@@ -1,7 +1,9 @@
 btree-framework
 
 Author: Andreas Steffens
+
 Version: 0.01 (alpha)
+
 License: GPL v2
 
 
