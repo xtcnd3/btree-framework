@@ -7,28 +7,28 @@ License: GPL v2
 
 Introduction
 
-The btree-framework is aimed at programmers that are looking for associative data container classes capable of handling data sets at a very large scale. Said data containers are coming with an interface similar to the existing STL container classes map, multimap, set and multiset. Furthermore, iterators, with a random access qualifier enabled, are supported, which ought to allow for a quick interchange between this framework and the STL container. Also, an array type, that isn't suffering from any slow down when data is inserted or removed at the beginning of the list, is available. This array type has an interface similar to the STL class vector.
+The btree-framework is aimed at programmers that are looking for associative data container classes capable of handling data sets at a very large scale. Said data containers are coming with an interface similar to the existing STL container classes map, multimap, set and multiset. Furthermore, iterators, with a random access qualifier enabled, are supported, which ought to allow for a quick interchange between this framework and existing STL containers. Also, an array type, that isn't suffering from any slow down when data is inserted or removed at the beginning of the list, is available. This array type has an interface similar to the STL class vector.
 
 Contents
 
-1) Where to start
-2) How to build this framework
-2.1) Linux
-2.2) Windows
-2.3) build flags
-2.4) What has to be included
-3) Feedback
-3.1) What increases the chances that I will respond to your email
-3.1.1) A proper subject, which tells the context of what I am going to find in your email's body.
-3.1.2) An email body that gets to the point of what you want to say.
-3.2) What decreases the chances that I will respond to your email
-3.2.1) An empty or useless subject.
-3.2.2) Email content that is confusing or off topic.
-3.2.3) Content that has been covered by the documentation or is too obvious to warrant a reply.
-3.2.4) Improper english.
+1. Where to start
+2. How to build this framework
+2.1. Linux
+2.2. Windows
+2.3. build flags
+2.4. What has to be included
+3. Feedback
+3.1. What increases the chances that I will respond to your email
+3.1.1. A proper subject, which tells the context of what I am going to find in your email's body.
+3.1.2. An email body that gets to the point of what you want to say.
+3.2. What decreases the chances that I will respond to your email
+3.2.1. An empty or useless subject.
+3.2.2. Email content that is confusing or off topic.
+3.2.3. Content that has been covered by the documentation or is too obvious to warrant a reply.
+3.2.4. Improper english.
 
 
-1) Where to start
+1. Where to start
 
 The folder ./doc contains an open office document file called "btree programmer guide.odt". That documentation explains this b-tree framework in detail, but only a sub set of sections is required to understand to get started. See below:
 
@@ -56,10 +56,12 @@ Programmer Guide
 				extract_key () addendum
 
 
-2) How to build this framework under linux or windows
 
 
-2.1) Linux
+2. How to build this framework under linux or windows
+
+
+2.1. Linux
 
 For this framework to compile, a compiler capable to support the C++11 dialect is required.
 This release was tested with: GCC (C++) 5.1.1 20150618 (Fedora 22)
@@ -75,7 +77,7 @@ coverage        - builds regression test binary with debug and coverage flags
 regression      - runs regression tests using debug binary
 performance     - runs performance tests using release binary (this is not ready yet)
 coverage_report - runs regression tests using coverage binary and creates result displayed as HTML
-valgrind_report - runs regression tests using valgrind with debug binary
+valgrind_report - runs regression tests using valgrind with debug binary (warning: takes days or maybe weeks to run)
 clean           - removes any build file (may those be intermediate or final)
 clean_coverage  - removes any coverage or coverage report file (may those be intermediate or final)
 
@@ -91,23 +93,23 @@ The additional include paths your compiler needs to be aware of are:
 /relative/or/absolute/path/to/your/common/location/filemem
 /relative/or/absolute/path/to/your/common/location/compatibility
 
-The build LINUX needs to be set and optionally the build flags _DEBUG and BTREE_ITERATOR_REGISTRATION (see below).
+Also, the build flag "LINUX" needs to be set and optionally the build flags "_DEBUG" and "BTREE_ITERATOR_REGISTRATION" (see below).
 
 
-2.2) Windows
+2.2. Windows
 
 For this framework to compile, at least Visual Sudio 2013 Express or a compiler that supports the C++11 dialect is required.
 
 To build the b-tree regression test system:
-1 - Create a new project
-2 - Copy files from this release to your project location
-3 - The project needs to be aware of the following include locations:
+1. Create a new project
+2. Copy files from this release to your project location
+3. The project needs to be aware of the following include locations:
 /relative/or/absolute/path/to/your/project/location/avp_path_find
 /relative/or/absolute/path/to/your/project/location/btree_framework
 /relative/or/absolute/path/to/your/project/location/btree_framework/stl_compatible
 /relative/or/absolute/path/to/your/project/location/filemem
 /relative/or/absolute/path/to/your/project/location/compatibility
-4 - add the build flag BTREE_ITERATOR_REGISTRATION to the any build
+4. add the build flag "BTREE_ITERATOR_REGISTRATION" to the any build, if required (see below)
 
 To compile the b-tree framework into another project the files in the following locations are relevant:
 ./src/btreetest/btree_framework
@@ -121,11 +123,11 @@ The additional include paths that need to be in your project settings are:
 /relative/or/absolute/path/to/your/common/or/project/location/filemem
 
 
-2.3) build flags
+2.3. build flags
 
 BTREE_ITERATOR_REGISTRATION:
 
-If your code makes sure, that any b-tree framework iterator instance is destroyed before its respective associated constainer instance is destroyed, then the build flag BTREE_ITERATOR_REGISTRATION can be omitted, otherwise you would be facing access violations at run time. If your code doesn't make sure, iterators are destroyed before their associated container or you are in doubt, then enable the build flag BTREE_ITERATOR_REGISTRATION.
+If your code makes sure, that any b-tree framework iterator instance is destroyed before its respective associated constainer instance is destroyed, then the build flag BTREE_ITERATOR_REGISTRATION can be omitted, otherwise you would be facing access violations at run time. If your code doesn't make sure, iterators are destroyed before their associated container or you are in doubt, then enable the build flag BTREE_ITERATOR_REGISTRATION. Disabling this flag results in sligtly faster code.
 
 _DEBUG:
 
@@ -136,7 +138,7 @@ LINUX:
 This build flag needs to be enabled if the code is compiled under linux, to enabled the respective linux include path and files as well as different API calls to the system.
 
 
-2.4) What has to be included
+2.4. What has to be included
 
 Depending on what data layer will be in use, at least one of the follwoing files needs to included:
 btreeioram.h	- contains everything required for the RAM data layer to work
@@ -149,73 +151,74 @@ If an STL container interchangeable class is required for the project, then see 
 include file		btree framework container		STL container
 
 btreemultimap.h		CBTreeMultiMap					multimap
-btreemap.h			CBTreeMap						map
+btreemap.h		CBTreeMap					map
 btreemultiset.h		CBTreeMultiSet					multiset
-btreeset.h			CBTreeSet						set
+btreeset.h		CBTreeSet					set
 
-Depending on what other container type is required, at least one of the following files needs to be include:
+Depending on what other container type is required, at least one of the following files needs to be included:
 btreekeysort.h	- includes ordered associative container: CBTreeKeySort
 btreearray.h	- includes array type: CBTreeArray
 
 
-3) Feedback
+3. Feedback
 
-Contact:
-btreeframework@gmail.com
+If you want to contact me about this project, the email address below is what you want to use. Before you do so, read and understand this entire section, otherwise you might be wasting your time.
 
-
-3.1) What increases the chances that I will respond to your email
+email: btreeframework@gmail.com
 
 
-3.1.1) A proper subject, which tells the context of what I am going to find in your email's body.
+3.1. What increases the chances that I will respond to your email
+
+
+3.1.1. A proper subject, which tells the context of what I am going to find in your email's body.
 
 The subject ought to tell me briefly what the email is about. For instance:
 "BUG: CBTree_classname::method_name - undefined behaviour in corner case"
 
 The keyword at the beginning as well as the follwing text allow me to quickly assess what I am dealing with.
-Also, the keyword allows to have filter rules in place. The following keywords are currently being filtered for:
+Also, the keyword allows to have filter rules in place. The subject currently is being filtered for the following keywords:
 
 BUG: anything code related that is not behaving as documented
 CODE: anything code related that ought to be implemented a different way
 TEST: anything related to existing or missing regression tests or code coverage
 DOC: anything document related, such as: Is content missing? Is something not explained well enough?
-COMMENT: anything code related in terms of commenting, such as: an existing comment is misleading or some particular code needs commenting
+COMMENT: anything code related in terms of commenting, such as: an existing comment is misleading or not clear enough (you don't need to tell me about code that has not been commented yet)
 QUESTION: any questing in terms of this project, which has not been answered anywhere else
-ENHANCEMENT: anything related to this project that is an enhancement for everyone, such as: release procedures, file formats etc.
+ENHANCEMENT: anything related to this project that is an enhancement for everyone, such as: release procedures, file formats, folder structure etc.
 OTHER: anything related to this project that has not been covered by any of the above keywords
 
-If none of the keywords has been used, then your email is not lost, but won't be addressed for a very long time. Potentially for a period of time long enough, that the content becomes irrelevant. 
+If none of the keywords or an unknown keyword has been used, then your email is not lost, but won't be addressed for a very long time. Potentially for a period of time long enough, that the content becomes irrelevant. 
 
 Neither the subject nor the email's body need to tell me that you are talking about the b-tree framework. If you send an email to the address above, then I am assuming that already.
 
 
-3.1.2) An email body that gets to the point of what you want to say.
+3.1.2. An email body that gets to the point of what you want to say.
 
 The rule of thumb to that end is: The more afford you have made on your side, the more I am inclined to believe you are actually interested in what you are doing. I mean: if you don't care, why should I? By afford, I don't mean that you have to write a tone of text. What I am asking for is a clear train of though, since it won't be you who has to understand your email, that will be me. Explain why you think something needs to be changed, enhanced, fixed, tested or is broken.
-In terms of bugs, make sure it isn't a misinterpretation of the documentation or that you are looking at the wrong API function, because between different container types they can look very similar. Double check your finds and document them very well.
+In terms of bugs, make sure it isn't a misinterpretation of the documentation or that you are looking at the wrong API function, because between different container types they can look very similar. Double check your findings and document them very well. I am asking you to do that, since your problem won't be the only one I will be dealing with. The more work you put into your request, the quicker I can resolve it and move on to the next request. In the long run it helps everyone.
 Also, criticism is good, but everyone can criticise. At the very least, suggest how to do things better.
 
 
-3.2) What decreases the chances that I will respond to your email
+3.2. What decreases the chances that I will respond to your email
 
 
-3.2.1) An empty or useless subject.
+3.2.1. An empty or useless subject.
 
-An empty subject or useless a subject like this: "OTHER: problem", just show me that not much afford went into writing this email. How I feel about that has been explained above. A useless subject also includes misleading ones. If I see the keyword "BUG" in the subject, then I am expecting to see email content that is talking about code that is not behaving as documented.
+An empty subject or useless a subject like this: "OTHER: problem", just show me that not much afford went into writing this email. How I feel about that has been explained above. A useless subject also includes misleading ones. If I see the keyword "BUG" in the subject, then I am expecting to see email content that is talking about code that is not behaving as documented. If that expectation is not met, then don't assume I will be putting much more afford into reading or understanding your message.
 
 
-3.2.2) Email content that is confusing or off topic.
+3.2.2. Email content that is confusing or off topic.
 
-If I find your email confusing, misleading or off topic, then chances are that you are trying to talk about two or more subjects at once. If you want to talk about two different subjects, write two emails. It also enables me to answer more to the point for each of your emails.
+If I find your email confusing, misleading or off topic, then chances are that you are trying to talk about two or more subjects at once. If you want to talk about two different subjects, then write two emails. It also enables me to answer more to the point for each of your messages.
 Also, in terms of off topic: Insults won't get you anywhere.
 
 
-3.2.3) Content that has been covered by the documentation or is too obvious to warrant a reply.
+3.2.3. Content that has been covered by the documentation or is too obvious to warrant a reply.
 
 If something has been covered by the documentation, then you will probably get a very short answer where to find it or none at all, depending on my work load. If I see a question like: "Hey, what's a b-tree?", you can be rest assured that I will remain silent.
 
 
-3.2.4) Improper english.
+3.2.4. Improper english.
 
 First of all, I am not an english native speaker and at this point you probably have already spotted a number of grammar and spelling mistakes. Those are not what I mean by "Improper english". What I mean is content like this: "Yo, c my hax yo!"
 It doesn't inspire any confidence and will just make me move on to the next email.
