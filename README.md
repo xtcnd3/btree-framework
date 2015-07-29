@@ -56,8 +56,6 @@ Programmer Guide
 				extract_key () addendum
 
 
-
-
 2. How to build this framework under linux or windows
 
 
