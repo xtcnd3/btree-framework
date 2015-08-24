@@ -24,8 +24,6 @@
 #include <fstream>
 #include <iterator>
 
-#include "CFileMem.h"
-
 #include "btree.h"
 
 #include "btreecommon.h"
@@ -264,7 +262,7 @@ public:
 														(CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
 						
 	// destruction
-								~CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	virtual						~CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 														();
 
 	CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
@@ -324,12 +322,11 @@ protected:
 	virtual CBTreeArrayPos<_t_sizetype> generate_prev_position	(const _t_nodeiter nNode, const _t_subnodeiter nSub, CBTreeArrayPos<_t_sizetype> sPos);
 	virtual CBTreeArrayPos<_t_sizetype> generate_next_position	(const _t_nodeiter nNode, const _t_subnodeiter nSub, CBTreeArrayPos<_t_sizetype> sPos);
 
-	void						convert_pos_to_container_pos	(_t_nodeiter nNode, _t_sizetype nPos, _t_nodeiter &rRsltNode, _t_subnodeiter &rRsltSubPos);
-
 	// manuvering
 	virtual _t_subnodeiter		find_next_sub_pos		(const _t_nodeiter nNode, CBTreeArrayPos<_t_sizetype> &sPos);
 
-	virtual bool				showdata				(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+	virtual bool				show_data				(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+	virtual bool				show_node				(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
 
 	void						assign					(CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
 
