@@ -89,7 +89,7 @@ public:
 													(CBTreeMultiSet_t &rBT, bool bAssign = true);
 
 	// destruction
-							~CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	virtual					~CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 													();
 
 	CBTreeMultiSet_t &		operator=				(CBTreeMultiSet_t &rBT);
