@@ -1184,7 +1184,7 @@ void TestBTreeKeySortIter (uint32_t nTest, _t_subnodeiter nNodeSize, _t_datalaye
 
 	cout << "b-tree keysort iterator test bench selected" << endl;
 
-	pClKeySort = new _t_obj (rDataLayerProperties, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
+	pClKeySort = new _t_obj (rDataLayerProperties, &sCacheDesc, nNodeSize);
 
 	if (pClKeySort == NULL)
 	{

@@ -34,8 +34,6 @@
 
 #include <stdint.h>
 
-#include "CFileMem.h"
-
 #include "btreeioram.h"
 #include "btreeiofile.h"
 
@@ -118,40 +116,54 @@ int main(int argc, char **argv)
 	btreeType_e				eBtreeType = BTREETYPE_NOT_SPECIFIED;
 	CBTreeIOpropertiesRAM	sDataPropertiesRAM;
 
+#if defined (WIN32)
+
+	SYSTEM_INFO			systemInfo;
+
+	GetSystemInfo (&systemInfo);
+
+	uint32_t	nPageSize = systemInfo.dwAllocationGranularity;
+
+#elif defined (LINUX)
+
+	uint32_t	nPageSize = (uint64_t) getpagesize ();
+
+#endif
+
 #if defined (_DEBUG)
-	CBTreeIOpropertiesFile	sDataPropertiesFile ("./", 1, 512);
+	CBTreeIOpropertiesFile	sDataPropertiesFile ("./", 1);
 #else
-	CBTreeIOpropertiesFile	sDataPropertiesFile ("./", 17, 4096);
+	CBTreeIOpropertiesFile	sDataPropertiesFile ("./");
 #endif
 
 	bayerTreeCacheDescription_t		asBTreeMultiCacheDesc[] = 
 	{
-		{512, 1, 1, 1}, 
-		{512, 1, 1, 1}, 
-		{512, 7, 1, 1}, 
-		{512, 1, 1, 4}, 
-		{512, 1, 5, 1}, 
-		{2048, 1, 1, 1}, 
-		{8192, 5, 2, 8}, 
-		{4096, 3, 3, 5}, 
-		{512, 7, 4, 2}, 
-		{1024, 1, 7, 4}, 
-		{16384, 4, 5, 9}, 
-		{2048, 6, 1, 2}
+		{1}, 
+		{nPageSize - 1}, 
+		{nPageSize}, 
+		{nPageSize + 1}, 
+		{1}, 
+		{nPageSize - 1}, 
+		{nPageSize}, 
+		{nPageSize + 1}, 
+		{1}, 
+		{nPageSize - 1}, 
+		{nPageSize}, 
+		{nPageSize + 1}
 	};
 
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize0 ("./", 5, 512);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize1 ("./", 1, 16384);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize2 ("./", 1, 512);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize3 ("./", 1, 512);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize4 ("./", 1, 512);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize5 ("./", 1, 512);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize6 ("./", 5, 2048);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize7 ("./", 2, 16384);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize8 ("./", 3, 8192);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize9 ("./", 4, 512);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize10 ("./", 8, 1024);
-	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize11 ("./", 7, 512);
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize0 ("./", 1);
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize1 ("./", 1);
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize2 ("./", 1);
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize3 ("./", 1);
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize4 ("./");
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize5 ("./");
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize6 ("./");
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize7 ("./");
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize8 ("./", 16777216);
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize9 ("./", 16777216);
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize10 ("./", 16777216);
+	CBTreeIOpropertiesFile	sDataPropertiesFileMultiCachesize11 ("./", 16777216);
 
 	CBTreeIOpropertiesFile	*apDataPropertiesFileMultiCachesize[] = 
 	{
@@ -190,25 +202,17 @@ int main(int argc, char **argv)
 	CBTreeArrayDataIf<arrayEntry_t>				*apClArraysPrim[6];
 	CBTreeKeySortDataIf<keySortEntry_t, uint32_t>	*apClKeySortsPrim[6];
 
-	uint32_t								nNumMultiTemplateParams = sizeof (apClArraysPrim) / sizeof (*apClArraysPrim);
+	uint32_t								nNumMultiTemplateParams = 0;
 
 	bayerTreeCacheDescription_t				sCacheDesc;
 
 #if defined (_DEBUG)
 
-	sCacheDesc.nMinNumberOfBytesPerSuperBlock = 512;
-	sCacheDesc.nNodeDescriptorNumOfLog2Lines = 1;
-	sCacheDesc.nDataCacheNumOfLog2Lines = 1;
-	sCacheDesc.nSubNodeCacheNumOfLog2Lines = 1;
-	sCacheDesc.nSerVectorCacheNumOfLog2Lines = 1;
+	sCacheDesc.nMinNumberOfBytesPerSuperBlock = nPageSize;
 
 #else
 
-	sCacheDesc.nMinNumberOfBytesPerSuperBlock = 4096;
-	sCacheDesc.nNodeDescriptorNumOfLog2Lines = 10;
-	sCacheDesc.nDataCacheNumOfLog2Lines = 12;
-	sCacheDesc.nSubNodeCacheNumOfLog2Lines = 12;
-	sCacheDesc.nSerVectorCacheNumOfLog2Lines = 12;
+	sCacheDesc.nMinNumberOfBytesPerSuperBlock = nPageSize * 16;
 
 #endif
 
@@ -337,12 +341,12 @@ int main(int argc, char **argv)
 		CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint16_t, uint16_t> >	*pClKeySort5444;
 		CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint16_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint16_t, uint16_t, uint16_t, uint16_t> >	*pClKeySort4444;
 	
-		pClKeySort6555 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint32_t, uint32_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort5555 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint32_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort5554 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint16_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort5454 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint32_t, uint16_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort5444 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint16_t, uint16_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort4444 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint16_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint16_t, uint16_t, uint16_t, uint16_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
+		pClKeySort6555 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint32_t, uint32_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize);
+		pClKeySort5555 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint32_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize);
+		pClKeySort5554 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint16_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize);
+		pClKeySort5454 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint32_t, uint16_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize);
+		pClKeySort5444 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint16_t, uint16_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize);
+		pClKeySort4444 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint16_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint16_t, uint16_t, uint16_t, uint16_t> > (sDataPropertiesRAM, &sCacheDesc, nNodeSize);
 
 		if (
 			(pClKeySort6555 == NULL) || 
@@ -364,6 +368,8 @@ int main(int argc, char **argv)
 		apClKeySortsPrim[3] = dynamic_cast <CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *> (pClKeySort5454);
 		apClKeySortsPrim[4] = dynamic_cast <CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *> (pClKeySort5444);
 		apClKeySortsPrim[5] = dynamic_cast <CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *> (pClKeySort4444);
+
+		nNumMultiTemplateParams = sizeof (apClArraysPrim) / sizeof (*apClArraysPrim);
 	}
 	else
 	{
@@ -409,12 +415,12 @@ int main(int argc, char **argv)
 		CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint16_t, uint16_t> >	*pClKeySort5444;
 		CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint16_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint16_t, uint16_t, uint16_t, uint16_t> >	*pClKeySort4444;
 	
-		pClKeySort6555 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint32_t, uint32_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort5555 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint32_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort5554 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint16_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort5454 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint32_t, uint16_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort5444 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint16_t, uint16_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
-		pClKeySort4444 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint16_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint16_t, uint16_t, uint16_t, uint16_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
+		pClKeySort6555 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint32_t, uint32_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize);
+		pClKeySort5555 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint32_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize);
+		pClKeySort5554 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint16_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize);
+		pClKeySort5454 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint32_t, uint16_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize);
+		pClKeySort5444 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint16_t, uint16_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize);
+		pClKeySort4444 = new CBTreeKeySortTest<keySortEntry_t, uint32_t, uint64_t, uint16_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint16_t, uint16_t, uint16_t, uint16_t> > (sDataPropertiesFile, &sCacheDesc, nNodeSize);
 
 		if (
 			(pClKeySort6555 == NULL) || 
@@ -436,6 +442,9 @@ int main(int argc, char **argv)
 		apClKeySortsPrim[3] = dynamic_cast <CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *> (pClKeySort5454);
 		apClKeySortsPrim[4] = dynamic_cast <CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *> (pClKeySort5444);
 		apClKeySortsPrim[5] = dynamic_cast <CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *> (pClKeySort4444);
+
+		nNumMultiTemplateParams = sizeof (apClArraysPrim) / sizeof (*apClArraysPrim);
+		nNumMultiTemplateParams -= 2;
 	}
 
 	try
@@ -462,8 +471,30 @@ int main(int argc, char **argv)
 										}
 										else
 										{
-											TestBTreeArray<CBTreeArrayTest<uint64_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO<uint64_t, uint32_t> >, CBTreeArrayDataIf<arrayEntry_t>, CBTreeIOpropertiesFile, CBTreeFileIO <> >
-												(nTestNum, nNodeSize, sDataPropertiesFile, sCacheDesc, nNumMultiCacheSizes, asBTreeMultiCacheDesc, nNumMultiCacheSizes, apDataPropertiesFileMultiCachesize, nNumMultiTemplateParams, apClArraysPrim, argc, argv);
+											switch (nTestNum)
+											{
+													case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_ITER		:
+													case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_CITER		:
+													case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_RITER		:
+													case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_CRITER	:
+													{
+														CBTreeIOpropertiesFile	sDataPropertiesFileLarge ("./", 16777216);
+														sCacheDesc.nMinNumberOfBytesPerSuperBlock *= 32;
+
+														TestBTreeArray<CBTreeArrayTest<uint64_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO<uint64_t, uint32_t> >, CBTreeArrayDataIf<arrayEntry_t>, CBTreeIOpropertiesFile, CBTreeFileIO <> >
+															(nTestNum, nNodeSize, sDataPropertiesFileLarge, sCacheDesc, nNumMultiCacheSizes, asBTreeMultiCacheDesc, nNumMultiCacheSizes, apDataPropertiesFileMultiCachesize, nNumMultiTemplateParams, apClArraysPrim, argc, argv);
+
+														break;
+													}
+
+													default:
+													{
+														TestBTreeArray<CBTreeArrayTest<uint64_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO<uint64_t, uint32_t> >, CBTreeArrayDataIf<arrayEntry_t>, CBTreeIOpropertiesFile, CBTreeFileIO <> >
+															(nTestNum, nNodeSize, sDataPropertiesFile, sCacheDesc, nNumMultiCacheSizes, asBTreeMultiCacheDesc, nNumMultiCacheSizes, apDataPropertiesFileMultiCachesize, nNumMultiTemplateParams, apClArraysPrim, argc, argv);
+
+														break;
+													}
+											}
 										}
 
 										break;

@@ -477,79 +477,60 @@ void CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerprope
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::showdata (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
 {
-	std::stringstream		buf;
-	uint64_t				ntab = 0ULL, notab = 0ULL;
 	uint32_t				rData;
-	arrayEntry_t			data;
-	bool					bError = false;
-	std::stringstream		aszMsg;
-
-	if (this->is_leaf (nNode))
+	arrayEntry_t			*psData;
+	
+	try
 	{
-		try
-		{
-			data = this->get_data (nNode, nSubPos);
-			
-			rData = data.nData;
-			rData = (rData >> 16) | (rData << 16);
-			rData = ((rData >> 8) & 0xFF00FF) | ((rData << 8) & 0xFF00FF00);
+		psData = this->get_data (nNode, nSubPos);
+		
+		rData = psData->nData;
+		rData = (rData >> 16) | (rData << 16);
+		rData = ((rData >> 8) & 0xFF00FF) | ((rData << 8) & 0xFF00FF00);
 
-			buf.clear ();
-			buf << "data: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << data.nDebug;
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
-			{
-				return (false);
-			}
-
-			aszMsg << "<br>data: corruption (" << pE->what () << ")";
-
-			buf.clear ();
-			buf << "data: ---<br>debug: ---";
-		}
-
-		if (ofs.is_open ())
-		{
-			ofs << buf.str ().c_str () << aszMsg.str ().c_str ();
-		}
+		rstrData.clear ();
+		rstrData << "data: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << psData->nDebug;
 	}
-	else
+	catch (exception *pE)
 	{
-		try
+		if (!ofs.is_open ())
 		{
-			data = this->get_data (nNode, nSubPos);
-
-			rData = data.nData;
-			rData = (rData >> 16) | (rData << 16);
-			rData = ((rData >> 8) & 0xFF00FF) | ((rData << 8) & 0xFF00FF00);
-			
-			buf.clear ();
-			buf << "data: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << data.nDebug;
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
-			{
-				return (false);
-			}
-
-			buf.clear ();
-			buf << "data: ---<br>debug: ---<br><font color=\"#FF0000\">" << pE->what () << "</font>";
+			return (false);
 		}
 
-		if (ofs.is_open ())
-		{
-			ofs << buf.str ().c_str () << endl;
-		}
+		rszMsg << "<br>data: corruption (" << pE->what () << ")";
+
+		rstrData.clear ();
+		rstrData << "data: ---<br>debug: ---";
 	}
 
 	return (true);
 }
 
+//template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+//bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_node (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+//{
+//	std::stringstream		buf;
+//	std::stringstream		aszMsg;
+//
+//	if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
+//	{
+//		if (!ofs.is_open ())
+//		{
+//			return (false);
+//		}
+//	}
+//
+//	if (ofs.is_open ())
+//	{
+//		ofs << buf.str ().c_str () << aszMsg.str ().c_str ();
+//	}
+//	
+//	return (true);
+//}
+//
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
 	(CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)

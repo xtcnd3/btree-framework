@@ -23,9 +23,7 @@ CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
 		bayerTreeCacheDescription_t *psCacheDescription, 
-		_t_subnodeiter nNodeSize, 
-		uint32_t nKeyOffset, 
-		uint32_t nKeySize
+		_t_subnodeiter nNodeSize
 	)
 	:	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
@@ -34,8 +32,6 @@ CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 		nNodeSize
 	)
 	,	CBTreeKeySortDataIf <_t_data, _t_key, _t_sizetype> ()
-	,	m_nKeyOffset (nKeyOffset)
-	,	m_nKeySize (nKeySize)
 {
 	m_pClRefData = new ::std::multimap<uint32_t, keySortMap_t> ();
 
@@ -49,8 +45,6 @@ CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 		rBT, false
 	)
 	,	CBTreeKeySortDataIf <_t_data, _t_key, _t_sizetype> ()
-	,	m_nKeyOffset (rBT.m_nKeyOffset)
-	,	m_nKeySize (rBT.m_nKeySize)
 {
 	m_pClRefData = new ::std::multimap<uint32_t, keySortMap_t> ();
 
@@ -407,7 +401,7 @@ bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>							*pKeySetTest;
 
-	pKeySetTest = new CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (*(this->m_pClDataLayerProperties), &(this->m_sCacheDescription), this->m_nNodeSize, this->m_nKeyOffset, this->m_nKeySize);
+	pKeySetTest = new CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (*(this->m_pClDataLayerProperties), &(this->m_sCacheDescription), this->m_nNodeSize);
 
 	BTREE_ASSERT (pKeySetTest != NULL, "CBTreeKeySortTest::operator== (const CBTreeKeySortTest &): insufficient memory!");
 
@@ -711,441 +705,369 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::showdata (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
 {
-	std::stringstream		buf;
-	uint64_t				ntab = 0ULL, notab = 0ULL;
+	_t_data					*psData;
 	uint32_t				rData;
-	_t_data					data;
-	bool					bError = false;
-	_t_nodeiter				nNeightbourNode;
-	_t_subnodeiter			nNeightbourSub;
-	int						nErrCnt = 0;
-	std::stringstream		aszMsg;
-	char					*pColorInit = (char *) "";
-	char					*pColorExit = (char *) "";
-	_t_nodeiter				nPrevNode;
-	_t_subnodeiter			nPrevSub;
-	_t_nodeiter				nNextNode;
-	_t_subnodeiter			nNextSub;
-	bool					bBounce;
 
-	if (this->is_leaf (nNode))
+	try
 	{
-		try
-		{
-			data = this->get_data (nNode, nSubPos);
+		psData = this->get_data (nNode, nSubPos);
 
-			rData = data.first;
+		rData = psData->first;
+		rData = (rData >> 16) | (rData << 16);
+		rData = ((rData >> 8) & 0xFF00FF) | ((rData << 8) & 0xFF00FF00);
+		
+		rstrData.clear ();
+		rstrData << "<table border=\"0\" cellspacing=\"1\" width=\"220\"><tr><td>";
+		rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
+		rstrData << "data: " << psData->second.nData << dec << "<br>";
+		rstrData << "debug: " << psData->second.nDebug << "<br>";
+		rstrData << "instance: " << this->get_instancePos (nNode, nSubPos);
+		rstrData << "</td>";
+
+		_t_sizetype		nDiff = this->lower_bound (psData->first) - this->cbegin ();
+		_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
+
+		rstrData << "<td align=\"top\">";
+
+		if (nOffset < m_pClRefData->size ())
+		{
+			::std::multimap<uint32_t, keySortMap_t>::const_iterator		sItMMap;
+
+			sItMMap = m_pClRefData->cbegin ();
+
+			::std::advance< ::std::multimap<uint32_t, keySortMap_t>::const_iterator, _t_sizetype> (sItMMap, nDiff);
+
+			rData = (*sItMMap).first;
 			rData = (rData >> 16) | (rData << 16);
 			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-			
-			buf.clear ();
-			buf << "<table border=\"0\" cellspacing=\"1\" width=\"220\"><tr><td>";
-			buf << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
-			buf << "data: " << data.second.nData << dec << "<br>";
-			buf << "debug: " << data.second.nDebug << "<br>";
-			buf << "instance: " << this->get_instancePos (nNode, nSubPos);
-			buf << "</td>";
 
-			_t_sizetype		nDiff = this->lower_bound (data.first) - this->cbegin ();
-			_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
-
-			buf << "<td align=\"top\">";
-
-			if (nOffset < m_pClRefData->size ())
+			if (psData->first != (*sItMMap).first)
 			{
-				::std::multimap<uint32_t, keySortMap_t>::const_iterator		sItMMap;
-
-				sItMMap = m_pClRefData->cbegin ();
-
-				::std::advance< ::std::multimap<uint32_t, keySortMap_t>::const_iterator, _t_sizetype> (sItMMap, nDiff);
-
-				rData = (*sItMMap).first;
-				rData = (rData >> 16) | (rData << 16);
-				rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-
-				if (data.first != (*sItMMap).first)
-				{
-					buf << "<font color=\"#FF0000\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
-				buf << "</font>";
-
-				if (data.second.nData != (*sItMMap).second.nData)
-				{
-					buf << "<font color=\"#AAAA00\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "data: " << (*sItMMap).second.nData << dec << "<br>";
-				buf << "</font>";
-
-				if (data.second.nDebug != (*sItMMap).second.nDebug)
-				{
-					buf << "<font color=\"#AAAA00\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "debug: " << (*sItMMap).second.nDebug << "<br>";
-				buf << "</font>";
-				buf << "-";
+				rstrData << "<font color=\"#FF0000\">";
 			}
 			else
 			{
-				buf << "<font color=\"#FF0000\">";
-				buf << "reference<br>";
-				buf << "out of<br>";
-				buf << "range";
-				buf << "</font>";
+				rstrData << "<font color=\"#00BB00\">";
 			}
-
-			buf << "</td></tr>";
-			buf << "</table>" << endl;
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
-			{
-				return (false);
-			}
-
-			nErrCnt++;
-
-			aszMsg.clear ();
-			aszMsg << "<br>data: corruption (" << pE->what () << ")";
-
-			rData = data.first;
-			rData = (rData >> 16) | (rData << 16);
-			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
 			
-			buf.clear ();
-			buf << "key: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << data.second.nDebug << "<br>instance: ---";
-		}
+			rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
+			rstrData << "</font>";
 
-		try
-		{
-			this->move_prev (nNode, nSubPos, nPrevNode, nPrevSub, bBounce);
-
-			if (bBounce == false)
+			if (psData->second.nData != (*sItMMap).second.nData)
 			{
-				_t_data	prevData = this->get_data (nPrevNode, nPrevSub);
-				_t_key	sPrevKey;
-				_t_key	sKey;
-
-				this->extract_key (&sPrevKey, prevData);
-				this->extract_key (&sKey, data);
-
-				if (this->comp (sPrevKey, sKey) > 0)
-				{
-					if (!ofs.is_open ())
-					{
-						return (false);
-					}
-
-					nErrCnt++;
-
-					aszMsg << "<br>prev: integrity error";
-				}
-
-				this->move_next (nPrevNode, nPrevSub, nNextNode, nNextSub, bBounce);
-
-				if (bBounce)
-				{
-					if (!ofs.is_open ())
-					{
-						return (false);
-					}
-
-					nErrCnt++;
-
-					aszMsg << "<br>prev: unexpected bBounce";
-				}
-				else
-				{
-					if ((nNextNode != nNode) || (nNextSub != nSubPos))
-					{
-						if (!ofs.is_open ())
-						{
-							return (false);
-						}
-
-						nErrCnt++;
-
-						aszMsg << "<br>prev: broken link";
-					}
-				}
+				rstrData << "<font color=\"#AAAA00\">";
 			}
-
-			this->allocateShortLiveKey ();
+			else
 			{
-				this->move_prev (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
-
-				if (bBounce == false)
-				{
-					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
-
-					if (this->comp (*(this->m_pShortLiveKey), (uint32_t) (((char *)&data)[this->m_nKeyOffset])) == 0)
-					{
-						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) + 1))
-						{
-							if (!ofs.is_open ())
-							{
-								this->freeShortLiveKey ();
-								
-								return (false);
-							}
-
-							nErrCnt++;
-
-							aszMsg << "<br>instance position error!";
-						}
-					}
-				}
-
-				this->move_next (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
-
-				if (bBounce == false)
-				{
-					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
-
-					if (this->comp (*(this->m_pShortLiveKey), (uint32_t) (((char *)&data)[this->m_nKeyOffset])) == 0)
-					{
-						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) - 1))
-						{
-							if (!ofs.is_open ())
-							{
-								this->freeShortLiveKey ();
-								
-								return (false);
-							}
-
-							nErrCnt++;
-
-							aszMsg << "<br>instance position error!";
-						}
-					}
-				}
+				rstrData << "<font color=\"#00BB00\">";
 			}
-			this->freeShortLiveKey ();
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
+			
+			rstrData << "data: " << (*sItMMap).second.nData << dec << "<br>";
+			rstrData << "</font>";
+
+			if (psData->second.nDebug != (*sItMMap).second.nDebug)
 			{
-				return (false);
+				rstrData << "<font color=\"#AAAA00\">";
 			}
-
-			nErrCnt++;
-
-			aszMsg << "<br>prev: link walk crashed (" << pE->what () << ")";
-		}
-
-		try
-		{
-			this->move_next (nNode, nSubPos, nNextNode, nNextSub, bBounce);
-
-			if (bBounce == false)
+			else
 			{
-				_t_data	nextData = this->get_data (nNextNode, nNextSub);
-				_t_key	sNextKey;
-				_t_key	sKey;
-
-				this->extract_key (&sNextKey, nextData);
-				this->extract_key (&sKey, data);
-
-				if (this->comp (sNextKey, sKey) < 0)
-				{
-					if (!ofs.is_open ())
-					{
-						return (false);
-					}
-
-					nErrCnt++;
-
-					aszMsg << "<br>next: integrity error";
-				}
-
-				this->move_prev (nNextNode, nNextSub, nPrevNode, nPrevSub, bBounce);
-
-				if (bBounce)
-				{
-					if (!ofs.is_open ())
-					{
-						return (false);
-					}
-
-					nErrCnt++;
-
-					aszMsg << "<br>next: unexpected bBounce";
-				}
-				else
-				{
-					if ((nPrevNode != nNode) || (nPrevSub != nSubPos))
-					{
-						if (!ofs.is_open ())
-						{
-							return (false);
-						}
-
-						nErrCnt++;
-
-						aszMsg << "<br>next: broken link";
-					}
-				}
+				rstrData << "<font color=\"#00BB00\">";
 			}
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
-			{
-				return (false);
-			}
-
-			nErrCnt++;
-
-			aszMsg << "<br>next: link walk crashed (" << pE->what () << ")";
-		}
-
-		if (nErrCnt == 0)
-		{
-			pColorInit = (char *) "";
-			pColorExit = (char *) "";
+			
+			rstrData << "debug: " << (*sItMMap).second.nDebug << "<br>";
+			rstrData << "</font>";
+			rstrData << "-";
 		}
 		else
 		{
-			pColorInit = (char *) "<font color=\"#FF0000\">";
-			pColorExit = (char *) "</font>";
+			rstrData << "<font color=\"#FF0000\">";
+			rstrData << "reference<br>";
+			rstrData << "out of<br>";
+			rstrData << "range";
+			rstrData << "</font>";
 		}
-		
-		if (ofs.is_open ())
-		{
-			ofs << pColorInit << buf.str ().c_str () << pColorExit << aszMsg.str ().c_str ();
-		}
+
+		rstrData << "</td></tr>";
+		rstrData << "</table>" << endl;
 	}
-	else
+	catch (exception *pE)
 	{
-		try
+		if (!ofs.is_open ())
 		{
-			data = this->get_data (nNode, nSubPos);
-
-			rData = data.first;
-			rData = (rData >> 16) | (rData << 16);
-			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-			
-			buf.clear ();
-			buf << "<table border=\"0\" cellspacing=\"1\" width=\"220\"><tr><td>";
-			buf << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
-			buf << "data: " << data.second.nData << dec << "<br>";
-			buf << "debug: " << data.second.nDebug << "<br>";
-			buf << "instance: " << this->get_instancePos (nNode, nSubPos);
-			buf << "</td>";
-
-			_t_sizetype		nDiff = this->lower_bound (data.first) - this->cbegin ();
-			_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
-
-			buf << "<td align=\"top\">";
-
-			if (nOffset < m_pClRefData->size ())
-			{
-				::std::multimap<uint32_t, keySortMap_t>::const_iterator		sItMMap;
-
-				sItMMap = m_pClRefData->cbegin ();
-
-				::std::advance< ::std::multimap<uint32_t, keySortMap_t>::const_iterator, _t_sizetype> (sItMMap, nDiff);
-
-				rData = (*sItMMap).first;
-				rData = (rData >> 16) | (rData << 16);
-				rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-
-				if (data.first != (*sItMMap).first)
-				{
-					buf << "<font color=\"#FF0000\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
-				buf << "</font>";
-
-				if (data.second.nData != (*sItMMap).second.nData)
-				{
-					buf << "<font color=\"#AAAA00\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "data: " << (*sItMMap).second.nData << dec << "<br>";
-				buf << "</font>";
-
-				if (data.second.nDebug != (*sItMMap).second.nDebug)
-				{
-					buf << "<font color=\"#AAAA00\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "debug: " << (*sItMMap).second.nDebug << "<br>";
-				buf << "</font>";
-				buf << "-";
-			}
-			else
-			{
-				buf << "<font color=\"#FF0000\">";
-				buf << "reference<br>";
-				buf << "out of<br>";
-				buf << "range";
-				buf << "</font>";
-			}
-
-			buf << "</td></tr>";
-			buf << "</table>" << endl;
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
-			{
-				return (false);
-			}
-
-			nErrCnt++;
-
-			aszMsg.clear ();
-			aszMsg << "<br>data: corruption (" << pE->what () << ")";
-
-			rData = data.first;
-			rData = (rData >> 16) | (rData << 16);
-			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-			
-			buf.clear ();
-			buf << "key: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << data.second.nDebug << "<br>instance: ---";
+			return (false);
 		}
 
-		if (ofs.is_open ())
-		{
-			ofs << buf.str ().c_str () << endl;
-		}
+		rszMsg.clear ();
+		rszMsg << "<br>data: corruption (" << pE->what () << ")";
+
+		rData = psData->first;
+		rData = (rData >> 16) | (rData << 16);
+		rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
+		
+		rstrData.clear ();
+		rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << psData->second.nDebug << "<br>instance: ---";
 	}
 
 	return (true);
 }
+
+//template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+//bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_node (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+//{
+//	std::stringstream		buf;
+//	uint32_t				rData;
+//	_t_data					*psData;
+//	_t_nodeiter				nNeightbourNode;
+//	_t_subnodeiter			nNeightbourSub;
+//	int						nErrCnt = 0;
+//	std::stringstream		aszMsg;
+//	char					*pColorInit = (char *) "";
+//	char					*pColorExit = (char *) "";
+//	_t_nodeiter				nPrevNode;
+//	_t_subnodeiter			nPrevSub;
+//	_t_nodeiter				nNextNode;
+//	_t_subnodeiter			nNextSub;
+//	bool					bBounce;
+//	_t_key					sKey;	
+//
+//	if (this->is_leaf (nNode))
+//	{
+//		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
+//		{
+//			if (!ofs.is_open ())
+//			{
+//				return (false);
+//			}
+//
+//			nErrCnt++;
+//		}
+//
+//		try
+//		{
+//			this->move_prev (nNode, nSubPos, nPrevNode, nPrevSub, bBounce);
+//
+//			if (bBounce == false)
+//			{
+//				_t_data	*psPrevData = this->get_data (nPrevNode, nPrevSub);
+//				_t_key	sPrevKey;
+//				_t_key	sKey;
+//
+//				this->extract_key (&sPrevKey, *psPrevData);
+//				this->extract_key (&sKey, *psData);
+//
+//				if (this->comp (sPrevKey, sKey) > 0)
+//				{
+//					if (!ofs.is_open ())
+//					{
+//						return (false);
+//					}
+//
+//					nErrCnt++;
+//
+//					aszMsg << "<br>prev: integrity error";
+//				}
+//
+//				this->move_next (nPrevNode, nPrevSub, nNextNode, nNextSub, bBounce);
+//
+//				if (bBounce)
+//				{
+//					if (!ofs.is_open ())
+//					{
+//						return (false);
+//					}
+//
+//					nErrCnt++;
+//
+//					aszMsg << "<br>prev: unexpected bBounce";
+//				}
+//				else
+//				{
+//					if ((nNextNode != nNode) || (nNextSub != nSubPos))
+//					{
+//						if (!ofs.is_open ())
+//						{
+//							return (false);
+//						}
+//
+//						nErrCnt++;
+//
+//						aszMsg << "<br>prev: broken link";
+//					}
+//				}
+//			}
+//
+//			this->allocateShortLiveKey ();
+//			{
+//				this->move_prev (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
+//
+//				if (bBounce == false)
+//				{
+//					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
+//
+//					this->extract_key (&sKey, *psData);
+//
+//					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
+//					{
+//						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) + 1))
+//						{
+//							if (!ofs.is_open ())
+//							{
+//								this->freeShortLiveKey ();
+//								
+//								return (false);
+//							}
+//
+//							nErrCnt++;
+//
+//							aszMsg << "<br>instance position error!";
+//						}
+//					}
+//				}
+//
+//				this->move_next (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
+//
+//				if (bBounce == false)
+//				{
+//					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
+//
+//					this->extract_key (&sKey, *psData);
+//
+//					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
+//					{
+//						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) - 1))
+//						{
+//							if (!ofs.is_open ())
+//							{
+//								this->freeShortLiveKey ();
+//								
+//								return (false);
+//							}
+//
+//							nErrCnt++;
+//
+//							aszMsg << "<br>instance position error!";
+//						}
+//					}
+//				}
+//			}
+//			this->freeShortLiveKey ();
+//		}
+//		catch (exception *pE)
+//		{
+//			if (!ofs.is_open ())
+//			{
+//				return (false);
+//			}
+//
+//			nErrCnt++;
+//
+//			aszMsg << "<br>prev: link walk crashed (" << pE->what () << ")";
+//		}
+//
+//		try
+//		{
+//			this->move_next (nNode, nSubPos, nNextNode, nNextSub, bBounce);
+//
+//			if (bBounce == false)
+//			{
+//				_t_data	*psNextData = this->get_data (nNextNode, nNextSub);
+//				_t_key	sNextKey;
+//				_t_key	sKey;
+//
+//				this->extract_key (&sNextKey, *psNextData);
+//				this->extract_key (&sKey, *psData);
+//
+//				if (this->comp (sNextKey, sKey) < 0)
+//				{
+//					if (!ofs.is_open ())
+//					{
+//						return (false);
+//					}
+//
+//					nErrCnt++;
+//
+//					aszMsg << "<br>next: integrity error";
+//				}
+//
+//				this->move_prev (nNextNode, nNextSub, nPrevNode, nPrevSub, bBounce);
+//
+//				if (bBounce)
+//				{
+//					if (!ofs.is_open ())
+//					{
+//						return (false);
+//					}
+//
+//					nErrCnt++;
+//
+//					aszMsg << "<br>next: unexpected bBounce";
+//				}
+//				else
+//				{
+//					if ((nPrevNode != nNode) || (nPrevSub != nSubPos))
+//					{
+//						if (!ofs.is_open ())
+//						{
+//							return (false);
+//						}
+//
+//						nErrCnt++;
+//
+//						aszMsg << "<br>next: broken link";
+//					}
+//				}
+//			}
+//		}
+//		catch (exception *pE)
+//		{
+//			if (!ofs.is_open ())
+//			{
+//				return (false);
+//			}
+//
+//			nErrCnt++;
+//
+//			aszMsg << "<br>next: link walk crashed (" << pE->what () << ")";
+//		}
+//
+//		if (nErrCnt == 0)
+//		{
+//			pColorInit = (char *) "";
+//			pColorExit = (char *) "";
+//		}
+//		else
+//		{
+//			pColorInit = (char *) "<font color=\"#FF0000\">";
+//			pColorExit = (char *) "</font>";
+//		}
+//		
+//		if (ofs.is_open ())
+//		{
+//			ofs << pColorInit << buf.str ().c_str () << pColorExit << aszMsg.str ().c_str ();
+//		}
+//	}
+//	else
+//	{
+//		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
+//		{
+//			if (!ofs.is_open ())
+//			{
+//				return (false);
+//			}
+//
+//			nErrCnt++;
+//		}
+//
+//		if (ofs.is_open ())
+//		{
+//			ofs << buf.str ().c_str () << endl;
+//		}
+//	}
+//
+//	return (true);
+//}
 
 /******************************************************************/
 
@@ -1154,9 +1076,7 @@ CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnode
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
 		bayerTreeCacheDescription_t *psCacheDescription, 
-		_t_subnodeiter nNodeSize, 
-		uint32_t nKeyOffset, 
-		uint32_t nKeySize
+		_t_subnodeiter nNodeSize
 	)
 	:	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
@@ -1165,8 +1085,6 @@ CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnode
 		nNodeSize
 	)
 	,	CBTreeKeySortDataIf <keySortEntry_t, uint32_t, _t_sizetype> ()
-	,	m_nKeyOffset (nKeyOffset)
-	,	m_nKeySize (nKeySize)
 {
 	m_pClRefData = new ::std::multimap<uint32_t, keySortMap_t> ();
 
@@ -1183,16 +1101,12 @@ CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnode
 		rBT, false
 	)
 	,	CBTreeKeySortDataIf <keySortEntry_t, uint32_t, _t_sizetype> ()
-	,	m_nKeyOffset (rBT.m_nKeyOffset)
-	,	m_nKeySize (rBT.m_nKeySize)
 {
 	m_pClRefData = new ::std::multimap<uint32_t, keySortMap_t> ();
 
 	BTREE_ASSERT (m_pClRefData != NULL, "CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest: insufficient memory!");
 
 	this->assign (rBT);
-
-//	m_pClRefData->insert<::std::multimap<uint32_t, keySortMap_t>::const_iterator> (rBT.m_pClRefData->cbegin (), rBT.m_pClRefData->cend ());
 
 	test ();
 }
@@ -1532,7 +1446,7 @@ bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 
 	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>							*pKeySetTest;
 
-	pKeySetTest = new CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (*(this->m_pClDataLayerProperties), &(this->m_sCacheDescription), this->m_nNodeSize, this->m_nKeyOffset, this->m_nKeySize);
+	pKeySetTest = new CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (*(this->m_pClDataLayerProperties), &(this->m_sCacheDescription), this->m_nNodeSize);
 
 	BTREE_ASSERT (pKeySetTest != NULL, "CBTreeKeySortTest::operator== (const CBTreeKeySortTest &): insufficient memory!");
 
@@ -1813,430 +1727,357 @@ void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::showdata (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
 {
-	std::stringstream		buf;
-	uint64_t				ntab = 0ULL, notab = 0ULL;
-	uint32_t				rData;
-	keySortEntry_t			data;
-	bool					bError = false;
-	_t_nodeiter				nNeightbourNode;
-	_t_subnodeiter			nNeightbourSub;
-	int						nErrCnt = 0;
-	std::stringstream		aszMsg;
-	char					*pColorInit = (char *) "";
-	char					*pColorExit = (char *) "";
-	_t_nodeiter				nPrevNode;
-	_t_subnodeiter			nPrevSub;
-	_t_nodeiter				nNextNode;
-	_t_subnodeiter			nNextSub;
-	bool					bBounce;
+	keySortEntry_t		*psData;
+	uint32_t			rData;
 
-	if (this->is_leaf (nNode))
+	try
 	{
-		try
-		{
-			data = this->get_data (nNode, nSubPos);
+		psData = this->get_data (nNode, nSubPos);
 
-			rData = data.nKey;
+		rData = psData->nKey;
+		rData = (rData >> 16) | (rData << 16);
+		rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
+		
+		rstrData.clear ();
+		rstrData << "<table border=\"0\" cellspacing=\"1\" width=\"220\"><tr><td>";
+		rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
+		rstrData << "data: " << psData->nData << dec << "<br>";
+		rstrData << "debug: " << psData->nDebug << "<br>";
+		rstrData << "instance: " << this->get_instancePos (nNode, nSubPos);
+		rstrData << "</td>";
+
+		_t_sizetype		nDiff = this->lower_bound (psData->nKey) - this->cbegin ();
+		_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
+
+		rstrData << "<td align=\"top\">";
+
+		if (nOffset < m_pClRefData->size ())
+		{
+			::std::multimap<uint32_t, keySortMap_t>::const_iterator		sItMMap;
+
+			sItMMap = m_pClRefData->cbegin ();
+
+			::std::advance< ::std::multimap<uint32_t, keySortMap_t>::const_iterator, _t_sizetype> (sItMMap, nDiff);
+
+			rData = (*sItMMap).first;
 			rData = (rData >> 16) | (rData << 16);
 			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-			
-			buf.clear ();
-			buf << "<table border=\"0\" cellspacing=\"1\" width=\"220\"><tr><td>";
-			buf << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
-			buf << "data: " << data.nData << dec << "<br>";
-			buf << "debug: " << data.nDebug << "<br>";
-			buf << "instance: " << this->get_instancePos (nNode, nSubPos);
-			buf << "</td>";
 
-			_t_sizetype		nDiff = this->lower_bound (data.nKey) - this->cbegin ();
-			_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
-
-			buf << "<td align=\"top\">";
-
-			if (nOffset < m_pClRefData->size ())
+			if (psData->nKey != (*sItMMap).first)
 			{
-				::std::multimap<uint32_t, keySortMap_t>::const_iterator		sItMMap;
-
-				sItMMap = m_pClRefData->cbegin ();
-
-				::std::advance< ::std::multimap<uint32_t, keySortMap_t>::const_iterator, _t_sizetype> (sItMMap, nDiff);
-
-				rData = (*sItMMap).first;
-				rData = (rData >> 16) | (rData << 16);
-				rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-
-				if (data.nKey != (*sItMMap).first)
-				{
-					buf << "<font color=\"#FF0000\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
-				buf << "</font>";
-
-				if (data.nData != (*sItMMap).second.nData)
-				{
-					buf << "<font color=\"#AAAA00\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "data: " << (*sItMMap).second.nData << dec << "<br>";
-				buf << "</font>";
-
-				if (data.nDebug != (*sItMMap).second.nDebug)
-				{
-					buf << "<font color=\"#AAAA00\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "debug: " << (*sItMMap).second.nDebug << "<br>";
-				buf << "</font>";
-				buf << "-";
+				rstrData << "<font color=\"#FF0000\">";
 			}
 			else
 			{
-				buf << "<font color=\"#FF0000\">";
-				buf << "reference<br>";
-				buf << "out of<br>";
-				buf << "range";
-				buf << "</font>";
+				rstrData << "<font color=\"#00BB00\">";
 			}
-
-			buf << "</td></tr>";
-			buf << "</table>" << endl;
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
-			{
-				return (false);
-			}
-
-			nErrCnt++;
-
-			aszMsg.clear ();
-			aszMsg << "<br>data: corruption (" << pE->what () << ")";
-
-			rData = data.nKey;
-			rData = (rData >> 16) | (rData << 16);
-			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
 			
-			buf.clear ();
-			buf << "key: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << data.nDebug << "<br>instance: ---";
-		}
+			rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
+			rstrData << "</font>";
 
-		try
-		{
-			this->move_prev (nNode, nSubPos, nPrevNode, nPrevSub, bBounce);
-
-			if (bBounce == false)
+			if (psData->nData != (*sItMMap).second.nData)
 			{
-				keySortEntry_t prevData = this->get_data (nPrevNode, nPrevSub);
-
-				if (this->comp (prevData.nKey, data.nKey) > 0)
-				{
-					if (!ofs.is_open ())
-					{
-						return (false);
-					}
-
-					nErrCnt++;
-
-					aszMsg << "<br>prev: integrity error";
-				}
-
-				this->move_next (nPrevNode, nPrevSub, nNextNode, nNextSub, bBounce);
-
-				if (bBounce)
-				{
-					if (!ofs.is_open ())
-					{
-						return (false);
-					}
-
-					nErrCnt++;
-
-					aszMsg << "<br>prev: unexpected bBounce";
-				}
-				else
-				{
-					if ((nNextNode != nNode) || (nNextSub != nSubPos))
-					{
-						if (!ofs.is_open ())
-						{
-							return (false);
-						}
-
-						nErrCnt++;
-
-						aszMsg << "<br>prev: broken link";
-					}
-				}
+				rstrData << "<font color=\"#AAAA00\">";
 			}
-
-			this->allocateShortLiveKey ();
+			else
 			{
-				this->move_prev (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
-
-				if (bBounce == false)
-				{
-					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
-
-					if (this->comp (*(this->m_pShortLiveKey), (uint32_t) (((char *)&data)[this->m_nKeyOffset])) == 0)
-					{
-						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) + 1))
-						{
-							if (!ofs.is_open ())
-							{
-								this->freeShortLiveKey ();
-								
-								return (false);
-							}
-
-							nErrCnt++;
-
-							aszMsg << "<br>instance position error!";
-						}
-					}
-				}
-
-				this->move_next (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
-
-				if (bBounce == false)
-				{
-					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
-
-					if (this->comp (*(this->m_pShortLiveKey), (uint32_t) (((char *)&data)[this->m_nKeyOffset])) == 0)
-					{
-						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) - 1))
-						{
-							if (!ofs.is_open ())
-							{
-								this->freeShortLiveKey ();
-								
-								return (false);
-							}
-
-							nErrCnt++;
-
-							aszMsg << "<br>instance position error!";
-						}
-					}
-				}
+				rstrData << "<font color=\"#00BB00\">";
 			}
-			this->freeShortLiveKey ();
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
+			
+			rstrData << "data: " << (*sItMMap).second.nData << dec << "<br>";
+			rstrData << "</font>";
+
+			if (psData->nDebug != (*sItMMap).second.nDebug)
 			{
-				return (false);
+				rstrData << "<font color=\"#AAAA00\">";
 			}
-
-			nErrCnt++;
-
-			aszMsg << "<br>prev: link walk crashed (" << pE->what () << ")";
-		}
-
-		try
-		{
-			this->move_next (nNode, nSubPos, nNextNode, nNextSub, bBounce);
-
-			if (bBounce == false)
+			else
 			{
-				keySortEntry_t nextData = this->get_data (nNextNode, nNextSub);
-
-				if (this->comp (nextData.nKey, data.nKey) < 0)
-				{
-					if (!ofs.is_open ())
-					{
-						return (false);
-					}
-
-					nErrCnt++;
-
-					aszMsg << "<br>next: integrity error";
-				}
-
-				this->move_prev (nNextNode, nNextSub, nPrevNode, nPrevSub, bBounce);
-
-				if (bBounce)
-				{
-					if (!ofs.is_open ())
-					{
-						return (false);
-					}
-
-					nErrCnt++;
-
-					aszMsg << "<br>next: unexpected bBounce";
-				}
-				else
-				{
-					if ((nPrevNode != nNode) || (nPrevSub != nSubPos))
-					{
-						if (!ofs.is_open ())
-						{
-							return (false);
-						}
-
-						nErrCnt++;
-
-						aszMsg << "<br>next: broken link";
-					}
-				}
+				rstrData << "<font color=\"#00BB00\">";
 			}
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
-			{
-				return (false);
-			}
-
-			nErrCnt++;
-
-			aszMsg << "<br>next: link walk crashed (" << pE->what () << ")";
-		}
-
-		if (nErrCnt == 0)
-		{
-			pColorInit = (char *) "";
-			pColorExit = (char *) "";
+			
+			rstrData << "debug: " << (*sItMMap).second.nDebug << "<br>";
+			rstrData << "</font>";
+			rstrData << "-";
 		}
 		else
 		{
-			pColorInit = (char *) "<font color=\"#FF0000\">";
-			pColorExit = (char *) "</font>";
+			rstrData << "<font color=\"#FF0000\">";
+			rstrData << "reference<br>";
+			rstrData << "out of<br>";
+			rstrData << "range";
+			rstrData << "</font>";
 		}
-		
-		if (ofs.is_open ())
-		{
-			ofs << pColorInit << buf.str ().c_str () << pColorExit << aszMsg.str ().c_str ();
-		}
+
+		rstrData << "</td></tr>";
+		rstrData << "</table>" << endl;
 	}
-	else
+	catch (exception *pE)
 	{
-		try
+		if (!ofs.is_open ())
 		{
-			data = this->get_data (nNode, nSubPos);
-
-			rData = data.nKey;
-			rData = (rData >> 16) | (rData << 16);
-			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-			
-			buf.clear ();
-			buf << "<table border=\"0\" cellspacing=\"1\" width=\"220\"><tr><td>";
-			buf << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
-			buf << "data: " << data.nData << dec << "<br>";
-			buf << "debug: " << data.nDebug << "<br>";
-			buf << "instance: " << this->get_instancePos (nNode, nSubPos);
-			buf << "</td>";
-
-			_t_sizetype		nDiff = this->lower_bound (data.nKey) - this->cbegin ();
-			_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
-
-			buf << "<td align=\"top\">";
-
-			if (nOffset < m_pClRefData->size ())
-			{
-				::std::multimap<uint32_t, keySortMap_t>::const_iterator		sItMMap;
-
-				sItMMap = m_pClRefData->cbegin ();
-
-				::std::advance< ::std::multimap<uint32_t, keySortMap_t>::const_iterator, _t_sizetype> (sItMMap, nDiff);
-
-				rData = (*sItMMap).first;
-				rData = (rData >> 16) | (rData << 16);
-				rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-
-				if (data.nKey != (*sItMMap).first)
-				{
-					buf << "<font color=\"#FF0000\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
-				buf << "</font>";
-
-				if (data.nData != (*sItMMap).second.nData)
-				{
-					buf << "<font color=\"#AAAA00\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "data: " << (*sItMMap).second.nData << dec << "<br>";
-				buf << "</font>";
-
-				if (data.nDebug != (*sItMMap).second.nDebug)
-				{
-					buf << "<font color=\"#AAAA00\">";
-				}
-				else
-				{
-					buf << "<font color=\"#00BB00\">";
-				}
-				
-				buf << "debug: " << (*sItMMap).second.nDebug << "<br>";
-				buf << "</font>";
-				buf << "-";
-			}
-			else
-			{
-				buf << "<font color=\"#FF0000\">";
-				buf << "reference<br>";
-				buf << "out of<br>";
-				buf << "range";
-				buf << "</font>";
-			}
-
-			buf << "</td></tr>";
-			buf << "</table>" << endl;
-		}
-		catch (exception *pE)
-		{
-			if (!ofs.is_open ())
-			{
-				return (false);
-			}
-
-			nErrCnt++;
-
-			aszMsg.clear ();
-			aszMsg << "<br>data: corruption (" << pE->what () << ")";
-
-			rData = data.nKey;
-			rData = (rData >> 16) | (rData << 16);
-			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
-			
-			buf.clear ();
-			buf << "key: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << data.nDebug << "<br>instance: ---";
+			return (false);
 		}
 
-		if (ofs.is_open ())
-		{
-			ofs << buf.str ().c_str () << endl;
-		}
+		rszMsg.clear ();
+		rszMsg << "<br>data: corruption (" << pE->what () << ")";
+
+		rData = psData->nKey;
+		rData = (rData >> 16) | (rData << 16);
+		rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
+		
+		rstrData.clear ();
+		rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << psData->nDebug << "<br>instance: ---";
 	}
 
 	return (true);
 }
+
+//template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+//bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_node (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+//{
+//	std::stringstream		buf;
+//	uint32_t				rData;
+//	keySortEntry_t			*psData;
+//	_t_nodeiter				nNeightbourNode;
+//	_t_subnodeiter			nNeightbourSub;
+//	int						nErrCnt = 0;
+//	std::stringstream		aszMsg;
+//	char					*pColorInit = (char *) "";
+//	char					*pColorExit = (char *) "";
+//	_t_nodeiter				nPrevNode;
+//	_t_subnodeiter			nPrevSub;
+//	_t_nodeiter				nNextNode;
+//	_t_subnodeiter			nNextSub;
+//	bool					bBounce;
+//
+//	if (this->is_leaf (nNode))
+//	{
+//		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
+//		{
+//			if (!ofs.is_open ())
+//			{
+//				return (false);
+//			}
+//
+//			nErrCnt++;
+//		}
+//
+//		try
+//		{
+//			this->move_prev (nNode, nSubPos, nPrevNode, nPrevSub, bBounce);
+//
+//			if (bBounce == false)
+//			{
+//				keySortEntry_t *pPrevData = this->get_data (nPrevNode, nPrevSub);
+//
+//				if (this->comp (pPrevData->nKey, psData->nKey) > 0)
+//				{
+//					if (!ofs.is_open ())
+//					{
+//						return (false);
+//					}
+//
+//					nErrCnt++;
+//
+//					aszMsg << "<br>prev: integrity error";
+//				}
+//
+//				this->move_next (nPrevNode, nPrevSub, nNextNode, nNextSub, bBounce);
+//
+//				if (bBounce)
+//				{
+//					if (!ofs.is_open ())
+//					{
+//						return (false);
+//					}
+//
+//					nErrCnt++;
+//
+//					aszMsg << "<br>prev: unexpected bBounce";
+//				}
+//				else
+//				{
+//					if ((nNextNode != nNode) || (nNextSub != nSubPos))
+//					{
+//						if (!ofs.is_open ())
+//						{
+//							return (false);
+//						}
+//
+//						nErrCnt++;
+//
+//						aszMsg << "<br>prev: broken link";
+//					}
+//				}
+//			}
+//
+//			this->allocateShortLiveKey ();
+//			{
+//				this->move_prev (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
+//
+//				if (bBounce == false)
+//				{
+//					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
+//
+//					this->extract_key (&sKey, *psData);
+//
+//					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
+//					{
+//						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) + 1))
+//						{
+//							if (!ofs.is_open ())
+//							{
+//								this->freeShortLiveKey ();
+//								
+//								return (false);
+//							}
+//
+//							nErrCnt++;
+//
+//							aszMsg << "<br>instance position error!";
+//						}
+//					}
+//				}
+//
+//				this->move_next (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
+//
+//				if (bBounce == false)
+//				{
+//					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
+//
+//					this->extract_key (&sKey, *psData);
+//
+//					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
+//					{
+//						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) - 1))
+//						{
+//							if (!ofs.is_open ())
+//							{
+//								this->freeShortLiveKey ();
+//								
+//								return (false);
+//							}
+//
+//							nErrCnt++;
+//
+//							aszMsg << "<br>instance position error!";
+//						}
+//					}
+//				}
+//			}
+//			this->freeShortLiveKey ();
+//		}
+//		catch (exception *pE)
+//		{
+//			if (!ofs.is_open ())
+//			{
+//				return (false);
+//			}
+//
+//			nErrCnt++;
+//
+//			aszMsg << "<br>prev: link walk crashed (" << pE->what () << ")";
+//		}
+//
+//		try
+//		{
+//			this->move_next (nNode, nSubPos, nNextNode, nNextSub, bBounce);
+//
+//			if (bBounce == false)
+//			{
+//				keySortEntry_t	*psNextData = this->get_data (nNextNode, nNextSub);
+//
+//				if (this->comp (psNextData->nKey, psData->nKey) < 0)
+//				{
+//					if (!ofs.is_open ())
+//					{
+//						return (false);
+//					}
+//
+//					nErrCnt++;
+//
+//					aszMsg << "<br>next: integrity error";
+//				}
+//
+//				this->move_prev (nNextNode, nNextSub, nPrevNode, nPrevSub, bBounce);
+//
+//				if (bBounce)
+//				{
+//					if (!ofs.is_open ())
+//					{
+//						return (false);
+//					}
+//
+//					nErrCnt++;
+//
+//					aszMsg << "<br>next: unexpected bBounce";
+//				}
+//				else
+//				{
+//					if ((nPrevNode != nNode) || (nPrevSub != nSubPos))
+//					{
+//						if (!ofs.is_open ())
+//						{
+//							return (false);
+//						}
+//
+//						nErrCnt++;
+//
+//						aszMsg << "<br>next: broken link";
+//					}
+//				}
+//			}
+//		}
+//		catch (exception *pE)
+//		{
+//			if (!ofs.is_open ())
+//			{
+//				return (false);
+//			}
+//
+//			nErrCnt++;
+//
+//			aszMsg << "<br>next: link walk crashed (" << pE->what () << ")";
+//		}
+//
+//		if (nErrCnt == 0)
+//		{
+//			pColorInit = (char *) "";
+//			pColorExit = (char *) "";
+//		}
+//		else
+//		{
+//			pColorInit = (char *) "<font color=\"#FF0000\">";
+//			pColorExit = (char *) "</font>";
+//		}
+//		
+//		if (ofs.is_open ())
+//		{
+//			ofs << pColorInit << buf.str ().c_str () << pColorExit << aszMsg.str ().c_str ();
+//		}
+//	}
+//	else
+//	{
+//		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
+//		{
+//			if (!ofs.is_open ())
+//			{
+//				return (false);
+//			}
+//
+//			nErrCnt++;
+//		}
+//
+//		if (ofs.is_open ())
+//		{
+//			ofs << buf.str ().c_str () << endl;
+//		}
+//	}
+//
+//	return (true);
+//}
 
 #endif // BTREETESTKEYSORT_CPP

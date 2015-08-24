@@ -1076,6 +1076,7 @@ void TestBTreeSetSTLifEraseViaIterator (_t_set *pClSet, uint32_t nNumEntries)
 	uint32_t									nLastKey = 0;
 	citer_t										sIter;
 	citer_t										sIterRslt;
+	uint32_t									nDebug = 0;
 	
 	cout << "exercises method compatible to STL interface CBTreeSet<>:: erase (const_iterator)" << endl;
 
@@ -1096,6 +1097,8 @@ void TestBTreeSetSTLifEraseViaIterator (_t_set *pClSet, uint32_t nNumEntries)
 
 			exit (-1);
 		}
+
+		nDebug++;
 	}
 }
 

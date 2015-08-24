@@ -357,7 +357,6 @@ void TestBTreeKeySortMultiNodeSizes (_t_obj *pClMaster, _t_datalayerproperties &
 	uint32_t		nDebug = 0;
 	uint32_t		ui32;
 	uint32_t		nNumInst;
-	bool			bError = false;
 	_t_obj			**ppClKeySort;
 
 	cout << "test exercises several instances using different node size settings" << endl;
@@ -377,7 +376,7 @@ void TestBTreeKeySortMultiNodeSizes (_t_obj *pClMaster, _t_datalayerproperties &
 	
 	for (ui32 = nFromNodeSize; ui32 <= nToNodeSize; ui32++)
 	{
-		ppClKeySort[ui32 - nFromNodeSize + 1] = new _t_obj (rDataLayerProperties, psCacheDescription, ui32, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
+		ppClKeySort[ui32 - nFromNodeSize + 1] = new _t_obj (rDataLayerProperties, psCacheDescription, ui32);
 
 		if (ppClKeySort[ui32 - nFromNodeSize + 1] == NULL)
 		{
@@ -402,7 +401,6 @@ void TestBTreeKeySortMultiCacheSize (_t_obj *pClMaster, uint32_t nNumInst, uint3
 {
 	uint32_t						nDebug = 0;
 	uint32_t						ui32;
-	bool							bError = false;
 	_t_obj							**ppClKeySort;
 	
 	cout << "test exercises several instances using different cache settings" << endl;
@@ -420,7 +418,7 @@ void TestBTreeKeySortMultiCacheSize (_t_obj *pClMaster, uint32_t nNumInst, uint3
 	
 	for (ui32 = 0; ui32 < nNumMultiCacheSizes; ui32++)
 	{
-		ppClKeySort[ui32 + 1] = new _t_obj (*(ppMultiCacheSizeDataLayerProperties[ui32]), &(psMultiCacheDesc[ui32]), nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
+		ppClKeySort[ui32 + 1] = new _t_obj (*(ppMultiCacheSizeDataLayerProperties[ui32]), &(psMultiCacheDesc[ui32]), nNodeSize);
 
 		if (ppClKeySort[ui32 + 1] == NULL)
 		{
@@ -3576,7 +3574,7 @@ void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, _t_datalayerpropertie
 
 	cout << "b-tree keysort test bench selected" << endl;
 	
-	pClKeySort = new _t_obj (rDataLayerProperties, &sCacheDesc, nNodeSize, OFFSETOF (keySortEntry_t, nKey), SIZEOF (keySortEntry_t, nKey));
+	pClKeySort = new _t_obj (rDataLayerProperties, &sCacheDesc, nNodeSize);
 
 	if (pClKeySort == NULL)
 	{

@@ -560,4 +560,109 @@ void CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 	}
 }
 
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+bool CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+{
+	uint32_t				*psData;
+	uint32_t				rData;
+
+	try
+	{
+		psData = this->get_data (nNode, nSubPos);
+
+		rData = *psData;
+		rData = (rData >> 16) | (rData << 16);
+		rData = ((rData >> 8) & 0xFF00FF) | ((rData << 8) & 0xFF00FF00);
+		
+		rstrData.clear ();
+		rstrData << "<table border=\"0\" cellspacing=\"1\" width=\"220\"><tr><td>";
+		rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
+
+		if (this->get_instancePos (nNode, nSubPos) > 0)
+		{
+			rstrData << "<font color=\"#FF0000\">";
+		}
+		else
+		{
+			rstrData << "<font color=\"#000000\">";
+		}
+
+		rstrData << "instance: " << this->get_instancePos (nNode, nSubPos);
+		rstrData << "</font>";
+		rstrData << "</td>";
+
+		_t_sizetype		nDiff = this->lower_bound (*psData) - this->cbegin ();
+		_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
+
+		rstrData << "<td align=\"top\">";
+
+		if (nOffset < m_pClRef->size ())
+		{
+			::std::set<uint32_t>::const_iterator		sItSet;
+
+			sItSet = m_pClRef->cbegin ();
+
+			::std::advance< ::std::set<uint32_t>::const_iterator, _t_sizetype> (sItSet, nDiff);
+
+			rData = *sItSet;
+			rData = (rData >> 16) | (rData << 16);
+			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
+
+			if (*psData != *sItSet)
+			{
+				rstrData << "<font color=\"#FF0000\">";
+			}
+			else
+			{
+				rstrData << "<font color=\"#00BB00\">";
+			}
+			
+			rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
+			rstrData << "</font>";
+
+			if (this->get_instancePos (nNode, nSubPos) > 0)
+			{
+				rstrData << "<font color=\"#FF0000\">";
+			}
+			else
+			{
+				rstrData << "<font color=\"#00BB00\">";
+			}
+
+			rstrData << "instance: 0";
+			rstrData << "</font>";
+		}
+		else
+		{
+			rstrData << "<font color=\"#FF0000\">";
+			rstrData << "reference<br>";
+			rstrData << "out of<br>";
+			rstrData << "range";
+			rstrData << "</font>";
+		}
+
+		rstrData << "</td></tr>";
+		rstrData << "</table>" << endl;
+	}
+	catch (exception *pE)
+	{
+		if (!ofs.is_open ())
+		{
+			return (false);
+		}
+
+		rszMsg.clear ();
+		rszMsg << "<br>data: corruption (" << pE->what () << ")";
+
+		rData = *psData;
+		rData = (rData >> 16) | (rData << 16);
+		rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
+		
+		rstrData.clear ();
+		rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>instance: ---";
+	}
+
+	return (true);
+}
+
 #endif // !BTREETESTSET_CPP

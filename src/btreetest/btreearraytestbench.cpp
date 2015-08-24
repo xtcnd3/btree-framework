@@ -294,7 +294,6 @@ void TestBTreeArrayMultiNodeSizes (_t_obj *pClMaster, _t_datalayerproperties &rD
 	uint32_t								nDebug = 0;
 	uint32_t								ui32;
 	uint32_t								nNumArray;
-	bool									bError = false;
 	_t_obj									**pClArrays;
 
 	cout << "test exercises several instances using different node size settings" << endl;
@@ -338,7 +337,6 @@ void TestBTreeArrayMultiCacheSize (_t_obj *pClMaster, uint32_t nNumArray, uint32
 {
 	uint32_t						nDebug = 0;
 	uint32_t						ui32;
-	bool							bError = false;
 	_t_obj							**pClArrays;
 
 	cout << "test exercises several instances using different cache settings" << endl;
