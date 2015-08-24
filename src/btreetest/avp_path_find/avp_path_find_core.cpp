@@ -1526,10 +1526,10 @@ int avp_path_find_core (int nTestNum, bool bStoreInRAM, const uint32_t nNodeSize
 #else
 
 	sCacheDesc.nMinNumberOfBytesPerSuperBlock = 4096;
-	sCacheDesc.nDataCacheNumOfLog2Lines = 12;
-	sCacheDesc.nSubNodeCacheNumOfLog2Lines = 12;
-	sCacheDesc.nSerVectorCacheNumOfLog2Lines = 12;
-	sCacheDesc.nNodeDescriptorNumOfLog2Lines = 12;
+//	sCacheDesc.nDataCacheNumOfLog2Lines = 12;
+//	sCacheDesc.nSubNodeCacheNumOfLog2Lines = 12;
+//	sCacheDesc.nSerVectorCacheNumOfLog2Lines = 12;
+//	sCacheDesc.nNodeDescriptorNumOfLog2Lines = 12;
 	
 #endif
 
