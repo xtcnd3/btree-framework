@@ -91,7 +91,7 @@ public:
 													(CBTreeSet_t &rBT, bool bAssign = true);
 
 	// destruction
-							~CBTreeSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	virtual					~CBTreeSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 													();
 
 	CBTreeSet_t &			operator=				(CBTreeSet_t &rBT);
