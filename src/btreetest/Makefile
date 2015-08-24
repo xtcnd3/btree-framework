@@ -17,7 +17,7 @@ VALGRIND_REPORT = valgrind_report.txt
 
 NICE_ARGS = -n 19
 
-INCLUDE_PATHS = -I./btree_framwork -I./btree_framwork/stl_compatible -I./filemem -I./compatibility -I./avp_path_find
+INCLUDE_PATHS = -I./btree_framework -I./btree_framework/stl_compatible -I./compatibility -I./avp_path_find
 
 CFLAGS_REL = -O3 --std=c++11 -march=native -fpermissive -DLINUX -DBTREE_ITERATOR_REGISTRATION $(INCLUDE_PATHS)
 CFLAGS_DBG = -g -O0 --std=c++11 -fpermissive -DLINUX -DBTREE_ITERATOR_REGISTRATION -D_DEBUG $(INCLUDE_PATHS)
@@ -27,7 +27,47 @@ LFLAGS_REL =
 LFLAGS_DBG = 
 LFLAGS_COV = -lgcov -coverage
 
-SOURCE = ./compatibility/windows.cpp ./filemem/CFileMem.cpp ./btree_framwork/btreecommon.cpp ./btree_framwork/btreeaux.cpp ./btree_framwork/btreeioprop.cpp ./btree_framwork/btreefileioprop.cpp ./btree_framwork/btreeramioprop.cpp ./btree_framwork/btree.cpp ./btree_framwork/btreearray.cpp ./btree_framwork/btreekeysort.cpp ./btree_framwork/btreeio.cpp ./btree_framwork/btreeiofile.cpp ./btree_framwork/btreeioram.cpp ./btree_framwork/btreeiter.cpp ./btree_framwork/stl_compatible/btreemultimap.cpp ./btree_framwork/stl_compatible/btreemap.cpp ./btree_framwork/stl_compatible/btreemultiset.cpp ./btree_framwork/stl_compatible/btreeset.cpp ./avp_path_find/avp_path_find_core.cpp btreetestcommon.cpp btreetestarray.cpp btreetestkeysort.cpp btreetestmultimap.cpp btreetestmap.cpp btreetestmultiset.cpp btreetestset.cpp btreearraytestbench.cpp btreekeysorttestbench.cpp btreemultimaptestbench.cpp btreemaptestbench.cpp btreemultisettestbench.cpp btreesettestbench.cpp btreearrayitertestbench.cpp btreekeysortitertestbench.cpp btreearraytestprimitive.cpp btreekeysorttestprimitive.cpp btreemultimapprimitives.cpp btreemultisetprimitives.cpp btreetest.cpp
+SOURCE =											\
+./compatibility/windows.cpp							\
+./btree_framework/btreecommon.cpp					\
+./btree_framework/btreeaux.cpp						\
+./btree_framework/btreeioprop.cpp					\
+./btree_framework/btreefileioprop.cpp				\
+./btree_framework/btreeramioprop.cpp				\
+./btree_framework/btree.cpp							\
+./btree_framework/btreearray.cpp					\
+./btree_framework/btreekeysort.cpp					\
+./btree_framework/btreeio.cpp						\
+./btree_framework/btreeioblock.cpp					\
+./btree_framework/btreeiolinear.cpp					\
+./btree_framework/btreeiofile.cpp					\
+./btree_framework/btreeioram.cpp					\
+./btree_framework/btreeiter.cpp						\
+./btree_framework/stl_compatible/btreemultimap.cpp	\
+./btree_framework/stl_compatible/btreemap.cpp		\
+./btree_framework/stl_compatible/btreemultiset.cpp	\
+./btree_framework/stl_compatible/btreeset.cpp		\
+./avp_path_find/avp_path_find_core.cpp				\
+btreetestcommon.cpp									\
+btreetestarray.cpp									\
+btreetestkeysort.cpp								\
+btreetestmultimap.cpp								\
+btreetestmap.cpp									\
+btreetestmultiset.cpp								\
+btreetestset.cpp									\
+btreearraytestbench.cpp								\
+btreekeysorttestbench.cpp							\
+btreemultimaptestbench.cpp							\
+btreemaptestbench.cpp								\
+btreemultisettestbench.cpp							\
+btreesettestbench.cpp								\
+btreearrayitertestbench.cpp							\
+btreekeysortitertestbench.cpp						\
+btreearraytestprimitive.cpp							\
+btreekeysorttestprimitive.cpp						\
+btreemultimapprimitives.cpp							\
+btreemultisetprimitives.cpp							\
+btreetest.cpp
 
 # VGFLAGS = --tool=memcheck -v --child-silent-after-fork=yes --smc-check=all --leak-check=full --leak-resolution=high --show-leak-kinds=all --show-reachable=yes --track-origins=yes --num-callers=30 --read-var-info=yes --keep-stacktraces=alloc-and-free
 
