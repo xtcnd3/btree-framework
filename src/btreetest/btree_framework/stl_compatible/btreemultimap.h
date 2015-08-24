@@ -88,7 +88,7 @@ public:
 													(CBTreeMultiMap_t &rBT, bool bAssign = true);
 
 	// destruction
-							~CBTreeMultiMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	virtual					~CBTreeMultiMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 													();
 
 	_t_keytype				*extract_key			(_t_keytype *pKey, const value_t &rData);
