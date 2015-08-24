@@ -97,7 +97,8 @@ public:
 
 	void				test						();
 
-	bool				showdata					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+	bool				show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+//	bool				show_node					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
 
 	CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 						&operator=					(CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);

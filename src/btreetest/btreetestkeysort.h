@@ -121,7 +121,7 @@ public:
 #endif
 
 						CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize, uint32_t nKeyOffset = 0, uint32_t nKeySize = sizeof (_t_data));
+													(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
 
 						CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 													(CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
@@ -180,13 +180,11 @@ protected:
 
 	void				test						();
 
-	bool				showdata					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+	bool				show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+//	bool				show_node					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
 
 	::std::multimap<_t_key, keySortMap_t>
 						*m_pClRefData;
-
-	uint32_t			m_nKeyOffset;
-	uint32_t			m_nKeySize;
 };
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -204,7 +202,7 @@ public:
 #endif
 
 						CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize, uint32_t nKeyOffset = 0, uint32_t nKeySize = sizeof (keySortEntry_t));
+													(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
 
 						CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 													(CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
@@ -253,13 +251,11 @@ protected:
 
 	void				test						();
 
-	bool				showdata					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+	bool				show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+//	bool				show_node					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
 
 	::std::multimap<uint32_t, keySortMap_t>
 						*m_pClRefData;
-
-	uint32_t			m_nKeyOffset;
-	uint32_t			m_nKeySize;
 };
 
 #endif // BTREETESTKEYSORT_H

@@ -113,6 +113,8 @@ protected:
 
 	void					test					();
 
+	bool					show_data				(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+
 	uint32_t				m_nDebug;
 
 	::std::set<uint32_t>	*m_pClRef;
