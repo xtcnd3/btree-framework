@@ -26,32 +26,27 @@ using namespace std;
 
 class CBTreeIOpropertiesFile : public CBTreeIOproperties
 {
-#define	BAYERTREE_FILE_CACHE_NUMBER_OF_LOG2_LINES		15
-#define	BAYERTREE_FILE_CACHE_NUMBER_OF_BYTES_PER_LINE	512ULL
+#define	BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT	1048576ULL
 
 public:
 
 					CBTreeIOpropertiesFile					(
 																const char *pszPathName, 
-																uint32_t nFileCacheNumOfLog2Lines = BAYERTREE_FILE_CACHE_NUMBER_OF_LOG2_LINES, 
-																uint64_t nFileCacheNumOfBytesPerLine = BAYERTREE_FILE_CACHE_NUMBER_OF_BYTES_PER_LINE
+																uint64_t nAddrSpaceSoftLimit = BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT
 															);
 
 					CBTreeIOpropertiesFile					(CBTreeIOpropertiesFile &rBT);
 
 					~CBTreeIOpropertiesFile					();
 
-	void			attach_pathname							(const char *pszPathName);
 	const char		*get_pathname							();
-	uint32_t		get_num_of_log2_cache_lines				();
-	uint64_t		get_num_of_log2_bytes_per_cache_line	();
+	
+	uint64_t		get_address_space_soft_limit			();
 
 protected:
 
-	string			**m_ppStrPathNames;
-	uint32_t		m_nNumPaths;
-	uint32_t		m_nFileCacheNumOfLog2Lines;
-	uint64_t		m_nFileCacheNumOfBytesPerLine;
+	string			*m_pStrPathNames;
+	uint64_t		m_nAddrSpaceSoftLimit;
 };
 
 #endif // BTREEIOFILEPROP_H
