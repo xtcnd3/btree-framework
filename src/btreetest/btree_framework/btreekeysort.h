@@ -229,7 +229,7 @@ public:
 													(CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
 
 	// destruction
-						~CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	virtual				~CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 													();
 	
 	_t_key				*extract_key				(_t_key *pKey, const _t_data &rData);
@@ -317,7 +317,8 @@ protected:
 	void				allocateShortLiveKey		();
 	void				freeShortLiveKey			();
 
-	virtual bool		showdata					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+	virtual bool		show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+	virtual bool		show_node					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
 
 	void				assign						(CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
 
