@@ -209,17 +209,12 @@ public:
 
 									~CBTreeBaseIterator<_ti_container> ();
 
-//									operator const CBTreeBaseConstIterator<_ti_container> & ();
-
 	const data_t &					operator* () const;
-
-//	data_t &						operator* ();
 
 	CBTreeBaseIteratorSubScriptWrapper<_ti_container>
 									operator* ();
 	
 	CBTreeBaseIterator&				operator= (const CBTreeBaseIterator &rIter);
-//	CBTreeBaseIterator&				operator= (const data_t &rData);
 
 	CBTreeBaseIteratorSubScriptWrapper<_ti_container>
 									operator[] (const int nPos);
@@ -364,8 +359,6 @@ public:
 												~CBTreeBaseReverseIterator<_t_iterator>	();
 
 	const data_t &								operator*	() const;
-
-//	data_t &									operator*	();
 
 	CBTreeBaseIteratorSubScriptWrapper<container_t>
 												operator*	();
