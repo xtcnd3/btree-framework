@@ -14,21 +14,38 @@
 #ifndef	BTREEFILEIO_H
 #define	BTREEFILEIO_H
 
-#include "btreeio.h"
+#if defined (WIN32)
+
+ #include <io.h>
+ #include <windows.h>
+
+#elif defined (LINUX)
+
+ #include <unistd.h>
+ #include <sys/mman.h>
+ #include <string.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+ #include <sys/ioctl.h>
+ #include <linux/fs.h>
+ #include <errno.h>
+
+#endif
+
+#include "btreeioblock.h"
 #include "btreeaux.h"
 #include "btreefileioprop.h"
 
-#include "CFileMem.h"
-
 template <class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_addresstype = uint64_t, class _t_offsettype = uint32_t>
-class CBTreeFileIO : public CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+class CBTreeFileIO : public CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
 {
 public:
 	// construction
 						CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
 												(
 													CBTreeIOpropertiesFile &rDataLayerProperties, 
-													uint32_t nBlockSize, 
+													_t_addresstype nBlockSize, 
 													_t_subnodeiter nNodeSize,
 													uint32_t nNumDataPools, 
 													CBTreeIOperBlockPoolDesc_t *psDataPools
@@ -41,16 +58,14 @@ public:
 	void				get_performance_counters				(uint64_t (&rHitCtrs)[PERFCTR_TERMINATOR], uint64_t (&rMissCtrs)[PERFCTR_TERMINATOR]);
 
 	// data access primitives
-	void				get_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nLen, _t_subnodeiter nEntry, void *pData);
-	void				set_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nLen, _t_subnodeiter nEntry, void *pData);
-
-	void				get_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nLen, void *pData);
-	void				set_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nLen, void *pData);
+	template<class _t_dl_data>
+	_t_dl_data *		get_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry);
 
 	// mid level data access
-	void				insert_dataIntoPool			(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nNodeLen, _t_subnodeiter nOffset, _t_subnodeiter nDataLen, void *pData);
+	template<class _t_dl_data>
+	void				insert_dataIntoPool			(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nNodeLen, _t_subnodeiter nOffset, _t_subnodeiter nDataLen, const _t_dl_data *pData);
 
-	// maintanence
+	// resources
 	void				set_size					(_t_nodeiter nMaxNodes);
 	void				unload						();
 
@@ -59,42 +74,36 @@ public:
 
 	// cache information
 	bool				is_dataCached				(uint32_t nPool, _t_nodeiter nNode);
-	
-	uint32_t			get_node_buffer_cache_size	();
+
+	// resource management
+	void				terminate_access			();
 
 	void				showdump					(std::ofstream &ofs, _t_nodeiter nTreeSize, char *pAlloc);
 
 protected:
 
-	// address generation
-	_t_addresstype		get_blockAddr				(_t_nodeiter nNode);
-	_t_offsettype		get_poolOffset				();
-	_t_addresstype		get_nodeAddr				(_t_nodeiter nNode);
-	
-	uint32_t			get_perBlockPoolCacheSize	(uint32_t nPool);
-	uint32_t			get_perBlockPoolCacheMask	(uint32_t nPool);
-	uint8_t				*get_perBlockPoolCacheBaseAddress	(uint32_t nPool);
-	_t_nodeiter			get_perBlockPoolCacheNode	(uint32_t nPool, uint32_t nLine);
-	bool				get_perBlockPoolCacheValid	(uint32_t nPool, uint32_t nLine);
-	_t_offsettype		get_perBlockPoolOffset		(uint32_t nPool);
-	_t_addresstype		get_perBlockPoolAddr		(uint32_t nPool, _t_nodeiter nNode);
-	uint32_t			get_perBlockPoolCacheLength	(uint32_t nPool, _t_nodeiter nNode);
+	void				init_mapping				();
+	void				exit_mapping				();
 
-	void				set_perBlockPoolCacheNode	(uint32_t nPool, uint32_t nLine, _t_nodeiter nNode);
-	void				set_perBlockPoolCacheLength	(uint32_t nPool, _t_nodeiter nNode, uint32_t nLen);
-	void				set_perBlockPoolCacheToInvalid	(uint32_t nPool, uint32_t nLine);
+	void				map_descriptor				(uint32_t nDescriptor);
+	void				unmap_descriptor			(uint32_t nDescriptor);
 
-	CFileMem										*m_pFile;
-		
-	uint32_t										*m_pnPerBlockPoolCacheMaskes;
-	uint8_t											**m_ppPoolCaches;
-	_t_nodeiter										**m_ppnPerBlockPoolCacheNode;
-	bool											**m_ppbPerBlockPoolCacheValid;
-	uint32_t										**m_ppnPerBlockPoolCacheLen;
+	void				unmap_all_descriptors		(bool bExceptRoot);
 
 	string											m_strTempFile;
 
+#if defined (WIN32)
+	HANDLE											m_hFile;
+	HANDLE											m_hFileMapping;
+#elif defined (LINUX)
+	int												m_nFileDesc;
+#endif
+
 	CBTreeIOpropertiesFile							*m_pClDataLayerProperties;
+
+	bool											m_bNoMapHandling;
+
+	_t_addresstype									m_nTotalAddressSpace;
 };
 
 #endif // BTREEFILEIO_H
