@@ -83,14 +83,12 @@ clean_coverage  - removes any coverage or coverage report file (may those be int
 
 To compile the b-tree framework into another project the files in the following locations are relevant:
 ./src/btreetest/btree_framework
-./src/btreetest/filemem
 ./src/btreetest/compatibility
 
 These folders then are then copied or sym. linked to your target or common code location.
 The additional include paths your compiler needs to be aware of are:
 /relative/or/absolute/path/to/your/common/location/btree_framework
 /relative/or/absolute/path/to/your/common/location/btree_framework/stl_compatible
-/relative/or/absolute/path/to/your/common/location/filemem
 /relative/or/absolute/path/to/your/common/location/compatibility
 
 Also, the build flag "LINUX" needs to be set and optionally the build flags "_DEBUG" and "BTREE_ITERATOR_REGISTRATION" (see below).
@@ -99,6 +97,7 @@ Also, the build flag "LINUX" needs to be set and optionally the build flags "_DE
 2.2. Windows
 
 For this framework to compile, at least Visual Sudio 2013 Express or a compiler that supports the C++11 dialect is required.
+This release was tested with: Visual Sudio 2013 Express (update 5)
 
 To build the b-tree regression test system:
 1. Create a new project
@@ -107,20 +106,17 @@ To build the b-tree regression test system:
 /relative/or/absolute/path/to/your/project/location/avp_path_find
 /relative/or/absolute/path/to/your/project/location/btree_framework
 /relative/or/absolute/path/to/your/project/location/btree_framework/stl_compatible
-/relative/or/absolute/path/to/your/project/location/filemem
 /relative/or/absolute/path/to/your/project/location/compatibility
 4. add the build flag "BTREE_ITERATOR_REGISTRATION" to the any build, if required (see below)
 
 To compile the b-tree framework into another project the files in the following locations are relevant:
 ./src/btreetest/btree_framework
-./src/btreetest/filemem
 ./src/btreetest/compatibility
 
-These folders then are then copied to your target or common code location.
+These folders are then copied to your target or common code location.
 The additional include paths that need to be in your project settings are:
 /relative/or/absolute/path/to/your/common/or/project/location/btree_framework
 /relative/or/absolute/path/to/your/common/or/project/location/btree_framework/stl_compatible
-/relative/or/absolute/path/to/your/common/or/project/location/filemem
 
 
 2.3. build flags
@@ -161,6 +157,9 @@ btreearray.h	- includes array type: CBTreeArray
 
 
 3. Feedback
+
+If you want to see updates or release on the btree-framework project, then follow this link:
+https://www.facebook.com/btreeframework
 
 If you want to contact me about this project, the email address below is what you want to use. Before you do so, read and understand this entire section, otherwise you might be wasting your time.
 
