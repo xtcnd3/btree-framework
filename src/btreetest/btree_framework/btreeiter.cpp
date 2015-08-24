@@ -172,7 +172,7 @@ typename CBTreeBaseConstIterator<_ti_container>::data_t& CBTreeBaseConstIterator
 
 	this->sync ();
 
-	m_sData = this->m_pContainer->get_data (m_nNode, m_nSub);
+	m_sData = *(this->m_pContainer->get_data (m_nNode, m_nSub));
 
 	return m_sData;
 }
@@ -539,14 +539,6 @@ void CBTreeBaseConstIterator<_ti_container>::evaluate ()
 template <class _ti_container>
 void CBTreeBaseConstIterator<_ti_container>::evaluate_from (typename CBTreeBaseConstIterator<_ti_container>::nodeiter_t nFromNode, typename CBTreeBaseConstIterator<_ti_container>::sizetype_t nFromPos)
 {
-//	CBTreeBaseConstIterator_t::nodeiter_t		nNode = nFromNode;
-//	CBTreeBaseConstIterator_t::subnodeiter_t	i;
-//	CBTreeBaseConstIterator_t::sizetype_t		nPos = nFromPos;
-//	CBTreeBaseConstIterator_t::sizetype_t		nMaxIdx;
-//	bool										bFound = false;
-//	CBTreeBaseConstIterator_t::nodeiter_t		nSubNode;
-//	CBTreeBaseConstIterator_t::subnodeiter_t	nSubNodeCount;
-
 	if (m_pContainer->empty ())
 	{
 		return;
@@ -554,45 +546,7 @@ void CBTreeBaseConstIterator<_ti_container>::evaluate_from (typename CBTreeBaseC
 
 	m_pContainer->convert_pos_to_container_pos (nFromNode, nFromPos, m_nNode, m_nSub);
 
-/*	while ( ! m_pContainer->is_leaf (nNode))
-	{
-		nSubNodeCount = m_pContainer->get_sub_node_count (nNode);
-
-		for (i = 0; i < nSubNodeCount; i++)
-		{
-			nSubNode = m_pContainer->get_sub_node (nNode, i);
-
-			nMaxIdx = m_pContainer->get_max_index (nSubNode);
-
-			if (nMaxIdx == nPos)
-			{
-				nPos = (CBTreeBaseConstIterator_t::sizetype_t) i;
-
-				bFound = true;
-
-				break;
-			}
-			else if (nMaxIdx > nPos)
-			{
-				nNode = nSubNode;
-
-				break;
-			}
-			else
-			{
-				nPos -= nMaxIdx + 1;
-			}
-		}
-
-		if (bFound)
-		{
-			break;
-		}
-	}
-*/
 	m_nAssociatedPos = m_nPos;
-//	m_nNode = nNode;
-//	m_nSub = (CBTreeBaseConstIterator_t::subnodeiter_t) nPos;
 }
 
 template <class _ti_container>
@@ -684,7 +638,7 @@ void CBTreeBaseConstIterator<_ti_container>::evaluate_by_seek ()
 								return;
 							}
 
-							nSubNode = m_pContainer->get_sub_node (nNode, i + 1);
+							nSubNode = *(m_pContainer->get_sub_node (nNode, i + 1));
 
 							sizetype_t		nMaxIdx = m_pContainer->get_max_index (nSubNode);
 
@@ -793,7 +747,7 @@ void CBTreeBaseConstIterator<_ti_container>::evaluate_by_seek ()
 						{
 							i--;
 
-							nSubNode = m_pContainer->get_sub_node (nNode, i);
+							nSubNode = *(m_pContainer->get_sub_node (nNode, i));
 
 							CBTreeBaseConstIterator_t::sizetype_t	nMaxIdx = m_pContainer->get_max_index (nSubNode);
 
@@ -1054,29 +1008,7 @@ template <class _ti_container>
 CBTreeBaseIterator<_ti_container>::~CBTreeBaseIterator ()
 {
 }
-/*
-template <class _ti_container>
-CBTreeBaseIterator<_ti_container>::operator const CBTreeBaseConstIterator<_ti_container> & ()
-{
-	typedef typename ::std::iterator< ::std::random_access_iterator_tag, data_t, sizetype_t> iter;
-	
-	CBTreeBaseConstIterator<_ti_container>	sRetval;
 
-	iter		*psThisIter = dynamic_cast <iter *> (this);
-	const iter	*psParmIter = dynamic_cast <const iter *> (&sRetval);
-
-	(iter)*psThisIter = (iter)*psParmIter;
-
-	sRetval.m_pContainer = this->m_pContainer;
-	sRetval.m_nPos = this->m_nPos;
-	sRetval.m_nNode = this->m_nNode;
-	sRetval.m_nSub = this->m_nSub;
-	sRetval.m_sData = this->m_sData;
-	sRetval.m_sTimeStamp = this->m_sTimeStamp;
-	
-	return (sRetval);
-}
-*/
 template <class _ti_container>
 const typename CBTreeBaseIterator<_ti_container>::data_t & CBTreeBaseIterator<_ti_container>::operator* () const
 {
@@ -1084,15 +1016,7 @@ const typename CBTreeBaseIterator<_ti_container>::data_t & CBTreeBaseIterator<_t
 
 	return (&**rCThis);
 }
-/*
-template <class _ti_container>
-typename CBTreeBaseIterator<_ti_container>::data_t & CBTreeBaseIterator<_ti_container>::operator* ()
-{
-	CBTreeBaseConstIterator<_ti_container>			&rCThis (*this);
 
-	return (*rCThis);
-}
-*/
 template <class _ti_container>
 CBTreeBaseIteratorSubScriptWrapper<_ti_container> CBTreeBaseIterator<_ti_container>::operator* ()
 {
@@ -1106,17 +1030,7 @@ CBTreeBaseIterator<_ti_container>& CBTreeBaseIterator<_ti_container>::operator= 
 
 	return (*this);
 }
-/*
-template <class _ti_container>
-CBTreeBaseIterator<_ti_container>& CBTreeBaseIterator<_ti_container>::operator= (const data_t &rData)
-{
-	BTREE_ASSERT (this->m_pContainer != NULL, "ERROR: CBTreeBase<>::CBTreeBaseIterator::operator=: Cannot assign if iterator is not associated with a b-tree!");
 
-	this->m_pContainer->set_data (this->m_nNode, this->m_nSub, rData);
-
-	return (*this);
-}
-*/
 template <class _ti_container>
 CBTreeBaseIteratorSubScriptWrapper<_ti_container> CBTreeBaseIterator<_ti_container>::operator[] (const int nPos)
 {
@@ -1333,15 +1247,7 @@ const typename CBTreeBaseReverseIterator<_t_iterator>::data_t & CBTreeBaseRevers
 
 	return (*rCThis);
 }
-/*
-template <class _t_iterator>
-typename CBTreeBaseReverseIterator<_t_iterator>::data_t & CBTreeBaseReverseIterator<_t_iterator>::operator*	()
-{
-	CBTreeBaseConstReverseIterator<_t_iterator>			&rCThis (*this);
 
-	return (*rCThis);
-}
-*/
 template <class _t_iterator>
 CBTreeBaseIteratorSubScriptWrapper<typename _t_iterator::container_t> CBTreeBaseReverseIterator<_t_iterator>::operator* ()
 {
