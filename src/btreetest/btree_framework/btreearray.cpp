@@ -730,6 +730,7 @@ bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	bool				retval = false;
 	_t_nodeiter			nNode;
 	_t_subnodeiter		nSubPos;
+	_t_data				*psData;
 	
 	this->create_root ();
 
@@ -737,7 +738,9 @@ bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	{
 		this->convert_pos_to_container_pos (this->m_nRootNode, nPos, nNode, nSubPos);
 
-		this->set_data (nNode, nSubPos, rData);
+		psData = this->get_data (nNode, nSubPos);
+
+		*psData = rData;
 
 		retval = true;
 	}
@@ -770,7 +773,7 @@ bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 		{
 			this->convert_pos_to_container_pos (this->m_nRootNode, nPos, nNode, nSubPos);
 
-			rData = this->get_data (nNode, nSubPos);
+			rData = *(this->get_data (nNode, nSubPos));
 
 			retval = true;
 		}
@@ -807,7 +810,8 @@ template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodei
 CBTreeArrayPos<_t_sizetype> CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::determine_position (CBTreeArrayPos<_t_sizetype> sPos, _t_nodeiter nNode, _t_subnodeiter &nSubPos, _t_subnodeiter &nSubData, bool &bFound)
 {
 	_t_sizetype			nMaxIdx;
-	node_t				sNodeDesc;
+	_t_nodeiter			*pnNode;
+	node_t				*psNodeDesc;
 
 	if (this->is_leaf (nNode))
 	{
@@ -819,14 +823,16 @@ CBTreeArrayPos<_t_sizetype> CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_su
 	{
 		bFound = false;
 
-		this->get_node (nNode, sNodeDesc);
+		psNodeDesc = this->get_node (nNode);
 
 		// determine which subnode (nSubPos) is to enter
 		// sPos will return as the number of data items before the selected sub node, including data from this node
 		nSubData = nSubPos = this->find_next_sub_pos (nNode, sPos); // <- note: sPos is an input/output parameter
 
 		// determine size of sub node
-		nMaxIdx = this->get_max_index (this->get_sub_node (nNode, nSubPos));
+		pnNode = this->get_sub_node (nNode, nSubPos);
+
+		nMaxIdx = this->get_max_index (*pnNode);
 
 #if defined (_DEBUG)
 		BTREE_ASSERT (sPos.nIndex <= nMaxIdx, "CBTreeArray::determine_position: position exceeds sub node size");
@@ -840,7 +846,7 @@ CBTreeArrayPos<_t_sizetype> CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_su
 		}
 
 		// if select sub-node is outside of the current node ...
-		if (nSubPos >= this->get_data_count (sNodeDesc))
+		if (nSubPos >= this->get_data_count (*psNodeDesc))
 		{
 			// ... then correct to most right sub-node
 			nSubData--;
@@ -877,21 +883,22 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBase<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer>::rebuild_node: requested node exceeds tree size");
 #endif
 
-	_t_nodeiter									nSubNode;
-	node_t										sNodeDesc;
+	_t_nodeiter									*pnSubNode;
+	node_t										*psNodeDesc;
 	_t_sizetype									nIdx = (_t_sizetype) 0;
 	_t_subnodeiter								ui32;
 	_t_subnodeiter								nSubPosOffset;
+	_t_sizetype									*pnSerVector;
 
-	this->get_node (nNode, sNodeDesc);
+	psNodeDesc = this->get_node (nNode);
 
 	if (this->is_leaf (nNode))
 	{
-		nIdx = ((_t_subnodeiter) (0 - sNodeDesc.nNumData));
+		nIdx = ((_t_subnodeiter) (0 - psNodeDesc->nNumData));
 	}
 	else
 	{
-		this->get_serVector (nNode, this->m_pSerVector);
+		pnSerVector = this->get_serVector (nNode);
 
 		if (nSubStart == 0)
 		{
@@ -901,32 +908,29 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 		else
 		{
 			nSubPosOffset = nSubStart - 1;
-			nIdx = this->m_pSerVector[nSubPosOffset] - nSubPosOffset;
+			nIdx = pnSerVector[nSubPosOffset] - nSubPosOffset;
 		}
 
 		this->m_pData->set_cacheFreeze (true);
 		{
-			for (ui32 = nSubStart; ui32 < this->get_sub_node_count (sNodeDesc); ui32++)
+			for (ui32 = nSubStart; ui32 < this->get_sub_node_count (*psNodeDesc); ui32++)
 			{
-				nSubNode = this->get_sub_node (nNode, ui32);
-				nIdx += this->get_max_index (nSubNode);
+				pnSubNode = this->get_sub_node (nNode, ui32);
+
+				nIdx += this->get_max_index (*pnSubNode);
 			
 				if (ui32 < this->get_data_count (nNode))
 				{
-					this->m_pSerVector[ui32] = nIdx + ui32;
+					pnSerVector[ui32] = nIdx + ui32;
 				}
 			}
 		}
 		this->m_pData->set_cacheFreeze (false);
 
-		nIdx += this->get_data_count (sNodeDesc);
-
-		this->set_serVector (nNode, this->m_pSerVector);
+		nIdx += this->get_data_count (*psNodeDesc);
 	}
 
-	sNodeDesc.nMaxIdx = nIdx;
-
-	this->set_node (nNode, sNodeDesc);
+	psNodeDesc->nMaxIdx = nIdx;
 }
 
 /*
@@ -994,72 +998,6 @@ CBTreeArrayPos<_t_sizetype> CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_su
 
 /*
 
-convert_pos_to_container_pos - linearly access data
-
-This method steps into a b-tree and finds the node and sub-position where the data associated
-with the linear address nPos is stored. Dependent on the parameter bReadOpr the data from that
-location is either copied from the b-tree into sData or from sData into the b-tree.
-
-nNode			- specifies the next node to go into
-nPos			- specifies the linear address of the data entry within the next node
-sData			- read / write data of access
-bReadOpr		- if true the access is a read operation, otherwise it is a write operation
-
-*/
-
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::convert_pos_to_container_pos (_t_nodeiter nNode, _t_sizetype nPos, _t_nodeiter &rRsltNode, _t_subnodeiter &rRsltSubPos)
-{
-	_t_subnodeiter							ui32;
-	_t_subnodeiter							nNumSubNodes;
-	_t_subnodeiter							nNumData;
-	bool									isLeaf = this->is_leaf (nNode);
-	CBTreeArrayPos<_t_sizetype>				sPos;
-
-	// node is not a leaf node ...
-	if (!isLeaf)
-	{
-		// ... then continue searching in this node as well as the sub-nodes
-		nNumData = this->get_data_count (nNode);
-		nNumSubNodes = this->get_sub_node_count (nNode);
-
-		sPos.nIndex = nPos;
-
-		// identify next sub-node to search in
-		ui32 = this->find_next_sub_pos (nNode, sPos);
-
-		// if data is in this node ...
-		if ((ui32 < nNumData) && (nPos == this->m_pSerVector[ui32]))
-		{
-			// ... then return immediately with result
-			rRsltNode = nNode;
-			rRsltSubPos = ui32;
-		}
-		else
-		{
-			// otherwise step into next sub-node
-
-			// if initial sub-node needs to be accessed ...
-			if (ui32 == 0)
-			{
-				// ... then the serial vector is not involved to calculate the next linear offset
-				this->convert_pos_to_container_pos (this->get_sub_node (nNode, ui32), nPos, rRsltNode, rRsltSubPos);
-			}
-			else
-			{
-				this->convert_pos_to_container_pos (this->get_sub_node (nNode, ui32), nPos - (this->m_pSerVector[ui32 - 1] + 1), rRsltNode, rRsltSubPos);
-			}
-		}
-	}
-	else
-	{
-		// linear access to leaf nodes are handled in CBTreeBase to avoid redundant code
-		CBTreeBase<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::convert_pos_to_container_pos (nNode, nPos, rRsltNode, rRsltSubPos);
-	}
-}
-
-/*
-
 find_next_sub_pos - find next sub-position
 
 To find the sub-position of the nearest greater offset of what sPos is displaying
@@ -1079,9 +1017,10 @@ _t_subnodeiter CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 	// input	- absolute index within this node
 	// output	- if sub node was found then index of sub node, otherwise zero
 
-	node_t					sNodeDesc;
+	node_t					*psNodeDesc;
 	_t_subnodeiter			nRetval;
 	_t_sizetype				nDiff;
+	_t_sizetype				*pnSerVector;
 #if defined (WIN32)
 	uint32_t				*pDiff = (uint32_t *) &nDiff;
 #endif
@@ -1096,17 +1035,17 @@ _t_subnodeiter CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 	}
 	else
 	{
-		this->get_node (nNode, sNodeDesc);
+		psNodeDesc = this->get_node (nNode);
 
 		// load node's serial vector
-		this->get_serVector (nNode, this->m_pSerVector);
+		pnSerVector = this->get_serVector (nNode);
 
 		uint32_t	ui32, nMinPos, nMaxPos;
 
 		// set range up
 		nMinPos = 0UL;
 
-		nMaxPos = this->get_data_count (sNodeDesc);
+		nMaxPos = this->get_data_count (*psNodeDesc);
 
 		// until nearest sub postion has been found ...
 		while (nMinPos != nMaxPos)
@@ -1115,7 +1054,7 @@ _t_subnodeiter CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 			ui32 = (nMinPos + nMaxPos) / 2;
 
 			// determine difference between current middle position's index and input index
-			nDiff = this->m_pSerVector[ui32] - sPos.nIndex;
+			nDiff = pnSerVector[ui32] - sPos.nIndex;
 
 			// if current middle position's index is beyond input index ...
 #if defined (WIN32)
@@ -1140,7 +1079,7 @@ _t_subnodeiter CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 		if (nMinPos > 0)
 		{
 			// ... then subtract sub position's serial vector entry from input index
-			sPos.nIndex -= this->m_pSerVector[nMinPos - 1] + 1;
+			sPos.nIndex -= pnSerVector[nMinPos - 1] + 1;
 
 			// Note: The initial sub node's position in the serial vector list would always be zero and is therefore not part of the serial vector.
 		}
@@ -1150,8 +1089,30 @@ _t_subnodeiter CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 }
 
 template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::showdata (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
 {
+	return (true);
+}
+
+template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_node (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+{
+	std::stringstream		buf;
+	std::stringstream		aszMsg;
+
+	if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
+	{
+		if (!ofs.is_open ())
+		{
+			return (false);
+		}
+	}
+
+	if (ofs.is_open ())
+	{
+		ofs << buf.str ().c_str () << aszMsg.str ().c_str ();
+	}
+	
 	return (true);
 }
 
