@@ -22,99 +22,94 @@ template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _
 CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO
 (
 	CBTreeIOpropertiesFile &rDataLayerProperties, 
-	uint32_t nBlockSize, 
+	_t_addresstype nBlockSize, 
 	_t_subnodeiter nNodeSize, 
 	uint32_t nNumDataPools, 
 	CBTreeIOperBlockPoolDesc_t *psDataPools
 )
-	:	CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype> (nBlockSize, nNodeSize, nNumDataPools, psDataPools)
+	:	CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype> (nBlockSize, nNodeSize, nNumDataPools, psDataPools)
+#if defined (WIN32)
+	,	m_hFile (INVALID_HANDLE_VALUE)
+	,	m_hFileMapping (INVALID_HANDLE_VALUE)
+#elif defined (LINUX)
+	,	m_nFileDesc (-1)
+#endif
+	,	m_nTotalAddressSpace (0)
 {
+#if defined (WIN32)
+
+	typedef DWORD		pagesize_t;
+
+#elif defined (LINUX)
+
+	typedef int			pagesize_t;
+
+#endif
+
 	std::stringstream	aszFilename;
 	LARGE_INTEGER		sTimeui64;
-	bool				bRslt;
 	uint32_t			nFails = 0;
+	bool				bOpenedFile = false;
+	uint32_t			nAttempts = 0;
+	pagesize_t			nPageSize;
+	char				*pszFileName;
+
+#if defined (WIN32)
+
+	DWORD				nAccess = GENERIC_READ | GENERIC_WRITE;
+	DWORD				nShare = 0;
+	DWORD				nCreation = OPEN_EXISTING;
+	DWORD				nAttr = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_DELETE_ON_CLOSE | FILE_FLAG_RANDOM_ACCESS;
+	struct _finddata_t	sFileinfo;
+	SYSTEM_INFO			sSystemInfo;
+	
+#elif defined (LINUX)
+
 	uint32_t			ui32;
+	int					nOpenFlags = O_TRUNC | O_CREAT | O_RDWR | O_NDELAY | O_NOATIME;
+	mode_t				nCreateMode = S_IRUSR | S_IWUSR;
+
+#endif
 
 	m_pClDataLayerProperties = new CBTreeIOpropertiesFile (rDataLayerProperties);
 
 	BTREEDATA_ASSERT (m_pClDataLayerProperties != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
 
-	m_ppPoolCaches = new uint8_t * [this->m_nNumDataPools];
-
-	BTREEDATA_ASSERT (m_ppPoolCaches != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
-
-	m_pnPerBlockPoolCacheMaskes = new uint32_t [this->m_nNumDataPools];
-
-	BTREEDATA_ASSERT (m_pnPerBlockPoolCacheMaskes != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
-
-	m_ppnPerBlockPoolCacheNode = new _t_nodeiter * [this->m_nNumDataPools];
-
-	BTREEDATA_ASSERT (m_ppnPerBlockPoolCacheNode != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
-
-	m_ppbPerBlockPoolCacheValid = new bool * [this->m_nNumDataPools];
-
-	BTREEDATA_ASSERT (m_ppbPerBlockPoolCacheValid != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
-
-	m_ppnPerBlockPoolCacheLen = new uint32_t * [this->m_nNumDataPools];
-
-	BTREEDATA_ASSERT (m_ppnPerBlockPoolCacheLen != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
-
-	for (ui32 = 0; ui32 < this->m_nNumDataPools; ui32++)
-	{
-		m_pnPerBlockPoolCacheMaskes[ui32] = (1 << this->m_psDataPools[ui32].nCacheVectorSize) - 1;
-
-		m_ppnPerBlockPoolCacheNode[ui32] = new _t_nodeiter [get_perBlockPoolCacheSize (ui32)];
-
-		BTREEDATA_ASSERT (m_ppnPerBlockPoolCacheNode[ui32] != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
-
-		memset ((void *) m_ppnPerBlockPoolCacheNode[ui32], 0, sizeof (**m_ppnPerBlockPoolCacheNode) * get_perBlockPoolCacheSize (ui32));
-
-		m_ppbPerBlockPoolCacheValid[ui32] = new bool [get_perBlockPoolCacheSize (ui32)];
-
-		BTREEDATA_ASSERT (m_ppbPerBlockPoolCacheValid[ui32] != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
-
-		memset ((void *) m_ppbPerBlockPoolCacheValid[ui32], 0, sizeof (**m_ppbPerBlockPoolCacheValid) * get_perBlockPoolCacheSize (ui32));
-
-		m_ppnPerBlockPoolCacheLen[ui32] = new uint32_t [get_perBlockPoolCacheSize (ui32)];
-
-		BTREEDATA_ASSERT (m_ppnPerBlockPoolCacheLen[ui32] != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
-
-		m_ppPoolCaches[ui32] = new uint8_t [this->get_perBlockPoolTotalBlockSize (ui32) * get_perBlockPoolCacheSize (ui32)];
-
-		BTREEDATA_ASSERT (m_ppPoolCaches[ui32] != NULL, "CBTreeFileIO::CBTreeFileIO: insufficient memory!");
-	}
-
-	if (nBlockSize == 0)
-	{
 #if defined (WIN32)
 
-		uint32_t		nBytesPerSector, nSectorsPerCluster, dummy0, dummy1;
+	GetSystemInfo (&sSystemInfo);
 
-		GetDiskFreeSpaceA (m_pClDataLayerProperties->get_pathname (), (LPDWORD) &nSectorsPerCluster, (LPDWORD) &nBytesPerSector, (LPDWORD) &dummy0, (LPDWORD) &dummy1);
-
-		nBlockSize = nSectorsPerCluster * nBytesPerSector;
+	nPageSize = sSystemInfo.dwAllocationGranularity;
 
 #elif defined (LINUX)
 
-		struct statfs		sFsParams;
+//	nPageSize = getpagesize ();
 
-		statfs (rDataLayerProperties.get_pathname (), &sFsParams);
-
-		nBlockSize = sFsParams.f_bsize;
-
-#else
-
-		nBlockSize = 4096;
+	nPageSize = sysconf(_SC_PAGE_SIZE);
 
 #endif
+
+	if (nBlockSize == 0)
+	{
+		nBlockSize = (_t_addresstype) nPageSize;
+
+		// these asserts usually flag if the type of _t_addresstype is set to a too small type (ie. _t_addresstype = uint16 and HW page size is 64k)
+		BTREE_ASSERT (nBlockSize == (_t_addresstype) nPageSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
+		BTREE_ASSERT (nPageSize == (pagesize_t) nBlockSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
+	}
+	else
+	{
+		nBlockSize = (_t_addresstype) ((nBlockSize + nPageSize - 1) / nPageSize);
+
+		nBlockSize *= (_t_addresstype) nPageSize;
+
+		// these asserts usually flag if the type of _t_addresstype is set to a too small type (ie. _t_addresstype = uint16 and HW page size is 64k)
+		BTREE_ASSERT (nBlockSize >= nPageSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
+		BTREE_ASSERT ((nBlockSize % nPageSize) == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
 	}
 
 	this->setup (nBlockSize);
 
-	m_pFile = new CFileMem ();
-	
-	m_pFile->setMode (CFileMem::VIEW_RWCOPIED);
-	
 	do
 	{
 		m_strTempFile = m_pClDataLayerProperties->get_pathname ();
@@ -142,41 +137,93 @@ CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTree
 		}
 #endif
 
-		bRslt = m_pFile->open ((char *) m_strTempFile.c_str (), CFileMem::modeCreate | CFileMem::modeReadWrite | CFileMem::osRandomAccess, true);
+		pszFileName = (char *) m_strTempFile.c_str ();
 
-		nFails++;
+#if defined (WIN32)
 
-		BTREEDATA_ASSERT (nFails <= 15, "CBTreeFileIO::CBTreeFileIO: Failed to create file!");
-	} while (!bRslt);
+		if (_findfirst (pszFileName, &sFileinfo) != -1)
+		{
+			nCreation = TRUNCATE_EXISTING;
+		}
+		else
+		{
+			nCreation = CREATE_NEW;
+		}
+	
+		m_hFile = CreateFileA (pszFileName, nAccess, nShare, NULL, nCreation, nAttr, 0);
 
-	m_pFile->setCacheCfg (m_pClDataLayerProperties->get_num_of_log2_cache_lines (), m_pClDataLayerProperties->get_num_of_log2_bytes_per_cache_line ());
+		if (m_hFile != INVALID_HANDLE_VALUE)
+		{
+			bOpenedFile = true;
+		}
+		
+#elif defined (LINUX)
+
+		int		openFlags = O_TRUNC | O_CREAT | O_RDWR;
+		mode_t	createMode = S_IRUSR | S_IWUSR;
+	
+		m_nFileDesc = ::open (pszFileName, openFlags, createMode);
+	
+		if (m_nFileDesc > 0)
+		{
+			unlink (pszFileName);
+
+			bOpenedFile = true;
+		}
+
+#endif
+
+		nAttempts++;
+
+	} while ((!bOpenedFile) && (nAttempts <= 15));
+
+	BTREE_ASSERT (bOpenedFile, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: failed to open temporary file!");
+
+	// init_mapping () fails by throwing an exception when a mapping handle on a zero length file has to be called into existance.
+	// to work around that, the file size is set to the size of one hardware page. to do so set_size () is used, since it has that
+	// code to perform the operation already in it. the problem is, that for set_size () to work correctly the mapping handle has to
+	// be in place, which is not the case here. An extra parameter is not an option, as this method is present in other data layer
+	// classes and would render CBTreeFileIO::set_size () incompatible and then would fail to compile.
+	// The solution was to have a member variable (m_bNoMapHandling), to control whether or not the mapping handle code in
+	// CBTreeFileIO::set_size () is active. To disable any mapping handle code during construction m_bNoMapHandling is asserted
+	// here, but has to be left alone anywhere else.
+	m_bNoMapHandling = true;
+	{
+		set_size (1);
+	}
+	m_bNoMapHandling = false;
+
+	init_mapping ();
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::~CBTreeFileIO ()
 {
-	uint32_t		ui32;
+	unmap_all_descriptors (false);
 
-	m_pFile->close ();
+	exit_mapping ();
 
-	delete (m_pFile);
+#if defined (WIN32)
 
-	delete m_pClDataLayerProperties;
-
-	delete [] m_pnPerBlockPoolCacheMaskes;
-	
-	for (ui32 = 0; ui32 < this->m_nNumDataPools; ui32++)
+	if (m_hFile != INVALID_HANDLE_VALUE)
 	{
-		delete [] m_ppnPerBlockPoolCacheNode[ui32];
-		delete [] m_ppbPerBlockPoolCacheValid[ui32];
-		delete [] m_ppnPerBlockPoolCacheLen[ui32];
-		delete [] m_ppPoolCaches[ui32];
+		CloseHandle (m_hFile);
+
+		m_hFile = INVALID_HANDLE_VALUE;
+	}
+		
+#elif defined (LINUX)
+
+	if (m_nFileDesc > 0)
+	{
+		::close (m_nFileDesc);
+
+		m_nFileDesc = -1;
 	}
 
-	delete [] m_ppnPerBlockPoolCacheNode;
-	delete [] m_ppbPerBlockPoolCacheValid;
-	delete [] m_ppnPerBlockPoolCacheLen;
-	delete [] m_ppPoolCaches;
+#endif
+
+	delete m_pClDataLayerProperties;
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
@@ -196,143 +243,6 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::g
 #endif
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-uint32_t CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_perBlockPoolCacheSize (uint32_t nPool)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_perBlockPoolCacheSize: nPool exceeds available block pools!");
-#endif
-
-	return (m_pnPerBlockPoolCacheMaskes[nPool] + 1);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-uint32_t CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_perBlockPoolCacheMask (uint32_t nPool)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_perBlockPoolCacheMask: nPool exceeds available block pools!");
-#endif
-
-	return (m_pnPerBlockPoolCacheMaskes[nPool]);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-uint8_t* CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_perBlockPoolCacheBaseAddress (uint32_t nPool)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_perBlockPoolCacheBaseAddress: nPool exceeds available block pools!");
-#endif
-
-	return (m_ppPoolCaches[nPool]);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_nodeiter CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_perBlockPoolCacheNode (uint32_t nPool, uint32_t nLine)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_perBlockPoolCacheNode: nPool exceeds available block pools!");
-	BTREEDATA_ASSERT (nLine < get_perBlockPoolCacheSize (nPool), "CBTreeFileIO::get_perBlockPoolCacheNode: nLine exceeds cache size!");
-#endif
-
-	_t_nodeiter		*pnPerBlockPoolCacheNodePool = m_ppnPerBlockPoolCacheNode[nPool];
-
-	return (pnPerBlockPoolCacheNodePool[nLine]);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-bool CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_perBlockPoolCacheValid (uint32_t nPool, uint32_t nLine)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_perBlockPoolCacheValid: nPool exceeds available block pools!");
-	BTREEDATA_ASSERT (nLine < get_perBlockPoolCacheSize (nPool), "CBTreeFileIO::get_perBlockPoolCacheValid: nLine exceeds cache size!");
-#endif
-
-	bool			*pbPerBlockPoolCacheValidPool = m_ppbPerBlockPoolCacheValid[nPool];
-
-	return (pbPerBlockPoolCacheValidPool[nLine]);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_offsettype CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_perBlockPoolOffset (uint32_t nPool)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_perBlockPoolOffset: nPool exceeds available block pools!");
-#endif
-
-	return (this->m_pnPerBlockPoolOffset[nPool]);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_addresstype CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_perBlockPoolAddr (uint32_t nPool, _t_nodeiter nNode)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_perBlockPoolAddr: nPool exceeds available block pools!");
-#endif
-
-	_t_addresstype		nAddr = this->get_nodeAddr (nNode);
-
-	nAddr += this->get_perBlockPoolOffset (nPool);
-
-	return (nAddr);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-uint32_t CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_perBlockPoolCacheLength (uint32_t nPool, _t_nodeiter nNode)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::set_perBlockPoolCacheLength: nPool exceeds available block pools!");
-#endif
-
-	const uint32_t				uCacheMask = get_perBlockPoolCacheMask (nPool);
-	uint32_t					nLine = (uint32_t) nNode & uCacheMask;
-	uint32_t					*pnPerBlockPoolCacheLen = m_ppnPerBlockPoolCacheLen[nPool];
-	
-	return (pnPerBlockPoolCacheLen[nLine]);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_perBlockPoolCacheNode (uint32_t nPool, uint32_t nLine, _t_nodeiter nNode)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::set_perBlockPoolCacheLength: nPool exceeds available block pools!");
-	BTREEDATA_ASSERT (nLine < get_perBlockPoolCacheSize (nPool), "CBTreeFileIO::get_perBlockPoolCacheNode: nLine exceeds cache size!");
-#endif
-
-	_t_nodeiter		*pnPerBlockPoolCacheNodePool = m_ppnPerBlockPoolCacheNode[nPool];
-
-	pnPerBlockPoolCacheNodePool[nLine] = nNode;
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_perBlockPoolCacheLength (uint32_t nPool, _t_nodeiter nNode, uint32_t nLen)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::set_perBlockPoolCacheLength: nPool exceeds available block pools!");
-	BTREEDATA_ASSERT (nLen <= this->get_perBlockPoolTotalBlockSize (nPool), "CBTreeFileIO::set_perBlockPoolCacheLength: nLen exceeds cache line size");
-#endif
-
-	const uint32_t				uCacheMask = get_perBlockPoolCacheMask (nPool);
-	uint32_t					nLine = (uint32_t) nNode & uCacheMask;
-	uint32_t					*pnPerBlockPoolCacheLen = m_ppnPerBlockPoolCacheLen[nPool];
-	bool						*pbPerBlockPoolCacheValid = m_ppbPerBlockPoolCacheValid[nPool];
-	
-	pnPerBlockPoolCacheLen[nLine] = nLen;
-	pbPerBlockPoolCacheValid[nLine] = true;
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_perBlockPoolCacheToInvalid (uint32_t nPool, uint32_t nLine)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_perBlockPoolCacheValid: nPool exceeds available block pools!");
-	BTREEDATA_ASSERT (nLine < get_perBlockPoolCacheSize (nPool), "CBTreeFileIO::get_perBlockPoolCacheValid: nLine exceeds cache size!");
-#endif
-
-	bool			*pbPerBlockPoolCacheValidPool = m_ppbPerBlockPoolCacheValid[nPool];
-
-	pbPerBlockPoolCacheValidPool[nLine] = false;
-}
-
 /*
 
 get_pooledData - get pooled data
@@ -346,288 +256,24 @@ pData[out]	- pointer to return value
 */
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pooledData (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nLen, _t_subnodeiter nEntry, void *pData)
+template<class _t_dl_data>
+_t_dl_data* CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pooledData (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry)
 {
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_pooledData: nPool exceeds avilable block data pools");
-	BTREEDATA_ASSERT (nLen <= (this->get_perBlockPoolTotalBlockSize (nPool) / this->get_perBlockPoolRawEntrySize (nPool)), "CBTreeFileIO::get_pooledData: nLen exceeds cache line size");
-#endif
+	uint32_t		nDescriptor = this->convert_node_to_descriptor (nNode);
+	_t_addresstype	nOffset;
 
-	uint64_t					nAddr;
-	const uint32_t				uCacheMask = get_perBlockPoolCacheMask (nPool);
-	uint32_t					nLine = (uint32_t) nNode & uCacheMask;
-	uint8_t						*pBuffer;
-	const uint32_t				nRawEntrySize = this->get_perBlockPoolRawEntrySize (nPool);
-
-	nLen *= nRawEntrySize;
-	nEntry *= nRawEntrySize;
-
-	// get pool base address
-	pBuffer = get_perBlockPoolCacheBaseAddress (nPool);
-	
-	// move pointer to block address within selected pool
-	pBuffer = &(pBuffer[nLine * this->get_perBlockPoolTotalBlockSize (nPool)]);
-	
-	// if data is not cached ...
-	if ((get_perBlockPoolCacheNode (nPool, nLine) != nNode) || !(get_perBlockPoolCacheValid (nPool, nLine)))
+	if (this->m_psDescriptorVector[nDescriptor].pBlockData == NULL)
 	{
-		// ... then load data into cache
-	
-		// if cache freeze is effective ...
-		if (this->m_bCacheFreeze)
-		{
-			// ... then directly read data from data layer
-			nAddr = this->get_perBlockPoolAddr (nPool, nNode);
-		
-			m_pFile->memcpy (pData, nAddr + nEntry, this->get_perBlockPoolRawEntrySize (nPool));
-	
-			// and exit
-			return;
-		}
-	
-		// if cache already contains data ...
-		if (get_perBlockPoolCacheValid (nPool, nLine))
-		{
-			// ... then save current data to mass memory
-			nAddr = this->get_perBlockPoolAddr (nPool, get_perBlockPoolCacheNode (nPool, nLine));
-	
-			m_pFile->memcpy (nAddr, pBuffer, get_perBlockPoolCacheLength (nPool, nNode));
-		}
-	
-		// update cache
-		nAddr = this->get_perBlockPoolAddr (nPool, nNode);
-		
-		m_pFile->memcpy (pBuffer, nAddr, nLen);
-	
-		set_perBlockPoolCacheNode (nPool, nLine, nNode);
-		set_perBlockPoolCacheLength (nPool, nNode, nLen);
-
-#if defined (USE_PERFORMANCE_COUNTERS)
-		m_anMissCtrs[PERFCTR_NODEDATA_DATA]++;
-#endif
-	}
-#if defined (USE_PERFORMANCE_COUNTERS)
-	else
-	{
-		m_anHitCtrs[PERFCTR_NODEDATA_DATA]++;
-	}
-#endif
-										
-	// copy cached entry to return location
-	memcpy (pData, (void *) &(((char *)pBuffer)[nEntry]), this->get_perBlockPoolRawEntrySize (nPool));
-}
-
-/*
-
-set_pooledData - set pooled data
-
-nPool[in]	- specifies data pool ID
-node[in]	- specifies linear node address of data pool
-len[in]		- specifies length of node
-entry[in]	- specifies linear entry of node
-pData[in]	- pointer to input data
-
-*/
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_pooledData (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nLen, _t_subnodeiter nEntry, void *pData)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::set_pooledData: nPool exceeds avilable block data pools");
-	BTREEDATA_ASSERT (nLen <= (this->get_perBlockPoolTotalBlockSize (nPool) / this->get_perBlockPoolRawEntrySize (nPool)), "CBTreeFileIO::set_pooledData: nLen exceeds cache line size");
-#endif
-
-	BTREEDATA_ASSERT (this->m_bCacheFreeze == false, "CBTreeFileIO::set_pooledData: data cannot be modified while cache freeze is in effect");
-
-	uint64_t					nAddr;
-	const uint32_t				uCacheMask = this->get_perBlockPoolCacheMask (nPool);
-	uint32_t					nLine = (uint32_t) nNode & uCacheMask;
-	uint8_t						*pBuffer;
-	const uint32_t				nRawEntrySize = this->get_perBlockPoolRawEntrySize (nPool);
-
-	nLen *= nRawEntrySize;
-	nEntry *= nRawEntrySize;
-
-										// get pool base address
-										pBuffer = get_perBlockPoolCacheBaseAddress (nPool);
-
-										// move pointer to block address within selected pool
-										pBuffer = &(pBuffer[nLine * this->get_perBlockPoolTotalBlockSize (nPool)]);
-
-										// if cache contains data of a different node or invalid data ...
-										if (!(get_perBlockPoolCacheValid (nPool, nLine)) || (get_perBlockPoolCacheNode (nPool, nLine) != nNode))
-										{
-											// ... then load node in question
-
-											// if cache contains valid data ...
-											if (get_perBlockPoolCacheValid (nPool, nLine))
-											{
-												// ... then save cached data to mass memory
-												nAddr = this->get_perBlockPoolAddr (nPool, get_perBlockPoolCacheNode (nPool, nLine));
-
-												m_pFile->memcpy (nAddr, pBuffer, get_perBlockPoolCacheLength (nPool, nNode));
-											}
-
-											// load node to cache
-											nAddr = this->get_perBlockPoolAddr (nPool, nNode);
-											
-											m_pFile->memcpy (pBuffer, nAddr, nLen);
-
-											set_perBlockPoolCacheNode (nPool, nLine, nNode);
-
-#if defined (USE_PERFORMANCE_COUNTERS)
-											m_anMissCtrs[PERFCTR_NODEDATA_DATA]++;
-#endif
-										}
-#if defined (USE_PERFORMANCE_COUNTERS)
-										else
-										{
-											m_anHitCtrs[PERFCTR_NODEDATA_DATA]++;
-										}
-#endif
-										// copy data to cache
-										memcpy ((void *) &(((char *)pBuffer)[nEntry]), pData, this->get_perBlockPoolRawEntrySize (nPool));
-
-										set_perBlockPoolCacheLength (nPool, nNode, nLen);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pooledData (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nLen, void *pData)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::get_pooledData (no entry): nPool exceeds avilable block data pools");
-	BTREEDATA_ASSERT (nLen <= (this->get_perBlockPoolTotalBlockSize (nPool) / this->get_perBlockPoolRawEntrySize (nPool)), "CBTreeFileIO::get_pooledData (no entry): nLen exceeds cache line size");
-#endif
-
-	uint64_t					nAddr;
-	const uint32_t				uCacheMask = this->get_perBlockPoolCacheMask (nPool);
-	uint32_t					nLine = (uint32_t) nNode & uCacheMask;
-	uint8_t						*pBuffer;
-
-	nLen *= this->get_perBlockPoolRawEntrySize (nPool);
-	
-	// get pool base address
-	pBuffer = get_perBlockPoolCacheBaseAddress (nPool);
-
-	// move pointer to block address within selected pool
-	pBuffer = &(pBuffer[nLine * this->get_perBlockPoolTotalBlockSize (nPool)]);
-
-	// if data is not cached ...
-	if ((get_perBlockPoolCacheNode (nPool, nLine) != nNode) || !(get_perBlockPoolCacheValid (nPool, nLine)))
-	{
-		// ... then load data into cache
-
-		// if cache freeze is effective ...
-		if (this->m_bCacheFreeze)
-		{
-			// ... then directly read data from data layer
-			nAddr = this->get_perBlockPoolAddr (nPool, nNode);
-		
-			m_pFile->memcpy (pData, nAddr, nLen);
-
-			// and exit
-			return;
-		}
-
-		// if cache already contains data ...
-		if (get_perBlockPoolCacheValid (nPool, nLine))
-		{
-			// ... then save current data to mass memory
-			nAddr = this->get_perBlockPoolAddr (nPool, get_perBlockPoolCacheNode (nPool, nLine));
-
-			m_pFile->memcpy (nAddr, pBuffer, get_perBlockPoolCacheLength (nPool, nNode));
-		}
-
-		// update cache
-		nAddr = this->get_perBlockPoolAddr (nPool, nNode);
-		
-		m_pFile->memcpy (pBuffer, nAddr, nLen);
-
-		set_perBlockPoolCacheNode (nPool, nLine, nNode);
-		set_perBlockPoolCacheLength (nPool, nNode, nLen);
-
-#if defined (USE_PERFORMANCE_COUNTERS)
-		m_anMissCtrs[PERFCTR_NODEDATA_DATA]++;
-#endif
-	}
-#if defined (USE_PERFORMANCE_COUNTERS)
-	else
-	{
-		m_anHitCtrs[PERFCTR_NODEDATA_DATA]++;
-	}
-#endif
-										
-	// copy cached entry to return location
-	memcpy (pData, (void *) pBuffer, (size_t) nLen);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_pooledData (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nLen, void *pData)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeFileIO::set_pooledData (no entry): nPool exceeds avilable block data pools");
-	BTREEDATA_ASSERT (nLen <= (this->get_perBlockPoolTotalBlockSize (nPool) / this->get_perBlockPoolRawEntrySize (nPool)), "CBTreeFileIO::set_pooledData (no entry): nLen exceeds cache line size");
-#endif
-
-	BTREEDATA_ASSERT (this->m_bCacheFreeze == false, "CBTreeFileIO::set_pooledData (no entry): data cannot be modified while cache freeze is in effect");
-
-	uint64_t					nAddr;
-	const uint32_t				uCacheMask = this->get_perBlockPoolCacheMask (nPool);
-	uint32_t					nLine = (uint32_t) nNode & uCacheMask;
-	uint8_t						*pBuffer;
-
-	nLen *= this->get_perBlockPoolRawEntrySize (nPool);
-	
-	// get pool base address
-	pBuffer = get_perBlockPoolCacheBaseAddress (nPool);
-
-	// move pointer to block address within selected pool
-	pBuffer = &(pBuffer[nLine * this->get_perBlockPoolTotalBlockSize (nPool)]);
-
-	// if cache contains data of a different node or invalid data ...
-	if (!(get_perBlockPoolCacheValid (nPool, nLine)) || (get_perBlockPoolCacheNode (nPool, nLine) != nNode))
-	{
-		// ... then load node in question
-
-		// if cache contains valid data ...
-		if (get_perBlockPoolCacheValid (nPool, nLine))
-		{
-			// ... then save cached data to mass memory
-			nAddr = this->get_perBlockPoolAddr (nPool, get_perBlockPoolCacheNode (nPool, nLine));
-
-			m_pFile->memcpy (nAddr, pBuffer, get_perBlockPoolCacheLength (nPool, nNode));
-		}
-
-		// load node to cache
-		nAddr = this->get_perBlockPoolAddr (nPool, nNode);
-		
-		m_pFile->memcpy (pBuffer, nAddr, nLen);
-
-		set_perBlockPoolCacheNode (nPool, nLine, nNode);
-
-#if defined (USE_PERFORMANCE_COUNTERS)
-		m_anMissCtrs[PERFCTR_NODEDATA_DATA]++;
-#endif
-	}
-#if defined (USE_PERFORMANCE_COUNTERS)
-	else
-	{
-		m_anHitCtrs[PERFCTR_NODEDATA_DATA]++;
-	}
-#endif
-
-	if (pBuffer != (void *) pData)
-	{
-		// copy data to cache
-		memcpy ((void *) pBuffer, pData, (size_t) nLen);
+		this->map_descriptor (nDescriptor);
 	}
 
-	if (this->m_bWriteThrough)
-	{
-		m_pFile->memcpy (this->get_perBlockPoolAddr (nPool, nNode), pBuffer, (uint64_t) nLen);
-	}
+	this->increment_access_counter (nDescriptor);
 
-	set_perBlockPoolCacheLength (nPool, nNode, nLen);
+	nOffset = this->get_pool_address (nPool, nNode);
+	nOffset -= this->get_blockAddr (nNode);
+	nOffset += nEntry * this->get_pool_entry_size (nPool);
+
+	return ((_t_dl_data *) &(this->m_psDescriptorVector[nDescriptor].pBlockData[nOffset]));
 }
 
 /*
@@ -643,60 +289,19 @@ pData	- pointer to new data
 */
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::insert_dataIntoPool (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nNodeLen, _t_subnodeiter nOffset, _t_subnodeiter nDataLen, void *pData)
+template <class _t_dl_data>
+void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::insert_dataIntoPool (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nNodeLen, _t_subnodeiter nOffset, _t_subnodeiter nDataLen, const _t_dl_data *pData)
 {
-	_t_addresstype				nAddr;
-	const uint32_t				uCacheMask = get_perBlockPoolCacheMask (nPool);
-	uint32_t					nLine = (uint32_t)nNode & uCacheMask;
-	uint8_t						*pBuffer = get_perBlockPoolCacheBaseAddress (nPool);
-	const uint32_t				nRawEntrySize = this->get_perBlockPoolRawEntrySize (nPool);
-
-	pBuffer = &(pBuffer[nLine * this->get_perBlockPoolTotalBlockSize (nPool)]);
-
-	nOffset *= nRawEntrySize;
-	nNodeLen *= nRawEntrySize;
-	nDataLen *= nRawEntrySize;
-
-	BTREEDATA_ASSERT (nNodeLen <= this->get_perBlockPoolTotalBlockSize (nPool), "CBTreeFileIO::insert_dataInDataBuffer: length exceeds node size");
-
-	if (!(get_perBlockPoolCacheValid (nPool, nLine)) || (get_perBlockPoolCacheNode (nPool, nLine) != nNode))
-	{
-		if (get_perBlockPoolCacheValid (nPool, nLine))
-		{
-			uint64_t	nCacheNode = get_perBlockPoolCacheNode (nPool, nLine);
-			
-			nAddr = this->get_perBlockPoolAddr (nPool, (_t_nodeiter) nCacheNode);
-
-			m_pFile->memcpy (nAddr, pBuffer, get_perBlockPoolCacheLength (nPool, (_t_nodeiter) nCacheNode));
-		}
-
-		nAddr = this->get_perBlockPoolAddr (nPool, nNode);
-		
-		m_pFile->memcpy (pBuffer, nAddr, nNodeLen);
-
-		set_perBlockPoolCacheNode (nPool, nLine, nNode);
-
-#if defined (USE_PERFORMANCE_COUNTERS)
-		m_anMissCtrs[PERFCTR_NODEDATA_DATA]++;
-#endif
-	}
-#if defined (USE_PERFORMANCE_COUNTERS)
-	else
-	{
-		m_anHitCtrs[PERFCTR_NODEDATA_DATA]++;
-	}
-#endif
-
-	set_perBlockPoolCacheLength (nPool, nNode, nNodeLen + nDataLen);
-
 #if defined (_DEBUG)
 
-	BTREE_ASSERT (nOffset <= nNodeLen, "CBTreeFileIO<>::insert_dataIntoPool: ERROR: offset exceeds node size!");
+	BTREEDATA_ASSERT ((this->get_pool_entry_size (nPool) * nNodeLen) <= this->get_pool_total_size (nPool), "CBTreeRAMIO::insert_dataInDataBuffer: length exceeds node size");
 
 #endif
 
-	memmove ((void *) &(((char *)pBuffer)[nOffset + nDataLen]), &(((char *)pBuffer)[nOffset]), (size_t)(nNodeLen - nOffset));
-	memcpy ((void *) &(((char *)pBuffer)[nOffset]), pData, (size_t)nDataLen);
+	_t_dl_data		*psNodeData = this->template get_pooledData<_t_dl_data> (nPool, nNode, 0);
+
+	memmove ((void *) &(psNodeData[nOffset + nDataLen]), (void *) &(psNodeData[nOffset]), sizeof (*psNodeData) * (nNodeLen - nOffset));
+	memcpy ((void *) &(psNodeData[nOffset]), (void *) pData, sizeof (*psNodeData) * nDataLen);
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
@@ -708,13 +313,81 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 	}
 
 	_t_addresstype		nSize;
-	bool				bRslt;
-
+	_t_addresstype		nOldSize;
+	
 	nSize = this->get_nodeAddr (nMaxNodes + 1);
 
-	bRslt = m_pFile->setLength (nSize);
+	nSize = (nSize + this->m_nBlockSize - 1) / this->m_nBlockSize;
+	nSize *= this->m_nBlockSize;
 
-	BTREEDATA_ASSERT (bRslt != false, "CBTreeFileIO::set_size: setLength failed!");
+	nOldSize = this->get_nodeAddr (this->m_nMaxNodes + 1);
+
+	nOldSize = (nOldSize + this->m_nBlockSize - 1) / this->m_nBlockSize;
+	nOldSize *= this->m_nBlockSize;
+		
+	if ((nSize != nOldSize) || (this->m_nMaxNodes == 0))
+	{
+		if (!m_bNoMapHandling)
+		{
+			unmap_all_descriptors (false);
+
+			exit_mapping ();
+		}
+
+#if defined (WIN32)
+
+		LARGE_INTEGER		sNewLen;
+		BOOL				bRslt;
+
+		sNewLen.QuadPart = (LONGLONG) nSize;
+
+		bRslt = SetFilePointerEx (m_hFile, sNewLen, NULL, FILE_BEGIN);
+
+		BTREE_ASSERT (bRslt != FALSE, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_size: failed to set file pointer!");
+
+		bRslt = SetEndOfFile (m_hFile);
+
+		BTREE_ASSERT (bRslt != FALSE, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_size: failed to set end of file marker!");
+
+#if defined (_DEBUG)
+		{
+			LARGE_INTEGER		ui64len;
+
+			BTREE_ASSERT (GetFileSizeEx (m_hFile, &ui64len) != false, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_size: Failed to confirm new file size!");
+
+			BTREE_ASSERT (ui64len.QuadPart == nSize, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_size: : Failed to set new file size!");
+		}
+#endif
+
+#elif defined (LINUX)
+
+		int		nRslt;
+
+		nRslt = ftruncate64 (m_nFileDesc, (off_t) nSize);
+
+		BTREE_ASSERT (nRslt == 0, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_size: failed to truncate file to new length!");
+
+#if defined (_DEBUG)
+
+		uint64_t		n64curPos = lseek64 (m_nFileDesc, 0, SEEK_CUR);
+
+		nSize -= lseek64 (m_nFileDesc, 0, SEEK_END);
+
+		lseek64 (m_nFileDesc, n64curPos, SEEK_SET);
+
+		BTREE_ASSERT (nSize == 0ULL, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_size: Failed to set new file size!");
+
+#endif
+
+#endif
+
+		if (!m_bNoMapHandling)
+		{
+			init_mapping ();
+		}
+
+		this->realloc_descriptor_vector (nMaxNodes + 1);
+	}
 
 	this->m_nMaxNodes = nMaxNodes;
 }
@@ -722,72 +395,104 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unload ()
 {
-	uint32_t			ui32;
-	uint8_t				*pBuffer;
-	uint32_t			nCacheSize;
-	uint32_t			nPool;
-	_t_nodeiter			nNode;
-
-	this->set_writeThrough (true);
-	
-	for (nPool = 0; nPool < this->m_nNumDataPools; nPool++)
-	{
-		nCacheSize = get_perBlockPoolCacheSize (nPool);
-
-		for (ui32 = 0UL; ui32 < nCacheSize; ui32++)
-		{
-			if (get_perBlockPoolCacheValid (nPool, ui32))
-			{
-				pBuffer = get_perBlockPoolCacheBaseAddress (nPool);
-				pBuffer = &(pBuffer[ui32 * this->get_perBlockPoolTotalBlockSize (nPool)]);
-
-				nNode = get_perBlockPoolCacheNode (nPool, ui32);
-
-				set_pooledData (nPool, nNode, get_perBlockPoolCacheLength (nPool, nNode) / this->get_perBlockPoolRawEntrySize (nPool), (void *) pBuffer);
-
-				set_perBlockPoolCacheToInvalid (nPool, ui32);
-			}
-		}
-	}
-
-	this->set_writeThrough (false);
-
-	m_pFile->unload ();
+	unmap_all_descriptors (true);
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unload_from_cache (_t_nodeiter nNode)
 {
-	uint32_t		ui32;
-
-	for (ui32 = 0; ui32 < this->m_nNumDataPools; ui32++)
-	{
-		const uint32_t				uCacheMask = this->get_perBlockPoolCacheMask (ui32);
-		uint32_t					nLine = (uint32_t) nNode & uCacheMask;
-		
-		if ((get_perBlockPoolCacheValid (ui32, nLine)) && (get_perBlockPoolCacheNode (ui32, nLine) == nNode))
-		{
-			set_perBlockPoolCacheToInvalid (ui32, nLine);
-		}
-	}
+	nNode;
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 bool CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::is_dataCached (uint32_t nPool, _t_nodeiter nNode)
 {
-	const uint32_t	uCacheMask = get_perBlockPoolCacheMask (nPool);
-	bool			bRetval = false;
-	uint32_t		nLine = (uint32_t) nNode & uCacheMask;
-	
-	bRetval = (get_perBlockPoolCacheNode (nPool, nLine) == nNode);
+	nPool;
+	nNode;
 
-	return (bRetval);
+	return (false);
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-uint32_t CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_node_buffer_cache_size ()
+void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::terminate_access ()
 {
-	return (get_perBlockPoolCacheSize (0));
+	uint32_t	nMinAccessCtr;
+	uint32_t	ui32;
+	uint32_t	nNumUnmapped;
+	uint32_t	nDescRoot;
+
+	if (this->m_nPrevRootNode == ~0)
+	{
+		nDescRoot = this->m_nDescriptorVectorSize;
+	}
+	else
+	{
+		nDescRoot = this->convert_node_to_descriptor (this->m_nPrevRootNode);
+	}
+
+//printf ("terminate_access\n");
+
+	while (m_nTotalAddressSpace > (_t_addresstype) m_pClDataLayerProperties->get_address_space_soft_limit ())
+	{
+//printf ("%llu\n", m_nTotalAddressSpace);
+
+		// for first active descriptor and therewith initialise minimum access counter
+		for (ui32 = 0; ui32 < this->m_nDescriptorVectorSize; ui32++)
+		{
+			if (this->m_psDescriptorVector[ui32].pBlockData != NULL)
+			{
+				if (ui32 != nDescRoot)
+				{
+					nMinAccessCtr = this->m_psDescriptorVector[ui32].nAccessCtr;
+
+					break;
+				}
+			}
+		}
+
+		nNumUnmapped = 0;
+
+		// if minimum access counter was initialised ... (otherwise stop)
+		if (ui32 < this->m_nDescriptorVectorSize)
+		{
+			// ... find smallest access counter
+			for (ui32++; ui32 < this->m_nDescriptorVectorSize; ui32++)
+			{
+				if (this->m_psDescriptorVector[ui32].pBlockData != NULL)
+				{
+					if (ui32 != nDescRoot)
+					{
+						if (this->m_psDescriptorVector[ui32].nAccessCtr < nMinAccessCtr)
+						{
+							nMinAccessCtr = this->m_psDescriptorVector[ui32].nAccessCtr;
+						}
+					}
+				}
+			}
+
+			// any descriptor having the smallest access counter will get unmapped
+			for (ui32 = 0; ui32 < this->m_nDescriptorVectorSize; ui32++)
+			{
+				if (this->m_psDescriptorVector[ui32].pBlockData != NULL)
+				{
+					if (ui32 != nDescRoot)
+					{
+						if (this->m_psDescriptorVector[ui32].nAccessCtr == nMinAccessCtr)
+						{
+							unmap_descriptor (ui32);
+
+							nNumUnmapped++;
+						}
+					}
+				}
+			}
+		}
+
+		if (nNumUnmapped == 0)
+		{
+			break;
+		}
+	}
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
@@ -824,16 +529,6 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 		ofs << "</tr>" << endl;
 
 		ofs << "<tr>" << endl;
-		ofs << "<td>m_psDataPools->nCacheVectorSize</td>" << endl;
-
-		for (ui32 = 0; ui32 < this->m_nNumDataPools; ui32++)
-		{
-			ofs << "<td>" << this->m_psDataPools[ui32].nCacheVectorSize << "</td>" << endl;
-		}
-
-		ofs << "</tr>" << endl;
-		
-		ofs << "<tr>" << endl;
 		ofs << "<td>m_psDataPools->nEntrySize</td>" << endl;
 
 		for (ui32 = 0; ui32 < this->m_nNumDataPools; ui32++)
@@ -854,21 +549,11 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 		ofs << "</tr>" << endl;
 		
 		ofs << "<tr>" << endl;
-		ofs << "<td>m_pnPerBlockPoolCacheMaskes</td>" << endl;
+		ofs << "<td>m_pnPerNodePoolOffset</td>" << endl;
 
 		for (ui32 = 0; ui32 < this->m_nNumDataPools; ui32++)
 		{
-			ofs << "<td>0x" << hex << m_pnPerBlockPoolCacheMaskes[ui32] << dec << "</td>" << endl;
-		}
-
-		ofs << "</tr>" << endl;
-
-		ofs << "<tr>" << endl;
-		ofs << "<td>m_pnPerBlockPoolOffset</td>" << endl;
-
-		for (ui32 = 0; ui32 < this->m_nNumDataPools; ui32++)
-		{
-			ofs << "<td>" << this->m_pnPerBlockPoolOffset[ui32] << "</td>" << endl;
+			ofs << "<td>" << this->m_pnPerNodePoolOffset[ui32] << "</td>" << endl;
 		}
 
 		ofs << "</tr>" << endl;
@@ -910,7 +595,7 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 
 						for (uk32 = 0; uk32 < this->m_nNumDataPools; uk32++)
 						{
-							_t_addresstype	nAddr = this->get_perBlockPoolAddr (uk32, ui64);
+							_t_addresstype	nAddr = this->get_pool_address (uk32, ui64);
 							bool			bIsCached = is_dataCached (uk32, ui64);
 
 							ofs << "<td>" << endl;
@@ -939,19 +624,15 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 
 								ofs << "<font color=\"#4040FF\">";
 
-								nMaxPoolLen = this->get_perBlockPoolTotalBlockSize (uk32);
+								nMaxPoolLen = this->get_pool_total_size (uk32);
 
-								pb = new uint8_t [nMaxPoolLen];
-
-								BTREEDATA_ASSERT (pb != NULL, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::showdump: insufficient memory!");
-
-								get_pooledData (uk32, ui64, nMaxPoolLen / this->get_perBlockPoolRawEntrySize (uk32), (void *) pb);
+								pb = get_pooledData<uint8_t> (uk32, ui64, nMaxPoolLen / this->get_pool_entry_size (uk32));
 							
 								for (ul32 = 0; ul32 < nMaxPoolLen; ul32++)
 								{
 									ofs << hex << setfill ('0') << setw (2) << (uint32_t) pb[ul32] << dec;
 
-									if (((ul32 + 1) % this->get_perBlockPoolRawEntrySize (uk32)) == 0)
+									if (((ul32 + 1) % this->get_pool_entry_size (uk32)) == 0)
 									{
 										ofs << "<br>" << endl;
 									}
@@ -961,39 +642,37 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 									}
 								}
 
-								delete [] pb;
-
 								ofs << "</font>";
 
 								ofs << "<br>";
 							}
 							
-							uint32_t	ul32;
-							uint8_t		b;
+//							uint32_t	ul32;
+//							uint8_t		b;
 
-							if (m_pFile != NULL)
-							{
-								ofs << "<font color=\"#999999\">";
-								
-								for (ul32 = 0; ul32 < this->get_perBlockPoolTotalBlockSize (uk32); ul32++)
-								{
-									m_pFile->memcpy ((void *) &b, nAddr + ul32, 1ULL);
-
-									ofs << hex << setfill ('0') << setw (2) << (uint32_t) b << dec;
-
-									if (((ul32 + 1) % this->get_perBlockPoolRawEntrySize (uk32)) == 0)
-									{
-										ofs << "<br>";
-									}
-									else if (((ul32 + 1) % 4) == 0)
-									{
-										ofs << " ";
-									}
-								}
-
-								ofs << "</font>";
-							}
-							
+//							if (m_pFile != NULL)
+//							{
+//								ofs << "<font color=\"#999999\">";
+//								
+//								for (ul32 = 0; ul32 < this->get_pool_total_size (uk32); ul32++)
+//								{
+//									m_pFile->memcpy ((void *) &b, nAddr + ul32, 1ULL);
+//
+//									ofs << hex << setfill ('0') << setw (2) << (uint32_t) b << dec;
+//
+//									if (((ul32 + 1) % this->get_pool_entry_size (uk32)) == 0)
+//									{
+//										ofs << "<br>";
+//									}
+//									else if (((ul32 + 1) % 4) == 0)
+//									{
+//										ofs << " ";
+//									}
+//								}
+//
+//								ofs << "</font>";
+//							}
+//							
 							ofs << "</td>";
 						}
 
@@ -1009,30 +688,233 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_addresstype CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_blockAddr (_t_nodeiter nNode)
+void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping ()
 {
-	_t_addresstype		nRetval;
+#if defined (WIN32)
 
-	nRetval = (_t_addresstype) ((nNode >> this->m_nNodesPerBlockVectorSize) * this->m_nBlockSize);
+	BTREE_ASSERT (m_hFile != INVALID_HANDLE_VALUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping: file handle not initialised!");
+	BTREE_ASSERT (m_hFileMapping == INVALID_HANDLE_VALUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping: map handle was previously initialised");
 
-	return (nRetval);
+	m_hFileMapping = CreateFileMapping (m_hFile, NULL, PAGE_READWRITE, 0, 0, NULL);
+
+	BTREE_ASSERT (m_hFileMapping != NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping: failed to initialise map handle!");
+
+#endif
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_offsettype CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_poolOffset ()
+void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::exit_mapping ()
 {
-	return ((_t_offsettype) 0);
+#if defined (WIN32)
+
+	BTREE_ASSERT (m_hFileMapping != INVALID_HANDLE_VALUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::exit_mapping: map handle was not initialised!");
+
+	HRESULT		sRslt = CloseHandle (m_hFileMapping);
+
+	if (sRslt != S_OK)
+	{
+		// it looks like CloseHandle sometimes returns with an error on file mapping handles, although everything seems to be fine
+		DWORD	nErrCode = GetLastError ();
+
+		// in those cases the code is double checking by using GetLastError ()
+		BTREE_ASSERT (nErrCode == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::exit_mapping: map handle was not de-initialised!");
+	}
+									
+	m_hFileMapping = INVALID_HANDLE_VALUE;
+
+#endif
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_addresstype CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_nodeAddr (_t_nodeiter nNode)
+void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor (uint32_t nDescriptor)
 {
-	_t_addresstype		nRetval;
+	uint64_t	nFileOffset;
 
-	nRetval = this->get_blockAddr (nNode);
-	nRetval += (nNode & (this->m_nNodesPerBlock - 1)) * this->m_nAlignedNodeSize;
+#if defined (WIN32)
 
-	return (nRetval);
+	DWORD				nHighOffset, nLowOffset;
+
+#elif defined (LINUX)
+
+	int		prot;
+	int		nFlags;
+
+#endif
+
+	size_t				nLineLen;
+
+#if defined (_DEBUG)
+
+	BTREE_ASSERT (nDescriptor < this->m_nDescriptorVectorSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested descriptor exceeds descriptor vector size!");
+	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData == NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested mapping already in place!");
+
+#endif
+
+	nFileOffset = this->m_nBlockSize * nDescriptor;
+
+	nLineLen = (size_t) this->m_nBlockSize;
+
+#if defined (WIN32)
+
+#if defined (_DEBUG)
+
+	BTREE_ASSERT (m_hFileMapping != INVALID_HANDLE_VALUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: map handle was not initialised!");
+
+#endif
+
+	nHighOffset = (DWORD)((nFileOffset >> 32ULL) & 0xFFFFFFFFUL);
+	nLowOffset = (DWORD)(nFileOffset & 0xFFFFFFFFUL);
+
+	this->m_psDescriptorVector[nDescriptor].pBlockData = (uint8_t *) MapViewOfFile (m_hFileMapping, FILE_MAP_ALL_ACCESS, nHighOffset, nLowOffset, nLineLen);
+
+	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: address mapping failed!");
+
+#elif defined (LINUX)
+
+#if defined (_DEBUG)
+
+	BTREE_ASSERT (m_nFileDesc > 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: file descriptor was not initialised!");
+
+#endif
+
+	prot = PROT_READ | PROT_WRITE;
+	nFlags = MAP_SHARED;
+
+	this->m_psDescriptorVector[nDescriptor].pBlockData = (uint8_t *) mmap64 (NULL, (size_t) nLineLen, prot, nFlags, m_nFileDesc, nFileOffset);
+
+	if (this->m_psDescriptorVector[nDescriptor].pBlockData == ((void *) -1))
+	{
+		char		*pszMessage;
+
+		switch (errno)
+		{
+		case EACCES	:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = EACCES";
+
+						break;
+
+		case EAGAIN	:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = EAGAIN";
+
+						break;
+
+		case EBADF	:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = EBADF";
+
+						break;
+
+		case EINVAL	:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = EINVAL";
+
+						break;
+
+		case ENFILE	:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = ENFILE";
+
+						break;
+
+		case ENODEV	:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = ENODEV";
+
+						break;
+
+		case ENOMEM	:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = ENOMEM";
+
+						break;
+
+		case EPERM	:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = EPERM";
+
+						break;
+
+		case ETXTBSY:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = ETXTBSY";
+
+						break;
+
+		case EOVERFLOW:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory! error code = EOVERFLOW";
+
+						break;
+
+		default		:	pszMessage = (char *) "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: mmap64 failed to map file to memory!";
+
+						break;
+		}
+
+		BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != ((uint8_t *) -1), pszMessage);
+	}
+
+#endif
+
+	this->m_psDescriptorVector[nDescriptor].nAccessCtr = 0;
+
+	m_nTotalAddressSpace += this->m_nBlockSize;
+}
+
+template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor (uint32_t nDescriptor)
+{
+#if defined (_DEBUG)
+
+	BTREE_ASSERT (nDescriptor < this->m_nDescriptorVectorSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested descriptor exceeds descriptor vector size!");
+	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested unmapping already done!");
+
+#endif
+
+#if defined (WIN32)
+	
+	BOOL	bRslt = FlushViewOfFile ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize);
+
+	BTREE_ASSERT (bRslt == TRUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to flush view of file!");
+
+	bRslt = UnmapViewOfFile ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData);
+
+	BTREE_ASSERT (bRslt == TRUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to unmap view of file!");
+
+#elif defined (LINUX)
+
+	int		nRslt = msync ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize, MS_SYNC);
+
+	BTREE_ASSERT (nRslt == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to flush view of file!");
+
+	nRslt = munmap ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize);
+
+	BTREE_ASSERT (nRslt == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to unmap view of file!");
+
+#endif
+
+	if (this->m_nPrevRootNode != ~0)
+	{
+		if (nDescriptor == this->convert_node_to_descriptor (this->m_nPrevRootNode))
+		{
+			this->m_nPrevRootNode = ~0;
+		}
+	}
+
+	this->m_psDescriptorVector[nDescriptor].pBlockData = NULL;
+	this->m_psDescriptorVector[nDescriptor].nAccessCtr = 0;
+
+	m_nTotalAddressSpace -= this->m_nBlockSize;
+}
+
+template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_all_descriptors (bool bExceptRoot)
+{
+	uint32_t	u;
+	uint32_t	nDescRoot;
+
+	if (this->m_nPrevRootNode == ~0)
+	{
+		nDescRoot = this->m_nDescriptorVectorSize;
+	}
+	else
+	{
+		nDescRoot = this->convert_node_to_descriptor (this->m_nPrevRootNode);
+	}
+
+	for (u = 0; u < this->m_nDescriptorVectorSize; u++)
+	{
+		if (!bExceptRoot || (bExceptRoot && (u != nDescRoot)))
+		{
+			if (this->m_psDescriptorVector[u].pBlockData != NULL)
+			{
+				unmap_descriptor (u);
+			}
+		}
+	}
 }
 
 #endif // BTREEFILEIO_CPP
+
