@@ -250,9 +250,29 @@ void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 	}
 	else
 	{
+#if defined (_DEBUG)
+
+		uint32_t	nDebug = 0;
+
+#endif
+
 		for (sIt = sItFirst; sIt != sItLast; sIt++)
 		{
+#if defined (_DEBUG)
+
+			_t_sizetype		nSize = CBTreeKeySort_t::size ();
+
+#endif
+
 			CBTreeKeySort_t::insert ((const _t_data &) *sIt);
+
+#if defined (_DEBUG)
+
+			nDebug++;
+
+			BTREE_ASSERT ((nSize + 1) == CBTreeKeySort_t::size (), "ERROR: CBTreeKeySort<...>::insert: unexpected container size!");
+
+#endif
 		}
 	}
 }
@@ -563,7 +583,7 @@ _t_sizetype CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 	while (true)
 	{
 		// copy data of current "seen" position to output array
-		pObj[retval] = this->get_data (nodeSeen, subPosSeen);
+		pObj[retval] = *(this->get_data (nodeSeen, subPosSeen));
 
 		retval++;
 
@@ -715,7 +735,7 @@ bool CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 	retval = true;
 
 	// obtain data instance
-	*pObj = this->get_data (nodeSeen, subPosSeen);
+	*pObj = *(this->get_data (nodeSeen, subPosSeen));
 
 #if defined (_DEBUG)
 	BTREE_ASSERT (nInstance == get_instancePos (nodeSeen, subPosSeen), "CBTreeBase<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get (_t_data, uint64_t, _t_data *): comparison of external and internal instance position mismatch!");
@@ -741,10 +761,11 @@ _t_sizetype CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 {
 	_t_sizetype					retval = (_t_sizetype) ~0;
 	_t_nodeiter					nNode, fstNode;
+	_t_nodeiter					*pnNode;
 	_t_subnodeiter				sub, fstSub;
 	uint32_t					comp = 0;
 	bool						bContinue;
-	node_t						sNodeDesc;
+	node_t						*psNodeDesc;
 
 	// if data layer not present ...
 	if (this->m_pData == NULL)
@@ -768,7 +789,7 @@ _t_sizetype CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 		do
 		{
 			// get description of current node
-			this->get_node (nNode, sNodeDesc);
+			psNodeDesc = this->get_node (nNode);
 
 			bContinue = (nNode != this->m_nRootNode);
 
@@ -781,7 +802,9 @@ _t_sizetype CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 				// ... then add the number of all entries of previous or left sub nodes
 				for (; sub != ~0; sub--)
 				{
-					retval += this->get_max_index (this->get_sub_node (nNode, sub));
+					pnNode = this->get_sub_node (nNode, sub);
+
+					retval += this->get_max_index (*pnNode);
 				}
 			}
 
@@ -789,8 +812,8 @@ _t_sizetype CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 			if (bContinue)
 			{
 				// ... move to the parent node, which during the next iteration will be the current node
-				sub = this->find_sub_node_offset (sNodeDesc.nParent, nNode) - 1;
-				nNode = sNodeDesc.nParent;
+				sub = this->find_sub_node_offset (psNodeDesc->nParent, nNode) - 1;
+				nNode = psNodeDesc->nParent;
 
 				comp = 1;
 			}
@@ -876,7 +899,7 @@ void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 				}
 				else
 				{
-					nNode = this->get_sub_node (nNode, nSub);
+					nNode = *(this->get_sub_node (nNode, nSub));
 				}
 			}
 		}
@@ -1095,7 +1118,7 @@ bool CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 			// ... then obtain of the data entry at the linear position in question
 			this->convert_pos_to_container_pos (this->m_nRootNode, nPos, nNode, nSubPos);
 
-			rData = this->get_data (nNode, nSubPos);
+			rData = *(this->get_data (nNode, nSubPos));
 
 			retval = true;
 		}
@@ -1213,9 +1236,9 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeKeySort<_t_data, _t_key, _t_sizetype
 {
 	_t_sizetype		nInstancePos;
 	int				triCmpRslt;
-	node_t			sNodeDesc;
+	node_t			*psNodeDesc;
 
-	this->get_node (nNode, sNodeDesc);
+	psNodeDesc = this->get_node (nNode);
 
 	// if node is a leaf node ...
 	if (this->is_leaf (nNode))
@@ -1229,12 +1252,12 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeKeySort<_t_data, _t_key, _t_sizetype
 		bFound = true;
 
 		// binary sub-divide the data in this node until the correct sub-data position (nSubData) has been idenfied
-		for (uBase = 0UL, ui32 = this->get_data_count (sNodeDesc) / 2; ui32 > 0; ui32 >>= 1)
+		for (uBase = 0UL, ui32 = this->get_data_count (*psNodeDesc) / 2; ui32 > 0; ui32 >>= 1)
 		{
 			allocateShortLiveKey ();
 			{
 				// test for correct position in sub-division
-				for (nSubData = uBase; nSubData < this->get_data_count (sNodeDesc); nSubData += ui32)
+				for (nSubData = uBase; nSubData < this->get_data_count (*psNodeDesc); nSubData += ui32)
 				{
 					// if the key of the current sub-position is smaller than the sought key ...
 					if (this->comp (*(extract_key (m_pShortLiveKey, nNode, nSubData)), *(sPos.pKey)) < 0)
@@ -1273,7 +1296,7 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeKeySort<_t_data, _t_key, _t_sizetype
 		nSubData = nSubPos = get_firstSubPos (nNode, *(sPos.pKey));
 
 		// if the nearest sub-position is not the last position ...
-		if (nSubPos < this->get_data_count (sNodeDesc))
+		if (nSubPos < this->get_data_count (*psNodeDesc))
 		{
 			allocateShortLiveKey ();
 			{
@@ -1303,7 +1326,7 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeKeySort<_t_data, _t_key, _t_sizetype
 				allocateShortLiveKey ();
 				{
 					// walk through node until the end of the node has been reached or a different key has been found
-					for (; ((nSubPos < this->get_data_count (sNodeDesc)) && (this->comp (*(sPos.pKey), *(extract_key (m_pShortLiveKey, nNode, nSubPos))) == 0)); nSubPos++, nSubData++)
+					for (; ((nSubPos < this->get_data_count (*psNodeDesc)) && (this->comp (*(sPos.pKey), *(extract_key (m_pShortLiveKey, nNode, nSubPos))) == 0)); nSubPos++, nSubData++)
 					{
 						nInstancePos = get_instancePos (nNode, nSubPos);
 
@@ -1327,7 +1350,7 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeKeySort<_t_data, _t_key, _t_sizetype
 			}
 
 			// if data sub-position exceeds node data size as a result of the previous loop ...
-			if (nSubData >= this->get_data_count (sNodeDesc))
+			if (nSubData >= this->get_data_count (*psNodeDesc))
 			{
 				// ... then limit data sub-position to node's data size
 				nSubData -= 1;
@@ -1365,32 +1388,33 @@ void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeKeySort<>::rebuild_node: requested node exceeds tree size");
 #endif
 
-	_t_nodeiter									nSubNode;
-	node_t										sNodeDesc;
+	_t_nodeiter									*pnSubNode;
+	node_t										*psNodeDesc;
 	_t_sizetype									nIdx = (_t_sizetype) 0;
 	_t_subnodeiter								ui32;
 	_t_subnodeiter								nSubPosOffset;
+	_t_sizetype									*pnSerVector;
 	int											nLocalTriMod = triMod;
 
-	this->get_node (nNode, sNodeDesc);
+	psNodeDesc = this->get_node (nNode);
 
 	// if nNode is a leaf node ...
 	if (this->is_leaf (nNode))
 	{
 		// ... then use the arithmetic negative size value of this node to determine nMaxIdx
-		nIdx = ((_t_subnodeiter) (0 - sNodeDesc.nNumData));
+		nIdx = ((_t_subnodeiter) (0 - psNodeDesc->nNumData));
 
 		// Note:	If a node is a leaf node, then the size is displayed as a negative
 		//			value, which appears as a 2's complement value, since the size actually is unsigned.
 	}
 	else
 	{
-		const _t_subnodeiter						nNumData = this->get_data_count (sNodeDesc);
+		const _t_subnodeiter						nNumData = this->get_data_count (*psNodeDesc);
 
-		this->get_serVector (nNode, this->m_pSerVector);
+		pnSerVector = this->get_serVector (nNode);
 
 		// if nMaxIdx has been determined (already set up node) and the fast modifier is set ...
-		if ((sNodeDesc.nMaxIdx != 0) && (triMod != 0))
+		if ((psNodeDesc->nMaxIdx != 0) && (triMod != 0))
 		{
 			// ... then use fast modifier to update nMaxIdx and serial vector
 			
@@ -1402,16 +1426,17 @@ void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 			else
 			{
 				nSubPosOffset = nSubStart - 1;
-				nIdx = this->m_pSerVector[nSubPosOffset] - nSubPosOffset;
+				nIdx = pnSerVector[nSubPosOffset] - nSubPosOffset;
 			}
 
 			// seek point where serial vector mismatches expected sequence based on sub-node indexes
 			for (ui32 = nSubStart; ui32 < (nNumData - 1); ui32++)
 			{
-				nSubNode = this->get_sub_node (nNode, ui32);
-				nIdx += this->get_max_index (nSubNode);
+				pnSubNode = this->get_sub_node (nNode, ui32);
 
-				if (this->m_pSerVector[ui32] != (nIdx + ui32))
+				nIdx += this->get_max_index (*pnSubNode);
+
+				if (pnSerVector[ui32] != (nIdx + ui32))
 				{
 					break;
 				}
@@ -1420,26 +1445,33 @@ void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 			// update remaining serial vector part by using fast modifier
 			for (; ui32 < (nNumData - 1); ui32++)
 			{
-				this->m_pSerVector[ui32] += triMod;
+				pnSerVector[ui32] += triMod;
 			}
 
-			nIdx = sNodeDesc.nMaxIdx + triMod;
+			nIdx = psNodeDesc->nMaxIdx + triMod;
 
 			if (ui32 == 0)
 			{
-				this->m_pSerVector[0] = this->get_max_index (this->get_sub_node (nNode, 0));
+				pnSubNode = this->get_sub_node (nNode, 0);
+
+				pnSerVector[0] = this->get_max_index (*pnSubNode);
 			}
 			else if (ui32 < nNumData)
 			{
-				const _t_sizetype	nLastIdx = this->get_max_index (this->get_sub_node (nNode, nNumData));
-				const _t_sizetype	nSecondLastIdx = this->get_max_index (this->get_sub_node (nNode, nNumData - 1));
+				pnSubNode = this->get_sub_node (nNode, nNumData);
+
+				const _t_sizetype	nLastIdx = this->get_max_index (*pnSubNode);
+
+				pnSubNode = this->get_sub_node (nNode, nNumData - 1);
+
+				const _t_sizetype	nSecondLastIdx = this->get_max_index (*pnSubNode);
 				_t_sizetype			nTrialingIdx = nLastIdx;
 
 				nTrialingIdx += nSecondLastIdx;
 
 				nTrialingIdx += 2;
 
-				if (nIdx != (this->m_pSerVector[ui32 - 1] + nTrialingIdx))
+				if (nIdx != (pnSerVector[ui32 - 1] + nTrialingIdx))
 				{
 					nLocalTriMod = 0;
 				}
@@ -1447,11 +1479,11 @@ void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 				{
 					// code cannot be sure if the last entry had valid data in the first place
 					// re-build last entry from all other values
-					this->m_pSerVector[ui32] = nIdx - nLastIdx - 1;
+					pnSerVector[ui32] = nIdx - nLastIdx - 1;
 
 					// the above code doesn't account for new entries
 					// if new entry has been created, which is not in the last place ...
-					if (this->m_pSerVector[ui32] < this->m_pSerVector[ui32 - 1])
+					if (pnSerVector[ui32] < pnSerVector[ui32 - 1])
 					{
 						// ..then fall back to slow full re-build mode
 						nLocalTriMod = 0;
@@ -1461,34 +1493,31 @@ void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 		}
 		
 		// if nMaxIdx has not been determined yet (newly created node) or the fast modifier is not set ...
-		if ((sNodeDesc.nMaxIdx == 0) || (nLocalTriMod == 0))
+		if ((psNodeDesc->nMaxIdx == 0) || (nLocalTriMod == 0))
 		{
 			this->m_pData->set_cacheFreeze (true);
 			{
 				// ... then fully re-calculate nMaxIdx and serial vector
-				for (ui32 = 0UL, nIdx = 0; ui32 < this->get_sub_node_count (sNodeDesc); ui32++)
+				for (ui32 = 0UL, nIdx = 0; ui32 < this->get_sub_node_count (*psNodeDesc); ui32++)
 				{
-					nSubNode = this->get_sub_node (nNode, ui32);
-					nIdx += this->get_max_index (nSubNode);
+					pnSubNode = this->get_sub_node (nNode, ui32);
+
+					nIdx += this->get_max_index (*pnSubNode);
 
 					if (ui32 < this->get_data_count (nNode))
 					{
-						this->m_pSerVector[ui32] = nIdx + ui32;
+						pnSerVector[ui32] = nIdx + ui32;
 					}
 				}
 			}
 			this->m_pData->set_cacheFreeze (false);
 
-			nIdx += this->get_data_count (sNodeDesc);
+			nIdx += this->get_data_count (*psNodeDesc);
 		}
-
-		this->set_serVector (nNode, this->m_pSerVector);
 	}
 
 	// write result back
-	sNodeDesc.nMaxIdx = nIdx;
-
-	this->set_node (nNode, sNodeDesc);
+	psNodeDesc->nMaxIdx = nIdx;
 }
 
 /*
@@ -1516,7 +1545,7 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeKeySort<_t_data, _t_key, _t_sizetype
 	_t_nodeiter		nPrevNode;
 	_t_subnodeiter	nPrevSubPos;
 	bool			bBounce;
-	_t_data			sData;
+	_t_data			*psData;
 
 	// get previous position within tree
 	this->move_prev (nNode, nSub, nPrevNode, nPrevSubPos, bBounce);
@@ -1526,10 +1555,10 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeKeySort<_t_data, _t_key, _t_sizetype
 	BTREE_ASSERT (!bBounce, "CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_prev_position: unexpected bounce!");
 #endif
 
-	sData = this->get_data (nPrevNode, nPrevSubPos);
+	psData = this->get_data (nPrevNode, nPrevSubPos);
 
 	// get key of previous position
-	m_pTempRemoveKey = extract_key (m_pTempRemoveKey, sData);
+	m_pTempRemoveKey = extract_key (m_pTempRemoveKey, *psData);
 
 	sPos.pKey = m_pTempRemoveKey;
 	sPos.nInstance = get_instancePos (nPrevNode, nPrevSubPos);
@@ -1562,7 +1591,7 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeKeySort<_t_data, _t_key, _t_sizetype
 	_t_nodeiter		nNextNode;
 	_t_subnodeiter	nNextSubPos;
 	bool			bBounce;
-	_t_data			sData;
+	_t_data			*psData;
 
 	// get previous position within tree
 	this->move_next (nNode, nSub, nNextNode, nNextSubPos, bBounce);
@@ -1572,10 +1601,10 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeKeySort<_t_data, _t_key, _t_sizetype
 	BTREE_ASSERT (!bBounce, "CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_prev_position: unexpected bounce!");
 #endif
 
-	sData = this->get_data (nNextNode, nNextSubPos);
+	psData = this->get_data (nNextNode, nNextSubPos);
 
 	// get key of previous position
-	m_pTempRemoveKey = extract_key (m_pTempRemoveKey, sData);
+	m_pTempRemoveKey = extract_key (m_pTempRemoveKey, *psData);
 
 	sPos.pKey = m_pTempRemoveKey;
 	sPos.nInstance = get_instancePos (nNextNode, nNextSubPos);
@@ -1628,17 +1657,17 @@ Note:	This method is application specific. By default the entire data set is dee
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 _t_key *CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *pKey, const _t_nodeiter nNode, const _t_subnodeiter nEntry)
 {
-	_t_data				sData;
+	_t_data				*psData;
 
 #if defined (_DEBUG)
 	BTREE_ASSERT (nEntry < this->get_data_count (nNode), "CBTreeBase<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::peek_key (void *, uint64_t, uint32_t): requested entry exceeds nodes data size");
 #endif
 
 	// obtain dataset
-	sData = this->get_data (nNode, nEntry);
+	psData = this->get_data (nNode, nEntry);
 
 	// convert dataset to key
-	return (extract_key (pKey, sData));
+	return (extract_key (pKey, *psData));
 }
 
 /*
@@ -1664,6 +1693,7 @@ _t_sizetype CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 	bool					bBounce;
 	_t_nodeiter				nFromNode = nNode;
 	_t_subnodeiter			nFromSub = nSub;
+	_t_nodeiter				*pnNode;
 
 	// determine one key of the key raw in question
 	m_pTempFindFirstKeyKey = extract_key (m_pTempFindFirstKeyKey, nFromNode, nFromSub);
@@ -1689,7 +1719,9 @@ _t_sizetype CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 
 			nFromSub = nSub - 1;
 
-			nRetval += this->get_max_index (this->get_sub_node (nNode, nSub));
+			pnNode = this->get_sub_node (nNode, nSub);
+
+			nRetval += this->get_max_index (*pnNode);
 		}
 
 		// if beginning the of the list has been reached ...
@@ -1731,18 +1763,18 @@ The value returned is the sub-position, which has the nearest greater or equal k
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 _t_subnodeiter CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_firstSubPos (_t_nodeiter nNode, _t_key const &rKey, bool bReverse)
 {
-	node_t					sNodeDesc;
+	node_t					*psNodeDesc;
 	_t_subnodeiter			ui32;
 	_t_subnodeiter			nMinPos, nMaxPos;
 	int						triCmpRslt = ~0x0;
 
 	// load node descriptor
-	this->get_node (nNode, sNodeDesc);
+	psNodeDesc = this->get_node (nNode);
 
 	// set range up
 	nMinPos = 0UL;
 
-	nMaxPos = this->get_data_count (sNodeDesc);
+	nMaxPos = this->get_data_count (*psNodeDesc);
 
 	// until first sub postion has been found ...
 	while (nMinPos != nMaxPos)
@@ -1777,7 +1809,7 @@ _t_subnodeiter CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subno
 		if (triCmpRslt == 0)
 		{
 			// set range up
-			nMaxPos = this->get_data_count (sNodeDesc);
+			nMaxPos = this->get_data_count (*psNodeDesc);
 
 			// until last equal sub postion has been found ...
 			while ((nMinPos + 1) != nMaxPos)
@@ -1829,17 +1861,17 @@ The value returned is the sub-position, which has the nearest greater key compar
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 _t_subnodeiter CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find_next_sub_pos (const _t_nodeiter nNode, CBTreeKeySortPos<_t_sizetype, _t_key> &sPos)
 {
-	node_t					sNodeDesc;
+	node_t					*psNodeDesc;
 	_t_subnodeiter			ui32;
 	_t_subnodeiter			nMinPos, nMaxPos;
 
 	// load node descriptor
-	this->get_node (nNode, sNodeDesc);
+	psNodeDesc = this->get_node (nNode);
 
 	// set range up
 	nMinPos = 0UL;
 
-	nMaxPos = this->get_data_count (sNodeDesc);
+	nMaxPos = this->get_data_count (*psNodeDesc);
 
 	// until nearest sub postion has been found ...
 	while (nMinPos != nMaxPos)
@@ -1906,12 +1938,12 @@ bool CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 		nSub = get_firstSubPos (nNode, rKey);
 
 		// load node descriptor
-		node_t	sNodeDesc;
+		node_t	*psNodeDesc;
 			
-		this->get_node (nNode, sNodeDesc);
+		psNodeDesc = this->get_node (nNode);
 
 		// if key can be found in current node ...
-		if (nSub < this->get_data_count (sNodeDesc))
+		if (nSub < this->get_data_count (*psNodeDesc))
 		{
 			// ... then test if key is part of the current node
 
@@ -1938,9 +1970,9 @@ bool CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 			{
 				for (i = 0; i < (nSub + bFound); i++)
 				{
-					_t_nodeiter		nSubNode = this->get_sub_node (nNode, i);
+					_t_nodeiter		*pnSubNode = this->get_sub_node (nNode, i);
 
-					(*pnPos) += this->get_max_index (nSubNode);
+					(*pnPos) += this->get_max_index (*pnSubNode);
 				}
 			}
 
@@ -1960,7 +1992,7 @@ bool CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 		}
 
 		// determine sub node for next iteration
-		nNode = this->get_sub_node (nNode, nSub);
+		nNode = *(this->get_sub_node (nNode, nSub));
 	}
 
 	return (true);
@@ -1985,7 +2017,7 @@ _t_sizetype CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 {
 	_t_sizetype		nRetval = 0;
 	_t_sizetype		nStepSize = 0;
-	_t_nodeiter		nSubNode;
+	_t_nodeiter		*pnSubNode;
 	bool			bBounce;
 	
 	// determine one key of the key raw in question
@@ -2014,11 +2046,11 @@ _t_sizetype CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 		{
 			bBounce = false;
 
-			nSubNode = this->get_sub_node (nFromNode, nFromSub);
+			pnSubNode = this->get_sub_node (nFromNode, nFromSub);
 
 			nFromSub = nSub - 1;
 
-			nStepSize = this->get_max_index (nSubNode);
+			nStepSize = this->get_max_index (*pnSubNode);
 			nStepSize += 1;
 		}
 
@@ -2218,8 +2250,265 @@ void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::showdata (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+bool CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
 {
+	return (true);
+}
+
+template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+bool CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_node (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+{
+	std::stringstream		buf;
+	_t_data					*psData;
+	_t_nodeiter				nNeightbourNode;
+	_t_subnodeiter			nNeightbourSub;
+	int						nErrCnt = 0;
+	std::stringstream		aszMsg;
+	char					*pColorInit = (char *) "";
+	char					*pColorExit = (char *) "";
+	_t_nodeiter				nPrevNode;
+	_t_subnodeiter			nPrevSub;
+	_t_nodeiter				nNextNode;
+	_t_subnodeiter			nNextSub;
+	bool					bBounce;
+	_t_key					sKey;
+
+	psData = this->get_data (nNode, nSubPos);
+
+	if (this->is_leaf (nNode))
+	{
+		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
+		{
+			if (!ofs.is_open ())
+			{
+				return (false);
+			}
+
+			nErrCnt++;
+		}
+
+		try
+		{
+			this->move_prev (nNode, nSubPos, nPrevNode, nPrevSub, bBounce);
+
+			if (bBounce == false)
+			{
+				_t_data	*psPrevData = this->get_data (nPrevNode, nPrevSub);
+				_t_key	sPrevKey;
+				_t_key	sKey;
+
+				this->extract_key (&sPrevKey, *psPrevData);
+				this->extract_key (&sKey, *psData);
+
+				if (this->comp (sPrevKey, sKey) > 0)
+				{
+					if (!ofs.is_open ())
+					{
+						return (false);
+					}
+
+					nErrCnt++;
+
+					aszMsg << "<br>prev: integrity error";
+				}
+
+				this->move_next (nPrevNode, nPrevSub, nNextNode, nNextSub, bBounce);
+
+				if (bBounce)
+				{
+					if (!ofs.is_open ())
+					{
+						return (false);
+					}
+
+					nErrCnt++;
+
+					aszMsg << "<br>prev: unexpected bBounce";
+				}
+				else
+				{
+					if ((nNextNode != nNode) || (nNextSub != nSubPos))
+					{
+						if (!ofs.is_open ())
+						{
+							return (false);
+						}
+
+						nErrCnt++;
+
+						aszMsg << "<br>prev: broken link";
+					}
+				}
+			}
+
+			this->allocateShortLiveKey ();
+			{
+				this->move_prev (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
+
+				if (bBounce == false)
+				{
+					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
+
+					this->extract_key (&sKey, *psData);
+
+					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
+					{
+						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) + 1))
+						{
+							if (!ofs.is_open ())
+							{
+								this->freeShortLiveKey ();
+								
+								return (false);
+							}
+
+							nErrCnt++;
+
+							aszMsg << "<br>instance position error!";
+						}
+					}
+				}
+
+				this->move_next (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
+
+				if (bBounce == false)
+				{
+					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
+
+					this->extract_key (&sKey, *psData);
+
+					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
+					{
+						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) - 1))
+						{
+							if (!ofs.is_open ())
+							{
+								this->freeShortLiveKey ();
+								
+								return (false);
+							}
+
+							nErrCnt++;
+
+							aszMsg << "<br>instance position error!";
+						}
+					}
+				}
+			}
+			this->freeShortLiveKey ();
+		}
+		catch (exception *pE)
+		{
+			if (!ofs.is_open ())
+			{
+				return (false);
+			}
+
+			nErrCnt++;
+
+			aszMsg << "<br>prev: link walk crashed (" << pE->what () << ")";
+		}
+
+		try
+		{
+			this->move_next (nNode, nSubPos, nNextNode, nNextSub, bBounce);
+
+			if (bBounce == false)
+			{
+				_t_data	*psNextData = this->get_data (nNextNode, nNextSub);
+				_t_key	sNextKey;
+				_t_key	sKey;
+
+				this->extract_key (&sNextKey, *psNextData);
+				this->extract_key (&sKey, *psData);
+
+				if (this->comp (sNextKey, sKey) < 0)
+				{
+					if (!ofs.is_open ())
+					{
+						return (false);
+					}
+
+					nErrCnt++;
+
+					aszMsg << "<br>next: integrity error";
+				}
+
+				this->move_prev (nNextNode, nNextSub, nPrevNode, nPrevSub, bBounce);
+
+				if (bBounce)
+				{
+					if (!ofs.is_open ())
+					{
+						return (false);
+					}
+
+					nErrCnt++;
+
+					aszMsg << "<br>next: unexpected bBounce";
+				}
+				else
+				{
+					if ((nPrevNode != nNode) || (nPrevSub != nSubPos))
+					{
+						if (!ofs.is_open ())
+						{
+							return (false);
+						}
+
+						nErrCnt++;
+
+						aszMsg << "<br>next: broken link";
+					}
+				}
+			}
+		}
+		catch (exception *pE)
+		{
+			if (!ofs.is_open ())
+			{
+				return (false);
+			}
+
+			nErrCnt++;
+
+			aszMsg << "<br>next: link walk crashed (" << pE->what () << ")";
+		}
+
+		if (nErrCnt == 0)
+		{
+			pColorInit = (char *) "";
+			pColorExit = (char *) "";
+		}
+		else
+		{
+			pColorInit = (char *) "<font color=\"#FF0000\">";
+			pColorExit = (char *) "</font>";
+		}
+		
+		if (ofs.is_open ())
+		{
+			ofs << pColorInit << buf.str ().c_str () << pColorExit << aszMsg.str ().c_str ();
+		}
+	}
+	else
+	{
+		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
+		{
+			if (!ofs.is_open ())
+			{
+				return (false);
+			}
+
+			nErrCnt++;
+		}
+
+		if (ofs.is_open ())
+		{
+			ofs << buf.str ().c_str () << endl;
+		}
+	}
+
 	return (true);
 }
 
