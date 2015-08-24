@@ -41,10 +41,10 @@ template parameters, although not being instantiated here.
 typedef struct
 {
 	uint32_t	nMinNumberOfBytesPerSuperBlock;
-	uint32_t	nNodeDescriptorNumOfLog2Lines;
-	uint32_t	nDataCacheNumOfLog2Lines;
-	uint32_t	nSubNodeCacheNumOfLog2Lines;
-	uint32_t	nSerVectorCacheNumOfLog2Lines;
+//	uint32_t	nNodeDescriptorNumOfLog2Lines;
+//	uint32_t	nDataCacheNumOfLog2Lines;
+//	uint32_t	nSubNodeCacheNumOfLog2Lines;
+//	uint32_t	nSerVectorCacheNumOfLog2Lines;
 } bayerTreeCacheDescription_t;
 
 template <class _ti_pos, class _t_data, class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_datalayerproperties = CBTreeIOpropertiesRAM, class _t_datalayer = CBTreeRAMIO <_t_nodeiter, _t_subnodeiter> >
@@ -93,7 +93,7 @@ public:
 													(CBTreeBase<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
 
 	// destruction
-						~CBTreeBase<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> ();
+	virtual				~CBTreeBase<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> ();
 
 	// monitoring
 	void				get_performance_counters	(uint64_t (&rHitCtrs)[PERFCTR_TERMINATOR], uint64_t (&rMissCtrs)[PERFCTR_TERMINATOR]);
@@ -176,23 +176,18 @@ protected:
 	bool				is_leaf						(const _t_nodeiter nNode);
 	bool				is_leaf						(const node_t &nodeDesc);
 
-	void				get_node					(const _t_nodeiter nNode, node_t &sDesc);
-	void				set_node					(const _t_nodeiter nNode, node_t &sDesc);
+	node_t *			get_node					(const _t_nodeiter nNode);
 
-	_t_nodeiter			get_sub_node				(_t_nodeiter nNode, _t_subnodeiter nEntry);
-	void				set_sub_node				(_t_nodeiter nNode, _t_subnodeiter nEntry, _t_nodeiter nSubNode);
+	_t_nodeiter *		get_sub_node				(_t_nodeiter nNode, _t_subnodeiter nEntry);
 
-	void				get_sub_node_buffer			(_t_nodeiter nNode, _t_nodeiter *pBuffer);
-	void				set_sub_node_buffer			(_t_nodeiter nNode, _t_nodeiter *pBuffer, _t_subnodeiter nNumEntries);
+	_t_nodeiter *		get_sub_node_buffer			(_t_nodeiter nNode);
 
-	_t_data				get_data					(_t_nodeiter nNode, _t_subnodeiter nEntry);
-	void				set_data					(_t_nodeiter nNode, _t_subnodeiter nEntry, _t_data sdata);
+	_t_data *			get_data					(_t_nodeiter nNode, _t_subnodeiter nEntry);
+	void				set_data					(_t_nodeiter nNode, _t_subnodeiter nEntry, _t_data sData);
 
-	void				get_data_buffer				(const _t_nodeiter nNode, _t_data *pBuffer);
-	void				set_data_buffer				(const _t_nodeiter nNode, _t_data *pBuffer, const _t_subnodeiter nSize);
+	_t_data *			get_data_buffer				(const _t_nodeiter nNode);
 
-	void				get_serVector				(_t_nodeiter nNode, _t_sizetype *pVector);
-	void				set_serVector				(_t_nodeiter nNode, _t_sizetype *pVector);
+	_t_sizetype *		get_serVector				(_t_nodeiter nNode);
 
 	// maintanence (allocation)
 	void				set_reservation				(_t_nodeiter nNode);
@@ -223,8 +218,9 @@ protected:
 
 	float				get_average_access_depth	();
 
-	virtual bool		showdata					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) = 0;
-	bool				shownode					(std::ofstream &ofs, _t_nodeiter nNode, _t_nodeiter nParent, char *pAlloc);
+	virtual bool		show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) = 0;
+	virtual bool		show_node					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) = 0;
+	bool				show_tree					(std::ofstream &ofs, _t_nodeiter nNode, _t_nodeiter nParent, char *pAlloc);
 	void				shownodelist				(std::ofstream &ofs, char *pAlloc);
 
 	// properties
@@ -245,23 +241,6 @@ protected:
 	uint32_t										m_nPoolIDdata;
 	uint32_t										m_nPoolIDsubNodes;
 	uint32_t										m_nPoolIDserialVector;
-
-	// root cache
-//	bool											m_bRootCacheValid;
-//	_t_nodeiter										m_nRootCacheRoot;
-//	node_t											m_sRootCacheNode;
-
-	// constant size buffers
-	_t_nodeiter										*m_pSubNodeBuffer0;
-	_t_nodeiter										*m_pSubNodeBuffer1;
-	_t_nodeiter										*m_pSubNodeBuffer2;
-
-	_t_data											*m_pData_tobj0;
-	_t_data											*m_pData_tobj1;
-	
-	_t_data											*m_pData_tobj_u0;
-	_t_data											*m_pData_tobj_u1;
-	_t_data											*m_pData_tobj_u2;
 
 	// rebuild FIFO
 	_t_nodeiter										*m_pRebuildFIFO;
@@ -288,9 +267,6 @@ protected:
 
 	// reservation
 	_t_nodeiter										m_nNextAlloc;
-
-	// static buffers
-	_t_sizetype										*m_pSerVector;
 
 #if defined (USE_PERFORMANCE_COUNTERS)
 	uint64_t										m_nHitCtr;
