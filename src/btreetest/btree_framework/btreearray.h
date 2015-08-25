@@ -23,6 +23,7 @@
 
 #include <fstream>
 #include <iterator>
+#include <algorithm>
 
 #include "btree.h"
 
