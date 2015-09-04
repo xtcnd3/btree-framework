@@ -139,8 +139,7 @@ protected:
 	_t_sizetype			serialize					(const _ti_pos nFrom, const _t_sizetype nLen, _t_data *pData, bool bReadOpr = true);
 
 	// primitives
-	_t_subnodeiter		insert_data_into_leaf		(_t_nodeiter nNode, _t_subnodeiter nSubPos, const _t_data &rData);
-	_t_subnodeiter		insert_data_into_node		(_t_nodeiter nNode, _t_subnodeiter nSubPos, const _t_data &rData, _t_nodeiter nSubNode, int triMod);
+	_t_subnodeiter		insert_data_into_node		(_t_nodeiter nNode, _t_subnodeiter nSubPos, const _t_data &rData, _t_nodeiter nSubNode = (_t_nodeiter) ~0x0, int triMod = -1);
 
 	void				remove_data_from_leaf		(_t_nodeiter nNode, _t_subnodeiter nSub);
 	void				remove_data_from_node		(_t_nodeiter nNode, _t_subnodeiter nSub, _t_subnodeiter nSubNode);
@@ -173,8 +172,8 @@ protected:
 
 	bool				is_root						(const _t_nodeiter nNode);
 
-	bool				is_leaf						(const _t_nodeiter nNode);
-	bool				is_leaf						(const node_t &nodeDesc);
+	inline bool			is_leaf						(const _t_nodeiter nNode);
+	inline bool			is_leaf						(const node_t &nodeDesc);
 
 	node_t *			get_node					(const _t_nodeiter nNode);
 
