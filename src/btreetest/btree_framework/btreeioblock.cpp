@@ -139,12 +139,22 @@ _t_offsettype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offs
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+_t_addresstype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_node_offset (_t_nodeiter nNode)
+{
+	_t_addresstype		nRetval;
+
+	nRetval = (nNode & (m_nNodesPerBlock - 1)) * m_nAlignedNodeSize;
+
+	return (nRetval);
+}
+
+template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 _t_addresstype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_nodeAddr (_t_nodeiter nNode)
 {
 	_t_addresstype		nRetval;
 
 	nRetval = get_blockAddr (nNode);
-	nRetval += (nNode & (m_nNodesPerBlock - 1)) * m_nAlignedNodeSize;
+	nRetval += get_node_offset (nNode);
 
 	return (nRetval);
 }
@@ -201,6 +211,7 @@ void CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::
 	{
 		m_psDescriptorVector[u].pBlockData = NULL;
 		m_psDescriptorVector[u].nAccessCtr = 0;
+		m_psDescriptorVector[u].bMarkedForUnmap = false;
 	}
 
 	m_nDescriptorVectorSize = nNewDescriptorVectorSize;
