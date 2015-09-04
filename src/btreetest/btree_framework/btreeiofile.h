@@ -59,7 +59,10 @@ public:
 
 	// data access primitives
 	template<class _t_dl_data>
-	_t_dl_data *		get_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry);
+	inline _t_dl_data *	get_pooledData				(uint32_t nPool, _t_nodeiter nNode);
+
+	template<class _t_dl_data>
+	inline _t_dl_data *	get_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry);
 
 	// mid level data access
 	template<class _t_dl_data>
@@ -86,6 +89,7 @@ protected:
 	void				exit_mapping				();
 
 	void				map_descriptor				(uint32_t nDescriptor);
+	void				sync_descriptor				(uint32_t nDescriptor);
 	void				unmap_descriptor			(uint32_t nDescriptor);
 
 	void				unmap_all_descriptors		(bool bExceptRoot);
