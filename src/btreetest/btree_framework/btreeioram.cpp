@@ -52,10 +52,27 @@ void CBTreeRAMIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::ge
 get_pooledData - get pooled data
 
 nPool[in]	- specifies data pool ID
-node[in]	- specifies linear node address of data pool
-len[in]		- specifies number of entries present in node
-entry[in]	- specifies entry to be returned
-pData[out]	- pointer to return value
+nNode[in]	- specifies linear node address of data pool
+nEntry[in]	- specifies entry to be returned
+
+*/
+
+template<class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+template<class _t_dl_data>
+_t_dl_data* CBTreeRAMIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pooledData (uint32_t nPool, _t_nodeiter nNode)
+{
+	_t_dl_data			*psData = (_t_dl_data *) this->get_node_base (nPool, nNode);
+
+	return (psData);
+}
+
+/*
+
+get_pooledData - get pooled data
+
+nPool[in]	- specifies data pool ID
+nNode[in]	- specifies linear node address of data pool
+nEntry[in]	- specifies entry to be returned
 
 */
 
@@ -63,7 +80,7 @@ template<class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t
 template<class _t_dl_data>
 _t_dl_data* CBTreeRAMIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pooledData (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry)
 {
-	const uint8_t		*psPooledNode = this->get_node_base (nPool, nNode);
+	const uint8_t		*psPooledNode = this->template get_pooledData<uint8_t> (nPool, nNode);
 	_t_dl_data			*psData = (_t_dl_data *) &(psPooledNode[nEntry * this->get_pool_entry_size (nPool)]);
 
 	return (psData);
@@ -91,7 +108,7 @@ void CBTreeRAMIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::in
 
 #endif
 
-	_t_dl_data		*psNodeData = this->template get_pooledData<_t_dl_data> (nPool, nNode, 0);
+	_t_dl_data		*psNodeData = this->template get_pooledData<_t_dl_data> (nPool, nNode);
 
 	memmove ((void *) &(psNodeData[nOffset + nDataLen]), (void *) &(psNodeData[nOffset]), sizeof (*psNodeData) * (nNodeLen - nOffset));
 	memcpy ((void *) &(psNodeData[nOffset]), (void *) pData, sizeof (*psNodeData) * nDataLen);
@@ -270,7 +287,7 @@ void CBTreeRAMIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::sh
 
 						BTREEDATA_ASSERT (pb != NULL, "CBTreeRAMIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::showdump: insufficient memory!");
 
-						pb = this->template get_pooledData<uint8_t> (uk32, ui64, 0);
+						pb = this->template get_pooledData<uint8_t> (uk32, ui64);
 					
 						for (ul32 = 0; ul32 < nMaxPoolLen; ul32++)
 						{
