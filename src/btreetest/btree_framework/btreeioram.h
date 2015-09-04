@@ -42,7 +42,10 @@ public:
 
 	// data access primitives
 	template<class _t_dl_data>
-	_t_dl_data *		get_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry);
+	inline _t_dl_data *	get_pooledData				(uint32_t nPool, _t_nodeiter nNode);
+
+	template<class _t_dl_data>
+	inline _t_dl_data *	get_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry);
 
 	// mid level data access
 	template<class _t_dl_data>
