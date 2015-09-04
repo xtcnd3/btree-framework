@@ -248,16 +248,13 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::g
 get_pooledData - get pooled data
 
 nPool[in]	- specifies data pool ID
-node[in]	- specifies linear node address of data pool
-len[in]		- specifies number of entries present in node
-entry[in]	- specifies entry to be returned
-pData[out]	- pointer to return value
+nNode[in]	- specifies linear node address of data pool
 
 */
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 template<class _t_dl_data>
-_t_dl_data* CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pooledData (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry)
+_t_dl_data* CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pooledData (uint32_t nPool, _t_nodeiter nNode)
 {
 	uint32_t		nDescriptor = this->convert_node_to_descriptor (nNode);
 	_t_addresstype	nOffset;
@@ -269,11 +266,30 @@ _t_dl_data* CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsett
 
 	this->increment_access_counter (nDescriptor);
 
-	nOffset = this->get_pool_address (nPool, nNode);
-	nOffset -= this->get_blockAddr (nNode);
-	nOffset += nEntry * this->get_pool_entry_size (nPool);
+	nOffset = this->get_node_offset (nNode);
+	nOffset += this->get_per_node_pool_offset (nPool);
 
 	return ((_t_dl_data *) &(this->m_psDescriptorVector[nDescriptor].pBlockData[nOffset]));
+}
+
+/*
+
+get_pooledData - get pooled data
+
+nPool[in]	- specifies data pool ID
+nNode[in]	- specifies linear node address of data pool
+nEntry[in]	- specifies entry to be returned
+
+*/
+
+template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+template<class _t_dl_data>
+_t_dl_data* CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pooledData (uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry)
+{
+	uint8_t			*pClData = this->template get_pooledData<uint8_t> (nPool, nNode);
+	_t_dl_data		*psData = (_t_dl_data *) &(pClData[nEntry * this->get_pool_entry_size (nPool)]);
+
+	return (psData);
 }
 
 /*
@@ -298,7 +314,7 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::i
 
 #endif
 
-	_t_dl_data		*psNodeData = this->template get_pooledData<_t_dl_data> (nPool, nNode, 0);
+	_t_dl_data		*psNodeData = this->template get_pooledData<_t_dl_data> (nPool, nNode);
 
 	memmove ((void *) &(psNodeData[nOffset + nDataLen]), (void *) &(psNodeData[nOffset]), sizeof (*psNodeData) * (nNodeLen - nOffset));
 	memcpy ((void *) &(psNodeData[nOffset]), (void *) pData, sizeof (*psNodeData) * nDataLen);
@@ -416,10 +432,11 @@ bool CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::i
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::terminate_access ()
 {
-	uint32_t	nMinAccessCtr;
-	uint32_t	ui32;
-	uint32_t	nNumUnmapped;
-	uint32_t	nDescRoot;
+	uint32_t		nMinAccessCtr;
+	uint32_t		ui32;
+	uint32_t		nNumUnmapped;
+	uint32_t		nDescRoot;
+	_t_addresstype	nTotalAddressSpace = m_nTotalAddressSpace;
 
 	if (this->m_nPrevRootNode == ~0)
 	{
@@ -430,22 +447,21 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::t
 		nDescRoot = this->convert_node_to_descriptor (this->m_nPrevRootNode);
 	}
 
-//printf ("terminate_access\n");
-
-	while (m_nTotalAddressSpace > (_t_addresstype) m_pClDataLayerProperties->get_address_space_soft_limit ())
+	while (nTotalAddressSpace > (_t_addresstype) m_pClDataLayerProperties->get_address_space_soft_limit ())
 	{
-//printf ("%llu\n", m_nTotalAddressSpace);
-
 		// for first active descriptor and therewith initialise minimum access counter
 		for (ui32 = 0; ui32 < this->m_nDescriptorVectorSize; ui32++)
 		{
 			if (this->m_psDescriptorVector[ui32].pBlockData != NULL)
 			{
-				if (ui32 != nDescRoot)
+				if (!this->m_psDescriptorVector[ui32].bMarkedForUnmap)
 				{
-					nMinAccessCtr = this->m_psDescriptorVector[ui32].nAccessCtr;
+					if (ui32 != nDescRoot)
+					{
+						nMinAccessCtr = this->m_psDescriptorVector[ui32].nAccessCtr;
 
-					break;
+						break;
+					}
 				}
 			}
 		}
@@ -460,11 +476,14 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::t
 			{
 				if (this->m_psDescriptorVector[ui32].pBlockData != NULL)
 				{
-					if (ui32 != nDescRoot)
+					if (!this->m_psDescriptorVector[ui32].bMarkedForUnmap)
 					{
-						if (this->m_psDescriptorVector[ui32].nAccessCtr < nMinAccessCtr)
+						if (ui32 != nDescRoot)
 						{
-							nMinAccessCtr = this->m_psDescriptorVector[ui32].nAccessCtr;
+							if (this->m_psDescriptorVector[ui32].nAccessCtr < nMinAccessCtr)
+							{
+								nMinAccessCtr = this->m_psDescriptorVector[ui32].nAccessCtr;
+							}
 						}
 					}
 				}
@@ -475,13 +494,18 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::t
 			{
 				if (this->m_psDescriptorVector[ui32].pBlockData != NULL)
 				{
-					if (ui32 != nDescRoot)
+					if (!this->m_psDescriptorVector[ui32].bMarkedForUnmap)
 					{
-						if (this->m_psDescriptorVector[ui32].nAccessCtr == nMinAccessCtr)
+						if (ui32 != nDescRoot)
 						{
-							unmap_descriptor (ui32);
+							if (this->m_psDescriptorVector[ui32].nAccessCtr == nMinAccessCtr)
+							{
+								sync_descriptor (ui32);
 
-							nNumUnmapped++;
+								nTotalAddressSpace -= this->m_nBlockSize;
+
+								nNumUnmapped++;
+							}
 						}
 					}
 				}
@@ -491,6 +515,14 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::t
 		if (nNumUnmapped == 0)
 		{
 			break;
+		}
+	}
+
+	for (ui32 = 0; ui32 < this->m_nDescriptorVectorSize; ui32++)
+	{
+		if (this->m_psDescriptorVector[ui32].bMarkedForUnmap)
+		{
+			unmap_descriptor (ui32);
 		}
 	}
 }
@@ -838,13 +870,13 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::m
 
 #endif
 
-	this->m_psDescriptorVector[nDescriptor].nAccessCtr = 0;
+	this->m_psDescriptorVector[nDescriptor].bMarkedForUnmap = false;
 
 	m_nTotalAddressSpace += this->m_nBlockSize;
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor (uint32_t nDescriptor)
+void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::sync_descriptor (uint32_t nDescriptor)
 {
 #if defined (_DEBUG)
 
@@ -859,17 +891,36 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::u
 
 	BTREE_ASSERT (bRslt == TRUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to flush view of file!");
 
-	bRslt = UnmapViewOfFile ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData);
+#elif defined (LINUX)
+
+	int		nRslt = msync ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize, MS_ASYNC);
+
+	BTREE_ASSERT (nRslt == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to flush view of file!");
+
+#endif
+
+	this->m_psDescriptorVector[nDescriptor].bMarkedForUnmap = true;
+}
+
+template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor (uint32_t nDescriptor)
+{
+#if defined (_DEBUG)
+
+	BTREE_ASSERT (nDescriptor < this->m_nDescriptorVectorSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested descriptor exceeds descriptor vector size!");
+	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested unmapping already done!");
+
+#endif
+
+#if defined (WIN32)
+	
+	BOOL	bRslt = UnmapViewOfFile ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData);
 
 	BTREE_ASSERT (bRslt == TRUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to unmap view of file!");
 
 #elif defined (LINUX)
 
-	int		nRslt = msync ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize, MS_SYNC);
-
-	BTREE_ASSERT (nRslt == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to flush view of file!");
-
-	nRslt = munmap ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize);
+	int		nRslt = munmap ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize);
 
 	BTREE_ASSERT (nRslt == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to unmap view of file!");
 
@@ -884,7 +935,7 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::u
 	}
 
 	this->m_psDescriptorVector[nDescriptor].pBlockData = NULL;
-	this->m_psDescriptorVector[nDescriptor].nAccessCtr = 0;
+	this->m_psDescriptorVector[nDescriptor].bMarkedForUnmap = false;
 
 	m_nTotalAddressSpace -= this->m_nBlockSize;
 }
@@ -910,8 +961,16 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::u
 		{
 			if (this->m_psDescriptorVector[u].pBlockData != NULL)
 			{
-				unmap_descriptor (u);
+				sync_descriptor (u);
 			}
+		}
+	}
+
+	for (u = 0; u < this->m_nDescriptorVectorSize; u++)
+	{
+		if (this->m_psDescriptorVector[u].bMarkedForUnmap)
+		{
+			unmap_descriptor (u);
 		}
 	}
 }
