@@ -44,6 +44,7 @@ class CBTreeBlockIO : public CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstyp
 	{
 		uint8_t		*pBlockData;
 		uint32_t	nAccessCtr;
+		bool		bMarkedForUnmap;
 	} btree_block_io_descriptor_t;
 
 public:
@@ -72,12 +73,13 @@ public:
 protected:
 
 	// address generation
-	_t_addresstype			get_blockAddr				(_t_nodeiter nNode);
+	inline _t_addresstype	get_blockAddr				(_t_nodeiter nNode);
 	virtual _t_offsettype	get_poolOffset				();
-	_t_addresstype			get_nodeAddr				(_t_nodeiter nNode);
+	inline _t_addresstype	get_node_offset				(_t_nodeiter nNode);
+	inline _t_addresstype	get_nodeAddr				(_t_nodeiter nNode);
 	
-	_t_offsettype			get_per_node_pool_offset	(uint32_t nPool);
-	_t_addresstype			get_pool_address			(uint32_t nPool, _t_nodeiter nNode);
+	inline _t_offsettype	get_per_node_pool_offset	(uint32_t nPool);
+	inline _t_addresstype	get_pool_address			(uint32_t nPool, _t_nodeiter nNode);
 
 	_t_offsettype			generate_pool_offsets		();
 
