@@ -76,7 +76,6 @@ typedef struct
 {
 	uint32_t		nTotalSize;
 	uint32_t		nEntrySize;
-//	uint32_t		nCacheVectorSize;
 } CBTreeIOperBlockPoolDesc_t;
 
 template <class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_addresstype = uint64_t, class _t_offsettype = uint32_t>
