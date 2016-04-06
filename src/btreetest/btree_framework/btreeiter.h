@@ -22,111 +22,111 @@
 #include "btreeaux.h"
 
 template <class _ti_container>
-class CBTreeBaseConstIterator : public ::std::iterator < ::std::random_access_iterator_tag, typename _ti_container::data_t, typename _ti_container::sizetype_t>
+class CBTreeIterator;
+
+template <class _ti_container>
+class CBTreeConstIterator : public ::std::iterator < ::std::random_access_iterator_tag, typename _ti_container::data_t, typename _ti_container::size_type>
 {
 public:
 
-	typedef CBTreeBaseConstIterator<_ti_container>					CBTreeBaseConstIterator_t;
+	typedef CBTreeConstIterator									CBTreeBaseConstIterator_t;
 
-	typedef _ti_container											container_t;
+	typedef _ti_container										container_t;
 
-	typedef typename _ti_container::position_t						position_t;
-	typedef typename _ti_container::data_t							data_t;
-	typedef typename _ti_container::sizetype_t						sizetype_t;
-	typedef typename _ti_container::nodeiter_t						nodeiter_t;
-	typedef typename _ti_container::subnodeiter_t					subnodeiter_t;
-
-									CBTreeBaseConstIterator<_ti_container> ();
-									CBTreeBaseConstIterator<_ti_container> (_ti_container *pContainer, sizetype_t nPos, bool bRegister = true);
-									CBTreeBaseConstIterator<_ti_container> (_ti_container *pContainer, sizetype_t nPos, nodeiter_t nNode, subnodeiter_t nSub, btree_time_stamp_t sTimeStamp, bool bRegister = true);
-									CBTreeBaseConstIterator<_ti_container> (const CBTreeBaseConstIterator &rIter, bool bRegister = true);
-
-									~CBTreeBaseConstIterator<_ti_container> ();
-
-	void							detach ();
+//	typedef typename _ti_container::position_t					position_t;
+	typedef typename _ti_container::data_t						data_t;
+	typedef typename _ti_container::size_type					size_type;
 	
-	void							swap (CBTreeBaseConstIterator &rRight);
+								CBTreeConstIterator<_ti_container> ();
+								CBTreeConstIterator<_ti_container> (const _ti_container *pContainer, const size_type nPos, const bool bRegister = true);
+								CBTreeConstIterator<_ti_container> (const _ti_container *pContainer, const size_type nPos, const void *pExternState, const btree_time_stamp_t sTimeStamp, const bool bRegister = true);
+								CBTreeConstIterator<_ti_container> (const CBTreeConstIterator &rIter, const bool bRegister = true);
+								CBTreeConstIterator<_ti_container> (const CBTreeIterator<_ti_container> &rIter, const bool bRegister = true);
+
+								~CBTreeConstIterator<_ti_container> ();
+
+	void						detach ();
 	
-	CBTreeBaseConstIterator &		operator= (const CBTreeBaseConstIterator &rIter);
-
-	bool							operator== (const CBTreeBaseConstIterator &rIter);
-	bool							operator!= (const CBTreeBaseConstIterator &rIter);
+	void						swap (CBTreeConstIterator &rRight);
 	
-	data_t &						operator* ();
-	data_t *						operator-> ();
+	CBTreeConstIterator &		operator= (const CBTreeConstIterator &rIter);
+	CBTreeConstIterator &		operator= (const CBTreeIterator<_ti_container> &rIter);
 
-	CBTreeBaseConstIterator&		operator++ ();
-	CBTreeBaseConstIterator			operator++ (int);
-	CBTreeBaseConstIterator&		operator-- ();
-	CBTreeBaseConstIterator			operator-- (int);
+	bool						operator== (const CBTreeConstIterator &rIter) const;
+	bool						operator!= (const CBTreeConstIterator &rIter) const;
 	
-	CBTreeBaseConstIterator&		operator+= (const int nOperand);
-	CBTreeBaseConstIterator&		operator+= (const sizetype_t nOperand);
-	CBTreeBaseConstIterator&		operator+= (const CBTreeBaseConstIterator &rIter);
+	data_t &					operator* ();
+	data_t *					operator-> ();
 
-	CBTreeBaseConstIterator&		operator-= (const int nOperand);
-	CBTreeBaseConstIterator&		operator-= (const sizetype_t nOperand);
-	CBTreeBaseConstIterator&		operator-= (const CBTreeBaseConstIterator &rIter);
+	CBTreeConstIterator&		operator++ ();
+	CBTreeConstIterator			operator++ (int);
+	CBTreeConstIterator&		operator-- ();
+	CBTreeConstIterator			operator-- (int);
 	
-	const CBTreeBaseConstIterator	operator+ (const int nOperand) const;
-	const CBTreeBaseConstIterator	operator+ (const sizetype_t nOperand) const;
-	const CBTreeBaseConstIterator	operator+ (const CBTreeBaseConstIterator &rIter) const;
+	CBTreeConstIterator&		operator+= (const int nOperand);
+	CBTreeConstIterator&		operator+= (const size_type nOperand);
+	CBTreeConstIterator&		operator+= (const CBTreeConstIterator &rIter);
 
-	const CBTreeBaseConstIterator	operator- (const int nOperand) const;
-	const CBTreeBaseConstIterator	operator- (const sizetype_t nOperand) const;
-	const sizetype_t				operator- (const CBTreeBaseConstIterator &rIter) const;
+	CBTreeConstIterator&		operator-= (const int nOperand);
+	CBTreeConstIterator&		operator-= (const size_type nOperand);
+	CBTreeConstIterator&		operator-= (const CBTreeConstIterator &rIter);
+	
+	const CBTreeConstIterator	operator+ (const int nOperand) const;
+	const CBTreeConstIterator	operator+ (const size_type nOperand) const;
+	const CBTreeConstIterator	operator+ (const CBTreeConstIterator &rIter) const;
 
-	bool							operator<  (const CBTreeBaseConstIterator &rIter);
-	bool							operator<= (const CBTreeBaseConstIterator &rIter);
-	bool							operator>  (const CBTreeBaseConstIterator &rIter);
-	bool							operator>= (const CBTreeBaseConstIterator &rIter);
+	const CBTreeConstIterator	operator- (const int nOperand) const;
+	const CBTreeConstIterator	operator- (const size_type nOperand) const;
+	const size_type				operator- (const CBTreeConstIterator &rIter) const;
 
-	data_t&							operator[] (const int nPos);
-	data_t&							operator[] (const sizetype_t nPos);
+	bool						operator<  (const CBTreeConstIterator &rIter) const;
+	bool						operator<= (const CBTreeConstIterator &rIter) const;
+	bool						operator>  (const CBTreeConstIterator &rIter) const;
+	bool						operator>= (const CBTreeConstIterator &rIter) const;
 
-	_ti_container					*get_container	();
-	bool							is_btree_valid	();
+	data_t&						operator[] (const int nPos);
+	data_t&						operator[] (const size_type nPos);
 
-	bool							is_evaluated	();
+	_ti_container				*get_container	();
+	bool						is_btree_valid	();
 
-	void							sync			();
+	bool						is_evaluated	();
 
-	sizetype_t						get_pos			();
-	nodeiter_t						get_node		();
-	subnodeiter_t					get_sub_pos		();
+	void						sync			();
 
-	void							set_time_stamp	(_ti_container *pContainer);
+	size_type					get_pos			();
+	void						*get_iterator_state ();
+
+	void						set_time_stamp	(_ti_container *pContainer);
 	
 protected:
 
 	typedef struct btree_iter_last_access_s
 	{
-		btree_time_stamp_t			sTimeStamp;
-		_ti_container				*pContainer;
+		btree_time_stamp_t		sTimeStamp;
+		_ti_container			*pContainer;
 
-		bool			operator== (const struct btree_iter_last_access_s &rLA)
+		bool			operator== (const struct btree_iter_last_access_s &rLA) const
 		{
 			return ((sTimeStamp == rLA.sTimeStamp) && (pContainer == rLA.pContainer));
 		}
 
-		bool			operator!= (const struct btree_iter_last_access_s &rLA)
+		bool			operator!= (const struct btree_iter_last_access_s &rLA) const
 		{
 			return ((sTimeStamp != rLA.sTimeStamp) && (pContainer != rLA.pContainer));
 		}
 	} btree_iter_last_access_t;
 
-	void						increment_by	(const sizetype_t nOperand);
-	void						decrement_by	(const sizetype_t nOperand);
+	void						increment_by	(const size_type nOperand);
+	void						decrement_by	(const size_type nOperand);
 	
 	bool						out_of_range	();
 	
 	void						evaluate		();
 	
-	void						evaluate_from	(const nodeiter_t nFromNode, const sizetype_t nFromPos);
-
 	void						evaluate_by_seek ();
 	
-	sizetype_t					get_pos			() const;
+	size_type					get_pos			() const;
 
 	bool						is_time_stamp_up_to_data	();
 
@@ -134,18 +134,16 @@ protected:
 
 	void						update_time_stamp	();
 	
-	float						get_average_node_hops (const sizetype_t nHopDistance) const;
+	float						get_average_node_hops (const size_type nHopDistance) const;
 	
-	void						assign			(const CBTreeBaseConstIterator &rIter);
+	void						assign			(const CBTreeConstIterator &rIter);
 
 	void						register_iterator	(_ti_container *pContainer);
 	void						unregister_iterator (_ti_container *pContainer);
 	
 	_ti_container				*m_pContainer;
-	sizetype_t					m_nPos;
-	sizetype_t					m_nAssociatedPos;
-	nodeiter_t					m_nNode;
-	subnodeiter_t				m_nSub;
+	size_type					m_nPos;
+	void						*m_pExternState;
 	data_t						m_sData;
 	data_t						m_sSubScriptResult;
 	btree_iter_last_access_t	m_sTimeStamp;
@@ -153,74 +151,73 @@ protected:
 public:
 
 	template <class _fti_container>
-	friend typename ::CBTreeBaseConstIterator<_fti_container> operator+
+	friend typename ::CBTreeConstIterator<_fti_container> operator+
 	(
-		typename _fti_container::sizetype_t nLhs, 
-		const typename ::CBTreeBaseConstIterator<_fti_container> &nRhs
+		typename _fti_container::size_type nLhs, 
+		const typename ::CBTreeConstIterator<_fti_container> &nRhs
 	);
 
 	template <class _fti_container>
-	friend typename ::CBTreeBaseConstIterator<_fti_container> operator+
+	friend typename ::CBTreeConstIterator<_fti_container> operator+
 	(
 		int nLhs, 
-		const typename ::CBTreeBaseConstIterator<_fti_container> &nRhs
+		const typename ::CBTreeConstIterator<_fti_container> &nRhs
 	);
 };
 
 template <class _ti_container>
-typename ::CBTreeBaseConstIterator<_ti_container> operator+
+typename ::CBTreeConstIterator<_ti_container> operator+
 (
-	typename _ti_container::sizetype_t nLhs, 
-	const typename ::CBTreeBaseConstIterator<_ti_container> &nRhs
+	typename _ti_container::size_type nLhs, 
+	const typename ::CBTreeConstIterator<_ti_container> &nRhs
 );
 
 template <class _ti_container>
-typename ::CBTreeBaseConstIterator<_ti_container> operator+
+typename ::CBTreeConstIterator<_ti_container> operator+
 (
 	int nLhs, 
-	const typename ::CBTreeBaseConstIterator<_ti_container> &nRhs
+	const typename ::CBTreeConstIterator<_ti_container> &nRhs
 );
 
 template <class _ti_container>
-class CBTreeBaseIteratorSubScriptWrapper;
+class CBTreeIteratorSubScriptWrapper;
 
 template <class _t_iterator>
-class CBTreeBaseReverseIterator;
+class CBTreeReverseIterator;
 
 template <class _ti_container>
-class CBTreeBaseIterator : public CBTreeBaseConstIterator<_ti_container>
+class CBTreeIterator : public CBTreeConstIterator<_ti_container>
 {
 public:
 
 	typedef _ti_container											container_t;
 
-	typedef typename _ti_container::position_t						position_t;
+//	typedef typename _ti_container::position_t						position_t;
 	typedef typename _ti_container::data_t							data_t;
-	typedef typename _ti_container::sizetype_t						sizetype_t;
-	typedef typename _ti_container::nodeiter_t						nodeiter_t;
-	typedef typename _ti_container::subnodeiter_t					subnodeiter_t;
+	typedef typename _ti_container::size_type						size_type;
 
-									CBTreeBaseIterator<_ti_container> ();
-									CBTreeBaseIterator<_ti_container> (_ti_container *pContainer, sizetype_t nPos, bool bRegister = true);
-									CBTreeBaseIterator<_ti_container> (const CBTreeBaseIterator &rIter, bool bRegister = true);
-						explicit	CBTreeBaseIterator<_ti_container> (const CBTreeBaseReverseIterator<CBTreeBaseIterator<_ti_container> > &rRIter, bool bRegister = true);
+									CBTreeIterator<_ti_container> ();
+									CBTreeIterator<_ti_container> (const _ti_container *pContainer, const size_type nPos, const bool bRegister = true);
+									CBTreeIterator<_ti_container> (const _ti_container *pContainer, const size_type nPos, const void *pExternState, const btree_time_stamp_t sTimeStamp, const bool bRegister = true);
+									CBTreeIterator<_ti_container> (const CBTreeIterator &rIter, const bool bRegister = true);
+						explicit	CBTreeIterator<_ti_container> (const CBTreeReverseIterator<CBTreeIterator<_ti_container> > &rRIter, const bool bRegister = true);
 						
-									CBTreeBaseIterator<_ti_container> (const CBTreeBaseConstIterator<_ti_container> &rIter, bool bRegister = true);
+									CBTreeIterator<_ti_container> (const CBTreeConstIterator<_ti_container> &rIter, const bool bRegister = true);
 
-									~CBTreeBaseIterator<_ti_container> ();
+									~CBTreeIterator<_ti_container> ();
 
 	const data_t &					operator* () const;
 
-	CBTreeBaseIteratorSubScriptWrapper<_ti_container>
+	CBTreeIteratorSubScriptWrapper<_ti_container>
 									operator* ();
 	
-	CBTreeBaseIterator&				operator= (const CBTreeBaseIterator &rIter);
+	CBTreeIterator&					operator= (const CBTreeIterator &rIter);
 
-	CBTreeBaseIteratorSubScriptWrapper<_ti_container>
+	CBTreeIteratorSubScriptWrapper<_ti_container>
 									operator[] (const int nPos);
 
-	CBTreeBaseIteratorSubScriptWrapper<_ti_container>
-									operator[] (const sizetype_t nPos);
+	CBTreeIteratorSubScriptWrapper<_ti_container>
+									operator[] (const size_type nPos);
 
 protected:
 
@@ -228,158 +225,154 @@ protected:
 
 public:
 
-	friend typename ::CBTreeBaseIteratorSubScriptWrapper<_ti_container>;
+	friend typename ::CBTreeIteratorSubScriptWrapper<_ti_container>;
 
 	template <class _fti_container>
-	friend typename ::CBTreeBaseIterator<_fti_container> operator+
+	friend typename ::CBTreeIterator<_fti_container> operator+
 	(
 		typename _fti_container::_t_sizetype nLhs, 
-		const typename ::CBTreeBaseIterator<_fti_container> &nRhs
+		const typename ::CBTreeIterator<_fti_container> &nRhs
 	);
 
 	template <class _fti_container>
-	friend typename ::CBTreeBaseIterator<_fti_container> operator+
+	friend typename ::CBTreeIterator<_fti_container> operator+
 	(
 		int nLhs, 
-		const typename ::CBTreeBaseIterator<_fti_container> &nRhs
+		const typename ::CBTreeIterator<_fti_container> &nRhs
 	);
 };
 
 template <class _ti_container>
-typename ::CBTreeBaseIterator<_ti_container> operator+
+typename ::CBTreeIterator<_ti_container> operator+
 (
 	typename _ti_container::_t_sizetype nLhs, 
-	const typename ::CBTreeBaseIterator<_ti_container> &nRhs
+	const typename ::CBTreeIterator<_ti_container> &nRhs
 );
 
 template <class _ti_container>
-typename ::CBTreeBaseIterator<_ti_container> operator+
+typename ::CBTreeIterator<_ti_container> operator+
 (
 	int nLhs, 
-	const typename ::CBTreeBaseIterator<_ti_container> &nRhs
+	const typename ::CBTreeIterator<_ti_container> &nRhs
 );
 
 template <class _ti_container>
-class CBTreeBaseIteratorSubScriptWrapper
+class CBTreeIteratorSubScriptWrapper
 {
 public:
 
 	typedef _ti_container											container_t;
 
-	typedef typename _ti_container::position_t						position_t;
+//	typedef typename _ti_container::position_t						position_t;
 	typedef typename _ti_container::data_t							data_t;
-	typedef typename _ti_container::sizetype_t						sizetype_t;
-	typedef typename _ti_container::nodeiter_t						nodeiter_t;
-	typedef typename _ti_container::subnodeiter_t					subnodeiter_t;
+	typedef typename _ti_container::size_type						size_type;
 
-						CBTreeBaseIteratorSubScriptWrapper<_ti_container>
+						CBTreeIteratorSubScriptWrapper<_ti_container>
 						(
-							const CBTreeBaseIterator<_ti_container>	&rInstance, 
-							sizetype_t								nPos
+							const CBTreeIterator<_ti_container>	&rInstance, 
+							size_type								nPos
 						);
 
-						~CBTreeBaseIteratorSubScriptWrapper<_ti_container> ();
+						~CBTreeIteratorSubScriptWrapper<_ti_container> ();
 
-	CBTreeBaseIteratorSubScriptWrapper<_ti_container> &
+	CBTreeIteratorSubScriptWrapper<_ti_container> &
 						operator=					(const data_t &rData);
 
 						operator const data_t &	();
 
 protected:
 
-	CBTreeBaseIterator<_ti_container>	m_nOffset;
-	sizetype_t							m_nPos;
-	data_t								m_sData;
+	CBTreeIterator<_ti_container>	m_nOffset;
+	size_type						m_nPos;
+	data_t							m_sData;
 };
 
 template <class _ti_container>
-typename ::CBTreeBaseIterator<_ti_container> operator+
+typename ::CBTreeIterator<_ti_container> operator+
 (
 	const int nLhs, 
-	const typename ::CBTreeBaseIterator<_ti_container> &nRhs
+	const typename ::CBTreeIterator<_ti_container> &nRhs
 );
 
 template <class _ti_container>
-typename ::CBTreeBaseIterator<_ti_container> operator+
+typename ::CBTreeIterator<_ti_container> operator+
 (
 	const typename _ti_container::_t_sizetype nLhs, 
-	const typename ::CBTreeBaseIterator<_ti_container> &nRhs
+	const typename ::CBTreeIterator<_ti_container> &nRhs
 );
 
 template <class _t_iterator>
-class CBTreeBaseConstReverseIterator	:	public ::std::reverse_iterator<_t_iterator>
+class CBTreeConstReverseIterator	:	public ::std::reverse_iterator<_t_iterator>
 {
 public:
 
 	typedef typename _t_iterator::container_t		container_t;
 
 	typedef typename container_t::data_t			data_t;
-	typedef typename container_t::sizetype_t		sizetype_t;
+	typedef typename container_t::size_type		size_type;
 	
-												CBTreeBaseConstReverseIterator<_t_iterator>	();
-									explicit	CBTreeBaseConstReverseIterator<_t_iterator>	(const _t_iterator &rIter);
-												CBTreeBaseConstReverseIterator<_t_iterator>	(const CBTreeBaseConstReverseIterator<_t_iterator> &rIter);
+											CBTreeConstReverseIterator<_t_iterator>	();
+								explicit	CBTreeConstReverseIterator<_t_iterator>	(const _t_iterator &rIter);
+											CBTreeConstReverseIterator<_t_iterator>	(const CBTreeConstReverseIterator<_t_iterator> &rIter);
+								explicit	CBTreeConstReverseIterator<_t_iterator> (const CBTreeReverseIterator<CBTreeIterator<container_t> > &rIter);
 
-												~CBTreeBaseConstReverseIterator<_t_iterator>	();
+											~CBTreeConstReverseIterator<_t_iterator>	();
 
-	void										swap (CBTreeBaseConstReverseIterator &rRight);
+	void									swap (CBTreeConstReverseIterator &rRight);
 												
-	CBTreeBaseConstReverseIterator<_t_iterator>&	operator= (const reverse_iterator<_t_iterator> &rIter);
+	CBTreeConstReverseIterator&				operator= (const reverse_iterator<_t_iterator> &rIter);
+	CBTreeConstReverseIterator&				operator= (const CBTreeReverseIterator<CBTreeIterator <container_t> > &rIter);
 
-	bool										operator== (const CBTreeBaseConstReverseIterator &rIter);
-	bool										operator!= (const CBTreeBaseConstReverseIterator &rIter);
+	bool									operator== (const CBTreeConstReverseIterator &rIter) const;
+	bool									operator!= (const CBTreeConstReverseIterator &rIter) const;
 
-	data_t&										operator* ();
-	data_t*										operator-> ();
+	data_t&									operator* ();
+	data_t*									operator-> ();
 
-	data_t&										operator[] (const int nPos);
-	data_t&										operator[] (const sizetype_t nPos);
+	data_t&									operator[] (const int nPos);
+	data_t&									operator[] (const size_type nPos);
 
 protected:
 
-	data_t										m_sSubScriptResult;
+	data_t									m_sSubScriptResult;
 };
 
 template <class _t_iterator>
-class CBTreeBaseReverseIterator	:	public CBTreeBaseConstReverseIterator<_t_iterator>
+class CBTreeReverseIterator	:	public CBTreeConstReverseIterator<_t_iterator>
 {
 public:
 
 	typedef typename _t_iterator::container_t					container_t;
 
 	typedef typename _t_iterator::container_t::data_t			data_t;
-	typedef typename _t_iterator::container_t::sizetype_t		sizetype_t;
-	typedef typename _t_iterator::container_t::nodeiter_t		nodeiter_t;
-	typedef typename _t_iterator::container_t::subnodeiter_t	subnodeiter_t;
+	typedef typename _t_iterator::container_t::size_type		size_type;
 
-												CBTreeBaseReverseIterator<_t_iterator>	();
-									explicit	CBTreeBaseReverseIterator<_t_iterator>	(const _t_iterator &rIter);
-												CBTreeBaseReverseIterator<_t_iterator>	(const CBTreeBaseReverseIterator<_t_iterator> &rIter);
+											CBTreeReverseIterator<_t_iterator>	();
+								explicit	CBTreeReverseIterator<_t_iterator>	(const _t_iterator &rIter);
+											CBTreeReverseIterator<_t_iterator>	(const CBTreeReverseIterator<_t_iterator> &rIter);
 
-												~CBTreeBaseReverseIterator<_t_iterator>	();
+											~CBTreeReverseIterator<_t_iterator>	();
 
-	const data_t &								operator*	() const;
+	const data_t &							operator*	() const;
 
-	CBTreeBaseIteratorSubScriptWrapper<container_t>
-												operator*	();
+	CBTreeIteratorSubScriptWrapper<container_t>
+											operator*	();
 											
-	CBTreeBaseReverseIterator&					operator=	(const reverse_iterator<_t_iterator> &rIter);
-	CBTreeBaseReverseIterator&					operator=	(const data_t &rData);
+	CBTreeReverseIterator&					operator=	(const reverse_iterator<_t_iterator> &rIter);
+	CBTreeReverseIterator&					operator=	(const data_t &rData);
 
-	CBTreeBaseIteratorSubScriptWrapper<container_t>
-												operator[]	(const int nPos);
+											operator const CBTreeConstReverseIterator<CBTreeConstIterator <container_t> > &	();
 
-	CBTreeBaseIteratorSubScriptWrapper<container_t>
-												operator[]	(const sizetype_t nPos);
+	CBTreeIteratorSubScriptWrapper<container_t>
+											operator[]	(const int nPos);
 
-protected:
-
-	void										set			(const data_t &rData);
+	CBTreeIteratorSubScriptWrapper<container_t>
+											operator[]	(const size_type nPos);
 
 public:
 
-	friend typename ::CBTreeBaseIterator<container_t>;
-	friend typename ::CBTreeBaseIteratorSubScriptWrapper<container_t>;
+	friend typename ::CBTreeIterator<container_t>;
+	friend typename ::CBTreeIteratorSubScriptWrapper<container_t>;
 
 };
 
