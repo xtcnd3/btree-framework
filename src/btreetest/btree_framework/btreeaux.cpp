@@ -33,16 +33,9 @@ CBTreeSuper::~CBTreeSuper ()
 	}
 }
 
-btree_time_stamp_t CBTreeSuper::get_time_stamp ()
+btree_time_stamp_t CBTreeSuper::get_time_stamp () const
 {
 	return (m_sTimeStamp);
-}
-
-void CBTreeSuper::swap (CBTreeSuper &rBT)
-{
-	this->update_time_stamp ();
-
-	rBT.update_time_stamp ();
 }
 
 void CBTreeSuper::update_time_stamp ()
@@ -59,7 +52,7 @@ uint32_t CBTreeSuper::create_dataPool (CBTreeIOperBlockPoolDesc_t *pPoolDesc)
 
 	CBTreeIOperBlockPoolDesc_t *pTempPoolDesc = new CBTreeIOperBlockPoolDesc_t [m_nNumPools];
 
-	BTREE_ASSERT (pTempPoolDesc != NULL, "CBTreeSuper::CBTreeSuper: insufficient memory!");
+	BTREE_ASSERT (pTempPoolDesc != NULL, "CBTreeSuper::create_dataPool: insufficient memory!");
 
 	if (m_pPoolDesc != NULL)
 	{
@@ -78,4 +71,11 @@ uint32_t CBTreeSuper::create_dataPool (CBTreeIOperBlockPoolDesc_t *pPoolDesc)
 	m_pPoolDesc[nNewID] = *pPoolDesc;
 
 	return (nNewID);
+}
+
+void CBTreeSuper::_swap (CBTreeSuper &rBT)
+{
+	this->update_time_stamp ();
+
+	rBT.update_time_stamp ();
 }
