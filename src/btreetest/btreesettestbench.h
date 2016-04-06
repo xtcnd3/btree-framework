@@ -26,7 +26,7 @@
 #include "btreemultisetprimitives.h"
 
 #include "btreetestcommon.h"
-#include "btreeset.h"
+#include "./associative/btreeset.h"
 
 typedef enum
 {
