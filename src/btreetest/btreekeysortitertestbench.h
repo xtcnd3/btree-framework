@@ -18,12 +18,7 @@
 #include <stdint.h>
 
 #include <iostream>
-#include <typeinfo>
 #include <vector>
-
-#if defined(__GNUC__) || defined(__GNUG__)
- #include <cxxabi.h>
-#endif
 
 #include "btreetestcommon.h"
 #include "btreetestkeysort.h"
@@ -51,7 +46,7 @@ typedef enum
 	BTREETEST_KEY_SORT_ITER_CONST_SWAP
 } btreetest_keysort_iter_e;
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeKeySortIter (uint32_t nTest, _t_subnodeiter nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, int argc, char **argv);
 
 #endif // BTREEKEYSORTITERTESTBENCH_H
