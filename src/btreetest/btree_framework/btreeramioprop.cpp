@@ -14,12 +14,12 @@
 #include "btreeramioprop.h"
 
 CBTreeIOpropertiesRAM::CBTreeIOpropertiesRAM ()
-	:	CBTreeIOproperties (CBTREE_IO_PROPERTIES_RAM)
+	:	CBTreeIOproperties ()
 {
 }
 
 CBTreeIOpropertiesRAM::CBTreeIOpropertiesRAM (CBTreeIOpropertiesRAM &rBT)
-	:	CBTreeIOproperties (CBTREE_IO_PROPERTIES_RAM)
+	:	CBTreeIOproperties ()
 {
 	rBT;
 }
@@ -27,5 +27,3 @@ CBTreeIOpropertiesRAM::CBTreeIOpropertiesRAM (CBTreeIOpropertiesRAM &rBT)
 CBTreeIOpropertiesRAM::~CBTreeIOpropertiesRAM ()
 {
 }
-
-
