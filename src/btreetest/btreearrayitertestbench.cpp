@@ -21,7 +21,6 @@ void TestBTreeArrayConstIterBasic (_t_obj *pClArray, bool bDescend, uint32_t nNu
 	typedef typename _t_obj::const_reverse_iterator		criter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
 	citer_t					sCIter;
 	criter_t				sCRIter;
 	_t_data					sEntryViaIf;
@@ -49,7 +48,7 @@ void TestBTreeArrayConstIterBasic (_t_obj *pClArray, bool bDescend, uint32_t nNu
 
 	if (bFillArray)
 	{
-		arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+		arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	}
 
 	for (nTurn = 0; nTurn <= nTurnArounds; nTurn++)
@@ -181,7 +180,6 @@ void TestBTreeArrayConstIterNodeSizeVsStepSize (bool bDescend, _t_datalayerprope
 	_t_subnodeiter		nNodeSize;
 	uint32_t			nStepSize;
 	_t_obj				*pClArray;
-	uint32_t			nDebug = 0;
 	vector_t			sPrimeNodeSizeVector;
 	vec_iter_t			sVecIter;
 	vector_test_t		sTestVector;
@@ -196,12 +194,12 @@ void TestBTreeArrayConstIterNodeSizeVsStepSize (bool bDescend, _t_datalayerprope
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		sEntry.nDebug = nDebug;
+		sEntry.nDebug = g_nDebug;
 		sEntry.nData = generate_rand32 ();
 
 		sTestVector.push_back (sEntry);
 
-		nDebug++;
+		g_nDebug++;
 	}
 
 	while (sPrimeNodeSizeVector.size () > 0)
@@ -249,7 +247,6 @@ void TestBTreeArrayIterBasic (_t_obj *pClArray, bool bDescend, uint32_t nNumEntr
 	typedef typename _t_obj::reverse_iterator			riter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
 	iter_t					sIter;
 	riter_t					sRIter;
 	_t_data					sEntryViaIf;
@@ -277,7 +274,7 @@ void TestBTreeArrayIterBasic (_t_obj *pClArray, bool bDescend, uint32_t nNumEntr
 
 	if (bFillArray)
 	{
-		arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+		arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	}
 
 	for (nTurn = 0; nTurn <= nTurnArounds; nTurn++)
@@ -409,7 +406,6 @@ void TestBTreeArrayIterNodeSizeVsStepSize (bool bDescend, _t_datalayerproperties
 	_t_subnodeiter		nNodeSize;
 	uint32_t			nStepSize;
 	_t_obj				*pClArray;
-	uint32_t			nDebug = 0;
 	vector_t			sPrimeNodeSizeVector;
 	vec_iter_t			sVecIter;
 	vector_test_t		sTestVector;
@@ -424,12 +420,12 @@ void TestBTreeArrayIterNodeSizeVsStepSize (bool bDescend, _t_datalayerproperties
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		sEntry.nDebug = nDebug;
+		sEntry.nDebug = g_nDebug;
 		sEntry.nData = generate_rand32 ();
 
 		sTestVector.push_back (sEntry);
 
-		nDebug++;
+		g_nDebug++;
 	}
 
 	while (sPrimeNodeSizeVector.size () > 0)
@@ -477,7 +473,6 @@ void TestBTreeArrayIterBiDirectionalDereference (_t_obj *pClArray, uint32_t nNum
 	typedef typename _t_obj::reverse_iterator			riter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
 	iter_t					sWriteIter;
 	riter_t					sWriteRIter;
 	_t_data					sEntryViaIter;
@@ -488,7 +483,7 @@ void TestBTreeArrayIterBiDirectionalDereference (_t_obj *pClArray, uint32_t nNum
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	
 	sWriteIter = pClArray->begin ();
 	sWriteRIter = pClArray->rbegin ();
@@ -525,7 +520,6 @@ void TestBTreeArrayIterBiDirectionalSubScriptor (_t_obj *pClArray, uint32_t nNum
 	typedef typename _t_obj::reverse_iterator			riter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
 	iter_t					sWriteIter;
 	riter_t					sWriteRIter;
 	_t_data					sEntryViaIter;
@@ -558,7 +552,7 @@ void TestBTreeArrayIterBiDirectionalSubScriptor (_t_obj *pClArray, uint32_t nNum
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	
 	sWriteIter = pClArray->begin ();
 	sWriteRIter = pClArray->rbegin ();
@@ -620,7 +614,6 @@ void TestBTreeArrayIterCompound (_t_obj *pClArray, uint32_t nNumEntries)
 	typedef typename _t_obj::reverse_iterator			riter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
 	iter_t					sWriteIter;
 	riter_t					sWriteRIter;
 	_t_data					sEntryViaIter;
@@ -653,7 +646,7 @@ void TestBTreeArrayIterCompound (_t_obj *pClArray, uint32_t nNumEntries)
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	
 	sWriteIter = pClArray->begin ();
 	sWriteRIter = pClArray->rbegin ();
@@ -731,7 +724,6 @@ void TestBTreeArrayIterCompoundIter (_t_obj *pClArray, uint32_t nNumEntries)
 	typedef typename _t_obj::reverse_iterator			riter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
 	iter_t					sWriteIter;
 	_t_data					sEntryViaIter;
 	iter_t					sI;
@@ -741,7 +733,7 @@ void TestBTreeArrayIterCompoundIter (_t_obj *pClArray, uint32_t nNumEntries)
 	
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	
 	sWriteIter = pClArray->begin ();
 	
@@ -795,7 +787,6 @@ void TestBTreeArrayIterArithmeticOperators (_t_obj *pClArray, uint32_t nNumEntri
 	typedef typename _t_obj::const_reverse_iterator		criter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
 	iter_t					sIter;
 	riter_t					sRIter;
 	citer_t					sCIter;
@@ -808,7 +799,7 @@ void TestBTreeArrayIterArithmeticOperators (_t_obj *pClArray, uint32_t nNumEntri
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	
 	sIter = pClArray->begin ();
 	sRIter = pClArray->rbegin ();
@@ -1447,13 +1438,11 @@ void TestBTreeArrayIterCompareOperators (_t_obj *pClArray, uint32_t nNumEntries)
 	typedef typename _t_obj::const_reverse_iterator		criter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
-	
 	cout << "basic array iterator compare operators test" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	
 	cout << "iterator versus iterator";
 
@@ -1496,7 +1485,6 @@ void TestBTreeArrayIterSwap (_t_obj *pClArray, uint32_t nNumEntries)
 	typedef typename _t_obj::reverse_iterator			riter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
 	iter_t					sWriteIter;
 	iter_t					sWriteIter2;
 	riter_t					sRWriteIter;
@@ -1509,7 +1497,7 @@ void TestBTreeArrayIterSwap (_t_obj *pClArray, uint32_t nNumEntries)
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	
 	sWriteIter = pClArray->begin ();
 	sWriteIter2 = pClArray->begin ();
@@ -1568,7 +1556,6 @@ void TestBTreeArrayIterConstSwap (_t_obj *pClArray, uint32_t nNumEntries)
 	typedef typename _t_obj::const_reverse_iterator			criter_t;
 
 	_t_objprim				*pClArrayPrim;
-	uint32_t				nDebug = 0;
 	citer_t					sCIter;
 	citer_t					sCIter2;
 	criter_t				sCRIter;
@@ -1578,7 +1565,7 @@ void TestBTreeArrayIterConstSwap (_t_obj *pClArray, uint32_t nNumEntries)
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	
 	sCIter = pClArray->cbegin ();
 	sCIter2 = pClArray->cend ();
