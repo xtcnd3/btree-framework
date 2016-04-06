@@ -13,20 +13,23 @@
 
 #include "btreearraytestprimitive.h"
 
-void arrayPrim_add (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEntries, uint32_t &nDebug, btreetest_array_primitive_seek_e eWhere)
+void arrayPrim_add (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere)
 {
+	typedef			CBTreeArrayIf<arrayEntry_t>::const_iterator			citer_t;
+
 	uint64_t		nPos;
 	uint32_t		ui32;
 	arrayEntry_t	sData;
+	citer_t			sCIter;
 
 	for (ui32 = 0; ui32 < nEntries; ui32++)
 	{
 		cout << "insert: " << ui32 << " / " << nEntries << "\r" << flush;
 
-		sData.nDebug = nDebug;
+		sData.nDebug = g_nDebug;
 		sData.nData = generate_rand32 ();
 
-		nDebug++;
+		g_nDebug++;
 
 		switch (eWhere)
 		{
@@ -61,16 +64,23 @@ void arrayPrim_add (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEntries
 			}
 		}
 
-		pClArray->insert_at (nPos, sData);
+		sCIter = pClArray->cbegin ();
+
+		::std::advance<citer_t, uint64_t> (sCIter, nPos);
+
+		pClArray->insert (sCIter, sData);
 	}
 
 	cout << "insert: " << ui32 << " / " << nEntries << endl;
 }
 
-void arrayPrim_remove (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere)
+void arrayPrim_remove (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere)
 {
+	typedef			CBTreeArrayIf<arrayEntry_t>::const_iterator			citer_t;
+
 	uint64_t		nPos;
 	uint32_t		ui32;
+	citer_t			sCIter;
 	
 	for (ui32 = 0; ui32 < nEntries; ui32++)
 	{
@@ -110,13 +120,17 @@ void arrayPrim_remove (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEntr
 			}
 		}
 
-		pClArray->remove_at (nPos);
+		sCIter = pClArray->cbegin ();
+
+		::std::advance<citer_t, uint64_t> (sCIter, nPos);
+
+		pClArray->erase (sCIter);
 	}
 
 	cout << "remove: " << ui32 << " / " << nEntries << endl;
 }
 
-void arrayPrim_replace (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEntries, uint32_t &nDebug, btreetest_array_primitive_seek_e eWhere)
+void arrayPrim_replace (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere)
 {
 	uint64_t		nPos;
 	uint32_t		ui32;
@@ -126,10 +140,10 @@ void arrayPrim_replace (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEnt
 	{
 		cout << "replace: " << ui32 << " / " << nEntries << "\r" << flush;
 
-		sData.nDebug = nDebug;
+		sData.nDebug = g_nDebug;
 		sData.nData = generate_rand32 ();
 
-		nDebug++;
+		g_nDebug++;
 
 		switch (eWhere)
 		{
@@ -171,7 +185,7 @@ void arrayPrim_replace (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEnt
 	cout << "replace: " << ui32 << " / " << nEntries << endl;
 }
 
-bool arrayPrim_compare (CBTreeArrayDataIf<arrayEntry_t> *pClArray0, CBTreeArrayDataIf<arrayEntry_t> *pClArray1)
+bool arrayPrim_compare (CBTreeArrayIf<arrayEntry_t> *pClArray0, CBTreeArrayIf<arrayEntry_t> *pClArray1)
 {
 	uint64_t		ui64;
 
