@@ -14,20 +14,123 @@
 
 #include "btreekeysortitertestbench.h"
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype>
-void TestBTreeKeySortConstIterBasic (_t_obj *pClKeySort, bool bDescend, uint32_t nNumEntries, uint32_t nStepSize, uint32_t nTurnArounds, bool bFillArray = true)
+template <class _t_container, class _t_reference>
+void TransferKeySortIterRefToTestContainer (_t_container *pContainer, _t_reference *pReference)
 {
-	typedef typename _t_obj::const_iterator				citer_t;
-	typedef typename _t_obj::const_reverse_iterator		criter_t;
+	typedef typename _t_container::value_type			data_t;
+	typedef typename _t_reference::const_iterator		citer_t;
 
-	_t_objprim				*pClKeySortPrim;
-	uint32_t				nDebug = 0;
+	citer_t		sIterRefBegin;
+	citer_t		sIterRefEnd;
+	data_t		sData;
+
+	get_begin (pReference, sIterRefBegin);
+	get_end (pReference, sIterRefEnd);
+
+	for (; sIterRefBegin != sIterRefEnd; ::std::advance (sIterRefBegin, 1))
+	{
+		entry_conversion (sData, *sIterRefBegin);
+
+		pContainer->insert (sData);
+	}
+}
+
+template <class _t_container, class _t_reference, class _t_iterator, class _t_ref_iterator, class _t_sizetype>
+void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pReference, _t_iterator sIter, _t_ref_iterator sIterRef, _t_sizetype nIter, _t_sizetype nRIter, _t_sizetype nPos, uint32_t nTurn)
+{
+	typedef typename _t_container::value_type					data_t;
+	
+	_t_sizetype		nTestDiff;
+	_t_iterator		sIterBegin;
+	bool			bMismatch;
+
+	data_t			sEntryViaIter;
+	data_t			sEntryViaRef;
+	
+	get_begin (pContainer, sIterBegin);
+
+	nTestDiff = ::std::distance (sIterBegin, sIter);
+
+	bMismatch = nTestDiff != nIter;
+
+	if (bMismatch)
+	{
+		::std::cerr << ::std::endl;
+		::std::cerr << "unexpected iterator distance!" << ::std::endl;
+		::std::cerr << "turn around: " << nTurn << ::std::endl;
+		::std::cerr << "position: " << nPos << ::std::endl;
+		::std::cerr << "iterator distance: " << nTestDiff;
+		::std::cerr << "expected iterator distance: " << nIter;
+
+		exit (-1);
+	}
+
+	if (is_reverse_iterator (pContainer, sIter))
+	{
+		::std::advance (sIterRef, nRIter);
+	}
+	else
+	{
+		::std::advance (sIterRef, nIter);
+	}
+
+	entry_conversion (sEntryViaRef, *sIterRef);
+
+	sEntryViaIter = *sIter;
+
+	if (sEntryViaRef != sEntryViaIter)
+	{
+		::std::cerr << ::std::endl;
+
+		if (is_const_iterator (pContainer, sIter))
+		{
+			::std::cerr << "const ";
+		}
+
+		if (is_reverse_iterator (pContainer, sIter))
+		{
+			::std::cerr << "reverse ";
+		}
+
+		::std::cerr << "iterator mismatch!" << ::std::endl;
+		::std::cerr << "turn around: " << nTurn << ::std::endl;
+		::std::cerr << "position: " << nPos << ::std::endl;
+		::std::cerr << "data via reference" << ::std::endl;
+		::std::cerr << "nData: " << sEntryViaRef.nData << ::std::endl;
+		::std::cerr << "nDebug: " << sEntryViaRef.nDebug << ::std::endl;
+		::std::cerr << "data via iterator" << ::std::endl;
+		::std::cerr << "nData: " << sEntryViaIter.nData << ::std::endl;
+		::std::cerr << "nDebug: " << sEntryViaIter.nDebug << ::std::endl;
+
+		exit (-1);
+	}
+}
+
+template <class _t_container, class _t_reference>
+void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pReference, bool bDescend, uint32_t nNumEntries, uint32_t nStepSize, uint32_t nTurnArounds, bool bFillArray = true)
+{
+	typedef typename _t_container::iterator						iter_t;
+	typedef typename _t_container::const_iterator				citer_t;
+	typedef typename _t_container::reverse_iterator				riter_t;
+	typedef typename _t_container::const_reverse_iterator		criter_t;
+
+	typedef typename _t_reference::const_iterator				citer_ref_t;
+
+	typedef typename _t_container::size_type					size_type;
+
+	typedef typename _t_container::value_type					data_t;
+	typedef typename _t_reference::value_type					data_ref_t;
+
 	uint32_t				nSeed = 0;
+	iter_t					sIter;
 	citer_t					sCIter;
+	riter_t					sRIter;
 	criter_t				sCRIter;
-	_t_data					sEntryViaIf;
-	_t_data					sEntryViaIter;
-	uint64_t				ui64;
+	citer_ref_t				sCIterRef;
+	data_ref_t				sEntryRef;
+	size_type				i;
+	size_type				nIter;
+	size_type				nRIter;
 	uint32_t				nTurn;
 	uint32_t				nThisStepSize;
 
@@ -46,11 +149,11 @@ void TestBTreeKeySortConstIterBasic (_t_obj *pClKeySort, bool bDescend, uint32_t
 	cout << "with step size " << nStepSize;
 	cout << " and turns around " << nTurnArounds << " times." << endl;
 
-	pClKeySortPrim = dynamic_cast <_t_objprim *> (pClKeySort);
-
 	if (bFillArray)
 	{
-		keySortPrim_add (pClKeySortPrim, nNumEntries, nDebug, nSeed, BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY);
+		associative_container_add_primitive (pReference, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
+
+		TransferKeySortIterRefToTestContainer (pContainer, pReference);
 	}
 
 	for (nTurn = 0; nTurn <= nTurnArounds; nTurn++)
@@ -59,109 +162,106 @@ void TestBTreeKeySortConstIterBasic (_t_obj *pClKeySort, bool bDescend, uint32_t
 
 		bool	bForward = (((nTurn & 0x1) == 0x0) != bDescend);
 
-		ui64 = bForward ? 0ULL : pClKeySort->size ();
+		i = bForward ? 0ULL : pContainer->size ();
 
-		sCIter = bForward ? pClKeySort->cbegin () : pClKeySort->cend ();
-		sCRIter = bForward ? pClKeySort->crbegin () : pClKeySort->crend ();
+		sIter = bForward ? pContainer->begin () : pContainer->end ();
+		sCIter = bForward ? pContainer->cbegin () : pContainer->cend ();
+		sRIter = bForward ? pContainer->rbegin () : pContainer->rend ();
+		sCRIter = bForward ? pContainer->crbegin () : pContainer->crend ();
 
-		while (bForward ? ui64 < pClKeySort->size () : ui64 > 0)
+		nIter = bForward ? 0 : pReference->size ();
+		nRIter = bForward ? pReference->size () : 0;
+		nRIter--;
+
+		while (bForward ? i < pContainer->size () : i > 0)
 		{
 			if (!bForward)
 			{
-				if (ui64 >= nStepSize)
+				if (i >= nStepSize)
 				{
 					nThisStepSize = nStepSize;
 				}
 				else
 				{
-					nThisStepSize = (uint32_t) ui64;
+					nThisStepSize = (uint32_t) i;
 				}
 
-				ui64 -= nThisStepSize;
+				i -= nThisStepSize;
 
 				if (nStepSize == 1)
 				{
-					if ((ui64 & 0x1) == 0x0)
+					if ((i & 0x1) == 0x0)
 					{
+						sIter--;
 						sCIter--;
+						sRIter--;
 						sCRIter--;
 					}
 					else
 					{
+						--sIter;
 						--sCIter;
+						--sRIter;
 						--sCRIter;
 					}
+
+					nIter--;
+					nRIter++;
 				}
 				else
 				{
-					sCIter -= (_t_sizetype) nThisStepSize;
-					sCRIter -= (_t_sizetype) nThisStepSize;
+					sIter -= (size_type) nThisStepSize;
+					sCIter -= (size_type) nThisStepSize;
+					sRIter -= (size_type) nThisStepSize;
+					sCRIter -= (size_type) nThisStepSize;
+
+					nIter -= (size_type) nThisStepSize;
+					nRIter += (size_type) nThisStepSize;
 				}
 			}
 
-			cout << ui64 << " " << "\r" << flush;
+			cout << i << " " << "\r" << flush;
 
-			pClKeySort->get_at (ui64, sEntryViaIf);
+			sCIterRef = pReference->cbegin ();
 
-			sEntryViaIter = *sCIter;
-
-			if (sEntryViaIf != sEntryViaIter)
-			{
-				cerr << endl;
-				cerr << "iterator mismatch!" << endl;
-				cerr << "turn around: " << nTurn << endl;
-				cerr << "position: " << ui64 << endl;
-				cerr << "data via interface" << endl;
-				cerr << "nData: " << sEntryViaIf.nData << endl;
-				cerr << "nDebug: " << sEntryViaIf.nDebug << endl;
-				cerr << "data via iterator" << endl;
-				cerr << "nData: " << sEntryViaIter.nData << endl;
-				cerr << "nDebug: " << sEntryViaIter.nDebug << endl;
-
-				exit (-1);
-			}
-
-			pClKeySort->get_at (pClKeySort->size () - 1ULL - ui64, sEntryViaIf);
-
-			sEntryViaIter = *sCRIter;
-
-			if (sEntryViaIf != sEntryViaIter)
-			{
-				cerr << endl;
-				cerr << "reverse iterator mismatch!" << endl;
-				cerr << "turn around: " << nTurn << endl;
-				cerr << "position: " << ui64 << endl;
-				cerr << "data via interface" << endl;
-				cerr << "nData: " << sEntryViaIf.nData << endl;
-				cerr << "nDebug: " << sEntryViaIf.nDebug << endl;
-				cerr << "data via iterator" << endl;
-				cerr << "nData: " << sEntryViaIter.nData << endl;
-				cerr << "nDebug: " << sEntryViaIter.nDebug << endl;
-
-				exit (-1);
-			}
+			TestBTreeKeySortConstIterBasic (pContainer, pReference, sIter, sCIterRef, nIter, nRIter, i, nTurn);
+			TestBTreeKeySortConstIterBasic (pContainer, pReference, sCIter, sCIterRef, nIter, nRIter, i, nTurn);
+			TestBTreeKeySortConstIterBasic (pContainer, pReference, sRIter, sCIterRef, nIter, nRIter, i, nTurn);
+			TestBTreeKeySortConstIterBasic (pContainer, pReference, sCRIter, sCIterRef, nIter, nRIter, i, nTurn);
 
 			if (bForward)
 			{
-				ui64 += nStepSize;
+				i += nStepSize;
 
 				if (nStepSize == 1)
 				{
-					if ((ui64 & 0x1) == 0x0)
+					if ((i & 0x1) == 0x0)
 					{
+						sIter++;
 						sCIter++;
+						sRIter++;
 						sCRIter++;
 					}
 					else
 					{
+						++sIter;
 						++sCIter;
+						++sRIter;
 						++sCRIter;
 					}
+
+					nIter++;
+					nRIter--;
 				}
 				else
 				{
-					sCIter += (_t_sizetype) nStepSize;
-					sCRIter += (_t_sizetype) nStepSize;
+					sIter += (size_type) nStepSize;
+					sCIter += (size_type) nStepSize;
+					sRIter += (size_type) nStepSize;
+					sCRIter += (size_type) nStepSize;
+
+					nIter += (size_type) nStepSize;
+					nRIter -= (size_type) nStepSize;
 				}
 			}
 		}
@@ -170,22 +270,31 @@ void TestBTreeKeySortConstIterBasic (_t_obj *pClKeySort, bool bDescend, uint32_t
 	}
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_subnodeiter, class _t_datalayerproperties>
-void TestBTreeKeySortConstIterNodeSizeVsStepSize (bool bDescend, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, uint32_t nNumEntries, _t_subnodeiter nFromNodeSize, _t_subnodeiter nToNodeSize, uint32_t nFromStepSize, uint32_t nToStepSize)
+template <class _t_container, class _t_reference>
+void TestBTreeKeySortConstIterNodeSizeVsStepSize (_t_container *pContainer, _t_reference *pReference, bool bDescend, typename _t_container::datalayerproperties_t &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, uint32_t nNumEntries, typename _t_container::subnodeiter_t nFromNodeSize, typename _t_container::subnodeiter_t nToNodeSize, uint32_t nFromStepSize, uint32_t nToStepSize)
 {
+	typedef typename _t_container::value_type			data_t;
+	typedef typename _t_container::subnodeiter_t		subnodeiter_t;
+
+	typedef typename _t_reference::const_iterator		citer_ref_t;
+
 	typedef ::std::vector<uint32_t>::iterator			vec_iter_t;
 	typedef ::std::vector<uint32_t>						vector_t;
 
-	_t_subnodeiter		nNodeSize;
+	subnodeiter_t		nNodeSize;
 	uint32_t			nStepSize;
-	_t_obj				*pClKeySort;
-	_t_objprim			*pClKeySortPrim;
-	uint32_t			nDebug;
+	_t_container		*pTestContainer;
 	uint32_t			nSeed;
 	vector_t			sPrimeNodeSizeVector;
 	vec_iter_t			sVecIter;
 	uint32_t			nPrime;
+	citer_ref_t			sCIterRefBegin;
+	citer_ref_t			sCIterRefEnd;
 
+	nSeed = 0;
+
+	associative_container_add_primitive (pReference, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
+		
 	for (nNodeSize = nFromNodeSize; nNodeSize < nToNodeSize; nNodeSize++)
 	{
 		sPrimeNodeSizeVector.push_back (nNodeSize);
@@ -195,18 +304,20 @@ void TestBTreeKeySortConstIterNodeSizeVsStepSize (bool bDescend, _t_datalayerpro
 	{
 		nNodeSize = sPrimeNodeSizeVector.at (0);
 
-		pClKeySort = new _t_obj (rDataLayerProperties, &sCacheDesc, nNodeSize);
+		pTestContainer = new _t_container (rDataLayerProperties, &sCacheDesc, nNodeSize);
 
-		pClKeySortPrim = dynamic_cast <_t_objprim *> (pClKeySort);
+		if (pTestContainer == NULL)
+		{
+			::std::cerr << "ERROR: insufficient memory!" << ::std::endl;
 
-		nDebug = 0;
-		nSeed = 0;
+			exit (-1);
+		}
 
-		keySortPrim_add (pClKeySortPrim, nNumEntries, nDebug, nSeed, BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY);
-
+		TransferKeySortIterRefToTestContainer (pTestContainer, pReference);
+		
 		for (nStepSize = nFromStepSize; nStepSize < nToStepSize; nStepSize <<= 1)
 		{
-			TestBTreeKeySortConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClKeySort, bDescend, nNumEntries, nStepSize, 0, false);
+			TestBTreeKeySortConstIterBasic (pTestContainer, pReference, bDescend, nNumEntries, nStepSize, 0, false);
 		}
 
 		nPrime = sPrimeNodeSizeVector.at (0);
@@ -223,24 +334,96 @@ void TestBTreeKeySortConstIterNodeSizeVsStepSize (bool bDescend, _t_datalayerpro
 			}
 		}
 		
-		delete pClKeySort;
+		delete pTestContainer;
 	}
 }
 
-template <class _t_obj, class _t_objprim, class _t_subscripttype, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeKeySortIterSubScriptor (_t_obj *pClKeySort, uint32_t nNumEntries)
+template <class _t_subscripttype, class _t_container, class _t_iterator>
+void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, _t_container *pContainerRef, _t_iterator &rIter, _t_subscripttype &rI, bool bForward)
 {
-	typedef typename _t_obj::const_iterator					citer_t;
-	typedef typename _t_obj::const_reverse_iterator			criter_t;
+	typedef typename _t_container::value_type						data_t;
 
-	_t_objprim				*pClKeySortPrim;
-	uint32_t				nDebug = 0;
+	data_t			sData;
+
+	if (bForward)
+	{
+		::std::cout << "progrssing ";
+	}
+	else
+	{
+		::std::cout << "reversing ";
+	}
+
+	if (is_const_iterator (pContainer, rIter))
+	{
+		::std::cout << "const ";
+	}
+
+	if (is_reverse_iterator (pContainer, rIter))
+	{
+		::std::cout << "reverse ";
+	}
+
+	::std::cout << "iterator ";
+	
+	if (bForward)
+	{
+		get_begin (pContainer, rIter);
+
+		for (rI = 0; rI < pContainer->size (); rI++)
+		{
+			sData = rIter[rI];
+
+			pContainerRef->insert (sData);
+		}
+	}
+	else
+	{
+		get_end (pContainer, rIter);
+
+		for (rI = (_t_subscripttype) pContainer->size (); rI > (_t_subscripttype) 0; )
+		{
+			rI--;
+
+			rI -= (_t_subscripttype) pContainer->size ();
+			{
+				sData = rIter[rI];
+
+				pContainerRef->insert (sData);
+			}
+			rI += (_t_subscripttype) pContainer->size ();
+		}
+	}
+
+	if (*pContainer != *pContainerRef)
+	{
+		::std::cout << "failed" << ::std::endl;
+		
+		exit (-1);
+	}
+
+	::std::cout << "passed" << ::std::endl;
+
+	pContainerRef->clear ();
+}
+
+template <class _t_subscripttype, class _t_container>
+void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, uint32_t nNumEntries)
+{
+	typedef typename _t_container::value_type						data_t;
+
+	typedef typename _t_container::iterator							iter_t;
+	typedef typename _t_container::const_iterator					citer_t;
+	typedef typename _t_container::reverse_iterator					riter_t;
+	typedef typename _t_container::const_reverse_iterator			criter_t;
+
 	uint32_t				nSeed = 0;
+	iter_t					sIter;
 	citer_t					sCIter;
+	riter_t					sRIter;
 	criter_t				sCRIter;
-	_t_data					sEntryViaIter;
 	_t_subscripttype		i;
-	_t_obj					sClRefKeySort (*pClKeySort);
+	_t_container			sContainerRef (*pContainer);
 	
 	cout << "basic keysort iterator sub-scription test" << endl;
 	
@@ -266,325 +449,167 @@ void TestBTreeKeySortIterSubScriptor (_t_obj *pClKeySort, uint32_t nNumEntries)
 	
 #endif
 
-	pClKeySortPrim = dynamic_cast <_t_objprim *> (pClKeySort);
+	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 
-	keySortPrim_add (pClKeySortPrim, nNumEntries, nDebug, nSeed, BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY);
-	
-	sCIter = pClKeySort->cbegin ();
-	sCRIter = pClKeySort->crbegin ();
+	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sIter, i, true);
+	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sCIter, i, true);
+	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sRIter, i, true);
+	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sCRIter, i, true);
 
-	cout << "positiv forward iterator ";
-
-	for (i = 0; i < (_t_subscripttype) pClKeySort->size (); i++)
-	{
-		sEntryViaIter = sCIter[i];
-
-		sClRefKeySort.insert (sEntryViaIter);
-	}
-
-	cout << "testing ";
-
-	if (sClRefKeySort != *pClKeySort)
-	{
-		cerr << endl;
-		cerr << "keysort mismatch (positiv forward iterator sub-scription)!" << endl;
-		
-		exit (-1);
-	}
-
-	cout << "passed" << endl;
-
-	sClRefKeySort.clear ();
-
-	cout << "positiv reverse iterator ";
-
-	for (i = 0; i < (_t_subscripttype) pClKeySort->size (); i++)
-	{
-		sEntryViaIter = sCRIter[i];
-		
-		sClRefKeySort.insert (sEntryViaIter);
-	}
-
-	cout << "testing ";
-
-	if (sClRefKeySort != *pClKeySort)
-	{
-		cerr << endl;
-		cerr << "keysort mismatch (positiv reverse iterator sub-scription)!" << endl;
-		
-		exit (-1);
-	}
-
-	cout << "passed" << endl;
-
-	sCIter = pClKeySort->cend ();
-	sCRIter = pClKeySort->crend ();
-
-	sClRefKeySort.clear ();
-
-	cout << "negativ forward iterator ";
-
-	for (i = (_t_subscripttype) pClKeySort->size (); i > 0; )
-	{
-		i--;
-
-		i -= (_t_subscripttype) pClKeySort->size ();
-		{
-			sEntryViaIter = sCIter[i];
-			
-			sClRefKeySort.insert (sEntryViaIter);
-		}
-		i += (_t_subscripttype) pClKeySort->size ();
-	}
-
-	cout << "testing ";
-
-	if (sClRefKeySort != *pClKeySort)
-	{
-		cerr << endl;
-		cerr << "keysort mismatch (negativ forward iterator sub-scription)!" << endl;
-		
-		exit (-1);
-	}
-
-	cout << "passed" << endl;
-
-	sClRefKeySort.clear ();
-
-	cout << "negativ reverse iterator ";
-
-	for (i = (_t_subscripttype) pClKeySort->size (); i > 0; )
-	{
-		i--;
-
-		i -= (_t_subscripttype) pClKeySort->size ();
-		{
-			sEntryViaIter = sCRIter[i];
-
-			sClRefKeySort.insert (sEntryViaIter);
-		}
-		i += (_t_subscripttype) pClKeySort->size ();
-	}
-
-	cout << "testing ";
-	
-	if (sClRefKeySort != *pClKeySort)
-	{
-		cerr << endl;
-		cerr << "keysort mismatch (negativ reverse iterator sub-scription)!" << endl;
-		
-		exit (-1);
-	}
-
-	cout << "passed" << endl;
+	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sIter, i, false);
+	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sCIter, i, false);
+	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sRIter, i, false);
+	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sCRIter, i, false);
 }
 
-template <class _t_obj, class _t_objprim, class _t_offsettype, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeKeySortIterCompound (_t_obj *pClKeySort, uint32_t nNumEntries)
+template <class _t_offsettype, class _t_container, class _t_iterator>
+void TestBTreeKeySortIterCompound (_t_container *pContainer, _t_container *pContainerRef, _t_iterator &rIter, _t_offsettype &rI, bool bForward)
 {
-	typedef typename _t_obj::const_iterator					citer_t;
-	typedef typename _t_obj::const_reverse_iterator			criter_t;
+	typedef typename _t_container::value_type						data_t;
 
-	_t_objprim				*pClKeySortPrim;
-	uint32_t				nDebug = 0;
-	uint32_t				nSeed = 0;
-	citer_t					sCIter;
-	criter_t				sCRIter;
-	_t_data					sEntryViaIter;
-	_t_offsettype			i;
-	_t_obj					sClRefKeySort (*pClKeySort);
-	
-	cout << "basic keysort iterator compound operator test" << endl;
-	
-#if defined(__GNUC__) || defined(__GNUG__)
+	data_t			sData;
 
-	int		nStatus;
-	char	*pszTypeid = abi::__cxa_demangle (typeid (_t_offsettype).name (), 0, 0, &nStatus);
-
-	if (pszTypeid != NULL)
+	if (bForward)
 	{
-		cout << "_t_sizetype is set to: " << pszTypeid << endl;
-		
-		free ((void *) pszTypeid);
+		::std::cout << "progrssing ";
 	}
 	else
 	{
-		cout << "_t_sizetype is set to: " << typeid (_t_offsettype).name () << endl;
+		::std::cout << "reversing ";
 	}
+
+	if (is_const_iterator (pContainer, rIter))
+	{
+		::std::cout << "const ";
+	}
+
+	if (is_reverse_iterator (pContainer, rIter))
+	{
+		::std::cout << "reverse ";
+	}
+
+	::std::cout << "iterator ";
 	
-#else
-
-	cout << "_t_sizetype is set to: " << typeid (_t_offsettype).name () << endl;
-	
-#endif
-
-	pClKeySortPrim = dynamic_cast <_t_objprim *> (pClKeySort);
-
-	keySortPrim_add (pClKeySortPrim, nNumEntries, nDebug, nSeed, BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY);
-	
-	sCIter = pClKeySort->cbegin ();
-	sCRIter = pClKeySort->crbegin ();
-
-	cout << "positiv forward iterator ";
-
-	for (i = 0; i < (_t_offsettype) pClKeySort->size (); i++)
+	if (bForward)
 	{
-		sCIter += i;
+		get_begin (pContainer, rIter);
+
+		for (rI = 0; rI < pContainer->size (); rI++)
 		{
-			sEntryViaIter = *sCIter;
-			
-			sClRefKeySort.insert (sEntryViaIter);
-		}
-		sCIter -= i;
-	}
-
-	cout << "testing ";
-
-	if (sClRefKeySort != *pClKeySort)
-	{
-		cerr << endl;
-		cerr << "keysort mismatch (positiv forward iterator)!" << endl;
-		
-		exit (-1);
-	}
-
-	cout << "passed" << endl;
-
-	sClRefKeySort.clear ();
-
-	cout << "positiv reverse iterator ";
-
-	for (i = 0; i < (_t_offsettype) pClKeySort->size (); i++)
-	{
-		sCRIter += i;
-		{
-			sEntryViaIter = *sCRIter;
-			
-			sClRefKeySort.insert (sEntryViaIter);
-		}
-		sCRIter -= i;
-	}
-
-	cout << "testing ";
-
-	if (sClRefKeySort != *pClKeySort)
-	{
-		cerr << endl;
-		cerr << "keysort mismatch (positiv reverse iterator)!" << endl;
-		
-		exit (-1);
-	}
-
-	cout << "passed" << endl;
-
-	sClRefKeySort.clear ();
-
-	sCIter = pClKeySort->cend ();
-	sCRIter = pClKeySort->crend ();
-
-	cout << "negativ forward iterator ";
-
-	for (i = (_t_offsettype) pClKeySort->size (); i > 0; )
-	{
-		i--;
-
-		i -= (_t_offsettype) pClKeySort->size ();
-		{
-			sCIter += i;
+			rIter += rI;
 			{
-				sEntryViaIter = *sCIter;
-				
-				sClRefKeySort.insert (sEntryViaIter);
+				sData = *rIter;
+
+				pContainerRef->insert (sData);
 			}
-			sCIter -= i;
+			rIter -= rI;
 		}
-		i += (_t_offsettype) pClKeySort->size ();
 	}
-
-	cout << "testing ";
-
-	if (sClRefKeySort != *pClKeySort)
+	else
 	{
-		cerr << endl;
-		cerr << "keysort mismatch (negativ forward iterator)!" << endl;
-		
-		exit (-1);
-	}
+		get_end (pContainer, rIter);
 
-	cout << "passed" << endl;
-
-	sClRefKeySort.clear ();
-
-	cout << "negativ reverse iterator ";
-
-	for (i = (_t_offsettype) pClKeySort->size (); i > 0; )
-	{
-		i--;
-
-		i -= (_t_offsettype) pClKeySort->size ();
+		for (rI = (_t_offsettype) pContainer->size (); rI > (_t_offsettype) 0; )
 		{
-			sCRIter += i;
+			rI--;
+
+			rI -= (_t_offsettype) pContainer->size ();
 			{
-				sEntryViaIter = *sCRIter;
-				
-				sClRefKeySort.insert (sEntryViaIter);
+				rIter += rI;
+				{
+					sData = *rIter;
+
+					pContainerRef->insert (sData);
+				}
+				rIter -= rI;
 			}
-			sCRIter -= i;
+			rI += (_t_offsettype) pContainer->size ();
 		}
-		i += (_t_offsettype) pClKeySort->size ();
 	}
 
-	cout << "testing ";
-
-	if (sClRefKeySort != *pClKeySort)
+	if (*pContainer != *pContainerRef)
 	{
-		cerr << endl;
-		cerr << "keysort mismatch (negativ reverse iterator)!" << endl;
+		::std::cout << "failed" << ::std::endl;
 		
 		exit (-1);
 	}
 
-	cout << "passed" << endl;
+	::std::cout << "passed" << ::std::endl;
+
+	pContainerRef->clear ();
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeKeySortIterCompoundIter (_t_obj *pClKeySort, uint32_t nNumEntries)
+template <class _t_offsettype, class _t_container>
+void TestBTreeKeySortIterCompound (_t_container *pContainer, uint32_t nNumEntries)
 {
-	typedef typename _t_obj::const_iterator					citer_t;
-	typedef typename _t_obj::const_reverse_iterator			criter_t;
+	typedef typename _t_container::iterator							iter_t;
+	typedef typename _t_container::const_iterator					citer_t;
+	typedef typename _t_container::reverse_iterator					riter_t;
+	typedef typename _t_container::const_reverse_iterator			criter_t;
 
-	_t_objprim				*pClKeySortPrim;
-	uint32_t				nDebug = 0;
+	uint32_t				nSeed = 0;
+	citer_t					sIter;
+	citer_t					sCIter;
+	criter_t				sRIter;
+	criter_t				sCRIter;
+	_t_offsettype			i;
+	_t_container			sContainerRef (*pContainer);
+	::std::string			strType;
+	
+	cout << "basic keysort iterator compound operator test" << endl;
+
+	get_typename (i, strType);
+	
+	cout << "_t_sizetype is set to: " << strType << endl;
+	
+	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
+
+	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sIter, i, true);
+	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sCIter, i, true);
+	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sRIter, i, true);
+	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sCRIter, i, true);
+
+	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sIter, i, false);
+	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sCIter, i, false);
+	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sRIter, i, false);
+	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sCRIter, i, false);
+}
+
+template <class _t_container>
+void TestBTreeKeySortIterCompoundIter (_t_container *pContainer, uint32_t nNumEntries)
+{
+	typedef typename _t_container::value_type				data_t;
+
+	typedef typename _t_container::const_iterator			citer_t;
+	
 	uint32_t				nSeed = 0;
 	citer_t					sCIter;
-	_t_data					sEntryViaIter;
+	data_t					sData;
 	citer_t					sCI;
-	_t_obj					sClRefKeySort (*pClKeySort);
+	_t_container			sContainerRef (*pContainer);
 	
-	cout << "basic keysort iterator compound operator (itreator) test" << endl;
+	cout << "basic keysort iterator compound operator (iterator) test" << endl;
 	
-	pClKeySortPrim = dynamic_cast <_t_objprim *> (pClKeySort);
-
-	keySortPrim_add (pClKeySortPrim, nNumEntries, nDebug, nSeed, BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY);
+	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 	
-	sCIter = pClKeySort->cbegin ();
+	sCIter = pContainer->cbegin ();
 	
 	cout << "forward iterator ";
 
-	for (sCI = pClKeySort->cbegin (); sCI != pClKeySort->cend (); sCI++)
+	for (sCI = pContainer->cbegin (); sCI != pContainer->cend (); sCI++)
 	{
 		sCIter += sCI;
 		{
-			sEntryViaIter = *sCIter;
+			sData = *sCIter;
 			
-			sClRefKeySort.insert (sEntryViaIter);
+			sContainerRef.insert (sData);
 		}
 		sCIter -= sCI;
 	}
 
 	cout << "testing ";
 
-	if (sClRefKeySort != *pClKeySort)
+	if (sContainerRef != *pContainer)
 	{
 		cerr << endl;
 		cerr << "keysort mismatch (forward iterator compound operation)!" << endl;
@@ -594,32 +619,32 @@ void TestBTreeKeySortIterCompoundIter (_t_obj *pClKeySort, uint32_t nNumEntries)
 
 	cout << "passed" << endl;
 
-	sClRefKeySort.clear ();
+	sContainerRef.clear ();
 
-	sCIter = pClKeySort->cend ();
+	sCIter = pContainer->cend ();
 	
 	cout << "reverse iterator ";
 
-	for (sCI = pClKeySort->cend (); sCI != pClKeySort->cbegin (); )
+	for (sCI = pContainer->cend (); sCI != pContainer->cbegin (); )
 	{
 		sCI--;
 
-		sCI -= pClKeySort->size ();
+		sCI -= pContainer->size ();
 		{
 			sCIter += sCI;
 			{
-				sEntryViaIter = *sCIter;
+				sData = *sCIter;
 				
-				sClRefKeySort.insert (sEntryViaIter);
+				sContainerRef.insert (sData);
 			}
 			sCIter -= sCI;
 		}
-		sCI += pClKeySort->size ();
+		sCI += pContainer->size ();
 	}
 
 	cout << "testing ";
 
-	if (sClRefKeySort != *pClKeySort)
+	if (sContainerRef != *pContainer)
 	{
 		cerr << endl;
 		cerr << "keysort mismatch (reverse iterator compound operation)!" << endl;
@@ -630,242 +655,217 @@ void TestBTreeKeySortIterCompoundIter (_t_obj *pClKeySort, uint32_t nNumEntries)
 	cout << "passed" << endl;
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeKeySortIterArithmeticOperators (_t_obj *pClKeySort, uint32_t nNumEntries)
+template <class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
+void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_reference *pReference, _t_dest_iterator &rIterDest, _t_operand_a &rOperandA, _t_operand_b &rOperandB, const typename _t_container::size_type nExpectedOffset, ::std::false_type)
 {
-	typedef typename _t_obj::const_iterator				citer_t;
-	typedef typename _t_obj::const_reverse_iterator		criter_t;
+	typedef typename _t_container::size_type		sizetype;
+	typedef typename _t_container::value_type		data_t;
 
-	_t_objprim				*pClKeySortPrim;
-	uint32_t				nDebug = 0;
+	typedef typename _t_container::const_iterator	citer_t;
+
+	typedef typename _t_reference::const_iterator	citer_ref_t;
+
+	_t_dest_iterator	sIterBegin;
+	sizetype			nDiff;
+	citer_ref_t			sCIterRef;
+	data_t				sData;
+	data_t				sDataRef;
+
+	get_begin (pContainer, sIterBegin);
+
+	nDiff = ::std::distance (sIterBegin, rIterDest);
+
+	if (is_reverse_iterator (pContainer, rIterDest))
+	{
+		nDiff = pContainer->size () - nDiff - 1;
+	}
+	
+	if (nDiff != nExpectedOffset)
+	{
+		::std::cout << "failed" << ::std::endl;
+		::std::cout << "resulting distance doesn't match expected result!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	get_begin (pReference, sCIterRef);
+
+	::std::advance (sCIterRef, nExpectedOffset);
+
+	citer_ref_t			sCIterRefEnd;
+	_t_dest_iterator	sIterEnd;
+
+	get_end (pReference, sCIterRefEnd);
+	get_end (pContainer, sIterEnd);
+
+	if ((sCIterRef == sCIterRefEnd) != (rIterDest == sIterEnd))
+	{
+		::std::cout << "failed" << ::std::endl;
+		::std::cout << "data set position and reference position are not matching on cend ()!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if ((sCIterRef != sCIterRefEnd) || (rIterDest != sIterEnd))
+	{
+		entry_conversion (sDataRef, *sCIterRef);
+
+		sData = *rIterDest;
+
+		if (sData != sDataRef)
+		{
+			::std::cout << "failed" << ::std::endl;
+			::std::cout << "returned data set doesn't match reference data set!" << ::std::endl;
+
+			exit (-1);
+		}
+	}
+	
+	::std::cout << "passed";
+}
+
+template <class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
+void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_reference *pReference, _t_dest_iterator &rDiff, _t_operand_a &rOperandA, _t_operand_b &rOperandB, const typename _t_container::size_type nExpectedOffset, ::std::true_type)
+{
+	typedef typename _t_container::size_type		sizetype;
+	
+	if (rDiff != nExpectedOffset)
+	{
+		::std::cout << "failed" << ::std::endl;
+		::std::cout << "resulting distance doesn't match expected result!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	sizetype			nNewExpectedOffset;
+	_t_operand_a		sIterA;
+	::std::false_type	sFalse;
+
+	get_begin (pContainer, sIterA);
+
+	nNewExpectedOffset = ::std::distance (sIterA, rOperandB);
+
+	TestBTreeKeySortIterArithmeticOperators (pContainer, pReference, rOperandB, rOperandA, rDiff, nNewExpectedOffset, sFalse);
+}
+
+template <class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
+void TestBTreeKeySortIterArithmeticOperatorAdd (_t_container *pContainer, _t_reference *pReference, const char *pszDest, const char *pszOperandA, const char *pszOperandB, _t_dest_iterator &rIterDest, _t_operand_a &rOperandA, _t_operand_b &rOperandB, const typename _t_container::size_type nExpectedOffset)
+{
+	typename ::std::is_integral<_t_dest_iterator>::type		sDestSelect;
+
+	::std::cout << pszDest << " = " << pszOperandA << " + " << pszOperandB << " ";
+
+	rIterDest = rOperandA + rOperandB;
+
+	TestBTreeKeySortIterArithmeticOperators (pContainer, pReference, rIterDest, rOperandA, rOperandB, nExpectedOffset, sDestSelect);
+
+	::std::cout << ::std::endl;
+}
+
+template <class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
+void TestBTreeKeySortIterArithmeticOperatorSub (_t_container *pContainer, _t_reference *pReference, const char *pszDest, const char *pszOperandA, const char *pszOperandB, _t_dest_iterator &rIterDest, _t_operand_a &rOperandA, _t_operand_b &rOperandB, const typename _t_container::size_type nExpectedOffset)
+{
+	typename ::std::is_integral<_t_dest_iterator>::type		sDestSelect;
+
+	::std::cout << pszDest << " = " << pszOperandA << " - " << pszOperandB << " ";
+
+	rIterDest = rOperandA - rOperandB;
+
+	TestBTreeKeySortIterArithmeticOperators (pContainer, pReference, rIterDest, rOperandA, rOperandB, nExpectedOffset, sDestSelect);
+
+	::std::cout << ::std::endl;
+}
+
+template <class _t_container, class _t_reference>
+void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_reference *pReference, uint32_t nNumEntries)
+{
+	typedef typename _t_container::value_type					data_t;
+	typedef typename _t_container::size_type					sizetype;
+
+	typedef typename _t_container::iterator						iter_t;
+	typedef typename _t_container::const_iterator				citer_t;
+	typedef typename _t_container::reverse_iterator				riter_t;
+	typedef typename _t_container::const_reverse_iterator		criter_t;
+
+	const uint32_t			nRepetitions = 1;
+	uint32_t				i;
 	uint32_t				nSeed = 0;
+	iter_t					sIter;
 	citer_t					sCIter;
+	riter_t					sRIter;
 	criter_t				sCRIter;
-	_t_data					sEntryViaIter;
-	_t_data					sEntryViaIf;
-	_t_sizetype				nOffset = 0;
+	iter_t					sIterBegin;
+	citer_t					sCIterBegin;
+	riter_t					sRIterBegin;
+	criter_t				sCRIterBegin;
+	iter_t					sIterEnd;
+	citer_t					sCIterEnd;
+	riter_t					sRIterEnd;
+	criter_t				sCRIterEnd;
+	sizetype				nOffset = 0;
+	int						nOffsetInt;
+	sizetype				nResult;
 	
 	cout << "basic keysort iterator arithmetic operators test" << endl;
 
-	pClKeySortPrim = dynamic_cast <_t_objprim *> (pClKeySort);
+	associative_container_add_primitive (pReference, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 
-	keySortPrim_add (pClKeySortPrim, nNumEntries, nDebug, nSeed, BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY);
-	
-	sCIter = pClKeySort->cbegin ();
-	sCRIter = pClKeySort->crbegin ();
+	TransferKeySortIterRefToTestContainer (pContainer, pReference);
 
-	cout << "const_iterator = const_iterator + _t_sizetype" << endl;
+	get_begin (pContainer, sIterBegin);
+	get_begin (pContainer, sCIterBegin);
+	get_begin (pContainer, sRIterBegin);
+	get_begin (pContainer, sCRIterBegin);
 
-	nOffset++;
+	get_end (pContainer, sIterEnd);
+	get_end (pContainer, sCIterEnd);
+	get_end (pContainer, sRIterEnd);
+	get_end (pContainer, sCRIterEnd);
 
-	sCIter = pClKeySort->cbegin () + (_t_sizetype) nOffset;
-
-	pClKeySort->get_at (nOffset, sEntryViaIf);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
+	for (i = 0; i < nRepetitions; i++)
 	{
-		cerr << "failed!" << endl;
+		nOffset = generate_rand32 ();
+		nOffset = nOffset % pContainer->size ();
 
-		exit (-1);
+		nOffsetInt = (int) nOffset;
+
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "iterator", "iterator", "sizetype", sIter, sIterBegin, nOffset, nOffset);
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "const_iterator", "const_iterator", "sizetype", sCIter, sCIterBegin, nOffset, nOffset);
+
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "iterator", "sizetype", "iterator", sIter, nOffset, sIterBegin, nOffset);
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "const_iterator", "sizetype", "const_iterator", sCIter, nOffset, sCIterBegin, nOffset);
+
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "iterator", "iterator", "int", sIter, sIterBegin, nOffsetInt, nOffset);
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "const_iterator", "const_iterator", "int", sCIter, sCIterBegin, nOffsetInt, nOffset);
+
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "iterator", "int", "iterator", sIter, nOffsetInt, sIterBegin, nOffset);
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "const_iterator", "int", "const_iterator", sCIter, nOffsetInt, sCIterBegin, nOffset);
+
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "iterator", "iterator", "sizetype", sIter, sIterEnd, nOffset, pContainer->size () - nOffset);
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "const_iterator", "const_iterator", "sizetype", sCIter, sCIterEnd, nOffset, pContainer->size () - nOffset);
+
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "iterator", "iterator", "int", sIter, sIterEnd, nOffsetInt, pContainer->size () - nOffset);
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "const_iterator", "const_iterator", "int", sCIter, sCIterEnd, nOffsetInt, pContainer->size () - nOffset);
+
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "sizetype", "iterator", "iterator", nResult, sIterBegin, sIterEnd, 0 - pContainer->size ());
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "sizetype", "const_iterator", "const_iterator", nResult, sCIterBegin, sCIterEnd, 0 - pContainer->size ());
+
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "reverse_iterator", "reverse_iterator", "sizetype", sRIter, sRIterBegin, nOffset, pContainer->size () - nOffset - 1);
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "reverse_const_iterator", "reverse_const_iterator", "sizetype", sCRIter, sCRIterBegin, nOffset, pContainer->size () - nOffset - 1);
+
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "reverse_iterator", "reverse_iterator", "int", sRIter, sRIterBegin, nOffsetInt, pContainer->size () - nOffset - 1);
+		TestBTreeKeySortIterArithmeticOperatorAdd (pContainer, pReference, "reverse_const_iterator", "reverse_const_iterator", "int", sCRIter, sCRIterBegin, nOffsetInt, pContainer->size () - nOffset - 1);
+
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "reverse_iterator", "reverse_iterator", "sizetype", sRIter, sRIterEnd, nOffset, nOffset - 1);
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "reverse_const_iterator", "reverse_const_iterator", "sizetype", sCRIter, sCRIterEnd, nOffset, nOffset - 1);
+
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "reverse_iterator", "reverse_iterator", "int", sRIter, sRIterEnd, nOffsetInt, nOffset - 1);
+		TestBTreeKeySortIterArithmeticOperatorSub (pContainer, pReference, "reverse_const_iterator", "reverse_const_iterator", "int", sCRIter, sCRIterEnd, nOffsetInt, nOffset - 1);
 	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_iterator = const_iterator + int" << endl;
-	
-	nOffset++;
-
-	sCIter = pClKeySort->cbegin () + (int) nOffset;
-
-	pClKeySort->get_at (nOffset, sEntryViaIf);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_iterator = _t_sizetype + const_iterator" << endl;
-	
-	nOffset++;
-
-	sCIter = ((_t_sizetype) nOffset) + pClKeySort->cbegin ();
-
-	pClKeySort->get_at (nOffset, sEntryViaIf);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_iterator = int + const_iterator" << endl;
-	
-	nOffset++;
-
-	sCIter = ((int) nOffset) + pClKeySort->cbegin ();
-
-	pClKeySort->get_at (nOffset, sEntryViaIf);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_iterator = const_iterator - _t_sizetype" << endl;
-	
-	nOffset++;
-
-	sCIter = pClKeySort->cend () - (_t_sizetype) nOffset;
-
-	pClKeySort->get_at (pClKeySort->size () - nOffset, sEntryViaIf);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-	
-	cout << "const_iterator = const_iterator - int" << endl;
-	
-	nOffset++;
-
-	sCIter = pClKeySort->cend () - (int) nOffset;
-
-	pClKeySort->get_at (pClKeySort->size () - nOffset, sEntryViaIf);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-	
-	cout << "_t_sizetype = const_iterator - const_iterator" << endl;
-
-	_t_sizetype		nSize = pClKeySort->cend () - pClKeySort->cbegin ();
-
-	if (nSize != pClKeySort->size ())
-	{
-		cout << "failed!" << endl;
-	}
-
-	cout << "const_reverse_iterator = const_reverse_iterator + _t_sizetype" << endl;
-	
-	nOffset++;
-
-	sCRIter = pClKeySort->crbegin () + (_t_sizetype) nOffset;
-
-	pClKeySort->get_at (pClKeySort->size () - (nOffset + 1), sEntryViaIf);
-
-	sEntryViaIter = *sCRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_reverse_iterator = const_reverse_iterator + int" << endl;
-	
-	nOffset++;
-
-	sCRIter = pClKeySort->crbegin () + (int) nOffset;
-
-	pClKeySort->get_at (pClKeySort->size () - (nOffset + 1), sEntryViaIf);
-
-	sEntryViaIter = *sCRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_reverse_iterator = const_reverse_iterator - _t_sizetype" << endl;
-	
-	nOffset++;
-
-	sCRIter = pClKeySort->crend () - (_t_sizetype) nOffset;
-
-	pClKeySort->get_at (nOffset - 1, sEntryViaIf);
-
-	sEntryViaIter = *sCRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_reverse_iterator = const_reverse_iterator - int" << endl;
-	
-	nOffset++;
-
-	sCRIter = pClKeySort->crend () - (int) nOffset;
-
-	pClKeySort->get_at (nOffset - 1, sEntryViaIf);
-
-	sEntryViaIter = *sCRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
 }
 
-template <class _t_obj, class _t_lhiter, class _t_rhiter>
-void TestBTreeKeySortIterCompareOperators (_t_obj *pClKeySort, uint32_t nNumEntries, _t_lhiter sLHIterBegin, _t_lhiter sLHIterEnd, _t_rhiter sRHIterBegin, _t_rhiter sRHIterEnd)
+template <class _t_lhiter, class _t_rhiter>
+void TestBTreeKeySortIterCompareOperators (_t_lhiter sLHIterBegin, _t_lhiter sLHIterEnd, _t_rhiter sRHIterBegin, _t_rhiter sRHIterEnd)
 {
 	_t_lhiter		sLhs;
 	_t_rhiter		sRhs;
@@ -1071,56 +1071,95 @@ void TestBTreeKeySortIterCompareOperators (_t_obj *pClKeySort, uint32_t nNumEntr
 	cout << endl;
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeKeySortIterCompareOperators (_t_obj *pClKeySort, uint32_t nNumEntries)
+template <class _t_container>
+void TestBTreeKeySortIterCompareOperators (_t_container *pContainer, uint32_t nNumEntries)
 {
-	typedef typename _t_obj::const_iterator				citer_t;
-	typedef typename _t_obj::const_reverse_iterator		criter_t;
+	typedef typename _t_container::iterator						iter_t;
+	typedef typename _t_container::const_iterator				citer_t;
+	typedef typename _t_container::reverse_iterator				riter_t;
+	typedef typename _t_container::const_reverse_iterator		criter_t;
 
-	_t_objprim				*pClKeySortPrim;
-	uint32_t				nDebug = 0;
 	uint32_t				nSeed = 0;
 	
 	cout << "basic array iterator compare operators test" << endl;
 
-	pClKeySortPrim = dynamic_cast <_t_objprim *> (pClKeySort);
-
-	keySortPrim_add (pClKeySortPrim, nNumEntries, nDebug, nSeed, BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY);
+	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 	
+	cout << "iterator versus iterator";
+	
+	TestBTreeKeySortIterCompareOperators (pContainer->begin (), pContainer->end (), pContainer->begin (), pContainer->end ());
+
 	cout << "const_iterator versus const_iterator";
 	
-	TestBTreeKeySortIterCompareOperators<_t_obj, citer_t, citer_t> (pClKeySort, nNumEntries, pClKeySort->cbegin (), pClKeySort->cend (), pClKeySort->cbegin (), pClKeySort->cend ());
+	TestBTreeKeySortIterCompareOperators (pContainer->cbegin (), pContainer->cend (), pContainer->cbegin (), pContainer->cend ());
+
+	cout << "reverse_iterator versus reverse_iterator";
+
+	TestBTreeKeySortIterCompareOperators (pContainer->rbegin (), pContainer->rend (), pContainer->rbegin (), pContainer->rend ());
 
 	cout << "const_reverse_iterator versus const_reverse_iterator";
 
-	TestBTreeKeySortIterCompareOperators<_t_obj, criter_t, criter_t> (pClKeySort, nNumEntries, pClKeySort->crbegin (), pClKeySort->crend (), pClKeySort->crbegin (), pClKeySort->crend ());
+	TestBTreeKeySortIterCompareOperators (pContainer->crbegin (), pContainer->crend (), pContainer->crbegin (), pContainer->crend ());
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeKeySortIterConstSwap (_t_obj *pClKeySort, uint32_t nNumEntries)
+template <class _t_container>
+void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntries)
 {
-	typedef typename _t_obj::const_iterator					citer_t;
-	typedef typename _t_obj::const_reverse_iterator			criter_t;
+	typedef typename _t_container::iterator							iter_t;
+	typedef typename _t_container::const_iterator					citer_t;
+	typedef typename _t_container::reverse_iterator					riter_t;
+	typedef typename _t_container::const_reverse_iterator			criter_t;
 
-	_t_objprim				*pClKeySortPrim;
-	uint32_t				nDebug = 0;
 	uint32_t				nSeed = 0;
+	iter_t					sIter;
+	iter_t					sIter2;
 	citer_t					sCIter;
 	citer_t					sCIter2;
+	riter_t					sRIter;
+	riter_t					sRIter2;
 	criter_t				sCRIter;
 	criter_t				sCRIter2;
 	
 	cout << "basic keysort const iterator swap test" << endl;
 
-	pClKeySortPrim = dynamic_cast <_t_objprim *> (pClKeySort);
+	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 
-	keySortPrim_add (pClKeySortPrim, nNumEntries, nDebug, nSeed, BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY);
+	get_begin (pContainer, sIter);
+	get_begin (pContainer, sCIter);
+	get_begin (pContainer, sRIter);
+	get_begin (pContainer, sCRIter);
 	
-	sCIter = pClKeySort->cbegin ();
-	sCIter2 = pClKeySort->cend ();
+	get_end (pContainer, sIter2);
+	get_end (pContainer, sCIter2);
+	get_end (pContainer, sRIter2);
+	get_end (pContainer, sCRIter2);
+	
+	cout << "iterator ";
 
-	sCRIter = pClKeySort->crbegin ();
-	sCRIter2 = pClKeySort->crend ();
+	if (sIter >= sIter2)
+	{
+		exit (-1);
+	}
+
+	cout << "swap ";
+
+	sIter.swap (sIter2);
+
+	if (sIter <= sIter2)
+	{
+		exit (-1);
+	}
+
+	cout << "swap ";
+
+	sIter2.swap (sIter);
+	
+	if (sIter >= sIter2)
+	{
+		exit (-1);
+	}
+
+	cout << endl;
 
 	cout << "const_iterator ";
 
@@ -1149,6 +1188,33 @@ void TestBTreeKeySortIterConstSwap (_t_obj *pClKeySort, uint32_t nNumEntries)
 
 	cout << endl;
 
+	cout << "reverse_iterator ";
+
+	if (sRIter >= sRIter2)
+	{
+		exit (-1);
+	}
+
+	cout << "swap ";
+
+	sRIter.swap (sRIter2);
+
+	if (sRIter <= sRIter2)
+	{
+		exit (-1);
+	}
+
+	cout << "swap ";
+
+	sRIter2.swap (sRIter);
+	
+	if (sRIter >= sRIter2)
+	{
+		exit (-1);
+	}
+
+	cout << endl;
+	
 	cout << "const_reverse_iterator ";
 
 	if (sCRIter >= sCRIter2)
@@ -1177,14 +1243,29 @@ void TestBTreeKeySortIterConstSwap (_t_obj *pClKeySort, uint32_t nNumEntries)
 	cout << endl;
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeKeySortIter (uint32_t nTest, _t_subnodeiter nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, int argc, char **argv)
 {
-	_t_obj												*pClKeySort;
+	typedef CBTreeKeySort <keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+																								container_t;
+
+	typedef typename ::std::multimap<const uint32_t, keySortMap_t, multiMapMemCmp<uint32_t> >	reference_memcmp_t;
+
+	container_t											*pClKeySort;
+	reference_memcmp_t									*pClRefMemCmpKeySort;
 
 	cout << "b-tree keysort iterator test bench selected" << endl;
 
-	pClKeySort = new _t_obj (rDataLayerProperties, &sCacheDesc, nNodeSize);
+	pClRefMemCmpKeySort = new reference_memcmp_t ();
+
+	if (pClRefMemCmpKeySort == NULL)
+	{
+		cerr << "ERROR: Insufficient memory!" << endl;
+
+		exit (-1);
+	}
+
+	pClKeySort = new container_t (rDataLayerProperties, &sCacheDesc, nNodeSize);
 
 	if (pClKeySort == NULL)
 	{
@@ -1197,70 +1278,70 @@ void TestBTreeKeySortIter (uint32_t nTest, _t_subnodeiter nNodeSize, _t_datalaye
 	{
 	case BTREETEST_KEY_SORT_ITER_CONST_ASCEND	:
 		{
-			TestBTreeKeySortConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClKeySort, false, 128, 1, 0);
+			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, false, 128, 1, 0);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_ASCEND_SMALL	:
 		{
-			TestBTreeKeySortConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClKeySort, false, 16, 1, 0);
+			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, false, 16, 1, 0);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_DESCEND	:
 		{
-			TestBTreeKeySortConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClKeySort, true, 128, 1, 0);
+			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, true, 128, 1, 0);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_DESCEND_SMALL	:
 		{
-			TestBTreeKeySortConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClKeySort, true, 16, 1, 0);
+			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, true, 16, 1, 0);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_ASCEND	:
 		{
-			TestBTreeKeySortConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClKeySort, false, 128, 5, 3);
+			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, false, 128, 5, 3);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_ASCEND_SMALL	:
 		{
-			TestBTreeKeySortConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClKeySort, false, 16, 2, 3);
+			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, false, 16, 2, 3);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_DESCEND	:
 		{
-			TestBTreeKeySortConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClKeySort, true, 128, 4, 3);
+			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, true, 128, 4, 3);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_DESCEND_SMALL	:
 		{
-			TestBTreeKeySortConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClKeySort, true, 16, 2, 3);
+			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, true, 16, 2, 3);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_NODESIZE_VS_STEPSIZE_ASCEND		:
 		{
-			TestBTreeKeySortConstIterNodeSizeVsStepSize<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_subnodeiter, _t_datalayerproperties> (false, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
+			TestBTreeKeySortConstIterNodeSizeVsStepSize (pClKeySort, pClRefMemCmpKeySort, false, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
 			
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_NODESIZE_VS_STEPSIZE_DESCEND	:
 		{
-			TestBTreeKeySortConstIterNodeSizeVsStepSize<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_subnodeiter, _t_datalayerproperties> (true, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
+			TestBTreeKeySortConstIterNodeSizeVsStepSize (pClKeySort, pClRefMemCmpKeySort, true, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
 
 			break;
 		}
@@ -1268,56 +1349,56 @@ void TestBTreeKeySortIter (uint32_t nTest, _t_subnodeiter nNodeSize, _t_datalaye
 
 	case BTREETEST_KEY_SORT_ITER_SUBSCRIPTOR	:
 		{
-			TestBTreeKeySortIterSubScriptor<_t_obj, _t_objprim, _t_sizetype, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClKeySort, 128);
+			TestBTreeKeySortIterSubScriptor<_t_sizetype> (pClKeySort, 128);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_SUBSCRIPTOR_INT	:
 		{
-			TestBTreeKeySortIterSubScriptor<_t_obj, _t_objprim, int, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClKeySort, 128);
+			TestBTreeKeySortIterSubScriptor<int> (pClKeySort, 128);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_COMPOUND	:
 		{
-			TestBTreeKeySortIterCompound<_t_obj, _t_objprim, _t_sizetype, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClKeySort, 128);
+			TestBTreeKeySortIterCompound<_t_sizetype> (pClKeySort, 128);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_COMPOUND_INT	:
 		{
-			TestBTreeKeySortIterCompound<_t_obj, _t_objprim, int, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClKeySort, 128);
+			TestBTreeKeySortIterCompound<int> (pClKeySort, 128);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_COMPOUND_ITER	:
 		{
-			TestBTreeKeySortIterCompoundIter<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClKeySort, 128);
+			TestBTreeKeySortIterCompoundIter (pClKeySort, 128);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_ARITHMETIC_OPERATORS	:
 		{
-			TestBTreeKeySortIterArithmeticOperators<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClKeySort, 40);
+			TestBTreeKeySortIterArithmeticOperators (pClKeySort, pClRefMemCmpKeySort, 40);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_COMPARE_OPERATORS	:
 		{
-			TestBTreeKeySortIterCompareOperators<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClKeySort, 16);
+			TestBTreeKeySortIterCompareOperators (pClKeySort, 16);
 
 			break;
 		}
 
 	case BTREETEST_KEY_SORT_ITER_CONST_SWAP	:
 		{
-			TestBTreeKeySortIterConstSwap<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClKeySort, 16);
+			TestBTreeKeySortIterConstSwap (pClKeySort, 16);
 
 			break;
 		}
@@ -1329,6 +1410,8 @@ void TestBTreeKeySortIter (uint32_t nTest, _t_subnodeiter nNodeSize, _t_datalaye
 			break;
 		}
 	}
+
+	delete pClRefMemCmpKeySort;
 
 	delete pClKeySort;
 }
