@@ -24,13 +24,20 @@
 
 #include <list>
 #include <vector>
+#include <map>
 
 #include "btreeioram.h"
 #include "btreeiofile.h"
 
+#include "btreeprimitivedefinitions.h"
+#include "btreekeysorttestprimitive.h"
+#include "btreecommonprimitives.h"
 #include "btreetestcommon.h"
 #include "btreetestkeysort.h"
-#include "btreekeysorttestprimitive.h"
+
+#include "btreekeysorttestwrapper.h"
+
+typedef ::std::multimap<const uint32_t, keySortMap_t>			keysort_reference_t;
 
 typedef enum
 {
@@ -40,16 +47,12 @@ typedef enum
 	BTREETEST_KEYSORT_BASIC_DESCEND_SMALL, 
 	BTREETEST_KEYSORT_BASIC_RANDOM, 
 	BTREETEST_KEYSORT_BASIC_RANDOM_SMALL, 
-	BTREETEST_KEYSORT_clear, 
+	BTREETEST_KEYSORT_CLEAR, 
 	BTREETEST_KEYSORT_REPLACE, 
 	BTREETEST_KEYSORT_UNLOAD, 
 	BTREETEST_KEYSORT_REMOVE_INSTANCES, 
-	BTREETEST_KEYSORT_MULTI_NODESIZES, 
-	BTREETEST_KEYSORT_MULTI_CACHE_SETTINGS, 
-	BTREETEST_KEYSORT_MULTI_TEMPLATE_PARAMETERS, 
 	BTREETEST_KEYSORT_CODE_COVERAGE_DETERMINE_POSITION, 
 	BTREETEST_KEYSORT_CODE_COVERAGE_FIND_FIRST_KEY, 
-	BTREETEST_KEYSORT_CODE_COVERAGE_GET, 
 	BTREETEST_KEYSORT_HTML_OUTPUT, 
 	BTREETEST_KEYSORT_COPY_CONSTRUCTOR, 
 	BTREETEST_KEYSORT_OPERATOR_OVERLOAD_ASSIGN, 
@@ -72,7 +75,18 @@ typedef enum
 	BTREETEST_KEYSORT_STL_IF_LOWER_BOUND_UPPER_BOUND
 } btreetest_keysort_e;
 
-template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, uint32_t nNumMultiCacheSizes, bayerTreeCacheDescription_t *psMultiCacheDesc, uint32_t nNumCacheProperties, _t_datalayerproperties **ppMultiCacheSizeDataLayerProperties, uint32_t nNumMultiTemplateParams, _t_objprim **ppClKeySortsPrim, int argc, char **argv);
+typedef enum
+{
+	BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, 
+	BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, 
+	BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SELF_REFERENCE, 
+	BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART_EXTERN, 
+	BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT_EXTERN, 
+} btreetest_keysort_stl_if_insert_via_iterator_e;
+
+//template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
+//void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, uint32_t nNumMultiCacheSizes, bayerTreeCacheDescription_t *psMultiCacheDesc, uint32_t nNumCacheProperties, _t_datalayerproperties **ppMultiCacheSizeDataLayerProperties, uint32_t nNumMultiTemplateParams, _t_objprim **ppClKeySortsPrim, int argc, char **argv);
+
+void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, CBTreeKeySortTestWrapper<keySortEntry_t, keySortEntry_t, keysort_reference_t> *pKeySortTestWrapper, CBTreeKeySortTestWrapper<keySortPair_t, keySortPair_t, keysort_reference_t> *pKeySortPairTestWrapper);
 
 #endif // BTREEARRAYTESTBENCH_H
