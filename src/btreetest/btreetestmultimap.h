@@ -20,20 +20,27 @@
 
 #include <map>
 #include <utility>
+#include <type_traits>
 
-#include "btree.h"
-#include "btreemultimap.h"
+#include "btreetestcommon.h"
 
-typedef struct
+#include "btreebasedefaults.h"
+#include "./associative/btreemultimap.h"
+
+typedef struct multiMapMap_s
 {
 	uint32_t	nData;
 	uint32_t	nDebug;
+
+	bool	operator== (const struct multiMapMap_s &rOpr) const
+	{
+		return ((nData == rOpr.nData) && (nDebug == rOpr.nDebug));
+	};
 } multiMapMap_t;
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 class CBTreeTestMultiMap
 	:	public CBTreeMultiMap<uint32_t, multiMapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-//	,	public virtual CBTreeKeySortDataIf < ::std::pair<uint32_t, multiMapMap_t>, uint32_t, _t_sizetype >
 {
 public:
 
@@ -42,20 +49,26 @@ public:
 	typedef CBTreeMultiMap<uint32_t, multiMapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 																		CBTreeMultiMap_t;
 
-	typedef typename CBTreeMultiMap_t::CBTreeKeySort_t::CBTreeBase_t	CBTreeBase_t;
+	typedef typename CBTreeMultiMap_t::CBTreeAssociativeBase_t			CBTreeAssociativeBase_t;
 
-#if defined(__GNUC__) || defined(__GNUG__)
+	typedef typename CBTreeAssociativeBase_t::CBTreeAssociative_t		CBTreeAssociative_t;
 
-	typedef typename ::CBTreeBaseIterator<CBTreeBase_t>					iterator;
-	typedef typename ::CBTreeBaseReverseIterator<iterator>				reverse_iterator;
-	typedef typename ::CBTreeBaseConstIterator<CBTreeBase_t>			const_iterator;
-	typedef typename ::CBTreeBaseConstReverseIterator<const_iterator>	const_reverse_iterator;
+	typedef typename CBTreeMultiMap_t::CBTreeAssociativeIf_t			CBTreeAssociativeIf_t;
 
-#endif
+	typedef typename CBTreeAssociative_t::CBTreeBase_t					CBTreeBase_t;
 
-	typedef typename CBTreeMultiMap_t::position_t						position_t;
+	typedef typename CBTreeBase_t::CBTreeBaseIf_t						CBTreeBaseIf_t;
+
+	typedef typename CBTreeBaseIf_t::CBTreeDefaults_t					CBTreeDefaults_t;
+
+	typedef typename CBTreeMultiMap_t::iterator							iterator;
+	typedef typename CBTreeMultiMap_t::const_iterator					const_iterator;
+	typedef typename CBTreeMultiMap_t::reverse_iterator					reverse_iterator;
+	typedef typename CBTreeMultiMap_t::const_reverse_iterator			const_reverse_iterator;
+
+//	typedef typename CBTreeMultiMap_t::position_t						position_t;
 	typedef typename ::std::pair<const uint32_t, multiMapMap_t>			data_t;
-	typedef _t_sizetype													sizetype_t;
+	typedef _t_sizetype													size_type;
 	typedef _t_nodeiter													nodeiter_t;
 	typedef _t_subnodeiter												subnodeiter_t;
 	typedef _t_datalayerproperties										datalayerproperties_t;
@@ -66,31 +79,22 @@ public:
 	typedef	typename CBTreeMultiMap_t::key_compare						key_compare;
 	typedef typename CBTreeMultiMap_t::value_compare					value_compare;
 
-							CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-								(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+	typedef ::std::multimap<const uint32_t, multiMapMap_t>					reference_t;
 
 							CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-								(CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
+								(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize, reference_t *pClRefData);
+
+							CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+								(const CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
 
 							~CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 								();
 
-	CBTreeTestMultiMap_t &	operator=				(CBTreeTestMultiMap_t &rBT);
-
-//	iterator				begin					();
-//	iterator				end						();
-//	reverse_iterator		rbegin					();
-//	reverse_iterator		rend					();
-//	const_iterator			cbegin					();
-//	const_iterator			cend					();
-//	const_reverse_iterator	crbegin					();
-//	const_reverse_iterator	crend					();
-
-//	bool					empty					();
-//	_t_sizetype				size					();
-//	_t_sizetype				max_size				();
+	CBTreeTestMultiMap_t &	operator=				(const CBTreeTestMultiMap_t &rBT);
 
 	template <class _t_iterator>
+	void					insert					(_t_iterator sItFirst, _t_iterator sItLast);
+	template <class _t_iterator, class _t_ref_iterator>
 	void					insert					(_t_iterator sItFirst, _t_iterator sItLast);
 	iterator				insert					(const value_t &rData);
 
@@ -105,30 +109,27 @@ public:
 	key_compare				key_comp				() const;
 	value_compare			value_comp				() const;
 	
-//	iterator				find					(const uint32_t &rKey);
-//	_t_sizetype				count					(const uint32_t &rKey);
-//	iterator				lower_bound				(const uint32_t &rKey);
-//	iterator				upper_bound				(const uint32_t &rKey);
+	bool					operator==				(const CBTreeTestMultiMap &rTMM) const;
+	bool					operator!=				(const CBTreeTestMultiMap &rTMM) const;
 
-	bool					operator==				(CBTreeTestMultiMap &rTMM);
-	bool					operator!=				(CBTreeTestMultiMap &rTMM);
+	void					test					() const;
+
+	void					set_reference			(reference_t *pReference);
+
+	void					set_atomic_testing		(bool bEnable);
 
 protected:
 
-	void					test					();
+	reference_t				*m_pClRef;
 
-	uint32_t				m_nDebug;
-
-	::std::multimap<uint32_t, multiMapMap_t>
-							*m_pClRef;
+	bool					m_bAtomicTesting;
 
 public:
 
-	friend class CBTreeBaseIterator<CBTreeBase_t>;
-	friend class CBTreeBaseReverseIterator<iterator>;
-	friend class CBTreeBaseConstIterator<CBTreeBase_t>;
-	friend class CBTreeBaseConstReverseIterator<const_iterator>;
-
+	friend class CBTreeIterator<CBTreeDefaults_t >;
+	friend class CBTreeConstIterator<CBTreeDefaults_t>;
+	friend class CBTreeReverseIterator<iterator>;
+	friend class CBTreeConstReverseIterator<const_iterator>;
 };
 
 #endif // !BTREETESTMULTIMAP_H
