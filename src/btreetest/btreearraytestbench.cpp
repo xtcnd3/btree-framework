@@ -15,15 +15,14 @@
 #include "btreearraytestbench.h"
 
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayBasic (_t_obj *pClArray, uint32_t nMaxEntries, uint32_t nVariation, uint32_t nRepetitions, btreetest_array_primitive_seek_e eWhereAdd, btreetest_array_primitive_seek_e eWhereRemove)
+void TestBTreeArrayBasic (_t_obj *pClArray, uint32_t nMaxEntries, uint32_t nVariation, uint32_t nRepetitions, btreetest_array_primitive_seek_e eGeneratorAdd, btreetest_array_primitive_seek_e eGeneratorRemove)
 {
-	uint32_t		nDebug = 0;
 	uint32_t		ui32;
 	_t_objprim		*pClArrayPrim;
 
 	cout << "basic test adds data at ";
 
-	switch (eWhereAdd)
+	switch (eGeneratorAdd)
 	{
 	case BTREETEST_ARRAY_PRIMITIVE_SEEK_BEGIN		:
 		{
@@ -56,7 +55,7 @@ void TestBTreeArrayBasic (_t_obj *pClArray, uint32_t nMaxEntries, uint32_t nVari
 
 	cout << "and removes it again at ";
 
-	switch (eWhereRemove)
+	switch (eGeneratorRemove)
 	{
 	case BTREETEST_ARRAY_PRIMITIVE_SEEK_BEGIN		:
 		{
@@ -89,18 +88,18 @@ void TestBTreeArrayBasic (_t_obj *pClArray, uint32_t nMaxEntries, uint32_t nVari
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nMaxEntries, nDebug, eWhereAdd);
+	arrayPrim_add (pClArrayPrim, nMaxEntries, eGeneratorAdd);
 
 	for (ui32 = 0; ui32 < nRepetitions; ui32++)
 	{
 		cout << "cycle: " << ui32 + 1 << endl;
 
-		arrayPrim_remove (pClArrayPrim, nVariation, eWhereRemove);
+		arrayPrim_remove (pClArrayPrim, nVariation, eGeneratorRemove);
 
-		arrayPrim_add (pClArrayPrim, nVariation, nDebug, eWhereAdd);
+		arrayPrim_add (pClArrayPrim, nVariation, eGeneratorAdd);
 	}
 
-	arrayPrim_remove (pClArrayPrim, nMaxEntries, eWhereRemove);
+	arrayPrim_remove (pClArrayPrim, nMaxEntries, eGeneratorRemove);
 
 	cout << "finished..." << endl;
 }
@@ -108,14 +107,13 @@ void TestBTreeArrayBasic (_t_obj *pClArray, uint32_t nMaxEntries, uint32_t nVari
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayRemoveAll (_t_obj *pClArray, uint32_t nEntries)
 {
-	uint32_t	nDebug = 0;
 	_t_objprim	*pClArrayPrim;
 
 	cout << "test inserts data and empties the data container by calling clear" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	pClArray->clear ();
 }
@@ -123,26 +121,24 @@ void TestBTreeArrayRemoveAll (_t_obj *pClArray, uint32_t nEntries)
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayReplace (_t_obj *pClArray, uint32_t nInitEntries, uint32_t nInitReplace, uint32_t nAddEntries, uint32_t nAddReplace)
 {
-	uint32_t	nDebug = 0;
 	_t_objprim	*pClArrayPrim;
 
 	cout << "test replaces data" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nInitEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nInitEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	arrayPrim_replace (pClArrayPrim, nAddEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_replace (pClArrayPrim, nAddEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	arrayPrim_add (pClArrayPrim, nAddEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nAddEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	arrayPrim_replace (pClArrayPrim, nAddReplace, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_replace (pClArrayPrim, nAddReplace, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 }
 
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayUnload (_t_obj *pClArray, uint32_t nInitEntries, uint32_t nAddEntries, uint32_t nRemoveEntries, uint32_t nExitEntries)
 {
-	uint32_t	nDebug = 0;
 	_t_objprim	*pClArrayPrim;
 
 	cout << "test uses unload after every operation" << endl;
@@ -153,13 +149,13 @@ void TestBTreeArrayUnload (_t_obj *pClArray, uint32_t nInitEntries, uint32_t nAd
 
 	pClArray->unload ();
 
-	arrayPrim_add (pClArrayPrim, nInitEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nInitEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	cout << "unloading..." << endl;
 	
 	pClArray->unload ();
 
-	arrayPrim_add (pClArrayPrim, nAddEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nAddEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	cout << "unloading..." << endl;
 	
@@ -177,7 +173,7 @@ void TestBTreeArrayUnload (_t_obj *pClArray, uint32_t nInitEntries, uint32_t nAd
 	
 	pClArray->unload ();
 
-	arrayPrim_add (pClArrayPrim, nInitEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nInitEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	cout << "unloading..." << endl;
 	
@@ -195,7 +191,6 @@ void TestBTreeArrayUnload (_t_obj *pClArray, uint32_t nInitEntries, uint32_t nAd
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void BTreeArrayMulti (_t_obj **ppClArrays, uint32_t nNumArray, uint32_t nAddEntries, uint32_t nAddMultiple, uint32_t nRemoveEntries, uint32_t nRemoveMultiple)
 {
-	uint32_t			nDebug = 0;
 	uint32_t			ui32, uj32;
 	bool				bError = false;
 	_t_objprim			**pClArraysPrim;
@@ -221,7 +216,7 @@ void BTreeArrayMulti (_t_obj **ppClArrays, uint32_t nNumArray, uint32_t nAddEntr
 		{
 			srand (ui32);
 
-			arrayPrim_add (pClArraysPrim[uj32], nAddEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+			arrayPrim_add (pClArraysPrim[uj32], nAddEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 		}
 
 		for (uj32 = 1; uj32 < nNumArray; uj32++)
@@ -291,7 +286,6 @@ void BTreeArrayMulti (_t_obj **ppClArrays, uint32_t nNumArray, uint32_t nAddEntr
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayMultiNodeSizes (_t_obj *pClMaster, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nFromNodeSize, uint32_t nToNodeSize, uint32_t nAddEntries, uint32_t nAddMultiple, uint32_t nRemoveEntries, uint32_t nRemoveMultiple)
 {
-	uint32_t								nDebug = 0;
 	uint32_t								ui32;
 	uint32_t								nNumArray;
 	_t_obj									**pClArrays;
@@ -335,7 +329,6 @@ void TestBTreeArrayMultiNodeSizes (_t_obj *pClMaster, _t_datalayerproperties &rD
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayMultiCacheSize (_t_obj *pClMaster, uint32_t nNumArray, uint32_t nNumMultiCacheSizes, bayerTreeCacheDescription_t *psMultiCacheDesc, _t_datalayerproperties **ppMultiCacheSizeDataLayerProperties, uint32_t nNodeSize, uint32_t nAddEntries, uint32_t nAddMultiple, uint32_t nRemoveEntries, uint32_t nRemoveMultiple)
 {
-	uint32_t						nDebug = 0;
 	uint32_t						ui32;
 	_t_obj							**pClArrays;
 
@@ -378,7 +371,6 @@ template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t
 void TestBTreeArrayMultiTemplateParams (_t_obj *pClMaster, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nNumMultiTemplateParams, _t_objprim **ppClArraysPrim, uint32_t nNodeSize, uint32_t nAddEntries, uint32_t nAddMultiple, uint32_t nRemoveEntries, uint32_t nRemoveMultiple)
 {
 	const uint32_t	nNumArray = nNumMultiTemplateParams + 1;
-	uint32_t		nDebug = 0;
 	uint32_t		ui32;
 	uint32_t		uj32;
 	bool			bError = false;
@@ -408,7 +400,7 @@ void TestBTreeArrayMultiTemplateParams (_t_obj *pClMaster, bayerTreeCacheDescrip
 		{
 			srand (ui32);
 
-			arrayPrim_add (ppClArraysPrimAll[uj32], nAddEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+			arrayPrim_add (ppClArraysPrimAll[uj32], nAddEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 		}
 
 		for (uj32 = 1; uj32 < nNumArray; uj32++)
@@ -485,22 +477,21 @@ void TestBTreeArrayMultiTemplateParams (_t_obj *pClMaster, bayerTreeCacheDescrip
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayHTMLoutput (_t_obj *pClArray, uint32_t nEntries)
 {
-	uint32_t	nDebug = 0;
 	_t_objprim	*pClArrayPrim;
 
 	cout << "tests if instance is left in undefined state after HTML output" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	pClArray->show_integrity ("test_array_output_0000.html");
 
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	pClArray->show_integrity ("test_array_output_0001.html");
 
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 }
 
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
@@ -524,7 +515,6 @@ void TestBTreeArrayCopyConstructorTest (_t_obj *pClRef, _t_obj sClCopy)
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayCopyConstructor (_t_obj *pClArray, uint32_t nEntries)
 {
-	uint32_t	nDebug = 0;
 	_t_objprim	*pClArrayPrim;
 
 	cout << "exercises array type copy constructor" << endl;
@@ -533,15 +523,15 @@ void TestBTreeArrayCopyConstructor (_t_obj *pClArray, uint32_t nEntries)
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	TestBTreeArrayCopyConstructorTest<_t_obj, _t_objprim, _t_datalayerproperties, _t_datalayer> (pClArray, *pClArray);
 	
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	TestBTreeArrayCopyConstructorTest<_t_obj, _t_objprim, _t_datalayerproperties, _t_datalayer> (pClArray, *pClArray);
 	
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	TestBTreeArrayCopyConstructorTest<_t_obj, _t_objprim, _t_datalayerproperties, _t_datalayer> (pClArray, *pClArray);
 
@@ -565,7 +555,6 @@ void TestBTreeArrayCopyConstructor (_t_obj *pClArray, uint32_t nEntries)
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayOperatorOverloadAssign (_t_obj *pClArray, uint32_t nEntries)
 {
-	uint32_t			nDebug = 0;
 	_t_objprim			*pClArrayPrim;
 	_t_obj				*pClTarget;
 	_t_objprim			*pClTargetPrim;
@@ -588,15 +577,15 @@ void TestBTreeArrayOperatorOverloadAssign (_t_obj *pClArray, uint32_t nEntries)
 
 	arrayPrim_compare (pClTargetPrim, pClArrayPrim);
 	
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	*pClTarget = *pClArray;
 	
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	*pClTarget = *pClArray;
 	
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	*pClTarget = *pClArray;
 	
@@ -622,7 +611,6 @@ void TestBTreeArrayOperatorOverloadAssign (_t_obj *pClArray, uint32_t nEntries)
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayOperatorOverloadSubScript (_t_obj *pClArray, uint32_t nEntries)
 {
-	uint32_t			nDebug = 0;
 	uint32_t			ui32;
 	_t_objprim			*pClArrayPrim;
 	_t_obj				*pClTarget;
@@ -643,9 +631,9 @@ void TestBTreeArrayOperatorOverloadSubScript (_t_obj *pClArray, uint32_t nEntrie
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 	pClTargetPrim = dynamic_cast <_t_objprim *> (pClTarget);
 	
-	arrayPrim_add (pClArrayPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	arrayPrim_add (pClTargetPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_BEGIN);
+	arrayPrim_add (pClTargetPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_BEGIN);
 
 	for (ui32 = 0; ui32 < nEntries; ui32++)
 	{
@@ -658,7 +646,7 @@ void TestBTreeArrayOperatorOverloadSubScript (_t_obj *pClArray, uint32_t nEntrie
 
 	pClTarget->clear ();
 
-	arrayPrim_add (pClTargetPrim, nEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_BEGIN);
+	arrayPrim_add (pClTargetPrim, nEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_BEGIN);
 
 	for (ui32 = 0; ui32 < nEntries; ui32++)
 	{
@@ -673,7 +661,6 @@ void TestBTreeArrayOperatorOverloadSubScript (_t_obj *pClArray, uint32_t nEntrie
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArraySerialize (_t_obj *pClArray, uint32_t nSize, uint32_t nWindowSize)
 {
-	uint32_t			nDebug = 0;
 	uint32_t			nLastKey = 0;
 	uint32_t			ui32, uj32;
 	uint64_t			nRslt;
@@ -694,7 +681,7 @@ void TestBTreeArraySerialize (_t_obj *pClArray, uint32_t nSize, uint32_t nWindow
 		exit (-1);
 	}
 	
-	arrayPrim_add (pClArrayPrim, nSize, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nSize, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	
 	for (ui32 = 0; ui32 < (nSize - nWindowSize + 1); ui32++)
 	{
@@ -735,7 +722,6 @@ void TestBTreeArraySerialize (_t_obj *pClArray, uint32_t nSize, uint32_t nWindow
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArraySerializeIncomplete (_t_obj *pClArray, uint32_t nSize, uint32_t nWindowSize, uint32_t nOffset)
 {
-	uint32_t			nDebug = 0;
 	uint64_t			nRslt;
 	arrayEntry_t		*pnData;
 	_t_objprim			*pClArrayPrim;
@@ -753,7 +739,7 @@ void TestBTreeArraySerializeIncomplete (_t_obj *pClArray, uint32_t nSize, uint32
 		exit (-1);
 	}
 	
-	arrayPrim_add (pClArrayPrim, nSize, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nSize, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	cout << "testing from " << nOffset << " to " << nWindowSize + nOffset << endl;
 
@@ -774,11 +760,10 @@ void TestBTreeArraySerializeIncomplete (_t_obj *pClArray, uint32_t nSize, uint32
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayCodeCoverageRootMergeWithLowerRight (_t_obj *pClArray, uint32_t nNodeSize)
 {
-	uint32_t			nDebug = 0;
 	uint32_t			nSize = nNodeSize * 2 - 1;
 	_t_objprim			*pClArrayPrim;
 	
-	cout << "exercises CBTreeBase::merge_node with root node having only one item left, while the right has the lower ID" << endl;
+	cout << "exercises CBTreeBaseDefaults::merge_node with root node having only one item left, while the right has the lower ID" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
@@ -790,11 +775,11 @@ void TestBTreeArrayCodeCoverageRootMergeWithLowerRight (_t_obj *pClArray, uint32
 		nSize = 65 * (nNodeSize * 2 - 1);
 	}
 
-	arrayPrim_add (pClArrayPrim, nSize, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nSize, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	arrayPrim_remove (pClArrayPrim, nSize - 1, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	arrayPrim_add (pClArrayPrim, nNodeSize * 2, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNodeSize * 2, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	arrayPrim_remove (pClArrayPrim, nNodeSize * 2, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 }
@@ -802,18 +787,17 @@ void TestBTreeArrayCodeCoverageRootMergeWithLowerRight (_t_obj *pClArray, uint32
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArraySelfReferenceViaSubScriptWrapper (_t_obj *pClArray, uint32_t nNumEntries)
 {
-	uint32_t			nDebug = 0;
 	uint32_t			i;
 	uint32_t			ri;
 	uint32_t			nSize;
 	_t_objprim			*pClArrayPrim;
 	arrayEntry_t		sEntry;
 	
-	cout << "exercises CBTreeBase<>::CBTreeArray<>::CBTreeArrayAccessWrapper<>::operator= (const CBTreeArrayAccessWrapper<> &) using its own input as reference" << endl;
+	cout << "exercises CBTreeBaseDefaults<>::CBTreeArray<>::CBTreeArrayAccessWrapper<>::operator= (const CBTreeArrayAccessWrapper<> &) using its own input as reference" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
 
 	nSize = (uint32_t) pClArray->size ();
 
@@ -856,10 +840,18 @@ void TestBTreeArraySelfReferenceViaSubScriptWrapper (_t_obj *pClArray, uint32_t 
 template <class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArrayInTrinsicDataType (uint32_t nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc)
 {
-	CBTreeArray<int, uint64_t, uint64_t, uint32_t, _t_datalayerproperties, _t_datalayer>	sClArrayInt (rDataLayerProperties, &sCacheDesc, nNodeSize);
+	typedef typename CBTreeArray<int, uint64_t, uint64_t, uint32_t, _t_datalayerproperties, _t_datalayer>::const_iterator		citer_t;
 
-	sClArrayInt.insert_at (0, 0);
-	sClArrayInt.insert_at (1, 1);
+	CBTreeArray<int, uint64_t, uint64_t, uint32_t, _t_datalayerproperties, _t_datalayer>	sClArrayInt (rDataLayerProperties, &sCacheDesc, nNodeSize);
+	citer_t																					sCIter;
+
+	sCIter = sClArrayInt.cbegin ();
+
+	sClArrayInt.insert (sCIter, 0);
+
+	sCIter++;
+
+	sClArrayInt.insert (sCIter, 1);
 
 	cout << "test if indirect read access with intrinsic types is possible!" << endl;
 
@@ -892,18 +884,17 @@ void TestBTreeArrayInTrinsicDataType (uint32_t nNodeSize, _t_datalayerproperties
 template <class _t_obj, class _t_objprim>
 void TestBTreeArraySTLifAtFrontBack (_t_obj *pClArray, uint32_t nNumEntries)
 {
-	uint32_t			nDebug = 0;
 	uint32_t			i;
 	uint32_t			nSize;
 	_t_objprim			*pClArrayPrim;
 	arrayEntry_t		sEntry;
 	uint32_t			nRef;
 	
-	cout << "exercises methods compatible to STL interface CBTreeBase<>::CBTreeArray<>:: at() front() back()" << endl;
+	cout << "exercises methods compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: at() front() back()" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
 
 	nSize = (uint32_t) pClArray->size ();
 
@@ -985,7 +976,7 @@ void TestBTreeArraySTLifAssignFill (_t_obj *pClArray, uint32_t nNumEntries)
 {
 	arrayEntry_t		sEntry;
 	
-	cout << "exercises methods compatible to STL interface CBTreeBase<>::CBTreeArray<>:: assign(_t_sizetype, const _t_data &)" << endl;
+	cout << "exercises methods compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: assign(_t_sizetype, const _t_data &)" << endl;
 
 	sEntry.nDebug = 0;
 	sEntry.nData = ~0x0U;
@@ -993,25 +984,195 @@ void TestBTreeArraySTLifAssignFill (_t_obj *pClArray, uint32_t nNumEntries)
 	pClArray->assign (nNumEntries, sEntry);
 }
 
+template <class _t_obj, class _t_objprim, class _t_container, class _t_iterator, class _t_ext_iterator>
+void TestBTreeArraySTLifAssignViaIteratorEx (btreetest_array_stl_if_assign_via_iterator_e eTest, const char *pszTestTitle, _t_obj *pClTargetArray, _t_objprim *pClArrayPrim, _t_container *pContainer, _t_iterator &rIterA, _t_iterator &rIterB, _t_ext_iterator &rExtIterA, _t_ext_iterator &rExtIterB, uint32_t nNumEntries)
+{
+	_t_iterator			sIterBegin;
+	_t_iterator			sIterEnd;
+	_t_ext_iterator		sExtIterBegin;
+	_t_ext_iterator		sExtIterEnd;
+
+	cout << pszTestTitle << endl;
+
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
+
+	get_begin (pClArrayPrim, sIterBegin);
+	get_end (pClArrayPrim, sIterEnd);
+
+	switch (eTest)
+	{
+		case BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL	:
+		{
+			pClTargetArray->assign (sIterBegin, sIterEnd);
+
+			break;
+		}
+
+		case BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN:
+		{
+			pContainer->assign (sIterBegin, sIterEnd);
+
+			get_begin (pContainer, sExtIterBegin);
+			get_end (pContainer, sExtIterEnd);
+
+			pClTargetArray->assign (sExtIterBegin, sExtIterEnd);
+
+			break;
+		}
+
+		case BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_SELF_REFERENCE:
+		{
+			pClTargetArray->assign (sIterBegin, sIterEnd);
+
+			get_begin (pClTargetArray, rIterA);
+			get_end (pClTargetArray, rIterB);
+
+			pClTargetArray->assign (rIterA, rIterB);
+
+			break;
+		}
+
+		case BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_EQUIVALENT_OR_SAME:
+		{
+			get_end (pClArrayPrim, rIterA);
+			get_end (pClArrayPrim, rIterB);
+
+			pClTargetArray->assign (rIterA, rIterB);
+
+			if (!pClTargetArray->empty ())
+			{
+				::std::cerr << "TestBTreeArraySTLifAssignViaIteratorEx: equivalent or same test: test 1 - container was not empty!" << ::std::endl;
+
+				exit (-1);
+			}
+
+			pClTargetArray->assign (rIterB, rIterA);
+		
+			if (!pClTargetArray->empty ())
+			{
+				::std::cerr << "TestBTreeArraySTLifAssignViaIteratorEx: equivalent or same test: test 2 - container was not empty!" << ::std::endl;
+
+				exit (-1);
+			}
+
+			get_begin (pClArrayPrim, rIterA);
+			get_begin (pClArrayPrim, rIterB);
+
+			pClTargetArray->assign (rIterA, rIterB);
+
+			if (!pClTargetArray->empty ())
+			{
+				::std::cerr << "TestBTreeArraySTLifAssignViaIteratorEx: equivalent or same test: test 3 - container was not empty!" << ::std::endl;
+
+				exit (-1);
+			}
+
+			pClTargetArray->assign (rIterB, rIterA);
+		
+			if (!pClTargetArray->empty ())
+			{
+				::std::cerr << "TestBTreeArraySTLifAssignViaIteratorEx: equivalent or same test: test 4 - container was not empty!" << ::std::endl;
+
+				exit (-1);
+			}
+
+			while (rIterA != sIterEnd)
+			{
+				pClTargetArray->assign (rIterA, rIterB);
+		
+				rIterA++;
+				rIterB++;
+
+				if (!pClTargetArray->empty ())
+				{
+					::std::cerr << "TestBTreeArraySTLifAssignViaIteratorEx: equivalent or same test: test 5 - container was not empty!" << ::std::endl;
+
+					exit (-1);
+				}
+			}
+
+			get_begin (pClTargetArray, rIterA);
+			get_end (pClTargetArray, rIterB);
+		
+			pClTargetArray->assign (rIterA, rIterB);
+
+			if (!pClTargetArray->empty ())
+			{
+				::std::cerr << "TestBTreeArraySTLifAssignViaIteratorEx: equivalent or same test: test 6 - container was not empty!" << ::std::endl;
+
+				exit (-1);
+			}
+
+			break;
+		}
+
+		case BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_PART_SELF_REFERENCE:
+		{
+			pClTargetArray->assign (sIterBegin, sIterEnd);
+
+			get_begin (pClTargetArray, rIterA);
+			get_end (pClTargetArray, rIterB);
+
+			rIterA += (int) (nNumEntries / 4);
+			rIterB -= (int) (nNumEntries / 4);
+
+			pClTargetArray->assign (rIterA, rIterB);
+
+			break;
+		}
+
+		default:
+		{
+			::std::cerr << "TestBTreeArraySTLifAssignViaIteratorEx: unknown test selected!" << ::std::endl;
+
+			exit (-1);
+
+			break;
+		}
+	}
+
+	pClArrayPrim->clear ();
+}
+
 template <class _t_obj, class _t_objprim>
 void TestBTreeArraySTLifAssignViaIterator (_t_obj *pClArray, uint32_t nNumEntries)
 {
-	typedef typename _t_obj::iterator				iter_t;
-	typedef typename _t_obj::const_iterator			citer_t;
-	typedef typename _t_obj::reverse_iterator		riter_t;
-	typedef typename _t_obj::const_reverse_iterator	criter_t;
+	typedef ::std::list<arrayEntry_t>					list_t;
+	typedef ::std::vector<arrayEntry_t>					vector_t;
 
-	uint32_t						nDebug = 0;
+	typedef typename list_t::iterator					itlist_t;
+	typedef typename list_t::const_iterator				citlist_t;
+	typedef typename list_t::reverse_iterator			ritlist_t;
+	typedef typename list_t::const_reverse_iterator		critlist_t;
+
+	typedef typename vector_t::iterator					itvector_t;
+	typedef typename vector_t::const_iterator			citvector_t;
+	typedef typename vector_t::reverse_iterator			ritvector_t;
+	typedef typename vector_t::const_reverse_iterator	critvector_t;
+
+	typedef typename _t_objprim::iterator				iter_t;
+	typedef typename _t_objprim::const_iterator			citer_t;
+	typedef typename _t_objprim::reverse_iterator		riter_t;
+	typedef typename _t_objprim::const_reverse_iterator	criter_t;
+
 	_t_obj							*pClTargetArray;
 	_t_objprim						*pClArrayPrim;
-	::std::list<arrayEntry_t>		sList;
-	::std::vector<arrayEntry_t>		sVector;
+	list_t							sList;
+	vector_t						sVector;
 	iter_t							sIterA, sIterB;
 	citer_t							sCIterA, sCIterB;
 	riter_t							sRIterA, sRIterB;
 	criter_t						sCRIterA, sCRIterB;
+	itlist_t						sItListBegin, sItListEnd;
+	citlist_t						sCItListBegin, sCItListEnd;
+	ritlist_t						sRItListBegin, sRItListEnd;
+	critlist_t						sCRItListBegin, sCRItListEnd;
+	itvector_t						sItVecBegin, sItVecEnd;
+	citvector_t						sCItVecBegin, sCItVecEnd;
+	ritvector_t						sRItVecBegin, sRItVecEnd;
+	critvector_t					sCRItVecBegin, sCRItVecEnd;
 	
-	cout << "exercises method compatible to STL interface CBTreeBase<>::CBTreeArray<>:: assign<_t_iterator>(_t_iterator, _t_iterator)" << endl;
+	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: assign<_t_iterator>(_t_iterator, _t_iterator)" << endl;
 
 	pClTargetArray = new _t_obj (*pClArray);
 
@@ -1024,310 +1185,36 @@ void TestBTreeArraySTLifAssignViaIterator (_t_obj *pClArray, uint32_t nNumEntrie
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	cout << "target::assign<_t_obj::iter_t> (iter_t, iter_t)" << endl;
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL, "target::assign<_t_obj::iter_t> (iter_t, iter_t)", pClTargetArray, pClArrayPrim, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL, "target::assign<_t_obj::citer_t> (citer_t, citer_t)", pClTargetArray, pClArrayPrim, &sList, sCIterA, sCIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL, "target::assign<_t_obj::riter_t> (riter_t, riter_t)", pClTargetArray, pClArrayPrim, &sList, sRIterA, sRIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL, "target::assign<_t_obj::criter_t> (criter_t, criter_t)", pClTargetArray, pClArrayPrim, &sList, sCRIterA, sCRIterB, sItListBegin, sItListEnd, nNumEntries);
+
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN, "target::assign<list::iter> (list::iter, list::iter)", pClTargetArray, pClArrayPrim, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN, "target::assign<list::citer> (list::citer, list::citer)", pClTargetArray, pClArrayPrim, &sList, sCIterA, sCIterB, sCItListBegin, sCItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN, "target::assign<list::riter> (list::riter, list::riter)", pClTargetArray, pClArrayPrim, &sList, sRIterA, sRIterB, sRItListBegin, sRItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN, "target::assign<list::criter> (list::criter, list::criter)", pClTargetArray, pClArrayPrim, &sList, sCRIterA, sCRIterB, sCRItListBegin, sCRItListEnd, nNumEntries);
+
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN, "target::assign<vector::iter> (vector::iter, vector::iter)", pClTargetArray, pClArrayPrim, &sVector, sIterA, sIterB, sItVecBegin, sItVecEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN, "target::assign<vector::citer> (vector::citer, vector::citer)", pClTargetArray, pClArrayPrim, &sVector, sCIterA, sCIterB, sCItVecBegin, sCItVecEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN, "target::assign<vector::riter> (vector::riter, vector::riter)", pClTargetArray, pClArrayPrim, &sVector, sRIterA, sRIterB, sRItVecBegin, sRItVecEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN, "target::assign<vector::criter> (vector::criter, vector::criter)", pClTargetArray, pClArrayPrim, &sVector, sCRIterA, sCRIterB, sCRItVecBegin, sCRItVecEnd, nNumEntries);
+
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_SELF_REFERENCE, "target::assign<_t_obj::iter_t> (target::iter_t, target::iter_t)", pClTargetArray, pClArrayPrim, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_SELF_REFERENCE, "target::assign<_t_obj::citer_t> (target::citer_t, target::citer_t)", pClTargetArray, pClArrayPrim, &sList, sCIterA, sCIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_SELF_REFERENCE, "target::assign<_t_obj::riter_t> (target::riter_t, target::riter_t)", pClTargetArray, pClArrayPrim, &sList, sRIterA, sRIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_SELF_REFERENCE, "target::assign<_t_obj::criter_t> (target::criter_t, target::criter_t)", pClTargetArray, pClArrayPrim, &sList, sCRIterA, sCRIterB, sItListBegin, sItListEnd, nNumEntries);
+
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_EQUIVALENT_OR_SAME, "target::assign<_t_obj::iter_t> (iter_t == iter_t)", pClTargetArray, pClArrayPrim, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_EQUIVALENT_OR_SAME, "target::assign<_t_obj::citer_t> (citer_t == citer_t)", pClTargetArray, pClArrayPrim, &sList, sCIterA, sCIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_EQUIVALENT_OR_SAME, "target::assign<_t_obj::riter_t> (riter_t == riter_t)", pClTargetArray, pClArrayPrim, &sList, sRIterA, sRIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_EQUIVALENT_OR_SAME, "target::assign<_t_obj::criter_t> (criter_t == criter_t)", pClTargetArray, pClArrayPrim, &sList, sCRIterA, sCRIterB, sItListBegin, sItListEnd, nNumEntries);
+
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_PART_SELF_REFERENCE, "target::assign<_t_obj::iter_t> (>target::iter_t, target::iter_t<)", pClTargetArray, pClArrayPrim, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_PART_SELF_REFERENCE, "target::assign<_t_obj::citer_t> (>target::citer_t, target::citer_t<)", pClTargetArray, pClArrayPrim, &sList, sCIterA, sCIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_PART_SELF_REFERENCE, "target::assign<_t_obj::riter_t> (>target::riter_t, target::riter_t<)", pClTargetArray, pClArrayPrim, &sList, sRIterA, sRIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifAssignViaIteratorEx (BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_PART_SELF_REFERENCE, "target::assign<_t_obj::criter_t> (>target::criter_t, target::criter_t<)", pClTargetArray, pClArrayPrim, &sList, sCRIterA, sCRIterB, sItListBegin, sItListEnd, nNumEntries);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::citer_t> (citer_t, citer_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<citer_t> (pClArray->cbegin (), pClArray->cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::riter_t> (riter_t, riter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<riter_t> (pClArray->rbegin (), pClArray->rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::criter_t> (criter_t, criter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<criter_t> (pClArray->crbegin (), pClArray->crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<list::iter> (list::iter, list::iter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sList.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign< ::std::list<arrayEntry_t>::iterator> (sList.begin (), sList.end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<list::citer> (list::citer, list::citer)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sList.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign< ::std::list<arrayEntry_t>::const_iterator> (sList.cbegin (), sList.cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<list::riter> (list::riter, list::riter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sList.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign< ::std::list<arrayEntry_t>::reverse_iterator> (sList.rbegin (), sList.rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<list::criter> (list::criter, list::criter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sList.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign< ::std::list<arrayEntry_t>::const_reverse_iterator> (sList.crbegin (), sList.crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<vector::iter> (vector::iter, vector::iter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sVector.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign< ::std::vector<arrayEntry_t>::iterator> (sVector.begin (), sVector.end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<vector::citer> (vector::citer, vector::citer)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sVector.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign< ::std::vector<arrayEntry_t>::const_iterator> (sVector.cbegin (), sVector.cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<vector::riter> (vector::riter, vector::riter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sVector.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign< ::std::vector<arrayEntry_t>::reverse_iterator> (sVector.rbegin (), sVector.rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<vector::criter> (vector::criter, vector::criter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sVector.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign< ::std::vector<arrayEntry_t>::const_reverse_iterator> (sVector.crbegin (), sVector.crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::iter_t> (target::iter_t, target::iter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign<iter_t> (pClTargetArray->begin (), pClTargetArray->end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::citer_t> (target::citer_t, target::citer_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign<citer_t> (pClTargetArray->cbegin (), pClTargetArray->cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::riter_t> (target::riter_t, target::riter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign<riter_t> (pClTargetArray->rbegin (), pClTargetArray->rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::criter_t> (target::criter_t, target::criter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClTargetArray->template assign<criter_t> (pClTargetArray->crbegin (), pClTargetArray->crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::iter_t> (iter_t == iter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->begin ());
-	pClTargetArray->template assign<iter_t> (pClArray->end (), pClArray->end ());
-
-	sIterA = pClArray->begin ();
-	sIterB = pClArray->begin ();
-
-	while (sIterA != pClArray->end ())
-	{
-		pClTargetArray->template assign<iter_t> (sIterA, sIterB);
-
-		sIterA++;
-		sIterB++;
-	}
-
-	pClTargetArray->template assign<iter_t> (pClTargetArray->begin (), pClTargetArray->end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::citer_t> (citer_t == citer_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<citer_t> (pClArray->cbegin (), pClArray->cbegin ());
-	pClTargetArray->template assign<citer_t> (pClArray->cend (), pClArray->cend ());
-
-	sCIterA = pClArray->cbegin ();
-	sCIterB = pClArray->cbegin ();
-
-	while (sCIterA != pClArray->cend ())
-	{
-		pClTargetArray->template assign<citer_t> (sCIterA, sCIterB);
-
-		sCIterA++;
-		sCIterB++;
-	}
-
-	pClTargetArray->template assign<citer_t> (pClTargetArray->cbegin (), pClTargetArray->cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::riter_t> (riter_t == riter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<riter_t> (pClArray->rbegin (), pClArray->rbegin ());
-	pClTargetArray->template assign<riter_t> (pClArray->rend (), pClArray->rend ());
-
-	sRIterA = pClArray->rbegin ();
-	sRIterB = pClArray->rbegin ();
-
-	while (sRIterA != pClArray->rend ())
-	{
-		pClTargetArray->template assign<riter_t> (sRIterA, sRIterB);
-
-		sRIterA++;
-		sRIterB++;
-	}
-
-	pClTargetArray->template assign<riter_t> (pClTargetArray->rbegin (), pClTargetArray->rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::criter_t> (criter_t == criter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<criter_t> (pClArray->crbegin (), pClArray->crbegin ());
-	pClTargetArray->template assign<criter_t> (pClArray->crend (), pClArray->crend ());
-
-	sCRIterA = pClArray->crbegin ();
-	sCRIterB = pClArray->crbegin ();
-
-	while (sCRIterA != pClArray->crend ())
-	{
-		pClTargetArray->template assign<criter_t> (sCRIterA, sCRIterB);
-
-		sCRIterA++;
-		sCRIterB++;
-	}
-
-	pClTargetArray->template assign<criter_t> (pClTargetArray->crbegin (), pClTargetArray->crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::iter_t> (>target::iter_t, target::iter_t<)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sIterA = pClTargetArray->begin ();
-	sIterB = pClTargetArray->end ();
-
-	sIterA += (int) (nNumEntries / 4);
-	sIterB -= (int) (nNumEntries / 4);
-
-	pClTargetArray->template assign<iter_t> (sIterA, sIterB);
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::citer_t> (>target::citer_t, target::citer_t<)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterA = pClTargetArray->cbegin ();
-	sCIterB = pClTargetArray->cend ();
-
-	sCIterA += (int) (nNumEntries / 4);
-	sCIterB -= (int) (nNumEntries / 4);
-
-	pClTargetArray->template assign<citer_t> (sCIterA, sCIterB);
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::riter_t> (>target::riter_t, target::riter_t<)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sRIterA = pClTargetArray->rbegin ();
-	sRIterB = pClTargetArray->rend ();
-
-	sRIterA += (int) (nNumEntries / 4);
-	sRIterB -= (int) (nNumEntries / 4);
-
-	pClTargetArray->template assign<riter_t> (sRIterA, sRIterB);
-
-	pClArrayPrim->clear ();
-
-	cout << "target::assign<_t_obj::criter_t> (>target::criter_t, target::criter_t<)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCRIterA = pClTargetArray->crbegin ();
-	sCRIterB = pClTargetArray->crend ();
-
-	sCRIterA += (int) (nNumEntries / 4);
-	sCRIterB -= (int) (nNumEntries / 4);
-
-	pClTargetArray->template assign<criter_t> (sCRIterA, sCRIterB);
-
-	pClArrayPrim->clear ();
-	
 	delete pClTargetArray;
 }
 
@@ -1337,7 +1224,7 @@ void TestBTreeArraySTLifPushBackPopBack (_t_obj *pClArray, uint32_t nNumEntries)
 	uint32_t		i;
 	arrayEntry_t	sEntry;
 
-	cout << "exercises methods compatible to STL interface CBTreeBase<>::CBTreeArray<>:: push_back (const _t_data &) pop_back ()" << endl;
+	cout << "exercises methods compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: push_back (const _t_data &) pop_back ()" << endl;
 
 	cout << "adding via push_back" << endl;
 
@@ -1363,17 +1250,16 @@ void TestBTreeArraySTLifInsertSingle (_t_obj *pClArray, uint32_t nNumEntries)
 	typedef typename _t_obj::iterator				iter_t;
 	typedef typename _t_obj::const_iterator			citer_t;
 	
-	uint32_t			nDebug = 0;
 	uint32_t			i;
 	_t_objprim			*pClArrayPrim;
 	arrayEntry_t		sEntry;
 	citer_t				sCIter;
 	
-	cout << "exercises method compatible to STL interface CBTreeBase<>::CBTreeArray<>:: insert (const_iterator, const _t_data &)" << endl;
+	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: insert (const_iterator, const _t_data &)" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	for (i = 0; i < nNumEntries; i++)
 	{
@@ -1394,17 +1280,16 @@ void TestBTreeArraySTLifInsertMultiple (_t_obj *pClArray, uint32_t nNumEntries, 
 	typedef typename _t_obj::iterator				iter_t;
 	typedef typename _t_obj::const_iterator			citer_t;
 	
-	uint32_t			nDebug = 0;
 	uint32_t			i;
 	_t_objprim			*pClArrayPrim;
 	arrayEntry_t		sEntry;
 	citer_t				sCIter;
 	
-	cout << "exercises method compatible to STL interface CBTreeBase<>::CBTreeArray<>:: insert (const_iterator, const _t_sizetype, const _t_data &)" << endl;
+	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: insert (const_iterator, const _t_sizetype, const _t_data &)" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	for (i = 0; i < nNumEntries; i++)
 	{
@@ -1419,15 +1304,232 @@ void TestBTreeArraySTLifInsertMultiple (_t_obj *pClArray, uint32_t nNumEntries, 
 	}
 }
 
+template <class _t_obj, class _t_objprim, class _t_container, class _t_iterator, class _t_ext_iterator>
+void TestBTreeArraySTLifInsertViaIteratorEx (btreetest_array_stl_if_insert_via_iterator_e eTest, const char *pszTestTitel, _t_objprim *pClArrayPrim, _t_obj *pClTargetArray, _t_container *pContainer, _t_iterator &rIterA, _t_iterator &rIterB, _t_ext_iterator &rExtIterA, _t_ext_iterator &rExtIterB, uint32_t nNumEntries)
+{
+	typedef typename _t_obj::const_iterator			citer_t;
+	typedef typename _t_objprim::size_type			size_type;
+
+	citer_t			sCIterHalf;
+	_t_iterator		sIterBegin;
+	_t_iterator		sIterEnd;
+	_t_ext_iterator	sExtIterBegin;
+	_t_ext_iterator	sExtIterEnd;
+	size_type		nSize;
+
+	cout << pszTestTitel << endl;
+
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
+
+	get_begin (pClArrayPrim, sIterBegin);
+	get_end (pClArrayPrim, sIterEnd);
+
+	switch (eTest)
+	{
+		case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY	:
+		{
+			pClTargetArray->template assign<_t_iterator> (sIterBegin, sIterEnd);
+
+			pClArrayPrim->clear ();
+		
+			arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
+		
+			sCIterHalf = pClTargetArray->cbegin ();
+		
+			sCIterHalf += pClTargetArray->size () / 2;
+
+			get_begin (pClArrayPrim, sIterBegin);
+			get_end (pClArrayPrim, sIterEnd);
+		
+			pClTargetArray->template insert<_t_iterator> (sCIterHalf, sIterBegin, sIterEnd);
+
+			break;
+		}
+
+		case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN:
+		{
+			pClTargetArray->template assign<_t_iterator> (sIterBegin, sIterEnd);
+
+			pClArrayPrim->clear ();
+		
+			arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
+
+			get_begin (pClArrayPrim, sIterBegin);
+			get_end (pClArrayPrim, sIterEnd);
+		
+			pContainer->template assign<_t_iterator> (sIterBegin, sIterEnd);
+		
+			sCIterHalf = pClTargetArray->cbegin ();
+		
+			sCIterHalf += pClTargetArray->size () / 2;
+
+			get_begin (pContainer, sExtIterBegin);
+			get_end (pContainer, sExtIterEnd);
+
+			pClTargetArray->template insert<_t_ext_iterator> (sCIterHalf, sExtIterBegin, sExtIterEnd);
+
+			break;
+		}
+
+		case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_SELF_REFERENCE:
+		{
+			pClTargetArray->template assign<_t_iterator> (sIterBegin, sIterEnd);
+		
+			sCIterHalf = pClTargetArray->cbegin ();
+		
+			sCIterHalf += pClTargetArray->size () / 2;
+		
+			get_begin (pClTargetArray, sIterBegin);
+			get_end (pClTargetArray, sIterEnd);
+		
+			pClTargetArray->template insert<_t_iterator> (sCIterHalf, sIterBegin, sIterEnd);
+
+			break;
+		}
+
+		case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_INEFFECTIVE:
+		{
+			pClTargetArray->template assign<_t_iterator> (sIterBegin, sIterEnd);
+
+			pClArrayPrim->clear ();
+
+			arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
+
+			get_end (pClArrayPrim, rIterA);
+			get_end (pClArrayPrim, rIterB);
+
+			get_begin (pClArrayPrim, sIterBegin);
+			get_end (pClArrayPrim, sIterEnd);
+
+			citer_t			sCIter;
+
+			nSize = pClTargetArray->size ();
+
+			for (sCIter = pClArrayPrim->cbegin (); sCIter < pClArrayPrim->cend (); sCIter++)
+			{
+				pClTargetArray->template insert<_t_iterator> (sCIter, rIterA, rIterB);
+			}
+
+			if (pClTargetArray->size () != nSize)
+			{
+				::std::cerr << "TestBTreeArraySTLifInsertViaIterator: ineffective test: test 1 - container size changed!" << ::std::endl;
+
+				exit (-1);
+			}
+
+			for (sCIter = pClArrayPrim->cbegin (); sCIter < pClArrayPrim->cend (); sCIter++)
+			{
+				pClTargetArray->template insert<_t_iterator> (sCIter, rIterB, rIterA);
+			}
+		
+			if (pClTargetArray->size () != nSize)
+			{
+				::std::cerr << "TestBTreeArraySTLifInsertViaIterator: ineffective test: test 2 - container size changed!" << ::std::endl;
+
+				exit (-1);
+			}
+
+			get_begin (pClArrayPrim, rIterA);
+			get_begin (pClArrayPrim, rIterB);
+
+			for (sCIter = pClArrayPrim->cbegin (); sCIter < pClArrayPrim->cend (); sCIter++)
+			{
+				pClTargetArray->template insert<_t_iterator> (sCIter, rIterA, rIterB);
+			}
+
+			if (pClTargetArray->size () != nSize)
+			{
+				::std::cerr << "TestBTreeArraySTLifInsertViaIterator: ineffective test: test 3 - container size changed!" << ::std::endl;
+
+				exit (-1);
+			}
+
+			for (sCIter = pClArrayPrim->cbegin (); sCIter < pClArrayPrim->cend (); sCIter++)
+			{
+				pClTargetArray->template insert<_t_iterator> (sCIter, rIterB, rIterA);
+			}
+		
+			if (pClTargetArray->size () != nSize)
+			{
+				::std::cerr << "TestBTreeArraySTLifInsertViaIterator: ineffective test: test 4 - container size changed!" << ::std::endl;
+
+				exit (-1);
+			}
+
+			while (rIterA != sIterEnd)
+			{
+				for (sCIter = pClArrayPrim->cbegin (); sCIter < pClArrayPrim->cend (); sCIter++)
+				{
+					pClTargetArray->template insert<_t_iterator> (sCIter, rIterA, rIterB);
+				}
+		
+				rIterA++;
+				rIterB++;
+
+				if (pClTargetArray->size () != nSize)
+				{
+					::std::cerr << "TestBTreeArraySTLifInsertViaIterator: ineffective test: test 5 - container size changed!" << ::std::endl;
+
+					exit (-1);
+				}
+			}
+
+			break;
+		}
+
+		case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_PART_SELF_REFERENCE:
+		{
+			pClTargetArray->template assign<_t_iterator> (sIterBegin, sIterEnd);
+		
+			sCIterHalf = pClTargetArray->cbegin ();
+		
+			sCIterHalf += pClTargetArray->size () / 2;
+		
+			get_begin (pClTargetArray, sIterBegin);
+			get_end (pClTargetArray, sIterEnd);
+
+			sIterBegin += (int) (nNumEntries / 4);
+			sIterEnd -= (int) (nNumEntries / 4);
+		
+			pClTargetArray->template insert<_t_iterator> (sCIterHalf, sIterBegin, sIterEnd);
+
+			break;
+		}
+
+		default:
+		{
+			cerr << "TestBTreeArraySTLifInsertViaIterator: unknown test!" << endl;
+
+			exit (-1);
+
+			break;
+		}
+	}
+
+	pClArrayPrim->clear ();
+}
+
 template <class _t_obj, class _t_objprim>
 void TestBTreeArraySTLifInsertViaIterator (_t_obj *pClArray, uint32_t nNumEntries)
 {
-	typedef typename _t_obj::iterator				iter_t;
-	typedef typename _t_obj::const_iterator			citer_t;
-	typedef typename _t_obj::reverse_iterator		riter_t;
-	typedef typename _t_obj::const_reverse_iterator	criter_t;
+	typedef ::std::list<arrayEntry_t>					list_t;
+	typedef ::std::vector<arrayEntry_t>					vector_t;
 
-	uint32_t						nDebug = 0;
+	typedef typename list_t::iterator					itlist_t;
+	typedef typename list_t::const_iterator				citlist_t;
+	typedef typename list_t::reverse_iterator			ritlist_t;
+	typedef typename list_t::const_reverse_iterator		critlist_t;
+
+	typedef typename vector_t::iterator					itvector_t;
+	typedef typename vector_t::const_iterator			citvector_t;
+	typedef typename vector_t::reverse_iterator			ritvector_t;
+	typedef typename vector_t::const_reverse_iterator	critvector_t;
+
+	typedef typename _t_obj::iterator					iter_t;
+	typedef typename _t_obj::const_iterator				citer_t;
+	typedef typename _t_obj::reverse_iterator			riter_t;
+	typedef typename _t_obj::const_reverse_iterator		criter_t;
+
 	_t_obj							*pClTargetArray;
 	_t_objprim						*pClArrayPrim;
 	::std::list<arrayEntry_t>		sList;
@@ -1437,8 +1539,16 @@ void TestBTreeArraySTLifInsertViaIterator (_t_obj *pClArray, uint32_t nNumEntrie
 	riter_t							sRIterA, sRIterB;
 	criter_t						sCRIterA, sCRIterB;
 	citer_t							sCIterHalf;
+	itlist_t						sItListBegin, sItListEnd;
+	citlist_t						sCItListBegin, sCItListEnd;
+	ritlist_t						sRItListBegin, sRItListEnd;
+	critlist_t						sCRItListBegin, sCRItListEnd;
+	itvector_t						sItVecBegin, sItVecEnd;
+	citvector_t						sCItVecBegin, sCItVecEnd;
+	ritvector_t						sRItVecBegin, sRItVecEnd;
+	critvector_t					sCRItVecBegin, sCRItVecEnd;
 	
-	cout << "exercises method compatible to STL interface CBTreeBase<>::CBTreeArray<>:: insert<_t_iterator>(const_iterator, _t_iterator, _t_iterator)" << endl;
+	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: insert<_t_iterator>(const_iterator, _t_iterator, _t_iterator)" << endl;
 
 	pClTargetArray = new _t_obj (*pClArray);
 
@@ -1451,542 +1561,36 @@ void TestBTreeArraySTLifInsertViaIterator (_t_obj *pClArray, uint32_t nNumEntrie
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	cout << "target::insert<_t_obj::iter_t> (iter_t, iter_t)" << endl;
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY, "target::insert<_t_obj::iter_t> (iter_t, iter_t)", pClArrayPrim, pClTargetArray, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY, "target::insert<_t_obj::citer_t> (citer_t, citer_t)", pClArrayPrim, pClTargetArray, &sList, sCIterA, sCIterB, sCItListBegin, sCItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY, "target::insert<_t_obj::riter_t> (riter_t, riter_t)", pClArrayPrim, pClTargetArray, &sList, sRIterA, sRIterB, sRItListBegin, sRItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY, "target::insert<_t_obj::criter_t> (criter_t, criter_t)", pClArrayPrim, pClTargetArray, &sList, sCRIterA, sCRIterB, sCRItListBegin, sCRItListEnd, nNumEntries);
+
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN, "target::insert<list::iter_t> (list::iter_t, list::iter_t)", pClArrayPrim, pClTargetArray, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN, "target::insert<list::citer_t> (list::citer_t, list::citer_t)", pClArrayPrim, pClTargetArray, &sList, sCIterA, sCIterB, sCItListBegin, sCItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN, "target::insert<list::riter_t> (list::riter_t, list::riter_t)", pClArrayPrim, pClTargetArray, &sList, sRIterA, sRIterB, sRItListBegin, sRItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN, "target::insert<list::criter_t> (list::criter_t, list::criter_t)", pClArrayPrim, pClTargetArray, &sList, sCRIterA, sCRIterB, sCRItListBegin, sCRItListEnd, nNumEntries);
+
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN, "target::insert<vector::iter_t> (vector::iter_t, vector::iter_t)", pClArrayPrim, pClTargetArray, &sVector, sIterA, sIterB, sItVecBegin, sItVecEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN, "target::insert<vector::citer_t> (vector::citer_t, vector::citer_t)", pClArrayPrim, pClTargetArray, &sVector, sCIterA, sCIterB, sCItVecBegin, sCItVecEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN, "target::insert<vector::riter_t> (vector::riter_t, vector::riter_t)", pClArrayPrim, pClTargetArray, &sVector, sRIterA, sRIterB, sRItVecBegin, sRItVecEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN, "target::insert<vector::criter_t> (vector::criter_t, vector::criter_t)", pClArrayPrim, pClTargetArray, &sVector, sCRIterA, sCRIterB, sCRItVecBegin, sCRItVecEnd, nNumEntries);
+
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_SELF_REFERENCE, "target::insert<_t_obj::iter_t> (target::iter_t, target::iter_t)", pClArrayPrim, pClTargetArray, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_SELF_REFERENCE, "target::insert<_t_obj::citer_t> (target::citer_t, target::citer_t)", pClArrayPrim, pClTargetArray, &sList, sCIterA, sCIterB, sCItListBegin, sCItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_SELF_REFERENCE, "target::insert<_t_obj::riter_t> (target::riter_t, target::riter_t)", pClArrayPrim, pClTargetArray, &sList, sRIterA, sRIterB, sRItListBegin, sRItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_SELF_REFERENCE, "target::insert<_t_obj::criter_t> (target::criter_t, target::criter_t)", pClArrayPrim, pClTargetArray, &sList, sCRIterA, sCRIterB, sCRItListBegin, sCRItListEnd, nNumEntries);
+
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_INEFFECTIVE, "target::insert<_t_obj::iter_t> (iter_t == iter_t)", pClArrayPrim, pClTargetArray, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_INEFFECTIVE, "target::insert<_t_obj::citer_t> (citer_t == citer_t)", pClArrayPrim, pClTargetArray, &sList, sCIterA, sCIterB, sCItListBegin, sCItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_INEFFECTIVE, "target::insert<_t_obj::riter_t> (riter_t == riter_t)", pClArrayPrim, pClTargetArray, &sList, sRIterA, sRIterB, sRItListBegin, sRItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_INEFFECTIVE, "target::insert<_t_obj::criter_t> (criter_t == criter_t)", pClArrayPrim, pClTargetArray, &sList, sCRIterA, sCRIterB, sCRItListBegin, sCRItListEnd, nNumEntries);
+
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_PART_SELF_REFERENCE, "target::insert<_t_obj::iter_t> (>target::iter_t, target::iter_t<)", pClArrayPrim, pClTargetArray, &sList, sIterA, sIterB, sItListBegin, sItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_PART_SELF_REFERENCE, "target::insert<_t_obj::citer_t> (>target::citer_t, target::citer_t<)", pClArrayPrim, pClTargetArray, &sList, sCIterA, sCIterB, sCItListBegin, sCItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_PART_SELF_REFERENCE, "target::insert<_t_obj::riter_t> (>target::riter_t, target::riter_t<)", pClArrayPrim, pClTargetArray, &sList, sRIterA, sRIterB, sRItListBegin, sRItListEnd, nNumEntries);
+	TestBTreeArraySTLifInsertViaIteratorEx (BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_PART_SELF_REFERENCE, "target::insert<_t_obj::criter_t> (>target::criter_t, target::criter_t<)", pClArrayPrim, pClTargetArray, &sList, sCRIterA, sCRIterB, sCRItListBegin, sCRItListEnd, nNumEntries);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<iter_t> (sCIterHalf, pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::citer_t> (citer_t, citer_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<citer_t> (sCIterHalf, pClArray->cbegin (), pClArray->cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::riter_t> (riter_t, riter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<riter_t> (sCIterHalf, pClArray->rbegin (), pClArray->rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::criter_t> (criter_t, criter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<criter_t> (sCIterHalf, pClArray->crbegin (), pClArray->crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<list::iter> (list::iter, list::iter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sList.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert< ::std::list<arrayEntry_t>::iterator> (sCIterHalf, sList.begin (), sList.end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<list::citer> (list::citer, list::citer)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sList.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert< ::std::list<arrayEntry_t>::const_iterator> (sCIterHalf, sList.cbegin (), sList.cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<list::riter> (list::riter, list::riter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sList.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert< ::std::list<arrayEntry_t>::reverse_iterator> (sCIterHalf, sList.rbegin (), sList.rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<list::criter> (list::criter, list::criter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sList.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert< ::std::list<arrayEntry_t>::const_reverse_iterator> (sCIterHalf, sList.crbegin (), sList.crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<vector::iter> (vector::iter, vector::iter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sVector.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert< ::std::vector<arrayEntry_t>::iterator> (sCIterHalf, sVector.begin (), sVector.end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<vector::citer> (vector::citer, vector::citer)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sVector.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert< ::std::vector<arrayEntry_t>::const_iterator> (sCIterHalf, sVector.cbegin (), sVector.cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<vector::riter> (vector::riter, vector::riter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sVector.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert< ::std::vector<arrayEntry_t>::reverse_iterator> (sCIterHalf, sVector.rbegin (), sVector.rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<vector::criter> (vector::criter, vector::criter)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sVector.assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert< ::std::vector<arrayEntry_t>::const_reverse_iterator> (sCIterHalf, sVector.crbegin (), sVector.crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::iter_t> (target::iter_t, target::iter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<iter_t> (sCIterHalf, pClTargetArray->begin (), pClTargetArray->end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::citer_t> (target::citer_t, target::citer_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<citer_t> (sCIterHalf, pClTargetArray->cbegin (), pClTargetArray->cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::riter_t> (target::riter_t, target::riter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<riter_t> (sCIterHalf, pClTargetArray->rbegin (), pClTargetArray->rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::criter_t> (target::criter_t, target::criter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<criter_t> (sCIterHalf, pClTargetArray->crbegin (), pClTargetArray->crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::iter_t> (iter_t == iter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	pClTargetArray->template insert<iter_t> (sCIterHalf, pClArray->begin (), pClArray->begin ());
-	pClTargetArray->template insert<iter_t> (sCIterHalf, pClArray->end (), pClArray->end ());
-
-	sIterA = pClArray->begin ();
-	sIterB = pClArray->begin ();
-
-	while (sIterA != pClArray->end ())
-	{
-		pClTargetArray->template insert<iter_t> (sCIterHalf, sIterA, sIterB);
-
-		sIterA++;
-		sIterB++;
-	}
-
-	pClTargetArray->template insert<iter_t> (sCIterHalf, pClTargetArray->begin (), pClTargetArray->end ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::citer_t> (citer_t == citer_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	pClTargetArray->template insert<citer_t> (sCIterHalf, pClArray->cbegin (), pClArray->cbegin ());
-	pClTargetArray->template insert<citer_t> (sCIterHalf, pClArray->cend (), pClArray->cend ());
-
-	sCIterA = pClArray->cbegin ();
-	sCIterB = pClArray->cbegin ();
-
-	while (sCIterA != pClArray->cend ())
-	{
-		pClTargetArray->template insert<citer_t> (sCIterHalf, sCIterA, sCIterB);
-
-		sCIterA++;
-		sCIterB++;
-	}
-
-	pClTargetArray->template insert<citer_t> (sCIterHalf, pClTargetArray->cbegin (), pClTargetArray->cend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::riter_t> (riter_t == riter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	pClTargetArray->template insert<riter_t> (sCIterHalf, pClArray->rbegin (), pClArray->rbegin ());
-	pClTargetArray->template insert<riter_t> (sCIterHalf, pClArray->rend (), pClArray->rend ());
-
-	sRIterA = pClArray->rbegin ();
-	sRIterB = pClArray->rbegin ();
-
-	while (sRIterA != pClArray->rend ())
-	{
-		pClTargetArray->template insert<riter_t> (sCIterHalf, sRIterA, sRIterB);
-
-		sRIterA++;
-		sRIterB++;
-	}
-
-	pClTargetArray->template insert<riter_t> (sCIterHalf, pClTargetArray->rbegin (), pClTargetArray->rend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::criter_t> (criter_t == criter_t)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	pClTargetArray->template insert<criter_t> (sCIterHalf, pClArray->crbegin (), pClArray->crbegin ());
-	pClTargetArray->template insert<criter_t> (sCIterHalf, pClArray->crend (), pClArray->crend ());
-
-	sCRIterA = pClArray->crbegin ();
-	sCRIterB = pClArray->crbegin ();
-
-	while (sCRIterA != pClArray->crend ())
-	{
-		pClTargetArray->template insert<criter_t> (sCIterHalf, sCRIterA, sCRIterB);
-
-		sCRIterA++;
-		sCRIterB++;
-	}
-
-	pClTargetArray->template insert<criter_t> (sCIterHalf, pClTargetArray->crbegin (), pClTargetArray->crend ());
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::iter_t> (>target::iter_t, target::iter_t<)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sIterA = pClTargetArray->begin ();
-	sIterB = pClTargetArray->end ();
-
-	sIterA += (int) (nNumEntries / 4);
-	sIterB -= (int) (nNumEntries / 4);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<iter_t> (sCIterHalf, sIterA, sIterB);
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::citer_t> (>target::citer_t, target::citer_t<)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCIterA = pClTargetArray->cbegin ();
-	sCIterB = pClTargetArray->cend ();
-
-	sCIterA += (int) (nNumEntries / 4);
-	sCIterB -= (int) (nNumEntries / 4);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<citer_t> (sCIterHalf, sCIterA, sCIterB);
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::riter_t> (>target::riter_t, target::riter_t<)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sRIterA = pClTargetArray->rbegin ();
-	sRIterB = pClTargetArray->rend ();
-
-	sRIterA += (int) (nNumEntries / 4);
-	sRIterB -= (int) (nNumEntries / 4);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<riter_t> (sCIterHalf, sRIterA, sRIterB);
-
-	pClArrayPrim->clear ();
-
-	cout << "target::insert<_t_obj::criter_t> (>target::criter_t, target::criter_t<)" << endl;
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	pClArrayPrim->clear ();
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_END);
-
-	pClTargetArray->template assign<iter_t> (pClArray->begin (), pClArray->end ());
-
-	sCRIterA = pClTargetArray->crbegin ();
-	sCRIterB = pClTargetArray->crend ();
-
-	sCRIterA += (int) (nNumEntries / 4);
-	sCRIterB -= (int) (nNumEntries / 4);
-
-	sCIterHalf = pClTargetArray->cbegin ();
-
-	sCIterHalf += pClTargetArray->size () / 2;
-
-	pClTargetArray->template insert<criter_t> (sCIterHalf, sCRIterA, sCRIterB);
-
-	pClArrayPrim->clear ();
-	
 	delete pClTargetArray;
 }
 
@@ -2000,7 +1604,6 @@ void TestBTreeArraySTLifInsertViaIteratorLarge (_t_obj *pClArray, uint32_t nWhic
 
 	uint32_t						i;
 	uint32_t						j;
-	uint32_t						nDebug = 0;
 	::std::vector<arrayEntry_t>		sVector;
 	iter_t							sIterA, sIterB;
 	citer_t							sCIterA, sCIterB;
@@ -2009,14 +1612,14 @@ void TestBTreeArraySTLifInsertViaIteratorLarge (_t_obj *pClArray, uint32_t nWhic
 	citer_t							sCIter;
 	arrayEntry_t					sEntry;
 	
-	cout << "exercises method compatible to STL interface CBTreeBase<>::CBTreeArray<>:: insert<_t_iterator>(const_iterator, _t_iterator, _t_iterator)" << endl;
+	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: insert<_t_iterator>(const_iterator, _t_iterator, _t_iterator)" << endl;
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		sEntry.nDebug = nDebug;
+		sEntry.nDebug = g_nDebug;
 		sEntry.nData = generate_rand32 ();
 
-		nDebug++;
+		g_nDebug++;
 
 		sVector.push_back (sEntry);
 	}
@@ -2133,16 +1736,15 @@ void TestBTreeArraySTLifEraseSingle (_t_obj *pClArray, uint32_t nNumEntries)
 	typedef typename _t_obj::iterator				iter_t;
 	typedef typename _t_obj::const_iterator			citer_t;
 	
-	uint32_t			nDebug = 0;
 	uint32_t			i;
 	_t_objprim			*pClArrayPrim;
 	citer_t				sCIter;
 	
-	cout << "exercises method compatible to STL interface CBTreeBase<>::CBTreeArray<>:: erase (const_iterator)" << endl;
+	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: erase (const_iterator)" << endl;
 
 	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, nDebug, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
 	for (i = 0; i < nNumEntries; i++)
 	{
@@ -2165,7 +1767,6 @@ void TestBTreeArraySTLifEraseMultiple (_t_obj *pClArray, uint32_t nNumEntries)
 	typedef typename _t_obj::const_iterator			citer_t;
 
 	::std::list<arrayEntry_t>		sList;
-	uint32_t						nDebug = 0;
 	uint32_t						i;
 	uint32_t						j;
 	uint32_t						k;
@@ -2173,7 +1774,7 @@ void TestBTreeArraySTLifEraseMultiple (_t_obj *pClArray, uint32_t nNumEntries)
 	citer_t							sCIterB;
 	arrayEntry_t					sEntry;
 
-	cout << "exercises method compatible to STL interface CBTreeBase<>::CBTreeArray<>:: erase (const_iterator, const_iterator)" << endl;
+	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: erase (const_iterator, const_iterator)" << endl;
 
 	for (i = 0; i < nNumEntries; i += 5)
 	{
@@ -2186,14 +1787,14 @@ void TestBTreeArraySTLifEraseMultiple (_t_obj *pClArray, uint32_t nNumEntries)
 			for (k = 0; k < nNumEntries; k++)
 			{
 				sEntry.nData = generate_rand32 ();
-				sEntry.nDebug = nDebug;
+				sEntry.nDebug = g_nDebug;
 
 				sList.push_back (sEntry);
 
-				nDebug++;
+				g_nDebug++;
 			}
 
-			pClArray->template assign< ::std::list<arrayEntry_t>::iterator> (sList.begin (), sList.end ());
+			pClArray->assign (sList.begin (), sList.end ());
 
 			sCIterA = pClArray->cbegin ();
 			sCIterB = sCIterA + (int) i;
@@ -2213,23 +1814,22 @@ void TestBTreeArraySTLifSwap (_t_obj *pClArray, uint32_t nNumEntries)
 	typedef typename _t_obj::const_iterator			citer_t;
 
 	::std::list<arrayEntry_t>		sList;
-	uint32_t						nDebug = 0;
 	uint32_t						i;
 	arrayEntry_t					sEntry;
 	_t_obj							sClArrayTarget (*pClArray);
 	_t_obj							sClArrayRef (*pClArray);
 	_t_obj							sClArrayTargetRef (*pClArray);
 
-	cout << "exercises method compatible to STL interface CBTreeBase<>::CBTreeArray<>:: swap ()" << endl;
+	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeArray<>:: swap ()" << endl;
 
 	for (i = 0; i < nNumEntries; i++)
 	{
 		sEntry.nData = generate_rand32 ();
-		sEntry.nDebug = nDebug;
+		sEntry.nDebug = g_nDebug;
 
 		sList.push_back (sEntry);
 
-		nDebug++;
+		g_nDebug++;
 	}
 
 	pClArray->template assign< ::std::list<arrayEntry_t>::iterator> (sList.begin (), sList.end ());
@@ -2247,11 +1847,11 @@ void TestBTreeArraySTLifSwap (_t_obj *pClArray, uint32_t nNumEntries)
 	for (i = 0; i < (nNumEntries / 2); i++)
 	{
 		sEntry.nData = generate_rand32 ();
-		sEntry.nDebug = nDebug;
+		sEntry.nDebug = g_nDebug;
 
 		sList.push_back (sEntry);
 
-		nDebug++;
+		g_nDebug++;
 	}
 
 	sClArrayTarget.template assign< ::std::list<arrayEntry_t>::iterator> (sList.begin (), sList.end ());
