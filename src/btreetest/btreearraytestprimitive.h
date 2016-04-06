@@ -28,9 +28,9 @@ typedef enum
 	BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM
 } btreetest_array_primitive_seek_e;
 
-void arrayPrim_add (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEntries, uint32_t &nDebug, btreetest_array_primitive_seek_e eWhere);
-void arrayPrim_remove (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere);
-void arrayPrim_replace (CBTreeArrayDataIf<arrayEntry_t> *pClArray, uint32_t nEntries, uint32_t &nDebug, btreetest_array_primitive_seek_e eWhere);
-bool arrayPrim_compare (CBTreeArrayDataIf<arrayEntry_t> *pClArray0, CBTreeArrayDataIf<arrayEntry_t> *pClArray1);
+void arrayPrim_add (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere);
+void arrayPrim_remove (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere);
+void arrayPrim_replace (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere);
+bool arrayPrim_compare (CBTreeArrayIf<arrayEntry_t> *pClArray0, CBTreeArrayIf<arrayEntry_t> *pClArray1);
 
 #endif // BTREEARRAYTESTPRIMITIVE_H
