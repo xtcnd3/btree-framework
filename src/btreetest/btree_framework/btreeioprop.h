@@ -22,22 +22,10 @@ class CBTreeIOproperties
 {
 public:
 
-	typedef enum
-	{
-		CBTREE_IO_PROPERTIES_RAM, 
-		CBTREE_IO_PROPERTIES_FILE
-	} cbtree_io_properties_type_e;
-
-									CBTreeIOproperties		(cbtree_io_properties_type_e ePropertyType);
+									CBTreeIOproperties		();
 
 									~CBTreeIOproperties		();
 
-	cbtree_io_properties_type_e		get_type	();
-
-protected:
-
-	cbtree_io_properties_type_e		m_ePropertyType;
 };
 
 #endif // BTREEIOPROP_H
-
