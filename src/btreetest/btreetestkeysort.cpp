@@ -22,8 +22,9 @@ template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, cla
 CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
-		bayerTreeCacheDescription_t *psCacheDescription, 
-		_t_subnodeiter nNodeSize
+		const bayerTreeCacheDescription_t *psCacheDescription, 
+		_t_subnodeiter nNodeSize, 
+		::std::multimap<const _t_key, keySortMap_t> *pClRefData
 	)
 	:	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
@@ -31,44 +32,30 @@ CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 		psCacheDescription, 
 		nNodeSize
 	)
-	,	CBTreeKeySortDataIf <_t_data, _t_key, _t_sizetype> ()
+	,	m_pClRefData (pClRefData)
+	,	m_bAtomicTesting (true)
 {
-	m_pClRefData = new ::std::multimap<uint32_t, keySortMap_t> ();
-
-	BTREE_ASSERT (m_pClRefData != NULL, "CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest: insufficient memory!");
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest (CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
-	:	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest
 	(
-		rBT, false
+		CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, 
+		bool bAssign
 	)
-	,	CBTreeKeySortDataIf <_t_data, _t_key, _t_sizetype> ()
+	:	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (rBT, false)
+	,	m_pClRefData (NULL)
+	,	m_bAtomicTesting (false)
 {
-	m_pClRefData = new ::std::multimap<uint32_t, keySortMap_t> ();
-
-	BTREE_ASSERT (m_pClRefData != NULL, "CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest: insufficient memory!");
-
-	this->assign (rBT);
-
-//	m_pClRefData->insert<::std::multimap<uint32_t, keySortMap_t>::const_iterator> (rBT.m_pClRefData->cbegin (), rBT.m_pClRefData->cend ());
-
-	test ();
+	if (bAssign)
+	{
+		this->_assign (rBT);
+	}
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeKeySortTest ()
 {
-	delete m_pClRefData;
-}
-
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key* CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *pKey, const _t_data &rData)
-{
-	*pKey = rData.first;
-
-	return (pKey);
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -81,37 +68,36 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
 	(
 		const _t_data &rData
 	)
 {
-	const_iterator							sCIter;
+	iterator					sIter;
 
-	this->m_pClRefData->insert (rData);
-	
-	sCIter = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (rData);
+	sIter = CBTreeKeySort_t::insert (rData);
 
 	test ();
 
-	return (sCIter);
+	return (sIter);
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
 	(
 		typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos
 	)
 {
-	typedef typename ::std::multimap<_t_key, keySortMap_t>::iterator		itmmap_t;
+	typedef typename reference_t::iterator		itmmap_t;
 
 	_t_key			sKey = (*sCIterPos).first;
 	itmmap_t		sItMMapLower = m_pClRefData->lower_bound (sKey);
 	itmmap_t		sItMMapUpper = m_pClRefData->upper_bound (sKey);
 	itmmap_t		sItMMap;
-
+	iterator		sIter;
+	/*
 	for (sItMMap = sItMMapLower; sItMMap != sItMMapUpper; sItMMap++)
 	{
 		if ((*sItMMap).second.nData == (*sCIterPos).second.nData)
@@ -124,12 +110,12 @@ typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnode
 			}
 		}
 	}
-
-	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIterPos);
+	*/
+	sIter = CBTreeKeySort_t::erase (sCIterPos);
 
 	test ();
 
-	return (sCIterPos);
+	return (sIter);
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -137,9 +123,9 @@ _t_sizetype CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subn
 {
 	_t_sizetype		nRetval;
 
-	m_pClRefData->erase (rKey);
+	//m_pClRefData->erase (rKey);
 
-	nRetval = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (rKey);
+	nRetval = CBTreeKeySort_t::erase (rKey);
 
 	test ();
 
@@ -147,23 +133,23 @@ _t_sizetype CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subn
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
 	(
 		typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterFirst, 
 		typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterLast
 	)
 {
-	typedef typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator		citer_t;
-	typedef typename ::std::multimap<_t_key, keySortMap_t>::iterator																						itmmap_t;
+	typedef typename reference_t::iterator			itmmap_t;
 
-	citer_t		sCIterRetval;
-	citer_t		sCIter;
-	_t_key		sKey;
-	itmmap_t	sItMMapLower;
-	itmmap_t	sItMMapUpper;
-	itmmap_t	sItMMap;
-
+	const_iterator		sCIterRetval;
+	const_iterator		sCIter;
+//	_t_key				sKey;
+	itmmap_t			sItMMapLower;
+	itmmap_t			sItMMapUpper;
+	itmmap_t			sItMMap;
+	iterator			sIter;
+	/*
 	for (sCIter = sCIterFirst; sCIter != sCIterLast; sCIter++)
 	{
 		sKey = (*sCIter).first;
@@ -184,12 +170,12 @@ typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnode
 			}
 		}
 	}
-
-	sCIterRetval = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIterFirst, sCIterLast);
+	*/
+	sIter = CBTreeKeySort_t::erase (sCIterFirst, sCIterLast);
 
 	test ();
 
-	return (sCIterRetval);
+	return (sIter);
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -198,187 +184,99 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 		CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rKeySort
 	)
 {
-	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>	&rBtrKeySort = 
-		dynamic_cast <CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rKeySort);
+	CBTreeKeySort_t	&rBtrKeySort = dynamic_cast <CBTreeKeySort_t &> (rKeySort);
 
 	m_pClRefData->swap (*(rKeySort.m_pClRefData));
 
-	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (rBtrKeySort);
+	CBTreeKeySort_t::swap (rBtrKeySort);
 
 	test ();
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find (const _t_key &rKey)
 {
-	return (CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find (rKey));
+	return (CBTreeKeySort_t::find (rKey));
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (const _t_key &rKey)
 {
-	return (CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (rKey));
+	return (CBTreeKeySort_t::lower_bound (rKey));
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (const _t_key &rKey) const
+{
+	return (CBTreeKeySort_t::lower_bound (rKey));
+}
+
+template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (const _t_key &rKey)
 {
-	return (CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (rKey));
+	return (CBTreeKeySort_t::upper_bound (rKey));
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_tb (const _t_data &rData)
+typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (const _t_key &rKey) const
 {
-	_t_sizetype								nRslt;
-
-	m_pClRefData->insert (rData);
-
-	nRslt = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_tb (rData);
-
-	test ();
-
-	return (nRslt);
-}
-
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase_tb (const _t_key &rKey)
-{
-	typedef ::std::multimap<uint32_t, keySortMap_t>::const_iterator		citer_mmap_t;
-
-	citer_mmap_t							sItMMapLower;
-	citer_mmap_t							sItMMapUpper;
-	citer_mmap_t							sItMMap;
-	const_iterator							sCIterLower;
-	const_iterator							sCIterUpper;
-	const_iterator							sCIter;
-	_t_sizetype								nRslt;
-	
-	sItMMapLower = m_pClRefData->lower_bound (rKey);
-	sItMMapUpper = m_pClRefData->upper_bound (rKey);
-
-	m_pClRefData->erase (sItMMapLower, sItMMapUpper);
-
-	sCIterLower = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (rKey);
-	sCIterUpper = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (rKey);	
-
-	nRslt = sCIterUpper - sCIterLower;
-
-	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIterLower, sCIterUpper);
-
-	test ();
-
-	return (nRslt);
-}
-
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase_tb (const _t_key &rKey, const _t_sizetype instance)
-{
-	typedef ::std::multimap<uint32_t, keySortMap_t>::const_iterator		citer_mmap_t;
-
-	::std::pair<uint32_t, keySortMap_t>		sValue;
-	keySortMap_t							sMap;
-	citer_mmap_t							sItMMapLower;
-	citer_mmap_t							sItMMapUpper;
-	citer_mmap_t							sItMMap;
-	const_iterator							sCIterLower;
-	const_iterator							sCIterUpper;
-	const_iterator							sCIter;
-	_t_sizetype								i;
-	_t_data									sEntry;
-	bool									bDeleted = false;
-
-	sCIterLower = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (rKey);
-	sCIterUpper = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (rKey);
-
-	for (sCIter = sCIterLower, i = 0; (sCIter != sCIterUpper) && (i < instance); sCIter++, i++);
-	
-	BTREE_ASSERT (i == instance, "CBTreeKeySortTest<>::erase_tb (const _t_key &, const _t_sizetype): ERROR: Failed to find instance!");
-
-	sEntry = *sCIter;
-
-	sItMMapLower = m_pClRefData->lower_bound (rKey);
-	sItMMapUpper = m_pClRefData->upper_bound (rKey);
-
-	for (sItMMap = sItMMapLower; sItMMap != sItMMapUpper; sItMMap++)
-	{
-		sMap = (*sItMMap).second;
-
-		if (sMap.nData == sEntry.second.nData)
-		{
-			if (sMap.nDebug == sEntry.second.nDebug)
-			{
-				m_pClRefData->erase (sItMMap);
-
-				bDeleted = true;
-
-				break;
-			}
-		}
-	}
-
-	BTREE_ASSERT (bDeleted, "CBTreeKeySortTest<>::erase_tb (const _t_key &, const _t_sizetype): ERROR: multi map instance failed to delete!");
-	
-	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIter);
-
-	test ();
-
-	return (1);
+	return (CBTreeKeySort_t::upper_bound (rKey));
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ()
 {
-	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ();
+	CBTreeKeySort_t::clear ();
 
-	m_pClRefData->clear ();
+	test ();
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get (const _t_key &rKey, _t_data *pObj)
+_t_sizetype CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::count (const _t_key &rKey) const
 {
-	return (CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get (rKey, pObj));
+	return (CBTreeKeySort_t::count (rKey));
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get (const _t_key &rKey, _t_sizetype nInstance, _t_data *pObj)
+_t_data CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_reference
+	(
+		typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator &rCIter
+	)
 {
-	return (CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get (rKey, nInstance, pObj));
+	typedef typename reference_t::const_iterator		mmap_citer_t;
+
+	return (this->template get_data_reference<const_iterator, mmap_citer_t> (rCIter));
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::count (const _t_key &rKey)
+_t_data CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_reference
+	(
+		typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_reverse_iterator &rCRIter
+	)
 {
-	return (CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::count (rKey));
-}
+	typedef typename reference_t::const_reverse_iterator		mmap_criter_t;
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_init_pos_of_key (const _t_key &rKey)
-{
-	return (CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_init_pos_of_key (rKey));
-}
-
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_at (const _t_sizetype nPos, _t_data &rData)
-{
-	return (CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_at (nPos, rData));
+	return (this->template get_data_reference<const_reverse_iterator, mmap_criter_t> (rCRIter));
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
-	(CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
+	(const CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
 {
 	if (this != &rBT)
 	{
-		CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pThisKeySort;
-		CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pRefKeySort;
+		CBTreeKeySort_t			&rThisKeySort;
+		const CBTreeKeySort_t	&rBTKeySort;
 
-		pThisKeySort = dynamic_cast <CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *> (this);
-		pRefKeySort = dynamic_cast <CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *> (&rBT);
+		rThisKeySort = dynamic_cast <CBTreeKeySort_t &> (*this);
+		rBTKeySort = dynamic_cast <const CBTreeKeySort_t &> (rBT);
 
-		*pThisKeySort = *pRefKeySort;
+		rThisKeySort = rBTKeySort;
 
 		test ();
 	}
@@ -387,116 +285,23 @@ CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (CBTreeKeySortTest &rKeySort)
+void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test () const
 {
-	if (this == &rKeySort)
+	if (!m_bAtomicTesting)
 	{
-		return (true);
+		return;
 	}
 
-	if (this->size () != rKeySort.size ())
-	{
-		return (false);
-	}
+	typedef ::std::pair<const _t_key, keySortMap_t>			value_t;
 
-	CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>							*pKeySetTest;
+	typedef typename reference_t::const_iterator			citer_mmap_t;
 
-	pKeySetTest = new CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (*(this->m_pClDataLayerProperties), &(this->m_sCacheDescription), this->m_nNodeSize);
-
-	BTREE_ASSERT (pKeySetTest != NULL, "CBTreeKeySortTest::operator== (const CBTreeKeySortTest &): insufficient memory!");
-
-	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pKeySort = dynamic_cast <CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *> (&rKeySort);
-	CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pKeySet;
-	_t_sizetype																											i;
-	_t_sizetype																											j;
-	_t_sizetype																											k;
-	_t_sizetype																											nKeySetSize;
-	_t_data																												sThisData;
-	_t_data																												sData;
-	_t_data																												sKey;
-
-	pKeySet = dynamic_cast <CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *> (pKeySetTest);
-
-	for (i = 0; i < this->size (); i += nKeySetSize)
-	{
-		this->get_at (i, sKey);
-
-		nKeySetSize = pKeySort->get (sKey.first, *pKeySet);
-
-		if (nKeySetSize != this->count (sKey.first))
-		{
-			break;
-		}
-
-		for (j = 0; j < nKeySetSize; j++)
-		{
-			this->get_at (i + j, sThisData);
-
-			for (k = 0; k < pKeySet->size (); k++)
-			{
-				pKeySet->get_at (k, sData);
-
-				if ((sThisData.first == sData.first) && (sThisData.second.nData == sData.second.nData))
-				{
-					pKeySet->erase_tb (sKey.first, k);
-
-					break;
-				}
-			}
-		}
-
-		if (pKeySet->size () != 0)
-		{
-			break;
-		}
-	}
-
-	delete pKeySetTest;
-
-	return (i >= this->size ());
-}
-
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (CBTreeKeySortTest &rKeySort)
-{
-	return ( ! (*this == rKeySort));
-}
-
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-int CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::comp (const _t_key &rKey0, const _t_key &rKey1)
-{
-	if (rKey0 < rKey1)
-	{
-		return (-1);
-	}
-	else if (rKey0 > rKey1)
-	{
-		return (1);
-	}
-
-	return (0);
-}
-
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key* CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *pKey, const _t_nodeiter nNode, const _t_subnodeiter nEntry)
-{
-	pKey = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (pKey, nNode, nEntry);
-
-	return (pKey);
-}
-
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test ()
-{
-	typedef ::std::multimap<uint32_t, keySortMap_t>::const_iterator		citer_mmap_t;
-
-	::std::multimap<uint32_t, keySortMap_t>		sMMap;
+	reference_t									sMMap;
 	uint32_t									nKey;
 	uint32_t									nNextKey;
 	bool										bBounce;
 	_t_sizetype									nTotalCount = 0;
 	_t_data										sEntry;
-	::std::pair<uint32_t, keySortMap_t>			sValue;
 	citer_mmap_t								sItMMapLower;
 	citer_mmap_t								sItMMapUpper;
 	citer_mmap_t								sItMMap;
@@ -521,8 +326,8 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 		exit (-1);
 	}
 
-	sCIterBegin = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::cbegin ();
-	sCIterEnd = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::cend ();
+	sCIterBegin = CBTreeKeySort_t::cbegin ();
+	sCIterEnd = CBTreeKeySort_t::cend ();
 
 	sCIter = sCIterBegin;
 
@@ -556,9 +361,9 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 		{
 			sItMMapLower = m_pClRefData->lower_bound (nKey);
 
-			sCIterLower = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (nKey);
+			sCIterLower = CBTreeKeySort_t::lower_bound (nKey);
 
-			sValue = *sItMMapLower;
+			value_t						sValue ((value_t) *sItMMapLower);
 
 			sEntry = ((_t_data) (*sCIterLower));
 
@@ -596,8 +401,8 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 			sMMap.insert<citer_mmap_t> (sItMMapLower, sItMMapUpper);
 
-			sCIterLower = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (nKey);
-			sCIterUpper = CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (nKey);
+			sCIterLower = CBTreeKeySort_t::lower_bound (nKey);
+			sCIterUpper = CBTreeKeySort_t::upper_bound (nKey);
 
 			for (sCIter = sCIterLower; sCIter != sCIterUpper; sCIter++)
 			{
@@ -607,7 +412,7 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 				for (sItMMap = sMMap.cbegin (); sItMMap != sMMap.cend (); sItMMap++)
 				{
-					sValue = *sItMMap;
+					value_t				sValue ((value_t) *sItMMap);
 
 					if (sEntry.second.nData == sValue.second.nData)
 					{
@@ -652,7 +457,7 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 				for (sItMMap = sMMap.cbegin (); sItMMap != sMMap.cend (); sItMMap++)
 				{
-					sValue = *sItMMap;
+					value_t						sValue ((value_t) *sItMMap);
 
 					cerr << "key: ";
 
@@ -677,7 +482,7 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 			}
 		}
 
-		CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_next_key (nKey, nNextKey, bBounce);
+		CBTreeKeySort_t::get_next_key (nKey, nNextKey, bBounce);
 
 		if (bBounce)
 		{
@@ -686,8 +491,17 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 		nKey = nNextKey;
 	}
+
+	if ((m_pClRefData == NULL) && (!this->empty ()))
+	{
+		cerr << endl;
+		cerr << "reference not set while data container not empty" << endl;
+		cerr << "size: " << this->size () << endl;
+
+		exit (-1);
+	}
 	
-	if (m_pClRefData->size () != this->size ())
+	if ((m_pClRefData != NULL) && (m_pClRefData->size () != this->size ()))
 	{
 		cerr << endl;
 		cerr << "size mismatches" << endl;
@@ -705,8 +519,71 @@ void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 }
 
 template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_reference (typename CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reference_t *pReference)
 {
+	m_pClRefData = pReference;
+}
+
+template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+void CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_atomic_testing (bool bEnable)
+{
+	m_bAtomicTesting = bEnable;
+}
+
+template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+int CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::comp (const _t_key &rKey0, const _t_key &rKey1) const
+{
+	if (rKey0 < rKey1)
+	{
+		return (-1);
+	}
+	else if (rKey0 > rKey1)
+	{
+		return (1);
+	}
+
+	return (0);
+}
+
+template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+_t_key* CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *pKey, const _t_nodeiter nNode, const _t_subnodeiter nEntry) const
+{
+	pKey = CBTreeKeySort_t::extract_key (pKey, nNode, nEntry);
+
+	return (pKey);
+}
+
+template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+_t_key* CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *pKey, const _t_data &rData) const
+{
+	*pKey = rData.first;
+
+	return (pKey);
+}
+
+template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template<class _t_iterator, class _t_ref_iterator>
+_t_data CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_reference (_t_iterator &rIter)
+{
+	_t_iterator			sIterBegin;
+	_t_ref_iterator		sMMapCIter;
+
+	get_begin (this, sIterBegin);
+	
+	get_begin (this->m_pClRefData, sMMapCIter);
+
+	_t_sizetype			nOffset = ::std::distance<_t_iterator> (sIterBegin, rIter);
+
+	::std::advance<_t_ref_iterator, _t_sizetype> (sMMapCIter, nOffset);
+
+	return ((_t_data) *sMMapCIter);
+}
+
+template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
+{
+	typedef typename reference_t::const_iterator		mmap_citer_t;
+
 	_t_data					*psData;
 	uint32_t				rData;
 
@@ -733,11 +610,11 @@ bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 		if (nOffset < m_pClRefData->size ())
 		{
-			::std::multimap<uint32_t, keySortMap_t>::const_iterator		sItMMap;
+			mmap_citer_t		sItMMap;
 
 			sItMMap = m_pClRefData->cbegin ();
 
-			::std::advance< ::std::multimap<uint32_t, keySortMap_t>::const_iterator, _t_sizetype> (sItMMap, nDiff);
+			::std::advance (sItMMap, nDiff);
 
 			rData = (*sItMMap).first;
 			rData = (rData >> 16) | (rData << 16);
@@ -813,270 +690,15 @@ bool CBTreeKeySortTest<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 	return (true);
 }
 
-//template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-//bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_node (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
-//{
-//	std::stringstream		buf;
-//	uint32_t				rData;
-//	_t_data					*psData;
-//	_t_nodeiter				nNeightbourNode;
-//	_t_subnodeiter			nNeightbourSub;
-//	int						nErrCnt = 0;
-//	std::stringstream		aszMsg;
-//	char					*pColorInit = (char *) "";
-//	char					*pColorExit = (char *) "";
-//	_t_nodeiter				nPrevNode;
-//	_t_subnodeiter			nPrevSub;
-//	_t_nodeiter				nNextNode;
-//	_t_subnodeiter			nNextSub;
-//	bool					bBounce;
-//	_t_key					sKey;	
-//
-//	if (this->is_leaf (nNode))
-//	{
-//		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
-//		{
-//			if (!ofs.is_open ())
-//			{
-//				return (false);
-//			}
-//
-//			nErrCnt++;
-//		}
-//
-//		try
-//		{
-//			this->move_prev (nNode, nSubPos, nPrevNode, nPrevSub, bBounce);
-//
-//			if (bBounce == false)
-//			{
-//				_t_data	*psPrevData = this->get_data (nPrevNode, nPrevSub);
-//				_t_key	sPrevKey;
-//				_t_key	sKey;
-//
-//				this->extract_key (&sPrevKey, *psPrevData);
-//				this->extract_key (&sKey, *psData);
-//
-//				if (this->comp (sPrevKey, sKey) > 0)
-//				{
-//					if (!ofs.is_open ())
-//					{
-//						return (false);
-//					}
-//
-//					nErrCnt++;
-//
-//					aszMsg << "<br>prev: integrity error";
-//				}
-//
-//				this->move_next (nPrevNode, nPrevSub, nNextNode, nNextSub, bBounce);
-//
-//				if (bBounce)
-//				{
-//					if (!ofs.is_open ())
-//					{
-//						return (false);
-//					}
-//
-//					nErrCnt++;
-//
-//					aszMsg << "<br>prev: unexpected bBounce";
-//				}
-//				else
-//				{
-//					if ((nNextNode != nNode) || (nNextSub != nSubPos))
-//					{
-//						if (!ofs.is_open ())
-//						{
-//							return (false);
-//						}
-//
-//						nErrCnt++;
-//
-//						aszMsg << "<br>prev: broken link";
-//					}
-//				}
-//			}
-//
-//			this->allocateShortLiveKey ();
-//			{
-//				this->move_prev (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
-//
-//				if (bBounce == false)
-//				{
-//					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
-//
-//					this->extract_key (&sKey, *psData);
-//
-//					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
-//					{
-//						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) + 1))
-//						{
-//							if (!ofs.is_open ())
-//							{
-//								this->freeShortLiveKey ();
-//								
-//								return (false);
-//							}
-//
-//							nErrCnt++;
-//
-//							aszMsg << "<br>instance position error!";
-//						}
-//					}
-//				}
-//
-//				this->move_next (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
-//
-//				if (bBounce == false)
-//				{
-//					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
-//
-//					this->extract_key (&sKey, *psData);
-//
-//					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
-//					{
-//						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) - 1))
-//						{
-//							if (!ofs.is_open ())
-//							{
-//								this->freeShortLiveKey ();
-//								
-//								return (false);
-//							}
-//
-//							nErrCnt++;
-//
-//							aszMsg << "<br>instance position error!";
-//						}
-//					}
-//				}
-//			}
-//			this->freeShortLiveKey ();
-//		}
-//		catch (exception *pE)
-//		{
-//			if (!ofs.is_open ())
-//			{
-//				return (false);
-//			}
-//
-//			nErrCnt++;
-//
-//			aszMsg << "<br>prev: link walk crashed (" << pE->what () << ")";
-//		}
-//
-//		try
-//		{
-//			this->move_next (nNode, nSubPos, nNextNode, nNextSub, bBounce);
-//
-//			if (bBounce == false)
-//			{
-//				_t_data	*psNextData = this->get_data (nNextNode, nNextSub);
-//				_t_key	sNextKey;
-//				_t_key	sKey;
-//
-//				this->extract_key (&sNextKey, *psNextData);
-//				this->extract_key (&sKey, *psData);
-//
-//				if (this->comp (sNextKey, sKey) < 0)
-//				{
-//					if (!ofs.is_open ())
-//					{
-//						return (false);
-//					}
-//
-//					nErrCnt++;
-//
-//					aszMsg << "<br>next: integrity error";
-//				}
-//
-//				this->move_prev (nNextNode, nNextSub, nPrevNode, nPrevSub, bBounce);
-//
-//				if (bBounce)
-//				{
-//					if (!ofs.is_open ())
-//					{
-//						return (false);
-//					}
-//
-//					nErrCnt++;
-//
-//					aszMsg << "<br>next: unexpected bBounce";
-//				}
-//				else
-//				{
-//					if ((nPrevNode != nNode) || (nPrevSub != nSubPos))
-//					{
-//						if (!ofs.is_open ())
-//						{
-//							return (false);
-//						}
-//
-//						nErrCnt++;
-//
-//						aszMsg << "<br>next: broken link";
-//					}
-//				}
-//			}
-//		}
-//		catch (exception *pE)
-//		{
-//			if (!ofs.is_open ())
-//			{
-//				return (false);
-//			}
-//
-//			nErrCnt++;
-//
-//			aszMsg << "<br>next: link walk crashed (" << pE->what () << ")";
-//		}
-//
-//		if (nErrCnt == 0)
-//		{
-//			pColorInit = (char *) "";
-//			pColorExit = (char *) "";
-//		}
-//		else
-//		{
-//			pColorInit = (char *) "<font color=\"#FF0000\">";
-//			pColorExit = (char *) "</font>";
-//		}
-//		
-//		if (ofs.is_open ())
-//		{
-//			ofs << pColorInit << buf.str ().c_str () << pColorExit << aszMsg.str ().c_str ();
-//		}
-//	}
-//	else
-//	{
-//		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
-//		{
-//			if (!ofs.is_open ())
-//			{
-//				return (false);
-//			}
-//
-//			nErrCnt++;
-//		}
-//
-//		if (ofs.is_open ())
-//		{
-//			ofs << buf.str ().c_str () << endl;
-//		}
-//	}
-//
-//	return (true);
-//}
-
 /******************************************************************/
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
-		bayerTreeCacheDescription_t *psCacheDescription, 
-		_t_subnodeiter nNodeSize
+		const bayerTreeCacheDescription_t *psCacheDescription, 
+		_t_subnodeiter nNodeSize, 
+		typename ::std::multimap<const uint32_t, keySortMap_t> *pClRefData
 	)
 	:	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
@@ -1084,52 +706,33 @@ CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnode
 		psCacheDescription, 
 		nNodeSize
 	)
-	,	CBTreeKeySortDataIf <keySortEntry_t, uint32_t, _t_sizetype> ()
+	,	m_pClRefData (pClRefData)
+	,	m_bAtomicTesting (true)
 {
-	m_pClRefData = new ::std::multimap<uint32_t, keySortMap_t> ();
-
-	BTREE_ASSERT (m_pClRefData != NULL, "CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest: insufficient memory!");
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest
 	(
-		CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT
+		CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, 
+		bool bAssign
 	)
 	:	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
 		rBT, false
 	)
-	,	CBTreeKeySortDataIf <keySortEntry_t, uint32_t, _t_sizetype> ()
+	,	m_pClRefData (NULL)
+	,	m_bAtomicTesting (false)
 {
-	m_pClRefData = new ::std::multimap<uint32_t, keySortMap_t> ();
-
-	BTREE_ASSERT (m_pClRefData != NULL, "CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySortTest: insufficient memory!");
-
-	this->assign (rBT);
-
-	test ();
+	if (bAssign)
+	{
+		this->_assign (rBT);
+	}
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeKeySortTest ()
 {
-	delete m_pClRefData;
-}
-
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-int CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::comp (const uint32_t &rKey0, const uint32_t &rKey1)
-{
-	if (rKey0 < rKey1)
-	{
-		return (-1);
-	}
-	else if (rKey0 > rKey1)
-	{
-		return (1);
-	}
-
-	return (0);
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -1142,68 +745,39 @@ void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
 	(
 		const keySortEntry_t &rData
 	)
 {
-	::std::pair<uint32_t, keySortMap_t>		sValue;
-	const_iterator							sCIter;
+	iterator								sIter;
 
-	sValue.first = rData.nKey;
-	sValue.second.nData = rData.nData;
-	sValue.second.nDebug = rData.nDebug;
-
-	this->m_pClRefData->insert (sValue);
-	
-	sCIter = CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (rData);
+	sIter = CBTreeKeySort_t::insert (rData);
 
 	test ();
 
-	return (sCIter);
+	return (sIter);
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
 	(
 		typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos
 	)
 {
-	typedef typename ::std::multimap<uint32_t, keySortMap_t>::iterator		itmmap_t;
-
-	uint32_t		sKey = (*sCIterPos).nKey;
-	itmmap_t		sItMMapLower = m_pClRefData->lower_bound (sKey);
-	itmmap_t		sItMMapUpper = m_pClRefData->upper_bound (sKey);
-	itmmap_t		sItMMap;
-
-	for (sItMMap = sItMMapLower; sItMMap != sItMMapUpper; sItMMap++)
-	{
-		if ((*sItMMap).second.nData == (*sCIterPos).nData)
-		{
-			if ((*sItMMap).second.nDebug == (*sCIterPos).nDebug)
-			{
-				m_pClRefData->erase (sItMMap);
-
-				break;
-			}
-		}
-	}
-
-	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIterPos);
+	iterator	sIter = CBTreeKeySort_t::erase (sCIterPos);
 
 	test ();
 
-	return (sCIterPos);
+	return (sIter);
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 _t_sizetype CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (const uint32_t &rKey)
 {
 	_t_sizetype		nRetval;
-
-	m_pClRefData->erase (rKey);
 
 	nRetval = CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (rKey);
 
@@ -1213,49 +787,18 @@ _t_sizetype CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
 	(
 		typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterFirst, 
 		typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterLast
 	)
 {
-	typedef typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator		citer_t;
-	typedef typename ::std::multimap<uint32_t, keySortMap_t>::iterator																						itmmap_t;
+	iterator			sIter;
 
-	citer_t		sCIterRetval;
-	citer_t		sCIter;
-	uint32_t	sKey;
-	itmmap_t	sItMMapLower;
-	itmmap_t	sItMMapUpper;
-	itmmap_t	sItMMap;
+	sIter = CBTreeKeySort_t::erase (sCIterFirst, sCIterLast);
 
-	for (sCIter = sCIterFirst; sCIter != sCIterLast; sCIter++)
-	{
-		sKey = (*sCIter).nKey;
-
-		sItMMapLower = m_pClRefData->lower_bound (sKey);
-		sItMMapUpper = m_pClRefData->upper_bound (sKey);
-
-		for (sItMMap = sItMMapLower; sItMMap != sItMMapUpper; sItMMap++)
-		{
-			if ((*sItMMap).second.nData == (*sCIter).nData)
-			{
-				if ((*sItMMap).second.nDebug == (*sCIter).nDebug)
-				{
-					m_pClRefData->erase (sItMMap);
-
-					break;
-				}
-			}
-		}
-	}
-
-	sCIterRetval = CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIterFirst, sCIterLast);
-
-	test ();
-
-	return (sCIterRetval);
+	return (sIter);
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -1264,10 +807,7 @@ void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 		CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rKeySort
 	)
 {
-	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>	&rBtrKeySort = 
-		dynamic_cast <CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rKeySort);
-
-	m_pClRefData->swap (*(rKeySort.m_pClRefData));
+	CBTreeKeySort_t	&rBtrKeySort = dynamic_cast <CBTreeKeySort_t &> (rKeySort);
 
 	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (rBtrKeySort);
 
@@ -1275,155 +815,78 @@ void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find (const uint32_t &rKey)
 {
-	return (CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find (rKey));
+	return (CBTreeKeySort_t::find (rKey));
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (const uint32_t &rKey)
 {
-	return (CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (rKey));
+	return (CBTreeKeySort_t::lower_bound (rKey));
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (const uint32_t &rKey) const
+{
+	return (CBTreeKeySort_t::lower_bound (rKey));
+}
+
+template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (const uint32_t &rKey)
 {
-	return (CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (rKey));
+	return (CBTreeKeySort_t::upper_bound (rKey));
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_tb (const keySortEntry_t &rData)
+typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
+	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (const uint32_t &rKey) const
 {
-	::std::pair<uint32_t, keySortMap_t>		sValue;
-	_t_sizetype								nRslt;
-	uint32_t								nKey = rData.nKey;
-	keySortMap_t							sMap;
-
-	sMap.nData = rData.nData;
-	sMap.nDebug = rData.nDebug;
-
-	sValue.first = nKey;
-	sValue.second = sMap;
-
-	m_pClRefData->insert (sValue);
-
-	nRslt = CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_tb (rData);
-
-	this->test ();
-
-	return (nRslt);
-}
-
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase_tb (const uint32_t &rKey)
-{
-	typedef ::std::multimap<uint32_t, keySortMap_t>::const_iterator		citer_mmap_t;
-
-	citer_mmap_t							sItMMapLower;
-	citer_mmap_t							sItMMapUpper;
-	citer_mmap_t							sItMMap;
-	const_iterator							sCIterLower;
-	const_iterator							sCIterUpper;
-	const_iterator							sCIter;
-	_t_sizetype								nRslt;
-	
-	sItMMapLower = m_pClRefData->lower_bound (rKey);
-	sItMMapUpper = m_pClRefData->upper_bound (rKey);
-
-	m_pClRefData->erase (sItMMapLower, sItMMapUpper);
-
-	sCIterLower = CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (rKey);
-	sCIterUpper = CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (rKey);	
-
-	nRslt = sCIterUpper - sCIterLower;
-
-	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIterLower, sCIterUpper);
-
-	test ();
-
-	return (nRslt);
-}
-
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase_tb (const uint32_t &rKey, const _t_sizetype instance)
-{
-	typedef ::std::multimap<uint32_t, keySortMap_t>::const_iterator		citer_mmap_t;
-
-	::std::pair<uint32_t, keySortMap_t>		sValue;
-	keySortMap_t							sMap;
-	citer_mmap_t							sItMMapLower;
-	citer_mmap_t							sItMMapUpper;
-	citer_mmap_t							sItMMap;
-	const_iterator							sCIterLower;
-	const_iterator							sCIterUpper;
-	const_iterator							sCIter;
-	_t_sizetype								i;
-	keySortEntry_t							sEntry;
-	bool									bDeleted = false;
-
-	sCIterLower = CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (rKey);
-	sCIterUpper = CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (rKey);
-
-	for (sCIter = sCIterLower, i = 0; (sCIter != sCIterUpper) && (i < instance); sCIter++, i++);
-	
-	BTREE_ASSERT (i == instance, "CBTreeKeySortTest<>::erase_tb (const _t_key &, const _t_sizetype): ERROR: Failed to find instance!");
-
-	sEntry = *sCIter;
-
-	sItMMapLower = m_pClRefData->lower_bound (rKey);
-	sItMMapUpper = m_pClRefData->upper_bound (rKey);
-
-	for (sItMMap = sItMMapLower; sItMMap != sItMMapUpper; sItMMap++)
-	{
-		sMap = (*sItMMap).second;
-
-		if (sMap.nData == sEntry.nData)
-		{
-			if (sMap.nDebug == sEntry.nDebug)
-			{
-				m_pClRefData->erase (sItMMap);
-
-				bDeleted = true;
-
-				break;
-			}
-		}
-	}
-
-	BTREE_ASSERT (bDeleted, "CBTreeKeySortTest<>::erase_tb (const _t_key &, const _t_sizetype): ERROR: multi map instance failed to delete!");
-	
-	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIter);
-
-	test ();
-
-	return (1);
+	return (CBTreeKeySort_t::upper_bound (rKey));
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ()
 {
-	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ();
+	CBTreeKeySort_t::clear ();
+}
 
-	m_pClRefData->clear ();
+template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+keySortEntry_t CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_reference
+	(
+		typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator &rCIter
+	)
+{
+	typedef typename ::std::multimap<const uint32_t, keySortMap_t>::const_iterator		mmap_citer_t;
+
+	return (this->template get_data_reference<const_iterator, mmap_citer_t> (rCIter));
+}
+
+template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+keySortEntry_t CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_reference
+	(
+		typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_reverse_iterator &rCRIter
+	)
+{
+	typedef typename ::std::multimap<const uint32_t, keySortMap_t>::const_reverse_iterator		mmap_criter_t;
+
+	return (this->template get_data_reference<const_reverse_iterator, mmap_criter_t> (rCRIter));
 }
 
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
-	(CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
+	(const CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
 {
 	if (this != &rBT)
 	{
-		CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pThisKeySort;
-		CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pRefKeySort;
+		CBTreeKeySort_t			&rThisKeySort = dynamic_cast <CBTreeKeySort_t &> (*this);
+		const CBTreeKeySort_t	&rBTKeySort = dynamic_cast <const CBTreeKeySort_t &> (rBT);
 
-		pThisKeySort = dynamic_cast <CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *> (this);
-		pRefKeySort = dynamic_cast <CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *> (&rBT);
-
-		*pThisKeySort = *pRefKeySort;
+		rThisKeySort = rBTKeySort;
 
 		test ();
 	}
@@ -1431,94 +894,106 @@ CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnode
 	return (*this);
 }
 
+//template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+//bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (const CBTreeKeySortTest &rKeySort) const
+//{
+//	typedef typename CBTreeKeySort_t::const_iterator		keysort_citer_t;
+//
+//	if (this == &rKeySort)
+//	{
+//		return (true);
+//	}
+//
+//	if (this->size () != rKeySort.size ())
+//	{
+//		return (false);
+//	}
+//
+//	CBTreeKeySortTest_t							*pKeySetTest;
+//
+//	pKeySetTest = new CBTreeKeySortTest_t (*(this->m_pClDataLayerProperties), &(this->m_sCacheDescription), this->m_nNodeSize, NULL);
+//
+//	BTREE_ASSERT (pKeySetTest != NULL, "CBTreeKeySortTest::operator== (const CBTreeKeySortTest &): insufficient memory!");
+//
+//	const CBTreeKeySort_t	*pKeySort = dynamic_cast <const CBTreeKeySort_t *> (&rKeySort);
+//	CBTreeKeySort_t			*pKeySet;
+//	_t_sizetype				i;
+//	_t_sizetype				j;
+//	_t_sizetype				k;
+//	_t_sizetype				nKeySetSize;
+//	keySortEntry_t			sThisData;
+//	keySortEntry_t			sData;
+//	keySortEntry_t			sKey;
+//	keysort_citer_t			sKeySortCIter;
+//
+//	pKeySet = dynamic_cast <CBTreeKeySort_t *> (pKeySetTest);
+//
+//	for (i = 0; i < this->size (); i += nKeySetSize)
+//	{
+//		this->get_at (i, sKey);
+//
+//		nKeySetSize = pKeySort->get (sKey, *pKeySet);
+//
+//		if (nKeySetSize != this->count (sKey))
+//		{
+//			break;
+//		}
+//
+//		for (j = 0; j < nKeySetSize; j++)
+//		{
+//			this->get_at (i + j, sThisData);
+//
+//			sKeySortCIter = pKeySet->cbegin ();
+//
+//			for (k = 0; k < pKeySet->size (); k++, sKeySortCIter++)
+//			{
+//				sData = *sKeySortCIter;
+//
+//				if ((sThisData.nKey == sData.nKey) && (sThisData.nData == sData.nData))
+//				{
+//					pKeySet->erase_tb (sKey, k);
+//
+//					break;
+//				}
+//			}
+//		}
+//
+//		if (pKeySet->size () != 0)
+//		{
+//			break;
+//		}
+//	}
+//
+//	delete pKeySetTest;
+//
+//	return (i >= this->size ());
+//}
+//
+//template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+//bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (const CBTreeKeySortTest &rKeySort) const
+//{
+//	return ( ! (*this == rKeySort));
+//}
+//
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (CBTreeKeySortTest &rKeySort)
+void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test () const
 {
-	if (this == &rKeySort)
+	if (!m_bAtomicTesting)
 	{
-		return (true);
+		return;
 	}
 
-	if (this->size () != rKeySort.size ())
-	{
-		return (false);
-	}
+	typedef ::std::multimap<const uint32_t, keySortMap_t>		mmap_t;
+	typedef ::std::pair<const uint32_t, keySortMap_t>			value_t;
 
-	CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>							*pKeySetTest;
+	typedef typename mmap_t::const_iterator						citer_mmap_t;
 
-	pKeySetTest = new CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (*(this->m_pClDataLayerProperties), &(this->m_sCacheDescription), this->m_nNodeSize);
-
-	BTREE_ASSERT (pKeySetTest != NULL, "CBTreeKeySortTest::operator== (const CBTreeKeySortTest &): insufficient memory!");
-
-	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pKeySort = dynamic_cast <CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *> (&rKeySort);
-	CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pKeySet;
-	_t_sizetype																													i;
-	_t_sizetype																													j;
-	_t_sizetype																													k;
-	_t_sizetype																													nKeySetSize;
-	keySortEntry_t																												sThisData;
-	keySortEntry_t																												sData;
-	keySortEntry_t																												sKey;
-
-	pKeySet = dynamic_cast <CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *> (pKeySetTest);
-
-	for (i = 0; i < this->size (); i += nKeySetSize)
-	{
-		this->get_at (i, sKey);
-
-		nKeySetSize = pKeySort->get (sKey, *pKeySet);
-
-		if (nKeySetSize != this->count (sKey))
-		{
-			break;
-		}
-
-		for (j = 0; j < nKeySetSize; j++)
-		{
-			this->get_at (i + j, sThisData);
-
-			for (k = 0; k < pKeySet->size (); k++)
-			{
-				pKeySet->get_at (k, sData);
-
-				if ((sThisData.nKey == sData.nKey) && (sThisData.nData == sData.nData))
-				{
-					pKeySet->erase_tb (sKey, k);
-
-					break;
-				}
-			}
-		}
-
-		if (pKeySet->size () != 0)
-		{
-			break;
-		}
-	}
-
-	delete pKeySetTest;
-
-	return (i >= this->size ());
-}
-
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (CBTreeKeySortTest &rKeySort)
-{
-	return ( ! (*this == rKeySort));
-}
-
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test ()
-{
-	typedef ::std::multimap<uint32_t, keySortMap_t>::const_iterator		citer_mmap_t;
-
-	::std::multimap<uint32_t, keySortMap_t>		sMMap;
+	mmap_t										sMMap;
 	uint32_t									nKey;
 	uint32_t									nNextKey;
 	bool										bBounce;
 	_t_sizetype									nTotalCount = 0;
 	keySortEntry_t								sEntry;
-	::std::pair<uint32_t, keySortMap_t>			sValue;
 	citer_mmap_t								sItMMapLower;
 	citer_mmap_t								sItMMapUpper;
 	citer_mmap_t								sItMMap;
@@ -1580,7 +1055,7 @@ void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 
 			sCIterLower = CBTreeKeySort<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (nKey);
 
-			sValue = *sItMMapLower;
+			value_t						sValue ((value_t) *sItMMapLower);
 
 			sEntry = ((keySortEntry_t) (*sCIterLower));
 
@@ -1629,7 +1104,7 @@ void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 
 				for (sItMMap = sMMap.cbegin (); sItMMap != sMMap.cend (); sItMMap++)
 				{
-					sValue = *sItMMap;
+					value_t						sValue ((value_t) *sItMMap);
 
 					if (sEntry.nData == sValue.second.nData)
 					{
@@ -1674,7 +1149,7 @@ void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 
 				for (sItMMap = sMMap.cbegin (); sItMMap != sMMap.cend (); sItMMap++)
 				{
-					sValue = *sItMMap;
+					value_t						sValue ((value_t) *sItMMap);
 
 					cerr << "key: ";
 
@@ -1715,6 +1190,8 @@ void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 		cerr << "size mismatches" << endl;
 		cerr << "size: " << this->size () << endl;
 		cerr << "reference size: " << m_pClRefData->size () << endl;
+		cerr << "empty: " << this->empty () << endl;
+		cerr << "reference empty: " << m_pClRefData->empty () << endl;
 
 		cerr << "creating size.html..." << endl;
 
@@ -1726,8 +1203,60 @@ void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 	}
 }
 
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_reference (typename CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reference_t *pReference)
+{
+	m_pClRefData = pReference;
+}
+
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+void CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_atomic_testing (bool bEnable)
+{
+	m_bAtomicTesting = bEnable;
+}
+
 template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+int CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::comp (const uint32_t &rKey0, const uint32_t &rKey1) const
+{
+	if (rKey0 < rKey1)
+	{
+		return (-1);
+	}
+	else if (rKey0 > rKey1)
+	{
+		return (1);
+	}
+
+	return (0);
+}
+
+template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template<class _t_iterator, class _t_ref_iterator>
+keySortEntry_t CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_reference (_t_iterator &rIter)
+{
+	typedef typename ::std::multimap<const uint32_t, keySortMap_t>::value_type	mmap_value_type_t;
+
+	keySortEntry_t		sRetval;
+	_t_iterator			sIterBegin;
+	_t_ref_iterator		sMMapCIter;
+
+	get_begin (this, sIterBegin);
+	
+	get_begin (this->m_pClRefData, sMMapCIter);
+
+	_t_sizetype			nOffset = ::std::distance<_t_iterator> (sIterBegin, rIter);
+
+	::std::advance<_t_ref_iterator, _t_sizetype> (sMMapCIter, nOffset);
+
+	sRetval.nKey = ((mmap_value_type_t) *sMMapCIter).first;
+	sRetval.nData = ((mmap_value_type_t) *sMMapCIter).second.nData;
+	sRetval.nDebug = ((mmap_value_type_t) *sMMapCIter).second.nDebug;
+
+	return (sRetval);
+}
+
+template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
 {
 	keySortEntry_t		*psData;
 	uint32_t			rData;
@@ -1748,18 +1277,18 @@ bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 		rstrData << "instance: " << this->get_instancePos (nNode, nSubPos);
 		rstrData << "</td>";
 
-		_t_sizetype		nDiff = this->lower_bound (psData->nKey) - this->cbegin ();
+		_t_sizetype		nDiff = ::std::distance (this->cbegin (), this->lower_bound (psData->nKey));
 		_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
 
 		rstrData << "<td align=\"top\">";
 
 		if (nOffset < m_pClRefData->size ())
 		{
-			::std::multimap<uint32_t, keySortMap_t>::const_iterator		sItMMap;
+			::std::multimap<const uint32_t, keySortMap_t>::const_iterator		sItMMap;
 
 			sItMMap = m_pClRefData->cbegin ();
 
-			::std::advance< ::std::multimap<uint32_t, keySortMap_t>::const_iterator, _t_sizetype> (sItMMap, nDiff);
+			::std::advance (sItMMap, nOffset);
 
 			rData = (*sItMMap).first;
 			rData = (rData >> 16) | (rData << 16);
@@ -1834,250 +1363,5 @@ bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_su
 
 	return (true);
 }
-
-//template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-//bool CBTreeKeySortTest<keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_node (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
-//{
-//	std::stringstream		buf;
-//	uint32_t				rData;
-//	keySortEntry_t			*psData;
-//	_t_nodeiter				nNeightbourNode;
-//	_t_subnodeiter			nNeightbourSub;
-//	int						nErrCnt = 0;
-//	std::stringstream		aszMsg;
-//	char					*pColorInit = (char *) "";
-//	char					*pColorExit = (char *) "";
-//	_t_nodeiter				nPrevNode;
-//	_t_subnodeiter			nPrevSub;
-//	_t_nodeiter				nNextNode;
-//	_t_subnodeiter			nNextSub;
-//	bool					bBounce;
-//
-//	if (this->is_leaf (nNode))
-//	{
-//		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
-//		{
-//			if (!ofs.is_open ())
-//			{
-//				return (false);
-//			}
-//
-//			nErrCnt++;
-//		}
-//
-//		try
-//		{
-//			this->move_prev (nNode, nSubPos, nPrevNode, nPrevSub, bBounce);
-//
-//			if (bBounce == false)
-//			{
-//				keySortEntry_t *pPrevData = this->get_data (nPrevNode, nPrevSub);
-//
-//				if (this->comp (pPrevData->nKey, psData->nKey) > 0)
-//				{
-//					if (!ofs.is_open ())
-//					{
-//						return (false);
-//					}
-//
-//					nErrCnt++;
-//
-//					aszMsg << "<br>prev: integrity error";
-//				}
-//
-//				this->move_next (nPrevNode, nPrevSub, nNextNode, nNextSub, bBounce);
-//
-//				if (bBounce)
-//				{
-//					if (!ofs.is_open ())
-//					{
-//						return (false);
-//					}
-//
-//					nErrCnt++;
-//
-//					aszMsg << "<br>prev: unexpected bBounce";
-//				}
-//				else
-//				{
-//					if ((nNextNode != nNode) || (nNextSub != nSubPos))
-//					{
-//						if (!ofs.is_open ())
-//						{
-//							return (false);
-//						}
-//
-//						nErrCnt++;
-//
-//						aszMsg << "<br>prev: broken link";
-//					}
-//				}
-//			}
-//
-//			this->allocateShortLiveKey ();
-//			{
-//				this->move_prev (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
-//
-//				if (bBounce == false)
-//				{
-//					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
-//
-//					this->extract_key (&sKey, *psData);
-//
-//					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
-//					{
-//						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) + 1))
-//						{
-//							if (!ofs.is_open ())
-//							{
-//								this->freeShortLiveKey ();
-//								
-//								return (false);
-//							}
-//
-//							nErrCnt++;
-//
-//							aszMsg << "<br>instance position error!";
-//						}
-//					}
-//				}
-//
-//				this->move_next (nNode, nSubPos, nNeightbourNode, nNeightbourSub, bBounce);
-//
-//				if (bBounce == false)
-//				{
-//					this->extract_key (this->m_pShortLiveKey, nNeightbourNode, nNeightbourSub);
-//
-//					this->extract_key (&sKey, *psData);
-//
-//					if (this->comp (*(this->m_pShortLiveKey), sKey) == 0)
-//					{
-//						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) - 1))
-//						{
-//							if (!ofs.is_open ())
-//							{
-//								this->freeShortLiveKey ();
-//								
-//								return (false);
-//							}
-//
-//							nErrCnt++;
-//
-//							aszMsg << "<br>instance position error!";
-//						}
-//					}
-//				}
-//			}
-//			this->freeShortLiveKey ();
-//		}
-//		catch (exception *pE)
-//		{
-//			if (!ofs.is_open ())
-//			{
-//				return (false);
-//			}
-//
-//			nErrCnt++;
-//
-//			aszMsg << "<br>prev: link walk crashed (" << pE->what () << ")";
-//		}
-//
-//		try
-//		{
-//			this->move_next (nNode, nSubPos, nNextNode, nNextSub, bBounce);
-//
-//			if (bBounce == false)
-//			{
-//				keySortEntry_t	*psNextData = this->get_data (nNextNode, nNextSub);
-//
-//				if (this->comp (psNextData->nKey, psData->nKey) < 0)
-//				{
-//					if (!ofs.is_open ())
-//					{
-//						return (false);
-//					}
-//
-//					nErrCnt++;
-//
-//					aszMsg << "<br>next: integrity error";
-//				}
-//
-//				this->move_prev (nNextNode, nNextSub, nPrevNode, nPrevSub, bBounce);
-//
-//				if (bBounce)
-//				{
-//					if (!ofs.is_open ())
-//					{
-//						return (false);
-//					}
-//
-//					nErrCnt++;
-//
-//					aszMsg << "<br>next: unexpected bBounce";
-//				}
-//				else
-//				{
-//					if ((nPrevNode != nNode) || (nPrevSub != nSubPos))
-//					{
-//						if (!ofs.is_open ())
-//						{
-//							return (false);
-//						}
-//
-//						nErrCnt++;
-//
-//						aszMsg << "<br>next: broken link";
-//					}
-//				}
-//			}
-//		}
-//		catch (exception *pE)
-//		{
-//			if (!ofs.is_open ())
-//			{
-//				return (false);
-//			}
-//
-//			nErrCnt++;
-//
-//			aszMsg << "<br>next: link walk crashed (" << pE->what () << ")";
-//		}
-//
-//		if (nErrCnt == 0)
-//		{
-//			pColorInit = (char *) "";
-//			pColorExit = (char *) "";
-//		}
-//		else
-//		{
-//			pColorInit = (char *) "<font color=\"#FF0000\">";
-//			pColorExit = (char *) "</font>";
-//		}
-//		
-//		if (ofs.is_open ())
-//		{
-//			ofs << pColorInit << buf.str ().c_str () << pColorExit << aszMsg.str ().c_str ();
-//		}
-//	}
-//	else
-//	{
-//		if (!this->show_data (ofs, buf, aszMsg, nNode, nSubPos))
-//		{
-//			if (!ofs.is_open ())
-//			{
-//				return (false);
-//			}
-//
-//			nErrCnt++;
-//		}
-//
-//		if (ofs.is_open ())
-//		{
-//			ofs << buf.str ().c_str () << endl;
-//		}
-//	}
-//
-//	return (true);
-//}
 
 #endif // BTREETESTKEYSORT_CPP
