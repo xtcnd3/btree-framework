@@ -13,6 +13,18 @@
 
 #include "btreetestcommon.h"
 
+uint32_t		g_nDebug = 0;
+
+namespace std
+{
+
+	void swap (const uint32_t &_Left, const uint32_t &_Right)
+	{
+		fast_swap ((uint32_t &) _Left, (uint32_t &) _Right);
+	}
+
+};
+
 uint32_t generate_rand32 ()
 {
 	uint32_t	nRetval = rand ();
