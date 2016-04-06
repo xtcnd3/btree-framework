@@ -27,16 +27,28 @@ typedef struct btree_time_stamp_s
 	::std::clock_t	sTime;
 	uint32_t		nAccCtr;
 
-	bool			operator== (const struct btree_time_stamp_s &rTimeStamp)
+	bool			operator== (const struct btree_time_stamp_s &rTimeStamp) const
 	{
 		return ((sTime == rTimeStamp.sTime) && (nAccCtr == rTimeStamp.nAccCtr));
 	}
 
-	bool			operator!= (const struct btree_time_stamp_s &rTimeStamp)
+	bool			operator!= (const struct btree_time_stamp_s &rTimeStamp) const
 	{
 		return ((sTime != rTimeStamp.sTime) || (nAccCtr != rTimeStamp.nAccCtr));
 	}
 } btree_time_stamp_t;
+
+template<class _t>
+struct has_compare_operator_equal
+{
+    template<class _ti>
+    static auto test(_ti*) -> decltype(std::declval<_ti>() == std::declval<_ti>());
+
+    template<typename>
+    static auto test(...) -> std::false_type;
+
+    using type = typename std::is_same<bool, decltype(test<_t>(0))>::type;
+};
 
 #if defined (uint128_t)
 
@@ -52,7 +64,6 @@ typedef struct btree_time_stamp_s
 	
 #endif
 
-
 template <class _t_type, typename _t_intrinsic>
 void				xor_swap		(_t_type &rLhs, _t_type &rRhs);
 
@@ -62,3 +73,4 @@ void				fast_swap		(_t_type &rLhs, _t_type &rRhs);
 #endif // BTREECOMMON_H
 
 #include "btreecommon.cpp"
+
