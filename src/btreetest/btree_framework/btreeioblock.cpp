@@ -1,3 +1,16 @@
+/************************************************************
+**
+** file:	btreeioblock.cpp
+** author:	Andreas Steffens
+** license:	GPL v2
+**
+** description:
+**
+** This file contains code for the b-tree framework's
+** block IO data layer class.
+**
+************************************************************/
+
 #ifndef	BTREEIOBLOCK_CPP
 #define	BTREEIOBLOCK_CPP
 
@@ -74,28 +87,6 @@ _t_offsettype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offs
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_offsettype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_per_node_pool_offset (uint32_t nPool)
-{
-#if defined (_DEBUG)
-
-	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeBlockIO::get_per_node_pool_offset: nPool exceeds available block pools!");
-
-#endif
-
-	return (m_pnPerNodePoolOffset[nPool]);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_addresstype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pool_address (uint32_t nPool, _t_nodeiter nNode)
-{
-	_t_addresstype		nAddr = get_nodeAddr (nNode);
-
-	nAddr += get_per_node_pool_offset (nPool);
-
-	return (nAddr);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 void CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_root_node (_t_nodeiter nRootNode)
 {
 	uint32_t		nCurrentRootContainingDesc;
@@ -114,7 +105,7 @@ void CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::
 	{
 #if defined (_DEBUG)
 
-		BTREE_ASSERT (nNewRootContainingDesc < m_nDescriptorVectorSize, "ERROR: CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_root_node: requested new root exceeds descriptor vector size!");
+		BTREE_ASSERT (nNewRootContainingDesc < m_nDescriptorVectorSize, "CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_root_node: requested new root exceeds descriptor vector size!");
 
 #endif
 
@@ -160,6 +151,28 @@ _t_addresstype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_off
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+_t_offsettype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_per_node_pool_offset (uint32_t nPool)
+{
+#if defined (_DEBUG)
+
+	BTREEDATA_ASSERT (nPool < this->m_nNumDataPools, "CBTreeBlockIO::get_per_node_pool_offset: nPool exceeds available block pools!");
+
+#endif
+
+	return (m_pnPerNodePoolOffset[nPool]);
+}
+
+template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+_t_addresstype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pool_address (uint32_t nPool, _t_nodeiter nNode)
+{
+	_t_addresstype		nAddr = get_nodeAddr (nNode);
+
+	nAddr += get_per_node_pool_offset (nPool);
+
+	return (nAddr);
+}
+
+template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 _t_offsettype CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::generate_pool_offsets ()
 {
 	_t_offsettype	nBase = this->get_poolOffset ();
@@ -192,19 +205,19 @@ void CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::
 	{
 #if defined (_DEBUG)
 
-		BTREE_ASSERT (m_nDescriptorVectorSize == 0, "ERROR: CBTreeBlockIO::realloc_descriptor_vector: on descriptor vector initialisation, vector size ought to be zero length!");
+		BTREE_ASSERT (m_nDescriptorVectorSize == 0, "CBTreeBlockIO::realloc_descriptor_vector: on descriptor vector initialisation, vector size ought to be zero length!");
 
 #endif
 
 		m_psDescriptorVector = (btree_block_io_descriptor_t *) malloc (nNewDescriptorVectorSize * sizeof (btree_block_io_descriptor_t));
 
-		BTREE_ASSERT (m_psDescriptorVector != NULL, "ERROR: CBTreeBlockIO::realloc_descriptor_vector: insufficient memory!");
+		BTREE_ASSERT (m_psDescriptorVector != NULL, "CBTreeBlockIO::realloc_descriptor_vector: insufficient memory!");
 	}
 	else if (nNewDescriptorVectorSize != nOldDescriptorVectorSize)
 	{
 		m_psDescriptorVector = (btree_block_io_descriptor_t *) realloc ((void *) m_psDescriptorVector, nNewDescriptorVectorSize * sizeof (btree_block_io_descriptor_t));
 
-		BTREE_ASSERT (m_psDescriptorVector != NULL, "ERROR: CBTreeBlockIO::realloc_descriptor_vector: insufficient memory! (realloc)");
+		BTREE_ASSERT (m_psDescriptorVector != NULL, "CBTreeBlockIO::realloc_descriptor_vector: insufficient memory! (realloc)");
 	}
 
 	for (u = nOldDescriptorVectorSize; u < nNewDescriptorVectorSize; u++)
@@ -235,7 +248,7 @@ uint32_t CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettyp
 
 #if defined (_DEBUG)
 
-	BTREE_ASSERT ((nNode & uRevNodeMask) == 0x0, "ERROR: CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::convert_node_to_descriptor: node value exceeds maximum descriptor vector size!");
+	BTREE_ASSERT ((nNode & uRevNodeMask) == 0x0, "CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::convert_node_to_descriptor: node value exceeds maximum descriptor vector size!");
 
 #endif
 
@@ -247,7 +260,7 @@ uint32_t CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettyp
 
 #if defined (_DEBUG)
 
-		BTREE_ASSERT (nRslt != 0, "ERROR: CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::convert_node_to_descriptor: requested size exceeds maximum descriptor vector size!");
+		BTREE_ASSERT (nRslt != 0, "CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::convert_node_to_descriptor: requested size exceeds maximum descriptor vector size!");
 
 #endif
 	}
@@ -261,7 +274,7 @@ void CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::
 	uint32_t	nMultiple = 1;
 	uint32_t	ui32;
 
-	BTREE_ASSERT (nBlockSize > 0, "ERROR: CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::setup: desired minimum block is zero!");
+	BTREE_ASSERT (nBlockSize > 0, "CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::setup: desired minimum block is zero!");
 
 	m_nBlockSize = nBlockSize * nMultiple;
 
