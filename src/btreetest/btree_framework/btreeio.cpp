@@ -120,16 +120,6 @@ void CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_p
 }
 
 template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-uint32_t CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pool_total_size (uint32_t nPool)
-{
-#if defined (_DEBUG)
-	BTREEDATA_ASSERT (nPool < m_nNumDataPools, "CBTreeIO::get_pool_total_size: nPool exceeds available block pools!");
-#endif
-
-	return (m_psDataPools[nPool].nTotalSize);
-}
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 uint32_t CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pool_entry_size (uint32_t nPool)
 {
 #if defined (_DEBUG)
@@ -155,6 +145,16 @@ template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _
 void CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_cacheFreeze (bool bEnabled)
 {
 	m_bCacheFreeze = bEnabled;
+}
+
+template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+uint32_t CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pool_total_size (uint32_t nPool)
+{
+#if defined (_DEBUG)
+	BTREEDATA_ASSERT (nPool < m_nNumDataPools, "CBTreeIO::get_pool_total_size: nPool exceeds available block pools!");
+#endif
+
+	return (m_psDataPools[nPool].nTotalSize);
 }
 
 #endif // BTREEIO_CPP
