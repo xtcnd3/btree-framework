@@ -21,13 +21,14 @@
 #include <map>
 #include <utility>
 
-#include "btree.h"
-#include "btreemultiset.h"
+#include "btreetestcommon.h"
+
+#include "btreebasedefaults.h"
+#include "./associative/btreemultiset.h"
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 class CBTreeTestMultiSet
 	:	public CBTreeMultiSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-//	,	public virtual CBTreeKeySortDataIf < ::std::pair<uint32_t, multiMapMap_t>, uint32_t, _t_sizetype >
 {
 public:
 
@@ -36,24 +37,24 @@ public:
 	typedef CBTreeMultiSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 																		CBTreeMultiSet_t;
 
-	typedef typename CBTreeMultiSet_t::CBTreeKeySort_t::CBTreeBase_t	CBTreeBase_t;
+	typedef typename CBTreeMultiSet_t::CBTreeDefaults_t				CBTreeDefaults_t;
 
-#if defined(__GNUC__) || defined(__GNUG__)
+	typedef typename CBTreeMultiSet_t::CBTreeAssociativeIf_t			CBTreeAssociativeIf_t;
 
-	typedef typename ::CBTreeBaseIterator<CBTreeBase_t>					iterator;
-	typedef typename ::CBTreeBaseReverseIterator<iterator>				reverse_iterator;
-	typedef typename ::CBTreeBaseConstIterator<CBTreeBase_t>			const_iterator;
-	typedef typename ::CBTreeBaseConstReverseIterator<const_iterator>	const_reverse_iterator;
+	typedef typename CBTreeMultiSet_t::iterator							iterator;
+	typedef typename CBTreeMultiSet_t::const_iterator					const_iterator;
+	typedef typename CBTreeMultiSet_t::reverse_iterator					reverse_iterator;
+	typedef typename CBTreeMultiSet_t::const_reverse_iterator			const_reverse_iterator;
 
-#endif
-
-	typedef typename CBTreeMultiSet_t::position_t						position_t;
+//	typedef typename CBTreeMultiSet_t::position_t						position_t;
 	typedef const uint32_t												data_t;
-	typedef _t_sizetype													sizetype_t;
+	typedef _t_sizetype													size_type;
 	typedef _t_nodeiter													nodeiter_t;
 	typedef _t_subnodeiter												subnodeiter_t;
 	typedef _t_datalayerproperties										datalayerproperties_t;
 	typedef _t_datalayer												datalayer_t;
+
+	typedef uint32_t													value_type;
 
 	typedef uint32_t													value_t;
 
@@ -61,31 +62,22 @@ public:
 	typedef typename CBTreeMultiSet_t::value_compare					value_compare;
 
 							CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-								(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+								(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
 
 							CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-								(CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
+								(const CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
 
 							~CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 								();
 
-	CBTreeTestMultiSet_t &	operator=				(CBTreeTestMultiSet_t &rBT);
-
-//	iterator				begin					();
-//	iterator				end						();
-//	reverse_iterator		rbegin					();
-//	reverse_iterator		rend					();
-//	const_iterator			cbegin					();
-//	const_iterator			cend					();
-//	const_reverse_iterator	crbegin					();
-//	const_reverse_iterator	crend					();
-
-//	bool					empty					();
-//	_t_sizetype				size					();
-//	_t_sizetype				max_size				();
+	CBTreeTestMultiSet_t &	operator=				(const CBTreeTestMultiSet_t &rBT);
 
 	template <class _t_iterator>
 	void					insert					(_t_iterator sItFirst, _t_iterator sItLast);
+	
+	template <class _t_iterator, class _t_ref_iterator>
+	void					insert					(_t_iterator sItFirst, _t_iterator sItLast);
+	
 	iterator				insert					(const value_t &rData);
 
 	iterator				erase					(const_iterator sCIterPos);
@@ -99,32 +91,24 @@ public:
 	key_compare				key_comp				() const;
 	value_compare			value_comp				() const;
 	
-//	iterator				find					(const uint32_t &rKey);
-//	_t_sizetype				count					(const uint32_t &rKey);
-//	iterator				lower_bound				(const uint32_t &rKey);
-//	iterator				upper_bound				(const uint32_t &rKey);
-
-	bool					operator==				(CBTreeTestMultiSet &rTMM);
-	bool					operator!=				(CBTreeTestMultiSet &rTMM);
+	bool					operator==				(const CBTreeTestMultiSet &rTMM) const;
+	bool					operator!=				(const CBTreeTestMultiSet &rTMM) const;
 
 protected:
 
-	void					test					();
+	void					test					() const;
 
-	bool					show_data				(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
-
-	uint32_t				m_nDebug;
+	bool					show_data				(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const;
 
 	::std::multiset<uint32_t>
 							*m_pClRef;
 
 public:
 
-	friend class CBTreeBaseIterator<CBTreeBase_t>;
-	friend class CBTreeBaseReverseIterator<iterator>;
-	friend class CBTreeBaseConstIterator<CBTreeBase_t>;
-	friend class CBTreeBaseConstReverseIterator<const_iterator>;
-
+	friend class CBTreeIterator<CBTreeDefaults_t>;
+	friend class CBTreeConstIterator<CBTreeDefaults_t>;
+	friend class CBTreeReverseIterator<iterator>;
+	friend class CBTreeConstReverseIterator<const_iterator>;
 };
 
 #endif // !BTREETESTMULTISET_H
