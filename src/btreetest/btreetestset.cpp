@@ -20,35 +20,33 @@
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeTestSet
-	(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize)
+	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize)
 	:	CBTreeSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
 		rDataLayerProperties, 
 		psCacheDescription, 
 		nNodeSize
 	)
-	,	m_nDebug (0)
 	,	m_pClRef (NULL)
 {
 	m_pClRef = new ::std::set<uint32_t> ();
 
-	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestSet<>::CBTreeTestSet: ERROR: insufficient memory!");
+	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestSet<>::CBTreeTestSet (_t_datalayerproperties &, bayerTreeCacheDescription_t *, _t_subnodeiter): insufficient memory!");
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeTestSet
-	(CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
+	(const CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
 	:	CBTreeSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
-		dynamic_cast<CBTreeSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), 
+		dynamic_cast<const CBTreeSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), 
 		bAssign
 	)
-	,	m_nDebug (0)
 	,	m_pClRef (NULL)
 {
 	m_pClRef = new ::std::set<uint32_t> ();
 
-	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestSet<>::CBTreeTestSet: ERROR: insufficient memory!");
+	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestSet<>::CBTreeTestSet (CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &, bool): insufficient memory!");
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -61,13 +59,13 @@ template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_da
 CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>&
 	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
 	(
-		CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT
+		const CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT
 	)
 {
 	if (this != &rBT)
 	{
-		CBTreeSet_t		&rThisMM = dynamic_cast<CBTreeSet_t &> (*this);
-		CBTreeSet_t		&rBTMM = dynamic_cast<CBTreeSet_t &> (rBT);
+		CBTreeSet_t			&rThisMM = dynamic_cast<CBTreeSet_t &> (*this);
+		const CBTreeSet_t	&rBTMM = dynamic_cast<const CBTreeSet_t &> (rBT);
 
 		rThisMM = rBTMM;
 
@@ -78,39 +76,6 @@ CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, 
 
 	return (*this);
 }
-
-/*
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::begin ()
-{
-
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::end ()
-{
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reverse_iterator
-	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rbegin ()
-{
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reverse_iterator
-	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rend ()
-{
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::max_size ()
-{
-}
-
-*/
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 template <class _t_iterator>
@@ -124,23 +89,24 @@ void CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename ::std::pair<typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator, bool>
+typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
 	(
 		const value_t &rData
 	)
 {
 	::std::pair<::std::set<uint32_t>::iterator, bool>		sRefRslt;
-	insert_rslt_t											sRslt;
+	iterator												sIter;
 	value_t													sData = rData;
-
-	m_nDebug++;
+	bool													bSuccess;
 
 	sRefRslt = m_pClRef->insert (sData);
 
-	sRslt = CBTreeSet_t::insert (sData);
+	sIter = CBTreeSet_t::insert (sData);
 
-	if (sRslt.second != sRefRslt.second)
+	bSuccess = sIter < this->end ();
+
+	if (bSuccess != sRefRslt.second)
 	{
 		cerr << endl;
 		cerr << "CBTreeTestSet<>::insert: ERROR: reference claims that key ";
@@ -158,7 +124,7 @@ typename ::std::pair<typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnode
 
 		cerr << "present, whereas the instance claims that said key was ";
 
-		if (sRslt.second)
+		if (bSuccess)
 		{
 			cerr << "not ";
 		}
@@ -175,7 +141,7 @@ typename ::std::pair<typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnode
 
 	test ();
 
-	return (sRslt);
+	return (sIter);
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -265,6 +231,8 @@ void CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 	m_pClRef->clear ();
 
 	CBTreeSet_t::clear ();
+
+	test ();
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -272,6 +240,8 @@ typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpro
 	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_comp () const
 {
 	key_compare		sRslt;
+
+	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
 
 	return (sRslt);
 }
@@ -282,34 +252,13 @@ typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpro
 {
 	value_compare	sRslt;
 
+	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+
 	return (sRslt);
 }
 
-/*
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find (const uint32_t &rKey)
-{
-
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (const uint32_t &rKey)
-{
-
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (const uint32_t &rKey)
-{
-
-}
-*/
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (CBTreeTestSet_t &rTSet)
+bool CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (const CBTreeTestSet_t &rTSet) const
 {
 	if (this == &rTSet)
 	{
@@ -349,13 +298,13 @@ bool CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (CBTreeTestSet_t &rTSet)
+bool CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (const CBTreeTestSet_t &rTSet) const
 {
 	return (! ((*this) == rTSet));
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test ()
+void CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test () const
 {
 	typedef ::std::set<uint32_t>::const_iterator		citer_set_t;
 
@@ -561,7 +510,7 @@ void CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+bool CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
 {
 	uint32_t				*psData;
 	uint32_t				rData;
@@ -591,7 +540,7 @@ bool CBTreeTestSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 		rstrData << "</font>";
 		rstrData << "</td>";
 
-		_t_sizetype		nDiff = this->lower_bound (*psData) - this->cbegin ();
+		_t_sizetype		nDiff = this->lower_bound (*psData) - this->begin ();
 		_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
 
 		rstrData << "<td align=\"top\">";
