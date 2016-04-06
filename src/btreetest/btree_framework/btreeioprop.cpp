@@ -13,17 +13,10 @@
 
 #include "btreeioprop.h"
 
-CBTreeIOproperties::CBTreeIOproperties (cbtree_io_properties_type_e ePropertyType)
-	:	m_ePropertyType (ePropertyType)
+CBTreeIOproperties::CBTreeIOproperties ()
 {
 }
 
 CBTreeIOproperties::~CBTreeIOproperties ()
 {
 }
-
-CBTreeIOproperties::cbtree_io_properties_type_e CBTreeIOproperties::get_type ()
-{
-	return (m_ePropertyType);
-}
-
