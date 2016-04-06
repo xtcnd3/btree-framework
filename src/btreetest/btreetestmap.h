@@ -21,80 +21,75 @@
 #include <map>
 #include <utility>
 
-#include "btree.h"
-#include "btreemap.h"
+#include "btreetestcommon.h"
 
-typedef struct
+#include "btreebasedefaults.h"
+#include "./associative/btreemap.h"
+
+typedef struct mapMap_s
 {
 	uint32_t	nData;
 	uint32_t	nDebug;
+
+	bool	operator== (const struct mapMap_s &rOpr) const
+	{
+		return ((nData == rOpr.nData) && (nDebug == rOpr.nDebug));
+	};
 } mapMap_t;
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 class CBTreeTestMap
 	:	public CBTreeMap<uint32_t, mapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-//	,	public virtual CBTreeKeySortDataIf < ::std::pair<uint32_t, mapMap_t>, uint32_t, _t_sizetype >
 {
 public:
 
-	typedef CBTreeTestMap												CBTreeTestMap_t;
+	typedef CBTreeTestMap									CBTreeTestMap_t;
 	
 	typedef CBTreeMap<uint32_t, mapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-																		CBTreeMap_t;
+															CBTreeMap_t;
 
-	typedef typename CBTreeMap_t::CBTreeKeySort_t::CBTreeBase_t			CBTreeBase_t;
+	typedef typename CBTreeMap_t::CBTreeAssociativeIf_t		CBTreeAssociativeIf_t;
 
-#if defined(__GNUC__) || defined(__GNUG__)
+	typedef typename CBTreeMap_t::CBTreeDefaults_t		CBTreeDefaults_t;
 
-	typedef typename ::CBTreeBaseIterator<CBTreeBase_t>					iterator;
-	typedef typename ::CBTreeBaseReverseIterator<iterator>				reverse_iterator;
-	typedef typename ::CBTreeBaseConstIterator<CBTreeBase_t>			const_iterator;
-	typedef typename ::CBTreeBaseConstReverseIterator<const_iterator>	const_reverse_iterator;
+	typedef typename CBTreeMap_t::iterator					iterator;
+	typedef typename CBTreeMap_t::const_iterator			const_iterator;
+	typedef typename CBTreeMap_t::reverse_iterator			reverse_iterator;
+	typedef typename CBTreeMap_t::const_reverse_iterator	const_reverse_iterator;
 
-#endif
+//	typedef typename CBTreeMap_t::position_t				position_t;
+	typedef typename ::std::pair<const uint32_t, mapMap_t>	data_t;
+	typedef _t_sizetype										size_type;
+	typedef _t_nodeiter										nodeiter_t;
+	typedef _t_subnodeiter									subnodeiter_t;
+	typedef _t_datalayerproperties							datalayerproperties_t;
+	typedef _t_datalayer									datalayer_t;
 
-	typedef typename CBTreeMap_t::position_t							position_t;
-	typedef typename ::std::pair<const uint32_t, mapMap_t>				data_t;
-	typedef _t_sizetype													sizetype_t;
-	typedef _t_nodeiter													nodeiter_t;
-	typedef _t_subnodeiter												subnodeiter_t;
-	typedef _t_datalayerproperties										datalayerproperties_t;
-	typedef _t_datalayer												datalayer_t;
+	typedef ::std::pair<uint32_t, mapMap_t>					value_t;
 
-	typedef ::std::pair<uint32_t, mapMap_t>								value_t;
+	typedef	typename CBTreeMap_t::key_compare				key_compare;
+	typedef typename CBTreeMap_t::value_compare				value_compare;
 
-	typedef typename ::std::pair<iterator, bool>						insert_rslt_t;
-
-	typedef	typename CBTreeMap_t::key_compare							key_compare;
-	typedef typename CBTreeMap_t::value_compare							value_compare;
+	typedef ::std::map<const uint32_t, mapMap_t>			reference_t;
 
 							CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-								(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+								(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize, reference_t *pClRefData);
 
 							CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-								(CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
+								(const CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
 
 							~CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 								();
 
-	CBTreeTestMap_t &		operator=				(CBTreeTestMap_t &rBT);
-
-//	iterator				begin					();
-//	iterator				end						();
-//	reverse_iterator		rbegin					();
-//	reverse_iterator		rend					();
-//	const_iterator			cbegin					();
-//	const_iterator			cend					();
-//	const_reverse_iterator	crbegin					();
-//	const_reverse_iterator	crend					();
-
-//	bool					empty					();
-//	_t_sizetype				size					();
-//	_t_sizetype				max_size				();
+	CBTreeTestMap_t &		operator=				(const CBTreeTestMap_t &rBT);
 
 	template <class _t_iterator>
 	void					insert					(_t_iterator sItFirst, _t_iterator sItLast);
-	insert_rslt_t			insert					(const value_t &rData);
+/*
+	template <class _t_iterator, class _t_ref_iterator>
+	void					insert					(_t_iterator sItFirst, _t_iterator sItLast);
+*/
+	iterator				insert					(const value_t &rData);
 
 	iterator				erase					(const_iterator sCIterPos);
 	_t_sizetype				erase					(const uint32_t &rKey);
@@ -107,30 +102,29 @@ public:
 	key_compare				key_comp				() const;
 	value_compare			value_comp				() const;
 	
-//	iterator				find					(const uint32_t &rKey);
-//	_t_sizetype				count					(const uint32_t &rKey);
-//	iterator				lower_bound				(const uint32_t &rKey);
-//	iterator				upper_bound				(const uint32_t &rKey);
+	bool					operator==				(const CBTreeTestMap &rTMM) const;
+	bool					operator!=				(const CBTreeTestMap &rTMM) const;
 
-	bool					operator==				(CBTreeTestMap &rTMM);
-	bool					operator!=				(CBTreeTestMap &rTMM);
+	void					test					() const;
+
+	void					set_reference			(reference_t *pReference);
+
+	void					set_atomic_testing		(bool bEnable);
 
 protected:
 
-	void					test					();
+	bool					show_data				(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const;
 
-	uint32_t				m_nDebug;
+	reference_t				*m_pClRef;
 
-	::std::map<uint32_t, mapMap_t>
-							*m_pClRef;
+	bool					m_bAtomicTesting;
 
 public:
 
-	friend class CBTreeBaseIterator<CBTreeBase_t>;
-	friend class CBTreeBaseReverseIterator<iterator>;
-	friend class CBTreeBaseConstIterator<CBTreeBase_t>;
-	friend class CBTreeBaseConstReverseIterator<const_iterator>;
-
+	friend class CBTreeIterator<CBTreeDefaults_t>;
+	friend class CBTreeConstIterator<CBTreeDefaults_t>;
+	friend class CBTreeReverseIterator<iterator>;
+	friend class CBTreeConstReverseIterator<const_iterator>;
 };
 
 #endif // !BTREETESTMAP_H
