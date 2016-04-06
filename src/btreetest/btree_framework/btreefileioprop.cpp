@@ -14,16 +14,16 @@
 #include "btreefileioprop.h"
 
 CBTreeIOpropertiesFile::CBTreeIOpropertiesFile (const char *pszPathName, uint64_t nAddrSpaceSoftLimit)
-	:	CBTreeIOproperties (CBTREE_IO_PROPERTIES_FILE)
+	:	CBTreeIOproperties ()
 	,	m_nAddrSpaceSoftLimit (nAddrSpaceSoftLimit)
 {
 	m_pStrPathNames = new string (pszPathName);
 
-	BTREE_ASSERT (m_pStrPathNames != NULL, "CBTreeIOpropertiesFile::CBTreeIOpropertiesFile (const char *, uint32_t , uint64_t): insufficient memory!");
+	BTREE_ASSERT (m_pStrPathNames != NULL, "CBTreeIOpropertiesFile::CBTreeIOpropertiesFile (const char *, uint64_t): insufficient memory!");
 }
 
 CBTreeIOpropertiesFile::CBTreeIOpropertiesFile (CBTreeIOpropertiesFile &rBT)
-	:	CBTreeIOproperties (CBTREE_IO_PROPERTIES_FILE)
+	:	CBTreeIOproperties ()
 	,	m_nAddrSpaceSoftLimit (rBT.m_nAddrSpaceSoftLimit)
 {
 	m_pStrPathNames = new string (*(rBT.m_pStrPathNames));
