@@ -1,3 +1,16 @@
+/************************************************************
+**
+** file:	btreeioram.h
+** author:	Andreas Steffens
+** license:	GPL v2
+**
+** description:
+**
+** This file contains code for the b-tree framework's
+** linear IO data layer class.
+**
+************************************************************/
+
 #ifndef	BTREEIOLINEAR_H
 #define	BTREEIOLINEAR_H
 
