@@ -26,7 +26,59 @@
 #include "btreemultimapprimitives.h"
 
 #include "btreetestcommon.h"
-#include "btreemultimap.h"
+#include "./associative/btreemultimap.h"
+
+#include "btreemaptestbench.h"
+
+template<class _t_key, class _t_map>
+class CBTreeTestBenchMultiMap	:	public ::std::multimap<_t_key, _t_map>
+{
+public:
+
+				CBTreeTestBenchMultiMap<_t_key, _t_map> ()	
+					:	::std::multimap<_t_key, _t_map> () 
+				{};
+
+				CBTreeTestBenchMultiMap<_t_key, _t_map> (const CBTreeTestBenchMultiMap &rMap)	
+					:	::std::multimap<_t_key, _t_map> (rMap) 
+				{};
+
+	explicit	CBTreeTestBenchMultiMap<_t_key, _t_map> (const ::std::map<_t_key, _t_map> &rMap)	
+					:	::std::multimap<_t_key, _t_map> (rMap) 
+				{};
+
+				~CBTreeTestBenchMultiMap<_t_key, _t_map> ()	
+				{};
+
+	template <class _t_iterator>
+	void insert (const typename ::std::multimap<_t_key, _t_map>::iterator &rDummyIter, _t_iterator &rIterFirst, _t_iterator &rIterLast)
+	{
+		rDummyIter;
+
+		::std::multimap<_t_key, _t_map>::template insert <_t_iterator> (rIterFirst, rIterLast);
+	};
+
+	template <class _t_iterator>
+	void insert (const typename ::std::multimap<_t_key, _t_map>::const_iterator &rDummyIter, _t_iterator &rIterFirst, _t_iterator &rIterLast)
+	{
+		rDummyIter;
+
+		::std::multimap<_t_key, _t_map>::template insert <_t_iterator> (rIterFirst, rIterLast);
+	};
+
+	template <class _t_iterator>
+	void insert (_t_iterator &rIterFirst, _t_iterator &rIterLast)
+	{
+		::std::multimap<_t_key, _t_map>::template insert <_t_iterator> (rIterFirst, rIterLast);
+	};
+
+	typename ::std::multimap<_t_key, _t_map>::iterator insert (const typename ::std::multimap<_t_key, _t_map>::value_type &rVal)
+	{
+		return (::std::multimap<_t_key, _t_map>::insert (rVal));
+	};
+};
+
+typedef CBTreeTestBenchMultiMap<const uint32_t, multiMapMap_t>			multimap_reference_t;
 
 typedef enum
 {
@@ -43,7 +95,7 @@ typedef enum
 	BTREETEST_MULTIMAP_STL_IF_LOWER_BOUND_UPPER_BOUND
 } btreetest_multimap_t;
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeSTLmultiMap (uint32_t nTestNum, _t_subnodeiter nNodeSize, _t_datalayerproperties sDataProperties, bayerTreeCacheDescription_t &sCacheDesc, int argc, char **argv);
+template <class _t_container>
+void TestBTreeSTLmultiMap (uint32_t nTestNum, _t_container *pMMapWrapper);
 
 #endif // !BTREEMULTIMAPTESTBENCH_H
