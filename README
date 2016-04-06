@@ -35,11 +35,10 @@ The folder ./doc contains an open office document file called "btree programmer 
 Quick Start Guide
 Programmer Guide
 	Class Hierarchy
-		Data Classes (CBTreeArray and CBTreeKeySort)
+		Specific Data Classes
 			CBTreeArray
 			CBTreeKeySort
-	Interface Classes
-		Data Interface Classes (CBTree*DataIf)
+			Associative Containers (CBTree[Multi]Map|Set)
 	Template Parameters
 		Data Type (_t_data)
 		Address Type (_t_sizetype)
@@ -64,7 +63,7 @@ Programmer Guide
 2.1. Linux
 
 For this framework to compile, a compiler capable to support the C++11 dialect is required.
-This release was tested with: GCC (C++) 5.1.1 20150618 (Fedora 22)
+This release was tested with: GCC (C++) 5.3.1 20151207 (Fedora 23)
 
 To build the b-tree regression test system go to ./src/btreetest
 and run "make debug".
@@ -88,7 +87,6 @@ To compile the b-tree framework into another project the files in the following 
 These folders then are then copied or sym. linked to your target or common code location.
 The additional include paths your compiler needs to be aware of are:
 /relative/or/absolute/path/to/your/common/location/btree_framework
-/relative/or/absolute/path/to/your/common/location/btree_framework/stl_compatible
 /relative/or/absolute/path/to/your/common/location/compatibility
 
 Also, the build flag "LINUX" needs to be set and optionally the build flags "_DEBUG" and "BTREE_ITERATOR_REGISTRATION" (see below).
@@ -97,7 +95,7 @@ Also, the build flag "LINUX" needs to be set and optionally the build flags "_DE
 2.2. Windows
 
 For this framework to compile, at least Visual Sudio 2013 Express or a compiler that supports the C++11 dialect is required.
-This release was tested with: Visual Sudio 2013 Express (update 5)
+This release was tested with: Visual Sudio 2013 Express Version: 12.0.40629.00 (update 5)
 
 To build the b-tree regression test system:
 1. Create a new project
@@ -105,7 +103,6 @@ To build the b-tree regression test system:
 3. The project needs to be aware of the following include locations:
 /relative/or/absolute/path/to/your/project/location/avp_path_find
 /relative/or/absolute/path/to/your/project/location/btree_framework
-/relative/or/absolute/path/to/your/project/location/btree_framework/stl_compatible
 /relative/or/absolute/path/to/your/project/location/compatibility
 4. add the build flag "BTREE_ITERATOR_REGISTRATION" to the any build, if required (see below)
 
@@ -116,7 +113,6 @@ To compile the b-tree framework into another project the files in the following 
 These folders are then copied to your target or common code location.
 The additional include paths that need to be in your project settings are:
 /relative/or/absolute/path/to/your/common/or/project/location/btree_framework
-/relative/or/absolute/path/to/your/common/or/project/location/btree_framework/stl_compatible
 
 
 2.3. build flags
