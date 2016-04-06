@@ -16,8 +16,16 @@
 
 #include <stdint.h>
 
-#include "btreetestcommon.h"
-#include "btreemultimap.h"
+#include <type_traits>
+
+#include "btreetestmap.h"
+#include "btreetestmultimap.h"
+
+#include "./associative/btreemultimap.h"
+
+typedef CBTreePairTest<const uint32_t, mapMap_t>										mapPair_t;
+
+typedef CBTreePairTest<const uint32_t, multiMapMap_t>									multiMapPair_t;
 
 typedef enum
 {
@@ -27,8 +35,8 @@ typedef enum
 	BTREETEST_MULTIMAP_PRIMITIVE_CONST_KEY
 } btreetest_multimap_primitive_seek_e;
 
-template<class _t_obj, class _t_value>
-void multiMapPrim_add (_t_obj *pClMM, uint32_t nEntries, uint32_t &nFromWhereOrSeed, btreetest_multimap_primitive_seek_e eWhere);
+template<class _t_container>
+void multiMapPrim_add (_t_container *pClMM, uint32_t nEntries, uint32_t &nFromWhereOrSeed, btreetest_multimap_primitive_seek_e eWhere);
 
 #endif // !BTREEMULTIMAPPRIMITIVES_H
 
