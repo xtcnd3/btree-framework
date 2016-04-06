@@ -69,6 +69,24 @@ typedef enum
 	BTREETEST_ARRAY_STL_IF_SWAP
 } btreetest_array_e;
 
+typedef enum
+{
+	BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL, 
+	BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_FULL_EXTERN, 
+	BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_SELF_REFERENCE, 
+	BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_EQUIVALENT_OR_SAME, 
+	BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR_PART_SELF_REFERENCE, 
+} btreetest_array_stl_if_assign_via_iterator_e;
+
+typedef enum
+{
+	BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY, 
+	BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_HALF_WAY_EXTERN, 
+	BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_SELF_REFERENCE, 
+	BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_INEFFECTIVE, 
+	BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_PART_SELF_REFERENCE, 
+} btreetest_array_stl_if_insert_via_iterator_e;
+
 template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
 void TestBTreeArray (uint32_t nTest, uint32_t nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, uint32_t nNumMultiCacheSizes, bayerTreeCacheDescription_t *psMultiCacheDesc, uint32_t nNumCacheProperties, _t_datalayerproperties **ppMultiCacheSizeDataLayerProperties, uint32_t nNumMultiTemplateParams, _t_objprim **ppClArraysPrim, int argc, char **argv);
 
