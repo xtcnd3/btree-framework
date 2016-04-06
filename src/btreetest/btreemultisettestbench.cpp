@@ -26,7 +26,7 @@ void TestBTreeMultiSetSTLifAssignmentOperator (_t_multiset *pClMSet, uint32_t nN
 	
 	cout << "exercises assignment operator compatible to STL interface CBTreeMultiSet<>:: operator= (CBTreeMultiSet<> &)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sClMSet = *pClMSet;
 
@@ -46,7 +46,7 @@ void TestBTreeMultiSetSTLifInsert (_t_multiset *pClMSet, uint32_t nNumEntries)
 
 	cout << "CBTreeMultiSet::insert (const valuetype &) is exercised" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastSeed, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastSeed, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 }
 
 template <class _t_multiset>
@@ -71,7 +71,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	typedef CBTreeMultiSet<uint32_t, size_t>											CBTreeMultiSet_VectorFeed_t;
 
-	typedef CBTreeTestMultiSet<typename _t_multiset::sizetype_t, typename _t_multiset::nodeiter_t, typename _t_multiset::subnodeiter_t, typename _t_multiset::datalayerproperties_t, typename _t_multiset::datalayer_t>
+	typedef CBTreeTestMultiSet<typename _t_multiset::size_type, typename _t_multiset::nodeiter_t, typename _t_multiset::subnodeiter_t, typename _t_multiset::datalayerproperties_t, typename _t_multiset::datalayer_t>
 																						CBTreeMultiSetTest_Pair_t;
 
 	typedef typename CBTreeMultiSetTest_Pair_t::iterator								iter_pair_t;
@@ -123,46 +123,36 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 	
 	cout << "exercises method compatible to STL interface CBTreeMultiSet<>:: insert<_t_iterator> (_t_iterator, _t_iterator)" << endl;
 
-#if 0 // for this code to compile, the b-tree framework under test must support const methods
-// this is to be implemented
-
 	cout << "target::insert<_t_obj::iter_t> (iter_t, iter_t)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
-	sClMSetTarget.template insert <iter_t> (pClMSet->begin (), pClMSet->end ());
+	sClMSetTarget.template insert <iter_t, citer_t> (pClMSet->begin (), pClMSet->end ());
 
 	pClMSet->clear ();
 	sClMSetTarget.clear ();
 
-#endif
-
 	cout << "target::insert<_t_obj::citer_t> (citer_t, citer_t)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sClMSetTarget.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
 	pClMSet->clear ();
 	sClMSetTarget.clear ();
 
-#if 0 // for this code to compile, the b-tree framework under test must support const methods
-// this is to be implemented
-
 	cout << "target::insert<_t_obj::riter_t> (riter_t, riter_t)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
-	sClMSetTarget.template insert <riter_t> (pClMSet->rbegin (), pClMSet->rend ());
+	sClMSetTarget.template insert <riter_t, criter_t> (pClMSet->rbegin (), pClMSet->rend ());
 
 	pClMSet->clear ();
 	sClMSetTarget.clear ();
 
-#endif
-
 	cout << "target::insert<_t_obj::criter_t> (criter_t, criter_t)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sClMSetTarget.template insert <criter_t> (pClMSet->crbegin (), pClMSet->crend ());
 
@@ -171,7 +161,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::citer_t> (citer_t == citer_t)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sCIterA = pClMSet->cbegin ();
 	sCIterB = pClMSet->cbegin ();
@@ -189,7 +179,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::criter_t> (criter_t == criter_t)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sCRIterA = pClMSet->crbegin ();
 	sCRIterB = pClMSet->crbegin ();
@@ -207,7 +197,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::citer_t> (>citer_t, citer_t<)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sCIterA = pClMSet->cbegin ();
 	sCIterB = pClMSet->cend ();
@@ -222,7 +212,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::criter_t> (>criter_t, criter_t<)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sCRIterA = pClMSet->crbegin ();
 	sCRIterB = pClMSet->crend ();
@@ -237,7 +227,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::citer_t> (target::citer_t, target::citer_t)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	pClMSet->template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -245,7 +235,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::criter_t> (target::criter_t, target::criter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	pClMSet->template insert <criter_t> (pClMSet->crbegin (), pClMSet->crend ());
 
@@ -253,7 +243,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::citer_t> (target::citer_t == target::citer_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sCIterA = pClMSet->cbegin ();
 	sCIterB = pClMSet->cbegin ();
@@ -270,7 +260,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::criter_t> (target::criter_t == target::criter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sCRIterA = pClMSet->crbegin ();
 	sCRIterB = pClMSet->crbegin ();
@@ -287,7 +277,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::citer_t> (>target::citer_t, target::citer_t<)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	pClMSet->template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 	pClMSet->template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
@@ -306,7 +296,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<_t_obj::criter_t> (>target::criter_t, target::criter_t<)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	pClMSet->template insert <criter_t> (pClMSet->crbegin (), pClMSet->crend ());
 	pClMSet->template insert <criter_t> (pClMSet->crbegin (), pClMSet->crend ());
@@ -325,7 +315,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::iter_t> (iter_t, iter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -337,7 +327,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::citer_t> (citer_t, citer_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -349,7 +339,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::riter_t> (riter_t, riter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -361,7 +351,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::criter_t> (criter_t, criter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -373,7 +363,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::iter_t> (iter_t == iter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -394,7 +384,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::citer_t> (citer_t == citer_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -415,7 +405,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::riter_t> (riter_t == riter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -436,7 +426,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::criter_t> (criter_t == criter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -457,7 +447,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::iter_t> (>iter_t, iter_t<)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -475,7 +465,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::citer_t> (>citer_t, citer_t<)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -493,7 +483,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::riter_t> (>riter_t, riter_t<)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -511,7 +501,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<list::criter_t> (>criter_t, criter_t<)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sList.template insert <citer_t> (sList.begin (), pClMSet->cbegin (), pClMSet->cend ());
 
@@ -529,7 +519,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::iter_t> (iter_t, iter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -543,7 +533,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::citer_t> (citer_t, citer_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -557,7 +547,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::riter_t> (riter_t, riter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -571,7 +561,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::criter_t> (criter_t, criter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -585,7 +575,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::iter_t> (iter_t == iter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -608,7 +598,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::citer_t> (citer_t == citer_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -631,7 +621,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::riter_t> (riter_t == riter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -654,7 +644,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::criter_t> (criter_t == criter_t)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -677,7 +667,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::iter_t> (>iter_t, iter_t<)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -697,7 +687,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::citer_t> (>citer_t, citer_t<)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -717,7 +707,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::riter_t> (>riter_t, riter_t<)" << endl;
 	
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -737,7 +727,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<vector::criter_t> (>criter_t, criter_t<)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetVectorFeed.template insert <citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -757,7 +747,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<map::iter_t> (iter_t, iter_t)" << endl;
 
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sMultiSetPair.template insert<itset_t> (sSet.begin (), sSet.end ());
 
@@ -765,7 +755,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<map::citer_t> (citer_t, citer_t)" << endl;
 	
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sMultiSetPair.template insert<citset_t> (sSet.cbegin (), sSet.cend ());
 
@@ -773,7 +763,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<map::riter_t> (riter_t, riter_t)" << endl;
 	
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sMultiSetPair.template insert<ritset_t> (sSet.rbegin (), sSet.rend ());
 
@@ -781,7 +771,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<map::criter_t> (criter_t, criter_t)" << endl;
 	
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sMultiSetPair.template insert<critset_t> (sSet.crbegin (), sSet.crend ());
 
@@ -789,7 +779,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<map::iter_t> (iter_t == iter_t)" << endl;
 
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sItSetA = sSet.begin ();
 	sItSetB = sSet.begin ();
@@ -806,7 +796,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 	
 	cout << "target::insert<map::citer_t> (citer_t == citer_t)" << endl;
 	
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sCItSetA = sSet.cbegin ();
 	sCItSetB = sSet.cbegin ();
@@ -823,7 +813,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 	
 	cout << "target::insert<map::riter_t> (riter_t == riter_t)" << endl;
 	
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sRItSetA = sSet.rbegin ();
 	sRItSetB = sSet.rbegin ();
@@ -840,7 +830,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 	
 	cout << "target::insert<map::criter_t> (criter_t == criter_t)" << endl;
 	
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sCRItSetA = sSet.crbegin ();
 	sCRItSetB = sSet.crbegin ();
@@ -857,7 +847,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 	
 	cout << "target::insert<map::iter_t> (>iter_t, iter_t<)" << endl;
 	
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sItSetA = sSet.begin ();
 	sItSetB = sSet.end ();
@@ -871,7 +861,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<map::citer_t> (>citer_t, citer_t<)" << endl;
 	
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sCItSetA = sSet.cbegin ();
 	sCItSetB = sSet.cend ();
@@ -885,7 +875,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<map::riter_t> (>riter_t, riter_t<)" << endl;
 	
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sRItSetA = sSet.rbegin ();
 	sRItSetB = sSet.rend ();
@@ -899,7 +889,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<map::criter_t> (>criter_t, criter_t<)" << endl;
 
-	multiSetPrim_add<::std::set<uint32_t>, ::std::set<uint32_t>::value_type> (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sCRItSetA = sSet.crbegin ();
 	sCRItSetB = sSet.crend ();
@@ -913,7 +903,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<multiset::iter_t> (iter_t, iter_t)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sMultiSetPair.template insert<itmset_t> (sMSet.begin (), sMSet.end ());
 
@@ -921,7 +911,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<multiset::citer_t> (citer_t, citer_t)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sMultiSetPair.template insert<citmset_t> (sMSet.cbegin (), sMSet.cend ());
 
@@ -929,7 +919,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<multiset::riter_t> (riter_t, riter_t)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sMultiSetPair.template insert<ritmset_t> (sMSet.rbegin (), sMSet.rend ());
 
@@ -937,7 +927,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<multiset::criter_t> (criter_t, criter_t)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sMultiSetPair.template insert<critmset_t> (sMSet.crbegin (), sMSet.crend ());
 
@@ -945,7 +935,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<multiset::iter_t> (iter_t == iter_t)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sItMSetA = sMSet.begin ();
 	sItMSetB = sMSet.begin ();
@@ -962,7 +952,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 	
 	cout << "target::insert<multiset::citer_t> (citer_t == citer_t)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sCItMSetA = sMSet.cbegin ();
 	sCItMSetB = sMSet.cbegin ();
@@ -979,7 +969,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 	
 	cout << "target::insert<multiset::riter_t> (riter_t == riter_t)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sRItMSetA = sMSet.rbegin ();
 	sRItMSetB = sMSet.rbegin ();
@@ -996,7 +986,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 	
 	cout << "target::insert<multiset::criter_t> (criter_t == criter_t)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sCRItMSetA = sMSet.crbegin ();
 	sCRItMSetB = sMSet.crbegin ();
@@ -1013,7 +1003,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 	
 	cout << "target::insert<multiset::iter_t> (>iter_t, iter_t<)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sItMSetA = sMSet.begin ();
 	sItMSetB = sMSet.end ();
@@ -1027,7 +1017,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<multiset::citer_t> (>citer_t, citer_t<)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sCItMSetA = sMSet.cbegin ();
 	sCItMSetB = sMSet.cend ();
@@ -1041,7 +1031,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<multiset::riter_t> (>riter_t, riter_t<)" << endl;
 	
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sRItMSetA = sMSet.rbegin ();
 	sRItMSetB = sMSet.rend ();
@@ -1055,7 +1045,7 @@ void TestBTreeMultiSetSTLifInsertViaIterator (_t_multiset *pClMSet, uint32_t nNu
 
 	cout << "target::insert<multiset::criter_t> (>criter_t, criter_t<)" << endl;
 
-	multiSetPrim_add<::std::multiset<uint32_t>, ::std::multiset<uint32_t>::value_type> (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	
 	sCRItMSetA = sMSet.crbegin ();
 	sCRItMSetB = sMSet.crend ();
@@ -1079,7 +1069,7 @@ void TestBTreeMultiSetSTLifEraseViaIterator (_t_multiset *pClMSet, uint32_t nNum
 	
 	cout << "exercises method compatible to STL interface CBTreeMultiSet<>:: erase (const_iterator)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	while (pClMSet->size () > 0)
 	{
@@ -1107,7 +1097,7 @@ void TestBTreeMultiSetSTLifEraseViaKey (_t_multiset *pClMSet, uint32_t nNumEntri
 	uint32_t									nLastKey;
 	citer_t										sIter;
 	uint32_t									i;
-	typename _t_multiset::sizetype_t			nRslt;
+	typename _t_multiset::size_type			nRslt;
 	
 	cout << "exercises method compatible to STL interface CBTreeMultiSet<>:: erase (const keytype &)" << endl;
 
@@ -1115,7 +1105,7 @@ void TestBTreeMultiSetSTLifEraseViaKey (_t_multiset *pClMSet, uint32_t nNumEntri
 	{
 		nLastKey = 0;
 
-		multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+		multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	}
 
 	while (pClMSet->size () > 0)
@@ -1153,7 +1143,7 @@ void TestBTreeMultiSetSTLifEraseViaIteratorMultiple (_t_multiset *pClMSet, uint3
 	{
 		nLastKey = 0;
 
-		multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+		multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 	}
 
 	while (pClMSet->size () > 0)
@@ -1195,7 +1185,7 @@ void TestBTreeMultiSetSTLifKeyComp (_t_multiset *pClMSet, uint32_t nNumEntries)
 	
 	cout << "exercises method compatible to STL interface CBTreeMultiSet<>:: key_comp ()" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sIterBegin = pClMSet->begin ();
 	sIterEnd = pClMSet->end ();
@@ -1236,7 +1226,7 @@ void TestBTreeMultiSetSTLifValueComp (_t_multiset *pClMSet, uint32_t nNumEntries
 	
 	cout << "exercises method compatible to STL interface CBTreeMultiSet<>:: value_comp ()" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sIterBegin = pClMSet->begin ();
 	sIterEnd = pClMSet->end ();
@@ -1272,7 +1262,7 @@ void TestBTreeMultiSetSTLifSwap (_t_multiset *pClMSet, uint32_t nNumEntries)
 
 	cout << "exercises method compatible to STL interface CBTreeMultiSet<>:: swap (CBTreeMultiSet &)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sClMultiSetRef.template insert<citer_t> (pClMSet->cbegin (), pClMSet->cend ());
 
@@ -1283,7 +1273,7 @@ void TestBTreeMultiSetSTLifSwap (_t_multiset *pClMSet, uint32_t nNumEntries)
 		exit (-1);
 	}
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (&sClMultiSetTarget, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
+	multiSetPrim_add (&sClMultiSetTarget, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_RANDOM_KEY);
 
 	sClMultiSetTargetRef.template insert<citer_t> (sClMultiSetTarget.cbegin (), sClMultiSetTarget.cend ());
 
@@ -1338,7 +1328,7 @@ void TestBTreeMultiSetSTLifFind (_t_multiset *pClMSet, uint32_t nNumEntries)
 	
 	cout << "exercises method compatible to STL interface CBTreeMultiSet<>:: find (const _t_keytype &)" << endl;
 
-	multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_ASCEND_KEY);
+	multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_ASCEND_KEY);
 
 	for (sCIter = pClMSet->cbegin (); sCIter != pClMSet->cend (); sCIter++)
 	{
@@ -1390,7 +1380,7 @@ void TestBTreeMultiSetSTLifLowerBoundUpperBound (_t_multiset *pClMSet, uint32_t 
 	{
 		nLastKey = 1;
 
-		multiSetPrim_add<_t_multiset, typename _t_multiset::value_t> (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_ASCEND_KEY);
+		multiSetPrim_add (pClMSet, nNumEntries, nLastKey, BTREETEST_MULTISET_PRIMITIVE_ASCEND_KEY);
 	}
 
 	for (i = 0; i < nNumEntries; i++)
