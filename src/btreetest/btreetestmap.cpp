@@ -20,164 +20,155 @@
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeTestMap
-	(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize)
+	(
+		_t_datalayerproperties &rDataLayerProperties, 
+		const bayerTreeCacheDescription_t *psCacheDescription, 
+		_t_subnodeiter nNodeSize, 
+		typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reference_t *pClRefData
+	)
 	:	CBTreeMap<uint32_t, mapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
 		rDataLayerProperties, 
 		psCacheDescription, 
 		nNodeSize
 	)
-	,	m_nDebug (0)
-	,	m_pClRef (NULL)
+	,	m_pClRef (pClRefData)
+	,	m_bAtomicTesting (true)
 {
-	m_pClRef = new ::std::map<uint32_t, mapMap_t> ();
-
-	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestMap<>::CBTreeTestMap: ERROR: insufficient memory!");
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeTestMap
-	(CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
+	(const CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
 	:	CBTreeMap<uint32_t, mapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
-		dynamic_cast<CBTreeMap<uint32_t, mapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), 
-		bAssign
+		dynamic_cast<const CBTreeMap<uint32_t, mapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), 
+		false
 	)
-	,	m_nDebug (0)
 	,	m_pClRef (NULL)
+	,	m_bAtomicTesting (false)
 {
-	m_pClRef = new ::std::map<uint32_t, mapMap_t> ();
+	if (bAssign)
+	{
+		this->_assign (rBT);
+	}
 
-	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestMap<>::CBTreeTestMap: ERROR: insufficient memory!");
+	this->set_atomic_testing (true);
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeTestMap ()
 {
-	delete m_pClRef;
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>&
 	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
 	(
-		CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT
+		const CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT
 	)
 {
 	if (this != &rBT)
 	{
-		CBTreeMap_t		&rThisMM = dynamic_cast<CBTreeMap_t &> (*this);
-		CBTreeMap_t		&rBTMM = dynamic_cast<CBTreeMap_t &> (rBT);
+		CBTreeMap_t			&rThisMM = dynamic_cast<CBTreeMap_t &> (*this);
+		const CBTreeMap_t	&rBTMM = dynamic_cast<const CBTreeMap_t &> (rBT);
 
 		rThisMM = rBTMM;
 
 		(*m_pClRef) = *(rBT.m_pClRef);
 
-		test ();
+		if (m_bAtomicTesting)
+		{
+			test ();
+		}
 	}
 
 	return (*this);
 }
 
-/*
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::begin ()
-{
-
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::end ()
-{
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reverse_iterator
-	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rbegin ()
-{
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reverse_iterator
-	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rend ()
-{
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::max_size ()
-{
-}
-
-*/
-
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 template <class _t_iterator>
 void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (_t_iterator sItFirst, _t_iterator sItLast)
 {
-	m_pClRef->template insert<_t_iterator> (sItFirst, sItLast);
+	CBTreeMap_t::template insert<_t_iterator> (sItFirst, sItLast);
+
+	test ();
+}
+/*
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template <class _t_iterator, class _t_ref_iterator>
+void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (_t_iterator sItFirst, _t_iterator sItLast)
+{
+	_t_ref_iterator		sCItFirst (sItFirst);
+	_t_ref_iterator		sCItLast (sItLast);
+
+	m_pClRef->template insert<_t_ref_iterator> (sCItFirst, sCItLast);
 
 	CBTreeMap_t::template insert<_t_iterator> (sItFirst, sItLast);
 
 	test ();
 }
-
+*/
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename ::std::pair<typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator, bool>
+typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
 	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
 	(
 		const value_t &rData
 	)
 {
-	::std::pair<::std::map<uint32_t, mapMap_t>::iterator, bool>		sRefRslt;
-	insert_rslt_t													sRslt;
-	value_t															sData = rData;
+	bool				bRefRslt;
+	iterator			sIter;
+	value_t				sData = rData;
+	bool				bSuccess;
 
-	sData.second.nDebug = m_nDebug;
-
-	m_nDebug++;
-
-	sRefRslt = m_pClRef->insert (sData);
-
-	sRslt = CBTreeMap_t::insert (sData);
-
-	if (sRslt.second != sRefRslt.second)
+	if (m_pClRef != NULL)
 	{
-		cerr << endl;
-		cerr << "CBTreeTestMap<>::insert: ERROR: reference claims that key ";
-		cerr << std::setfill ('0') << std::hex << std::setw (8);
+		bRefRslt = m_pClRef->count (sData.first) != 0;
+	}
+
+	sIter = CBTreeMap_t::insert (sData);
+
+	if (m_pClRef != NULL)
+	{
+		bSuccess = sIter < this->end ();
+
+		if (CBTreeMap_t::count (sData.first) != m_pClRef->count (sData.first))
 		{
-			cerr << sData.first;
+			cerr << endl;
+			cerr << "CBTreeTestMap<>::insert: ERROR: reference claims that key ";
+			cerr << std::setfill ('0') << std::hex << std::setw (8);
+			{
+				cerr << sData.first;
+			}
+			cerr << std::setfill (' ') << std::dec << std::setw (0);
+			cerr << " was ";
+
+			if (bRefRslt)
+			{
+				cerr << "not ";
+			}
+
+			cerr << "present, whereas the instance claims that said key was ";
+
+			if (bSuccess)
+			{
+				cerr << "not ";
+			}
+
+			cerr << "present!" << endl;
+			cerr << "creating count.html... ";
+
+			this->show_integrity ("count.html");
+
+			cerr << "finished" << endl;
+
+			exit (-1);
 		}
-		cerr << std::setfill (' ') << std::dec << std::setw (0);
-		cerr << " was ";
-
-		if (sRefRslt.second)
-		{
-			cerr << "not ";
-		}
-
-		cerr << "present, whereas the instance claims that said key was ";
-
-		if (sRslt.second)
-		{
-			cerr << "not ";
-		}
-
-		cerr << "present!" << endl;
-		cerr << "creating count.html... ";
-
-		this->show_integrity ("count.html");
-
-		cerr << "finished" << endl;
-
-		exit (-1);
 	}
 
 	test ();
 
-	return (sRslt);
+	return (sIter);
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -187,17 +178,7 @@ typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpro
 		typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos
 	)
 {
-	typedef typename ::std::multimap<uint32_t, mapMap_t>::iterator		iter_mm_t;
-
-	_t_sizetype		nPos = sCIterPos.get_pos ();
-	iter_mm_t		sItMM;
 	iterator		sRslt;
-
-	sItMM = m_pClRef->begin ();
-
-	::std::advance<iter_mm_t, _t_sizetype> (sItMM, nPos);
-
-	m_pClRef->erase (sItMM);
 
 	sRslt = CBTreeMap_t::erase (sCIterPos);
 
@@ -210,8 +191,6 @@ template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_da
 _t_sizetype CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (const uint32_t &rKey)
 {
 	_t_sizetype		nRslt;
-
-	m_pClRef->erase (rKey);
 
 	nRslt = CBTreeMap_t::erase (rKey);
 
@@ -228,23 +207,11 @@ typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpro
 		typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterLast
 	)
 {
-	typedef typename ::std::multimap<uint32_t, mapMap_t>::iterator		iter_mm_t;
+	iterator	sRslt = CBTreeMap_t::erase (sCIterFirst, sCIterLast);
 
-	_t_sizetype		nPos = sCIterFirst.get_pos ();
-	iter_mm_t		sItMMfirst;
-	iter_mm_t		sItMMlast;
+	test ();
 
-	sItMMlast = sItMMfirst = m_pClRef->begin ();
-
-	::std::advance<iter_mm_t, _t_sizetype> (sItMMfirst, nPos);
-
-	nPos = sCIterLast.get_pos ();
-
-	::std::advance<iter_mm_t, _t_sizetype> (sItMMlast, nPos);
-
-	m_pClRef->erase (sItMMfirst, sItMMlast);
-
-	return (CBTreeMap_t::erase (sCIterFirst, sCIterLast));
+	return (sRslt);
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -256,17 +223,17 @@ void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 		CBTreeMap_t	&rMM = dynamic_cast<CBTreeMap_t &> (rTMM);
 
 		rThisMM.swap (rMM);
-
-		m_pClRef->swap (*(rTMM.m_pClRef));
 	}
+
+	test ();
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ()
 {
-	m_pClRef->clear ();
-
 	CBTreeMap_t::clear ();
+
+	test ();
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -274,6 +241,8 @@ typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpro
 	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_comp () const
 {
 	key_compare		sRslt;
+
+	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
 
 	return (sRslt);
 }
@@ -284,34 +253,13 @@ typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpro
 {
 	value_compare	sRslt;
 
+	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+
 	return (sRslt);
 }
 
-/*
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find (const uint32_t &rKey)
-{
-
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (const uint32_t &rKey)
-{
-
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (const uint32_t &rKey)
-{
-
-}
-*/
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (CBTreeTestMap_t &rTMM)
+bool CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (const CBTreeTestMap_t &rTMM) const
 {
 	if (this == &rTMM)
 	{
@@ -353,14 +301,19 @@ bool CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (CBTreeTestMap_t &rTMM)
+bool CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (const CBTreeTestMap_t &rTMM) const
 {
 	return (! ((*this) == rTMM));
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test ()
+void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test () const
 {
+	if (!m_bAtomicTesting)
+	{
+		return;
+	}
+
 	typedef ::std::multimap<uint32_t, mapMap_t>::const_iterator		citer_mmap_t;
 
 	::std::multimap<uint32_t, mapMap_t>			sMMap;
@@ -559,8 +512,17 @@ void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 
 		nKey = nNextKey;
 	}
+
+	if ((m_pClRef == NULL) && (!this->empty ()))
+	{
+		cerr << endl;
+		cerr << "reference not set while data container not empty" << endl;
+		cerr << "size: " << this->size () << endl;
+
+		exit (-1);
+	}
 	
-	if (m_pClRef->size () != this->size ())
+	if ((m_pClRef != NULL) && (m_pClRef->size () != this->size ()))
 	{
 		cerr << endl;
 		cerr << "size mismatches" << endl;
@@ -575,6 +537,127 @@ void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 
 		exit (-1);
 	}
+}
+
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_reference (typename CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reference_t *pReference)
+{
+	m_pClRef = pReference;
+}
+
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+void CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_atomic_testing (bool bEnable)
+{
+	m_bAtomicTesting = bEnable;
+}
+	
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+bool CBTreeTestMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
+{
+	value_t					*psData;
+	uint32_t				rData;
+
+	try
+	{
+		psData = this->get_data (nNode, nSubPos);
+
+		rData = psData->first;
+		rData = (rData >> 16) | (rData << 16);
+		rData = ((rData >> 8) & 0xFF00FF) | ((rData << 8) & 0xFF00FF00);
+		
+		rstrData.clear ();
+		rstrData << "<table border=\"0\" cellspacing=\"1\" width=\"220\"><tr><td>";
+		rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
+		rstrData << "data: " << psData->second.nData << dec << "<br>";
+		rstrData << "debug: " << psData->second.nDebug << "<br>";
+		rstrData << "instance: " << this->get_instancePos (nNode, nSubPos);
+		rstrData << "</td>";
+
+		_t_sizetype		nDiff = this->lower_bound (psData->first) - this->cbegin ();
+		_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
+
+		rstrData << "<td align=\"top\">";
+
+		if (nOffset < m_pClRef->size ())
+		{
+			::std::multimap<uint32_t, mapMap_t>::const_iterator		sItMMap;
+
+			sItMMap = m_pClRef->cbegin ();
+
+			::std::advance< ::std::multimap<uint32_t, mapMap_t>::const_iterator, _t_sizetype> (sItMMap, nDiff);
+
+			rData = (*sItMMap).first;
+			rData = (rData >> 16) | (rData << 16);
+			rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
+
+			if (psData->first != (*sItMMap).first)
+			{
+				rstrData << "<font color=\"#FF0000\">";
+			}
+			else
+			{
+				rstrData << "<font color=\"#00BB00\">";
+			}
+			
+			rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << "<br>";
+			rstrData << "</font>";
+
+			if (psData->second.nData != (*sItMMap).second.nData)
+			{
+				rstrData << "<font color=\"#AAAA00\">";
+			}
+			else
+			{
+				rstrData << "<font color=\"#00BB00\">";
+			}
+			
+			rstrData << "data: " << (*sItMMap).second.nData << dec << "<br>";
+			rstrData << "</font>";
+
+			if (psData->second.nDebug != (*sItMMap).second.nDebug)
+			{
+				rstrData << "<font color=\"#AAAA00\">";
+			}
+			else
+			{
+				rstrData << "<font color=\"#00BB00\">";
+			}
+			
+			rstrData << "debug: " << (*sItMMap).second.nDebug << "<br>";
+			rstrData << "</font>";
+			rstrData << "-";
+		}
+		else
+		{
+			rstrData << "<font color=\"#FF0000\">";
+			rstrData << "reference<br>";
+			rstrData << "out of<br>";
+			rstrData << "range";
+			rstrData << "</font>";
+		}
+
+		rstrData << "</td></tr>";
+		rstrData << "</table>" << endl;
+	}
+	catch (exception *pE)
+	{
+		if (!ofs.is_open ())
+		{
+			return (false);
+		}
+
+		rszMsg.clear ();
+		rszMsg << "<br>data: corruption (" << pE->what () << ")";
+
+		rData = psData->first;
+		rData = (rData >> 16) | (rData << 16);
+		rData = ((rData >> 8) & 0xFF00FF)| ((rData << 8) & 0xFF00FF00);
+		
+		rstrData.clear ();
+		rstrData << "key: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << psData->second.nDebug << "<br>instance: ---";
+	}
+
+	return (true);
 }
 
 #endif // !BTREETESTMAP_CPP
