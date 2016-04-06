@@ -20,35 +20,33 @@
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeTestMultiSet
-	(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize)
+	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize)
 	:	CBTreeMultiSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
 		rDataLayerProperties, 
 		psCacheDescription, 
 		nNodeSize
 	)
-	,	m_nDebug (0)
 	,	m_pClRef (NULL)
 {
 	m_pClRef = new ::std::multiset<uint32_t> ();
 
-	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestMultiSet<>::CBTreeTestMultiSet: ERROR: insufficient memory!");
+	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestMultiSet<>::CBTreeTestMultiSet (_t_datalayerproperties &, bayerTreeCacheDescription_t *, _t_subnodeiter): insufficient memory!");
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeTestMultiSet
-	(CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
+	(const CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
 	:	CBTreeMultiSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 	(
-		dynamic_cast<CBTreeMultiSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), 
+		dynamic_cast<const CBTreeMultiSet<uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), 
 		bAssign
 	)
-	,	m_nDebug (0)
 	,	m_pClRef (NULL)
 {
 	m_pClRef = new ::std::multiset<uint32_t> ();
 
-	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestMultiSet<>::CBTreeTestMultiSet: ERROR: insufficient memory!");
+	BTREE_ASSERT (m_pClRef != NULL, "CBTreeTestMultiSet<>::CBTreeTestMultiSet (CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &, bool): insufficient memory!");
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -61,13 +59,13 @@ template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_da
 CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>&
 	CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
 	(
-		CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT
+		const CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT
 	)
 {
 	if (this != &rBT)
 	{
 		CBTreeMultiSet_t		&rThisMM = dynamic_cast<CBTreeMultiSet_t &> (*this);
-		CBTreeMultiSet_t		&rBTMM = dynamic_cast<CBTreeMultiSet_t &> (rBT);
+		const CBTreeMultiSet_t	&rBTMM = dynamic_cast<const CBTreeMultiSet_t &> (rBT);
 
 		rThisMM = rBTMM;
 
@@ -79,44 +77,25 @@ CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 	return (*this);
 }
 
-/*
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::begin ()
-{
-
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::end ()
-{
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reverse_iterator
-	CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rbegin ()
-{
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reverse_iterator
-	CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rend ()
-{
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::max_size ()
-{
-}
-
-*/
-
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
 template <class _t_iterator>
 void CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (_t_iterator sItFirst, _t_iterator sItLast)
 {
 	m_pClRef->template insert<_t_iterator> (sItFirst, sItLast);
+
+	CBTreeMultiSet_t::template insert<_t_iterator> (sItFirst, sItLast);
+
+	test ();
+}
+
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template <class _t_iterator, class _t_ref_iterator>
+void CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (_t_iterator sItFirst, _t_iterator sItLast)
+{
+	_t_ref_iterator		sCItFirst (sItFirst);
+	_t_ref_iterator		sCItLast (sItLast);
+
+	m_pClRef->template insert<_t_ref_iterator> (sCItFirst, sCItLast);
 
 	CBTreeMultiSet_t::template insert<_t_iterator> (sItFirst, sItLast);
 
@@ -132,8 +111,6 @@ typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalay
 {
 	iterator	sIter;
 	value_t		sData = rData;
-
-	m_nDebug++;
 
 	m_pClRef->insert (sData);
 
@@ -231,6 +208,8 @@ void CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 	m_pClRef->clear ();
 
 	CBTreeMultiSet_t::clear ();
+
+	test ();
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
@@ -238,6 +217,8 @@ typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalay
 	CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_comp () const
 {
 	key_compare		sRslt;
+
+	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
 
 	return (sRslt);
 }
@@ -248,34 +229,13 @@ typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalay
 {
 	value_compare	sRslt;
 
+	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+
 	return (sRslt);
 }
 
-/*
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find (const uint32_t &rKey)
-{
-
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound (const uint32_t &rKey)
-{
-
-}
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound (const uint32_t &rKey)
-{
-
-}
-*/
-
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (CBTreeTestMultiSet_t &rTMM)
+bool CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (const CBTreeTestMultiSet_t &rTMM) const
 {
 	if (this == &rTMM)
 	{
@@ -315,13 +275,13 @@ bool CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (CBTreeTestMultiSet_t &rTMM)
+bool CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (const CBTreeTestMultiSet_t &rTMM) const
 {
 	return (! ((*this) == rTMM));
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test ()
+void CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test () const
 {
 	typedef ::std::multiset<uint32_t>::const_iterator		citer_mmap_t;
 
@@ -525,7 +485,7 @@ void CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 }
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos)
+bool CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
 {
 	uint32_t				*psData;
 	uint32_t				rData;
@@ -544,7 +504,7 @@ bool CBTreeTestMultiSet<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 		rstrData << "instance: " << this->get_instancePos (nNode, nSubPos);
 		rstrData << "</td>";
 
-		_t_sizetype		nDiff = this->lower_bound (*psData) - this->cbegin ();
+		_t_sizetype		nDiff = this->lower_bound (*psData) - this->begin ();
 		_t_sizetype		nOffset = nDiff + this->get_instancePos (nNode, nSubPos);
 
 		rstrData << "<td align=\"top\">";
