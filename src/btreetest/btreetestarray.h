@@ -33,7 +33,7 @@ typedef struct arrayEntry_s
 	uint32_t		nData;
 	uint32_t		nDebug;
 
-	bool			operator!= (const struct arrayEntry_s sOperand)
+	bool			operator!= (const struct arrayEntry_s sOperand) const
 	{
 		return ((nData != sOperand.nData) || (nDebug != sOperand.nDebug));
 	}
@@ -41,20 +41,20 @@ typedef struct arrayEntry_s
 
 template <class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_datalayerproperties = CBTreeIOpropertiesRAM, class _t_datalayer = CBTreeRAMIO <_t_nodeiter, _t_subnodeiter, uint64_t, uint32_t> >
 class CBTreeArrayTest
-	:	public virtual CBTreeArrayDataIf <arrayEntry_t, _t_sizetype>
-	,	public CBTreeArray <arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	public CBTreeArray <arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 {
 public:
 
-#if defined(__GNUC__) || defined(__GNUG__)
+	typedef CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+																			CBTreeArray_t;
 
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iterator;
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	const_iterator;
+	typedef typename CBTreeArray_t::CBTreeBase_t							CBTreeBase_t;
+
+	typedef typename CBTreeArray_t::iterator								iterator;
+	typedef typename CBTreeArray_t::const_iterator							const_iterator;
 	
-#endif
-
 						CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
 
 						CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
 													(CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
@@ -81,29 +81,22 @@ public:
 
 	void				swap						(CBTreeArrayTest &rArray);
 
-	_t_sizetype			insert_at					(const _t_sizetype nPos, const arrayEntry_t &rData);
-
-	_t_sizetype			replace_at					(const _t_sizetype nStart, const _t_sizetype nLen, arrayEntry_t *pSrcData);
-
-	_t_sizetype			remove_at					(const _t_sizetype nPos);
-
 	void				clear						();
 
-	bool				set_at						(const _t_sizetype nPos, const arrayEntry_t &rData);
-	bool				get_at						(const _t_sizetype nPos, arrayEntry_t &rData);
+	bool				operator==					(const CBTreeArrayTest &rArray) const;
+	bool				operator!=					(const CBTreeArrayTest &rArray) const;
 
-	bool				operator==					(CBTreeArrayTest &rArray);
-	bool				operator!=					(CBTreeArrayTest &rArray);
+	void				test						() const;
 
-	void				test						();
-
-	bool				show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
-//	bool				show_node					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos);
+	bool				show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const;
 
 	CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-						&operator=					(CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
+						&operator=					(const CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
 
 protected:
+
+	bool				set_at						(const _t_sizetype nPos, const arrayEntry_t &rData);
+	bool				get_at						(const _t_sizetype nPos, arrayEntry_t &rData) const;
 
 	std::list<arrayEntry_t>							*m_pClRef;
 };
