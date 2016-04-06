@@ -271,7 +271,7 @@ public:
 		(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nodeSize);
 
 protected:
-	int comp (void *pkey0, void *pkey1)
+	int comp (void *pkey0, void *pkey1) const
 	{
 		_t_data		*ptkey0 = (_t_data *) pkey0;
 		_t_data		*ptkey1 = (_t_data *) pkey1;
