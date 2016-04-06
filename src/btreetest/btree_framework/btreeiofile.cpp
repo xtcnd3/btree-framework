@@ -94,8 +94,8 @@ CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTree
 		nBlockSize = (_t_addresstype) nPageSize;
 
 		// these asserts usually flag if the type of _t_addresstype is set to a too small type (ie. _t_addresstype = uint16 and HW page size is 64k)
-		BTREE_ASSERT (nBlockSize == (_t_addresstype) nPageSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
-		BTREE_ASSERT (nPageSize == (pagesize_t) nBlockSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
+		BTREE_ASSERT (nBlockSize == (_t_addresstype) nPageSize, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
+		BTREE_ASSERT (nPageSize == (pagesize_t) nBlockSize, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
 	}
 	else
 	{
@@ -104,8 +104,8 @@ CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTree
 		nBlockSize *= (_t_addresstype) nPageSize;
 
 		// these asserts usually flag if the type of _t_addresstype is set to a too small type (ie. _t_addresstype = uint16 and HW page size is 64k)
-		BTREE_ASSERT (nBlockSize >= nPageSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
-		BTREE_ASSERT ((nBlockSize % nPageSize) == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
+		BTREE_ASSERT (nBlockSize >= nPageSize, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
+		BTREE_ASSERT ((nBlockSize % nPageSize) == 0, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: variable nBlockSize cannot display page size!");
 	}
 
 	this->setup (nBlockSize);
@@ -177,7 +177,7 @@ CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTree
 
 	} while ((!bOpenedFile) && (nAttempts <= 15));
 
-	BTREE_ASSERT (bOpenedFile, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: failed to open temporary file!");
+	BTREE_ASSERT (bOpenedFile, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeFileIO: failed to open temporary file!");
 
 	// init_mapping () fails by throwing an exception when a mapping handle on a zero length file has to be called into existance.
 	// to work around that, the file size is set to the size of one hardware page. to do so set_size () is used, since it has that
@@ -330,13 +330,27 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 
 	_t_addresstype		nSize;
 	_t_addresstype		nOldSize;
-	
+
 	nSize = this->get_nodeAddr (nMaxNodes + 1);
+
+	nOldSize = this->get_nodeAddr (this->m_nMaxNodes + 1);
+
+#if defined (_DEBUG)
+
+	if (nMaxNodes > this->m_nMaxNodes)
+	{
+		BTREE_ASSERT (nSize >= nOldSize, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_size: ERROR: While a larger space was requested, a smaller size was calculated! This means that, variables of type _t_addresstype cannot display an address space necessary for this application!");
+	}
+
+	if (nMaxNodes < this->m_nMaxNodes)
+	{
+		BTREE_ASSERT (nSize <= nOldSize, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_size: ERROR: While a smaller space was requested, a larger size was calculated! This means that, variables of type _t_addresstype cannot display an address space necessary for this application!");
+	}
+
+#endif
 
 	nSize = (nSize + this->m_nBlockSize - 1) / this->m_nBlockSize;
 	nSize *= this->m_nBlockSize;
-
-	nOldSize = this->get_nodeAddr (this->m_nMaxNodes + 1);
 
 	nOldSize = (nOldSize + this->m_nBlockSize - 1) / this->m_nBlockSize;
 	nOldSize *= this->m_nBlockSize;
@@ -724,12 +738,12 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::i
 {
 #if defined (WIN32)
 
-	BTREE_ASSERT (m_hFile != INVALID_HANDLE_VALUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping: file handle not initialised!");
-	BTREE_ASSERT (m_hFileMapping == INVALID_HANDLE_VALUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping: map handle was previously initialised");
+	BTREE_ASSERT (m_hFile != INVALID_HANDLE_VALUE, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping: file handle not initialised!");
+	BTREE_ASSERT (m_hFileMapping == INVALID_HANDLE_VALUE, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping: map handle was previously initialised");
 
 	m_hFileMapping = CreateFileMapping (m_hFile, NULL, PAGE_READWRITE, 0, 0, NULL);
 
-	BTREE_ASSERT (m_hFileMapping != NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping: failed to initialise map handle!");
+	BTREE_ASSERT (m_hFileMapping != NULL, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::init_mapping: failed to initialise map handle!");
 
 #endif
 }
@@ -739,17 +753,21 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::e
 {
 #if defined (WIN32)
 
-	BTREE_ASSERT (m_hFileMapping != INVALID_HANDLE_VALUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::exit_mapping: map handle was not initialised!");
+	BTREE_ASSERT (m_hFileMapping != INVALID_HANDLE_VALUE, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::exit_mapping: map handle was not initialised!");
+
+	DWORD	nErrCode = GetLastError ();
+
+	BTREE_ASSERT (nErrCode == ERROR_SUCCESS, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::exit_mapping: error code was not reset!");
 
 	HRESULT		sRslt = CloseHandle (m_hFileMapping);
 
 	if (sRslt != S_OK)
 	{
 		// it looks like CloseHandle sometimes returns with an error on file mapping handles, although everything seems to be fine
-		DWORD	nErrCode = GetLastError ();
+		nErrCode = GetLastError ();
 
 		// in those cases the code is double checking by using GetLastError ()
-		BTREE_ASSERT (nErrCode == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::exit_mapping: map handle was not de-initialised!");
+		BTREE_ASSERT (nErrCode == ERROR_SUCCESS, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::exit_mapping: map handle was not de-initialised!");
 	}
 									
 	m_hFileMapping = INVALID_HANDLE_VALUE;
@@ -777,8 +795,8 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::m
 
 #if defined (_DEBUG)
 
-	BTREE_ASSERT (nDescriptor < this->m_nDescriptorVectorSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested descriptor exceeds descriptor vector size!");
-	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData == NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested mapping already in place!");
+	BTREE_ASSERT (nDescriptor < this->m_nDescriptorVectorSize, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested descriptor exceeds descriptor vector size!");
+	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData == NULL, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested mapping already in place!");
 
 #endif
 
@@ -790,7 +808,7 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::m
 
 #if defined (_DEBUG)
 
-	BTREE_ASSERT (m_hFileMapping != INVALID_HANDLE_VALUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: map handle was not initialised!");
+	BTREE_ASSERT (m_hFileMapping != INVALID_HANDLE_VALUE, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: map handle was not initialised!");
 
 #endif
 
@@ -799,13 +817,13 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::m
 
 	this->m_psDescriptorVector[nDescriptor].pBlockData = (uint8_t *) MapViewOfFile (m_hFileMapping, FILE_MAP_ALL_ACCESS, nHighOffset, nLowOffset, nLineLen);
 
-	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: address mapping failed!");
+	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != NULL, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: address mapping failed!");
 
 #elif defined (LINUX)
 
 #if defined (_DEBUG)
 
-	BTREE_ASSERT (m_nFileDesc > 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: file descriptor was not initialised!");
+	BTREE_ASSERT (m_nFileDesc > 0, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: file descriptor was not initialised!");
 
 #endif
 
@@ -880,8 +898,8 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 {
 #if defined (_DEBUG)
 
-	BTREE_ASSERT (nDescriptor < this->m_nDescriptorVectorSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested descriptor exceeds descriptor vector size!");
-	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested unmapping already done!");
+	BTREE_ASSERT (nDescriptor < this->m_nDescriptorVectorSize, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::sync_descriptor: requested descriptor exceeds descriptor vector size!");
+	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != NULL, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::sync_descriptor: requested unmapping already done!");
 
 #endif
 
@@ -889,13 +907,13 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::s
 	
 	BOOL	bRslt = FlushViewOfFile ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize);
 
-	BTREE_ASSERT (bRslt == TRUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to flush view of file!");
+	BTREE_ASSERT (bRslt == TRUE, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::sync_descriptor: failed to flush view of file!");
 
 #elif defined (LINUX)
 
 	int		nRslt = msync ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize, MS_ASYNC);
 
-	BTREE_ASSERT (nRslt == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to flush view of file!");
+	BTREE_ASSERT (nRslt == 0, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::sync_descriptor: failed to flush view of file!");
 
 #endif
 
@@ -907,8 +925,8 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::u
 {
 #if defined (_DEBUG)
 
-	BTREE_ASSERT (nDescriptor < this->m_nDescriptorVectorSize, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested descriptor exceeds descriptor vector size!");
-	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != NULL, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::map_descriptor: requested unmapping already done!");
+	BTREE_ASSERT (nDescriptor < this->m_nDescriptorVectorSize, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: requested descriptor exceeds descriptor vector size!");
+	BTREE_ASSERT (this->m_psDescriptorVector[nDescriptor].pBlockData != NULL, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: requested unmapping already done!");
 
 #endif
 
@@ -916,13 +934,13 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::u
 	
 	BOOL	bRslt = UnmapViewOfFile ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData);
 
-	BTREE_ASSERT (bRslt == TRUE, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to unmap view of file!");
+	BTREE_ASSERT (bRslt == TRUE, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to unmap view of file!");
 
 #elif defined (LINUX)
 
 	int		nRslt = munmap ((void *) this->m_psDescriptorVector[nDescriptor].pBlockData, (size_t) this->m_nBlockSize);
 
-	BTREE_ASSERT (nRslt == 0, "ERROR: CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to unmap view of file!");
+	BTREE_ASSERT (nRslt == 0, "CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::unmap_descriptor: failed to unmap view of file!");
 
 #endif
 
@@ -976,4 +994,3 @@ void CBTreeFileIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::u
 }
 
 #endif // BTREEFILEIO_CPP
-
