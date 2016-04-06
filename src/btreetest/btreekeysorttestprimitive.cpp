@@ -11,179 +11,97 @@
 **
 ************************************************************/
 
+#ifndef	BTREEKEYSORTTESTPRIMITIVE_CPP
+#define	BTREEKEYSORTTESTPRIMITIVE_CPP
+
 #include "btreekeysorttestprimitive.h"
 
-void keySortPrim_add (CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *pClKeySort, uint32_t nEntries, uint32_t &nDebug, uint32_t &nFromWhereOrSeed, btreetest_keysort_primitive_seek_e eWhere)
+void container_data_reset (keySortEntry_t &rData)
 {
-	uint32_t		ui32;
-	keySortEntry_t	sData;
+	rData.nKey = 0;
+	rData.nData = 0;
+	rData.nDebug = 0;
+}
 
-	if (eWhere == BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY)
+void container_data_set (keySortEntry_t &rData, uint32_t nDebug, uint32_t &nFromWhereOrSeed, btreetest_key_generation_e eGenerator)
+{
+	rData.nDebug = nDebug;
+
+	switch (eGenerator)
 	{
-		srand (nFromWhereOrSeed);
-	}
-
-	for (ui32 = 0; ui32 < nEntries; ui32++)
-	{
-		cout << "insert: " << ui32 << " / " << nEntries << "\r" << flush;
-
-		sData.nDebug = nDebug;
-
-		nDebug++;
-
-		switch (eWhere)
+		case BTREETEST_KEY_GENERATION_DESCEND	:
 		{
-		case BTREETEST_KEYSORT_PRIMITIVE_DESCEND_KEY		:
-			{
-				sData.nKey = nFromWhereOrSeed;
+			rData.nKey = nFromWhereOrSeed;
 
-				nFromWhereOrSeed--;
-				
-				break;
-			}
+			nFromWhereOrSeed--;
+			
+			break;
+		}
 
-		case BTREETEST_KEYSORT_PRIMITIVE_ASCEND_KEY		:
-			{
-				sData.nKey = nFromWhereOrSeed;
+		case BTREETEST_KEY_GENERATION_ASCEND	:
+		{
+			rData.nKey = nFromWhereOrSeed;
 
-				nFromWhereOrSeed++;
-				
-				break;
-			}
+			nFromWhereOrSeed++;
+			
+			break;
+		}
 
-		case BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY	:
-			{
-				sData.nKey = generate_rand32 ();
+		case BTREETEST_KEY_GENERATION_RANDOM	:
+		{
+			rData.nKey = generate_rand32 ();
 
-				break;
-			}
+			break;
+		}
 
-		case BTREETEST_KEYSORT_PRIMITIVE_CONST_KEY	:
-			{
-				sData.nKey = nFromWhereOrSeed;
+		case BTREETEST_KEY_GENERATION_CONST		:
+		{
+			rData.nKey = nFromWhereOrSeed;
 
-				break;
-			}
+			break;
+		}
 
 		default									:
-			{
-				cerr << "ERROR: keySortPrim_add: eWhere corrupted or not set!" << endl;
+		{
+			cerr << "ERROR: container_data_set<keySortEntry_>: eGenerator corrupted or not set!" << endl;
 
-				exit (-1);
+			exit (-1);
 
-				break;
-			}
+			break;
 		}
-
-		sData.nData = generate_rand32 ();
-
-		pClKeySort->insert_tb (sData);
 	}
 
-	cout << "insert: " << ui32 << " / " << nEntries << endl;
+	rData.nData = generate_rand32 ();
 }
 
-void keySortPrim_remove (CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *pClKeySort, uint32_t nEntries, uint32_t nInstance, uint32_t &nFromWhereOrSeed, btreetest_keysort_primitive_seek_e eWhere)
+uint32_t get_entry_key (const keySortEntry_t &rData)
 {
-	uint32_t		ui32;
-	keySortEntry_t	sKey;
-
-	sKey.nDebug = 0;
-	
-	if (eWhere == BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY)
-	{
-		srand (nFromWhereOrSeed);
-	}
-
-	for (ui32 = 0; ui32 < nEntries; ui32++)
-	{
-		cout << "remove: " << ui32 << " / " << nEntries << "\r" << flush;
-
-		switch (eWhere)
-		{
-		case BTREETEST_KEYSORT_PRIMITIVE_DESCEND_KEY		:
-			{
-				nFromWhereOrSeed--;
-
-				sKey.nKey = nFromWhereOrSeed;
-				
-				break;
-			}
-
-		case BTREETEST_KEYSORT_PRIMITIVE_ASCEND_KEY		:
-			{
-				nFromWhereOrSeed++;
-
-				sKey.nKey = nFromWhereOrSeed;
-				
-				break;
-			}
-
-		case BTREETEST_KEYSORT_PRIMITIVE_RANDOM_KEY	:
-			{
-				sKey.nKey = generate_rand32 ();
-
-				break;
-			}
-
-		case BTREETEST_KEYSORT_PRIMITIVE_CONST_KEY	:
-			{
-				sKey.nKey = nFromWhereOrSeed;
-
-				break;
-			}
-
-		default									:
-			{
-				cerr << "ERROR: keySortPrim_remove: eWhere corrupted or not set!" << endl;
-
-				exit (-1);
-
-				break;
-			}
-		}
-
-		sKey.nData = generate_rand32 ();
-		
-		if (nInstance == ~0x0)
-		{
-			pClKeySort->erase_tb (sKey);
-		}
-		else
-		{
-			pClKeySort->erase_tb (sKey, (uint64_t) nInstance);
-		}
-	}
-
-	cout << "remove: " << ui32 << " / " << nEntries << endl;
+	return (rData.nKey);
 }
 
-bool keySortPrim_compare (CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *pClKeySort0, CBTreeKeySortDataIf<keySortEntry_t, uint32_t> *pClKeySort1)
+uint32_t get_entry_data (const keySortEntry_t &rData)
 {
-	if (pClKeySort0 == pClKeySort1)
-	{
-		return (true);
-	}
-
-	if (pClKeySort0->size () != pClKeySort1->size ())
-	{
-		return (false);
-	}
-
-	uint64_t			i;
-	keySortEntry_t		sData0;
-	keySortEntry_t		sData1;
-
-	for (i = 0; i < pClKeySort0->size (); i++)
-	{
-		pClKeySort0->get_at (i, sData0);
-		pClKeySort1->get_at (i, sData1);
-
-		if ((sData0.nKey != sData1.nKey) || (sData0.nData != sData1.nData))
-		{
-			return (false);
-		}
-	}
-
-	return (true);
+	return (rData.nData);
 }
+
+uint32_t get_entry_debug (const keySortEntry_t &rData)
+{
+	return (rData.nDebug);
+}
+
+void set_entry_key (keySortEntry_t &rEntry, uint32_t nKey)
+{
+	rEntry.nKey = nKey;
+}
+
+void set_entry_data (keySortEntry_t &rEntry, uint32_t nData)
+{
+	rEntry.nData = nData;
+}
+
+void set_entry_debug (keySortEntry_t &rEntry, uint32_t nDebug)
+{
+	rEntry.nDebug = nDebug;
+}
+
+#endif // BTREEKEYSORTTESTPRIMITIVE_CPP
