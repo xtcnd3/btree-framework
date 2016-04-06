@@ -1,3 +1,16 @@
+/************************************************************
+**
+** file:	btreeiolinear.cpp
+** author:	Andreas Steffens
+** license:	GPL v2
+**
+** description:
+**
+** This file contains code for the b-tree framework's
+** block IO data layer class.
+**
+************************************************************/
+
 #ifndef	BTREEIOLINEAR_CPP
 #define	BTREEIOLINEAR_CPP
 
