@@ -18,271 +18,176 @@
 
 #include "btreetestarray.h"
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArrayTest 
+template<class _t_datalayerproperties>
+CBTreeTestArray<_t_datalayerproperties>::CBTreeTestArray 
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
 		const bayerTreeCacheDescription_t *psCacheDescription, 
-		_t_subnodeiter nNodeSize
+		typename _t_datalayerproperties::sub_node_iter_type nNodeSize, 
+		typename CBTreeTestArray<_t_datalayerproperties>::reference_t *pClRef
 	)
-	:	CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	CBTreeArray<typename CBTreeTestArray<_t_datalayerproperties>::value_type, _t_datalayerproperties>
 	(
 		rDataLayerProperties, 
 		psCacheDescription, 
 		nNodeSize
 	)
+	,	m_pClRef (pClRef)
+	,	m_bAtomicTesting (true)
 {
-	m_pClRef = new std::list<arrayEntry_t> ();
-	
-	BTREE_ASSERT (m_pClRef != NULL, "CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArrayTest (_t_datalayerproperties &, bayerTreeCacheDescription_t *, _t_subnodeiter): insufficient memory!");
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArrayTest (CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
-	:	CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_datalayerproperties>
+CBTreeTestArray<_t_datalayerproperties>::CBTreeTestArray (CBTreeTestArray<_t_datalayerproperties> &rBT, bool bAssign)
+	:	CBTreeArray<typename CBTreeTestArray<_t_datalayerproperties>::value_type, _t_datalayerproperties>
 	(
 		rBT, false
 	)
+	,	m_pClRef (rBT.m_pClRef)
+	,	m_bAtomicTesting (false)
 {
-	m_pClRef = new std::list<arrayEntry_t> ();
+	if (bAssign)
+	{
+		this->_assign (rBT);
+	}
 
-	BTREE_ASSERT (m_pClRef != NULL, "CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArrayTest (CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &): insufficient memory!");
+	this->set_atomic_testing (true);
+}
 
-	CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_assign (rBT);
+template<class _t_datalayerproperties>
+CBTreeTestArray<_t_datalayerproperties>::~CBTreeTestArray ()
+{
+}
 
-	*m_pClRef = *(rBT.m_pClRef);
+template<class _t_datalayerproperties>
+template<class _t_iterator>
+void CBTreeTestArray<_t_datalayerproperties>::assign (_t_iterator sItFirst, _t_iterator sItLast)
+{
+	CBTreeArray_t::assign (sItFirst, sItLast);
+}
+
+template<class _t_datalayerproperties>
+void CBTreeTestArray<_t_datalayerproperties>::assign (typename _t_datalayerproperties::size_type nNewSize, const typename CBTreeTestArray<_t_datalayerproperties>::value_type& rVal)
+{
+	CBTreeArray_t::assign (nNewSize, rVal);
 
 	test ();
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeArrayTest ()
+template<class _t_datalayerproperties>
+void CBTreeTestArray<_t_datalayerproperties>::push_back (const typename CBTreeTestArray<_t_datalayerproperties>::value_type& rData)
 {
-	delete m_pClRef;
-}
-
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator>
-void CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::assign (_t_iterator sItFirst, _t_iterator sItLast)
-{
-	m_pClRef->assign<_t_iterator> (sItFirst, sItLast);
-
-	CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::template assign< _t_iterator > (sItFirst, sItLast);
+	CBTreeArray_t::push_back (rData);
 
 	test ();
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::assign (_t_sizetype nNewSize, const arrayEntry_t& rVal)
+template<class _t_datalayerproperties>
+void CBTreeTestArray<_t_datalayerproperties>::pop_back ()
 {
-	m_pClRef->assign ((size_t) nNewSize, rVal);
-
-	CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::assign (nNewSize, rVal);
+	CBTreeArray_t::pop_back ();
 
 	test ();
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::push_back (const arrayEntry_t& rData)
-{
-	m_pClRef->push_back (rData);
-
-	CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::push_back (rData);
-
-	test ();
-}
-
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::pop_back ()
-{
-	m_pClRef->pop_back ();
-
-	CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::pop_back ();
-
-	test ();
-}
-
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator>
-typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
+template<class _t_datalayerproperties>
+template<class _t_iterator>
+typename CBTreeTestArray<_t_datalayerproperties>::iterator
+	CBTreeTestArray<_t_datalayerproperties>::insert
 	(
-		typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	sCIterPos, 
-		_t_iterator																													sItFirst, 
-		_t_iterator																													sItLast
+		typename CBTreeTestArray<_t_datalayerproperties>::const_iterator	sCIterPos, 
+		_t_iterator															sItFirst, 
+		_t_iterator															sItLast
 	)
 {
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	citer_t;
-
-	typedef typename ::std::list<arrayEntry_t>::iterator																				listiter_t;
-
-	listiter_t			sListIter = m_pClRef->begin ();
-	_t_sizetype			nDiff = ::std::distance<citer_t> (this->cbegin (), sCIterPos);
-
-	::std::advance<listiter_t> (sListIter, (size_t) nDiff);
-
-	m_pClRef->insert<_t_iterator> (sListIter, sItFirst, sItLast);
-
-	iter_t			sRetval (this, false);
-
-	sRetval = CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::template insert<_t_iterator> (sCIterPos, sItFirst, sItLast);
-
-	test ();
+	iterator		sRetval = CBTreeArray_t::insert (sCIterPos, sItFirst, sItLast);
 
 	return (sRetval);
 }	
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
+template<class _t_datalayerproperties>
+typename CBTreeTestArray<_t_datalayerproperties>::iterator
+	CBTreeTestArray<_t_datalayerproperties>::insert
 	(
-		typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos, 
-		const arrayEntry_t& rData
+		typename CBTreeTestArray<_t_datalayerproperties>::const_iterator sCIterPos, 
+		const typename CBTreeTestArray<_t_datalayerproperties>::value_type& rData
 	)
 {
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	citer_t;
-
-	typedef typename ::std::list<arrayEntry_t>::iterator																				listiter_t;
-
-	listiter_t			sListIter = m_pClRef->begin ();
-	_t_sizetype			nDiff = ::std::distance<citer_t> (this->cbegin (), sCIterPos);
-
-	::std::advance<listiter_t> (sListIter, (size_t) nDiff);
-
-	m_pClRef->insert (sListIter, rData);
-
-	iter_t			sRetval (this, false);
-
-	sRetval = CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (sCIterPos, rData);
+	iterator		sRetval = CBTreeArray_t::insert (sCIterPos, rData);
 
 	test ();
 
 	return (sRetval);
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
+template<class _t_datalayerproperties>
+typename CBTreeTestArray<_t_datalayerproperties>::iterator
+	CBTreeTestArray<_t_datalayerproperties>::insert
 	(
-		typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos, 
-		const _t_sizetype nLen, 
-		const arrayEntry_t& rData
+		typename CBTreeTestArray<_t_datalayerproperties>::const_iterator sCIterPos, 
+		const typename _t_datalayerproperties::size_type nLen, 
+		const typename CBTreeTestArray<_t_datalayerproperties>::value_type& rData
 	)
 {
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	citer_t;
-
-	typedef typename ::std::list<arrayEntry_t>::iterator																				listiter_t;
-
-	listiter_t			sListIter = m_pClRef->begin ();
-	_t_sizetype			nDiff = ::std::distance<citer_t> (this->cbegin (), sCIterPos);
-
-	::std::advance<listiter_t> (sListIter, (size_t) nDiff);
-
-	m_pClRef->insert (sListIter, (size_t) nLen, rData);
-
-	iter_t			sRetval (this, false);
-
-	sRetval = CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (sCIterPos, nLen, rData);
+	iterator		sRetval = CBTreeArray_t::insert (sCIterPos, nLen, rData);
 
 	test ();
 
 	return (sRetval);
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
+template<class _t_datalayerproperties>
+typename CBTreeTestArray<_t_datalayerproperties>::iterator
+	CBTreeTestArray<_t_datalayerproperties>::erase
 	(
-		typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos
+		typename CBTreeTestArray<_t_datalayerproperties>::const_iterator sCIterPos
 	)
 {
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	citer_t;
-	
-	typedef typename ::std::list<arrayEntry_t>::iterator																				listiter_t;
-
-	listiter_t			sListIter = m_pClRef->begin ();
-	_t_sizetype			nDiff = ::std::distance<citer_t> (this->cbegin (), sCIterPos);
-
-	::std::advance<listiter_t> (sListIter, (size_t) nDiff);
-
-	m_pClRef->erase (sListIter);
-
-	iter_t			sRetval (this, false);
-
-	sRetval = CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIterPos);
+	iterator		sRetval = CBTreeArray_t::erase (sCIterPos);
 
 	test ();
 
 	return (sRetval);
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
+template<class _t_datalayerproperties>
+typename CBTreeTestArray<_t_datalayerproperties>::iterator
+	CBTreeTestArray<_t_datalayerproperties>::erase
 	(
-		typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterFirst, 
-		typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterLast
+		typename CBTreeTestArray<_t_datalayerproperties>::const_iterator sCIterFirst, 
+		typename CBTreeTestArray<_t_datalayerproperties>::const_iterator sCIterLast
 	)
 {
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	citer_t;
-	
-	typedef typename ::std::list<arrayEntry_t>::iterator																				listiter_t;
-
-	listiter_t			sListIterFirst = m_pClRef->begin ();
-	listiter_t			sListIterLast = m_pClRef->begin ();
-
-	_t_sizetype			nDiff = ::std::distance<citer_t> (this->cbegin (), sCIterFirst);
-
-	::std::advance<listiter_t> (sListIterFirst, (size_t) nDiff);
-
-	nDiff = ::std::distance<citer_t> (this->cbegin (), sCIterLast);
-
-	::std::advance<listiter_t> (sListIterLast, (size_t) nDiff);
-
-	m_pClRef->erase (sListIterFirst, sListIterLast);
-
-	iter_t			sRetval (this, false);
-
-	sRetval = CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (sCIterFirst, sCIterLast);
+	iterator		sRetval = CBTreeArray_t::erase (sCIterFirst, sCIterLast);
 
 	test ();
 
 	return (sRetval);
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap
+template<class _t_datalayerproperties>
+void CBTreeTestArray<_t_datalayerproperties>::swap
 	(
-		CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rArray
+		CBTreeTestArray<_t_datalayerproperties> &rArray
 	)
 {
-	CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>	&rBtrArray = 
-		dynamic_cast <CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rArray);
+	CBTreeArray_t	&rBtrArray = dynamic_cast <CBTreeArray_t &> (rArray);
 
-	m_pClRef->swap (*(rArray.m_pClRef));
-
-	CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (rBtrArray);
+	CBTreeArray_t::swap (rBtrArray);
 
 	test ();
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ()
+template<class _t_datalayerproperties>
+void CBTreeTestArray<_t_datalayerproperties>::clear ()
 {
-	m_pClRef->clear ();
-
-	CBTreeBase_t::clear ();
+	CBTreeBaseDefaults_t::clear ();
 
 	test ();
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (const CBTreeArrayTest &rArray) const
+template<class _t_datalayerproperties>
+bool CBTreeTestArray<_t_datalayerproperties>::operator== (const CBTreeTestArray &rArray) const
 {
 	if (this == &rArray)
 	{
@@ -294,68 +199,74 @@ bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerprope
 		return (false);
 	}
 
-	_t_sizetype			i;
+	const_iterator		sCIterThis = this->cbegin ();
+	const_iterator		sCIterArray = rArray.cbegin ();
 
-	for (i = 0; i < this->size (); i++)
+	while (sCIterThis != this->cend ())
 	{
-		arrayEntry_t	sThisData = this->at (i);
-		arrayEntry_t	sArrayData = rArray.at (i);
-
-		if (sThisData.nData != sArrayData.nData)
+		if ((*sCIterThis).nData != (*sCIterArray).nData)
 		{
 			return (false);
 		}
+
+		sCIterThis++;
+		sCIterArray++;
 	}
 
 	return (true);
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (const CBTreeArrayTest &rArray) const
+template<class _t_datalayerproperties>
+bool CBTreeTestArray<_t_datalayerproperties>::operator!= (const CBTreeTestArray &rArray) const
 {
 	return ( ! (*this == rArray));
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test () const
+template<class _t_datalayerproperties>
+void CBTreeTestArray<_t_datalayerproperties>::test () const
 {
-	typedef typename CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator	iter_t;
+	typedef typename CBTreeTestArray<_t_datalayerproperties>::iterator	iter_t;
+
+	if (!this->m_bAtomicTesting)
+	{
+		return;
+	}
 
 	if (!this->test_integrity ())
 	{
-		cerr << endl;
-		cerr << "integrity test failed" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "integrity test failed" << ::std::endl;
 
-		cerr << "creating integrity.html..." << endl;
+		::std::cerr << "creating integrity.html..." << ::std::endl;
 
 		this->show_integrity ("integrity.html");
 
-		cerr << "finished!" << endl;
+		::std::cerr << "finished!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	if (this->size () != (_t_sizetype) m_pClRef->size ())
+	if (this->size () != (size_type) m_pClRef->size ())
 	{
-		cerr << endl;
-		cerr << "size mismatches" << endl;
-		cerr << "size: " << this->size () << endl;
-		cerr << "reference: " << m_pClRef->size () << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "size mismatches" << ::std::endl;
+		::std::cerr << "size: " << this->size () << ::std::endl;
+		::std::cerr << "reference: " << m_pClRef->size () << ::std::endl;
 
-		cerr << "creating size.html..." << endl;
+		::std::cerr << "creating size.html..." << ::std::endl;
 
 		this->show_integrity ("size.html");
 
-		cerr << "finished!" << endl;
+		::std::cerr << "finished!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	typename std::list<arrayEntry_t>::iterator		itRef = m_pClRef->begin ();
-	_t_sizetype										it;
-	arrayEntry_t									sData;
-	arrayEntry_t									sRef;
-	iter_t											sIter;
+	typename reference_t::iterator		itRef = m_pClRef->begin ();
+	size_type							it;
+	value_type							sData;
+	value_type							sRef;
+	iter_t								sIter;
 
 	sIter = this->begin ();
 
@@ -365,58 +276,37 @@ void CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerprope
 
 		sRef = *itRef;
 
-		if (memcmp ((void *) &sData, (void *) &sRef, sizeof (arrayEntry_t)) != 0)
+		if (memcmp ((void *) &sData, (void *) &sRef, sizeof (sData)) != 0)
 		{
-			cerr << endl;
-			cerr << "data mismatch at " << it << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "data mismatch at " << it << ::std::endl;
 			
-			cerr << "creating error.html..." << endl;
+			::std::cerr << "creating error.html..." << ::std::endl;
 
 			this->show_integrity ("error.html");
 
-			cerr << "finished!" << endl;
+			::std::cerr << "finished!" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
+template<class _t_datalayerproperties>
+void CBTreeTestArray<_t_datalayerproperties>::set_reference (reference_t *pReference)
 {
-	uint32_t				rData;
-	arrayEntry_t			*psData;
-	
-	try
-	{
-		psData = this->get_data (nNode, nSubPos);
-		
-		rData = psData->nData;
-		rData = (rData >> 16) | (rData << 16);
-		rData = ((rData >> 8) & 0xFF00FF) | ((rData << 8) & 0xFF00FF00);
-
-		rstrData.clear ();
-		rstrData << "data: " << hex << setfill ('0') << setw (8) << rData << dec << "<br>debug: " << psData->nDebug;
-	}
-	catch (exception *pE)
-	{
-		if (!ofs.is_open ())
-		{
-			return (false);
-		}
-
-		rszMsg << "<br>data: corruption (" << pE->what () << ")";
-
-		rstrData.clear ();
-		rstrData << "data: ---<br>debug: ---";
-	}
-
-	return (true);
+	this->m_pClRef = pReference;
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
-	(const CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
+template<class _t_datalayerproperties>
+void CBTreeTestArray<_t_datalayerproperties>::set_atomic_testing (bool bEnable)
+{
+	this->m_bAtomicTesting = bEnable;
+}
+
+template<class _t_datalayerproperties>
+CBTreeTestArray<_t_datalayerproperties> &CBTreeTestArray<_t_datalayerproperties>::operator=
+	(const CBTreeTestArray<_t_datalayerproperties> &rBT)
 {
 	if (this != &rBT)
 	{
@@ -433,12 +323,129 @@ CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties
 	return (*this);
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_at (const _t_sizetype nPos, const arrayEntry_t &rData)
+template<class _t_datalayerproperties>
+bool CBTreeTestArray<_t_datalayerproperties>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSubPos) const
 {
-	bool										bRslt;
-	typename std::list<arrayEntry_t>::iterator	itRef = m_pClRef->begin ();
-	_t_sizetype									nFForward;
+	uint32_t			nData;
+	value_type			*psData;
+	
+	try
+	{
+		psData = this->get_data (nNode, nSubPos);
+		
+		nData = psData->nData;
+		nData = (nData >> 16) | (nData << 16);
+		nData = ((nData >> 8) & 0xFF00FF) | ((nData << 8) & 0xFF00FF00);
+
+		if (ofs.is_open ())
+		{
+			rstrData.clear ();
+			rstrData << "<table border=\"0\" cellspacing=\"1\" width=\"220\"><tr><td>";
+			rstrData << "data: " << ::std::hex << ::std::setfill ('0') << ::std::setw (8) << nData << ::std::dec << "<br>debug: " << psData->nDebug;
+			rstrData << "</td>";
+
+			rstrData << "<td align=\"top\">";
+		}
+
+		size_type		nOffset;
+		node_iter_type	nTmpNode = nNode;
+
+		if (this->is_leaf (nNode))
+		{
+			nOffset = nSubPos;
+		}
+		else
+		{
+			size_type		*pnSerVector = this->get_serVector (nNode);
+
+			nOffset = pnSerVector[nSubPos];
+		}
+		
+		while (nTmpNode != this->m_nRootNode)
+		{
+			node_iter_type		nParentNode = this->get_parent (nTmpNode);
+			sub_node_iter_type	nTmpSubPos = this->find_sub_node_offset (nParentNode, nTmpNode);
+
+			if (nTmpSubPos > 0)
+			{
+				size_type		*pnSerVector = this->get_serVector (nParentNode);
+
+				nOffset += pnSerVector[nTmpSubPos - 1] + 1;
+			}
+
+			nTmpNode = nParentNode;
+		}
+
+		if (nOffset < this->m_pClRef->size ())
+		{
+			typename reference_t::const_iterator	sCIter = this->m_pClRef->cbegin ();
+			value_type								sData;
+
+			::std::advance (sCIter, nOffset);
+
+			sData = *sCIter;
+
+			nData = sData.nData;
+			nData = (nData >> 16) | (nData << 16);
+			nData = ((nData >> 8) & 0xFF00FF) | ((nData << 8) & 0xFF00FF00);
+
+			if (ofs.is_open ())
+			{
+				if (psData->nData != sData.nData)
+				{
+					rstrData << "<font color=\"#FF0000\">";
+				}
+				else
+				{
+					rstrData << "<font color=\"#00BB00\">";
+				}
+
+				rstrData << "data: " << ::std::hex << ::std::setfill ('0') << ::std::setw (8) << nData << ::std::dec << "<br>debug: " << sData.nDebug;
+				rstrData << "</font>";
+			}
+		}
+		else
+		{
+			if (ofs.is_open ())
+			{
+				rstrData << "<font color=\"#FF0000\">";
+				rstrData << "reference<br>";
+				rstrData << "out of<br>";
+				rstrData << "range";
+				rstrData << "</font>";
+			}
+		}
+
+		if (ofs.is_open ())
+		{
+			rstrData << "</td></tr>";
+			rstrData << "</table>" << ::std::endl;
+		}
+	}
+	catch (::std::exception *pE)
+	{
+		if (!ofs.is_open ())
+		{
+			return (false);
+		}
+		else
+		{
+			rszMsg << "<br>data: corruption (" << pE->what () << ")";
+
+			rstrData.clear ();
+			rstrData << "data: ---<br>debug: ---";
+		}
+	}
+
+	return (true);
+}
+
+template<class _t_datalayerproperties>
+bool CBTreeTestArray<_t_datalayerproperties>::set_at (const typename _t_datalayerproperties::size_type nPos, const typename CBTreeTestArray<_t_datalayerproperties>::value_type &rData)
+{
+	bool								bRslt;
+	typename reference_t::iterator		itRef = m_pClRef->begin ();
+	size_type							nFForward;
 
 	for (nFForward = 0; nFForward < nPos; nFForward++)
 	{
@@ -447,17 +454,17 @@ bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerprope
 
 	(*itRef) = rData;
 
-	bRslt = CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_at (nPos, rData);
+	bRslt = CBTreeArray_t::set_at (nPos, rData);
 
 	test ();
 
 	return (bRslt);
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_at (const _t_sizetype nPos, arrayEntry_t &rData) const
+template<class _t_datalayerproperties>
+bool CBTreeTestArray<_t_datalayerproperties>::get_at (const typename _t_datalayerproperties::size_type nPos, typename CBTreeTestArray<_t_datalayerproperties>::value_type &rData) const
 {
-	return (CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_at (nPos, rData));
+	return (CBTreeArray_t::get_at (nPos, rData));
 }
 
 #endif // BTREETESTARRAY_CPP
