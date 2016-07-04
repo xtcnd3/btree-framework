@@ -17,15 +17,15 @@
 
 #include <stdexcept>
 
-#include <ctime>
+#include <chrono>
 
 #define	BTREE_ASSERT(c,m)			if (!(c)) throw (new ::std::runtime_error (m))
 #define	BTREE_ASSERT_EXCEPT(c,e,m)	if (!(c)) throw (new (e) ((m)))
 
 typedef struct btree_time_stamp_s
 {
-	::std::clock_t	sTime;
-	uint32_t		nAccCtr;
+	::std::chrono::high_resolution_clock::time_point	sTime;
+	uint32_t											nAccCtr;
 
 	bool			operator== (const struct btree_time_stamp_s &rTimeStamp) const
 	{
@@ -64,11 +64,25 @@ struct has_compare_operator_equal
 	
 #endif
 
-template <class _t_type, typename _t_intrinsic>
+template<class _t_type, typename _t_intrinsic>
 void				xor_swap		(_t_type &rLhs, _t_type &rRhs);
 
-template <class _t_type>
+template<class _t_type>
 void				fast_swap		(_t_type &rLhs, _t_type &rRhs);
+
+namespace operator_test_scope
+{
+	struct doesnt_exist {};
+
+	template<class _t_data, class _t_cdata>
+	doesnt_exist operator== (const _t_data &, const _t_cdata &);
+
+	template<class _t_data, class _t_cdata = _t_data>
+	struct has_equal_operator
+	{
+		typedef typename ::std::is_same<typename ::std::is_same<decltype (*(_t_data *)(0) == *(_t_cdata *)(0)), doesnt_exist>::type, ::std::false_type>::type		type;
+	};
+}
 
 #endif // BTREECOMMON_H
 
