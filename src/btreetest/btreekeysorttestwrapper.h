@@ -31,12 +31,13 @@
 
 #include "btreekeysorttestprimitive.h"
 
-template <class _t_data, class _t_value, class _t_ref_container>
+template<class _t_data, class _t_value, class _t_ref_container>
 class CBTreeKeySortTestWrapper	:	public CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
 {
 public:
 
-	typedef CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>	CBTreeKeySortTestWrapper_t;
+	typedef CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>
+																CBTreeKeySortTestWrapper_t;
 
 	typedef CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
 																CBTreeAssociativeTestWrapper_t;
@@ -48,17 +49,15 @@ public:
 	typedef typename reference_t::reverse_iterator				reverse_iterator;
 	typedef typename reference_t::const_reverse_iterator		const_reverse_iterator;
 
-	typedef _t_data												data_t;
-	
 	typedef typename reference_t::value_type					value_type;
+	typedef typename reference_t::key_type						key_type;
+	typedef typename reference_t::size_type						size_type;
 
-	typedef typename reference_t::size_type						sizetype_ref_t;
+	typedef _t_data												value_test_type;
+	typedef uint32_t											key_test_type;
+	typedef uint64_t											size_test_type;
 
-	typedef sizetype_ref_t										size_type;
-
-	typedef uint64_t											sizetype_test_t;
-
-	typedef CBTreeAssociativeIf<_t_value, uint32_t, sizetype_test_t>
+	typedef CBTreeAssociativeIf<_t_value, uint32_t, size_test_type>
 																CBTreeAssociativeIf_t;
 
 	typedef typename CBTreeAssociativeIf_t::iterator			test_iterator;
@@ -94,47 +93,47 @@ protected:
 
 	void					transfer_containers					();
 
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint64_t, uint32_t> >	*m_pContainerFile6565min;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile6555min;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile5555min;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint16_t> >	*m_pContainerFile5554min;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint32_t, uint16_t> >	*m_pContainerFile5454min;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >	*m_pContainerFile6565min;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile6555min;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile5555min;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >	*m_pContainerFile5554min;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >	*m_pContainerFile5454min;
 
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint64_t, uint32_t> >	*m_pContainerFile6565default;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile6555default;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile5555default;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint16_t> >	*m_pContainerFile5554default;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint32_t, uint16_t> >	*m_pContainerFile5454default;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >	*m_pContainerFile6565default;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile6555default;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile5555default;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >	*m_pContainerFile5554default;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >	*m_pContainerFile5454default;
 
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint64_t, uint32_t> >	*m_pContainerFile6565large;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile6555large;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile5555large;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint16_t> >	*m_pContainerFile5554large;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint32_t, uint16_t> >	*m_pContainerFile5454large;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >	*m_pContainerFile6565large;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile6555large;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >	*m_pContainerFile5555large;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >	*m_pContainerFile5554large;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >	*m_pContainerFile5454large;
 
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint16_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_n;
 
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_2n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_2n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_2n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_2n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_2n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_2n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint16_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_2n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_2n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_2n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_2n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_2n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_2n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_2n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_2n;
 
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_4n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_4n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_4n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_4n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_4n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_4n;
-	CBTreeKeySortTest<data_t, uint32_t, sizetype_test_t, uint16_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_4n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_4n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_4n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_4n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_4n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_4n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_4n;
+	CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesRAM <size_test_type, uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_4n;
 
 	static const uint32_t											m_nNumContainersKS;
 };
