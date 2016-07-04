@@ -26,19 +26,13 @@
 
 #include <string>
 
-#if defined (WIN32)
+#if defined (_MSC_VER)
 
- #if defined (_HAS_MFC)
-  #include <afxtempl.h>
- #endif
-
- #if !defined (_HAS_MFC)
-  #include <windows.h>
- #endif
+ #include <windows.h>
 
  #include <io.h>
 
-#elif defined (LINUX)
+#elif defined(__GNUC__) || defined(__GNUG__)
 
  #include <stdlib.h>
 
@@ -54,22 +48,27 @@ typedef struct
 	uint32_t	nMinNumberOfBytesPerSuperBlock;
 } bayerTreeCacheDescription_t;
 
-template <class _t_data, class _t_sizetype = uint64_t>
+template<class _t_data, class _t_sizetype = uint64_t>
 class CBTreeIf
 	:	public CBTreeSuper
 {
 public:
 
-	typedef CBTreeIf<_t_data, _t_sizetype>					CBTreeIf_t;
+	typedef _t_data											value_type;
+	typedef _t_sizetype										size_type;
+
+	typedef value_type&										reference;
+	typedef const value_type&								const_reference;
+	typedef value_type*										pointer;
+	typedef const value_type*								const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type	difference_type;
+
+	typedef CBTreeIf<value_type, size_type>					CBTreeIf_t;
 
 	typedef CBTreeIterator<CBTreeIf_t>						iterator;
 	typedef CBTreeConstIterator<CBTreeIf_t>					const_iterator;
 	typedef CBTreeReverseIterator<iterator>					reverse_iterator;
 	typedef CBTreeConstReverseIterator<const_iterator>		const_reverse_iterator;
-
-	typedef _t_data											data_t;
-	typedef _t_sizetype										size_type;
-//	typedef _ti_pos											position_t;
 
 									CBTreeIf				();
 
@@ -122,17 +121,17 @@ protected:
 
 	virtual uint32_t				get_iter_state_size		() const = 0;
 	virtual void					reset_iter_state		(void *pState) const = 0;
-	virtual void					evaluate_iter			(void *pState, _t_sizetype nOffsetPos) const = 0;
-	virtual void					evaluate_iter_by_seek	(void *pState, _t_sizetype nNewPos) const = 0;
-	virtual bool					is_iter_pos_evaluated	(void *pState, _t_sizetype nPos) const = 0; // part of is_evaluated ()
+	virtual void					evaluate_iter			(void *pState, size_type nOffsetPos) const = 0;
+	virtual void					evaluate_iter_by_seek	(void *pState, size_type nNewPos) const = 0;
+	virtual bool					is_iter_pos_evaluated	(void *pState, size_type nPos) const = 0; // part of is_evaluated ()
 
-	virtual _t_data					*get_iter_data			(void *pState) const = 0;
-	virtual void					set_iter_data			(void *pState, const _t_data &rData) = 0;
+	virtual value_type				*get_iter_data			(void *pState) const = 0;
+	virtual void					set_iter_data			(void *pState, const value_type &rData) = 0;
 
 public:
 
-	friend class CBTreeIterator<CBTreeIf<_t_data, _t_sizetype> >;
-	friend class CBTreeConstIterator<CBTreeIf<_t_data, _t_sizetype> >;
+	friend class CBTreeIterator<CBTreeIf_t>;
+	friend class CBTreeConstIterator<CBTreeIf_t>;
 	friend class CBTreeReverseIterator<iterator>;
 	friend class CBTreeConstReverseIterator<const_iterator>;
 
