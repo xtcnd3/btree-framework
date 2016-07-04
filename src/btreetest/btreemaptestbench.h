@@ -77,26 +77,26 @@ public:
 				~CBTreeTestBenchMap<_t_key, _t_map> ()	
 				{};
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	void insert (const typename ::std::map<_t_key, _t_map>::iterator &rDummyIter, _t_iterator &rIterFirst, _t_iterator &rIterLast)
 	{
 		rDummyIter;
 
-		::std::map<_t_key, _t_map>::template insert <_t_iterator> (rIterFirst, rIterLast);
+		::std::map<_t_key, _t_map>::insert (rIterFirst, rIterLast);
 	};
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	void insert (const typename ::std::map<_t_key, _t_map>::const_iterator &rDummyIter, _t_iterator &rIterFirst, _t_iterator &rIterLast)
 	{
 		rDummyIter;
 
-		::std::map<_t_key, _t_map>::template insert <_t_iterator> (rIterFirst, rIterLast);
+		::std::map<_t_key, _t_map>::insert (rIterFirst, rIterLast);
 	};
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	void insert (_t_iterator &rIterFirst, _t_iterator &rIterLast)
 	{
-		::std::map<_t_key, _t_map>::template insert <_t_iterator> (rIterFirst, rIterLast);
+		::std::map<_t_key, _t_map>::insert (rIterFirst, rIterLast);
 	};
 
 	// this version of insert only returns an iterator, instead of pair<iterator, bool>, although
@@ -120,9 +120,9 @@ public:
 	};
 };
 
-typedef CBTreeTestBenchMap<const uint32_t, mapMap_t>			map_reference_t;
+typedef CBTreeTestBenchMap<uint32_t, mapMap_t>				map_reference_t;
 
-template <class _t_container, class _t_iterator>
+template<class _t_container, class _t_iterator>
 void TestBTreeMapSTLifInsertViaIteratorPart (const char *pszTitle, int nArg, uint32_t nNumInstances, uint32_t nNumEntries, _t_container *pContainer, _t_iterator &rIter)
 {
 	uint32_t					nLastKey = 0;
@@ -177,7 +177,7 @@ void TestBTreeMapSTLifInsertViaIteratorPart (const char *pszTitle, int nArg, uin
 	pContainer->clear ();
 }
 
-template <class _t_dest_container, class _t_src_container, class _t_dest_iterator, class _t_src_iterator>
+template<class _t_dest_container, class _t_src_container, class _t_dest_iterator, class _t_src_iterator>
 void TestBTreeMapSTLifInsertViaIteratorPart (const char *pszTitle, int nArg, uint32_t nNumInstances, uint32_t nNumEntries, _t_dest_container *pDestContainer, _t_src_container *pSrcContainer, _t_dest_iterator &rDestIter, _t_src_iterator &rSrcIter)
 {
 	uint32_t					nLastKey = 0;
@@ -204,7 +204,7 @@ void TestBTreeMapSTLifInsertViaIteratorPart (const char *pszTitle, int nArg, uin
 	pSrcContainer->clear ();
 }
 
-template <class _t_dest_container, class _t_src_container, class _t_dest_iterator, class _t_src_iterator>
+template<class _t_dest_container, class _t_src_container, class _t_dest_iterator, class _t_src_iterator>
 void TestBTreeMapSTLifInsertViaIteratorSame (const char *pszTitle, int nArg, uint32_t nNumInstances, uint32_t nNumEntries, _t_dest_container *pDestContainer, _t_src_container *pSrcContainer, _t_dest_iterator &rDestIter, _t_src_iterator &rSrcIter)
 {
 	uint32_t					nLastKey = 0;
@@ -286,7 +286,7 @@ void TestBTreeMapSTLifInsertViaIteratorSame (const char *pszTitle, int nArg, uin
 	pSrcContainer->clear ();
 }
 
-template <class _t_dest_container, class _t_src_container, class _t_ext_container, class _t_dest_iterator, class _t_src_iterator, class _t_ext_iterator>
+template<class _t_dest_container, class _t_src_container, class _t_ext_container, class _t_dest_iterator, class _t_src_iterator, class _t_ext_iterator>
 void TestBTreeMapSTLifInsertViaIteratorPartExtern (const char *pszTitle, int nArg, uint32_t nNumInstances, uint32_t nNumEntries, _t_dest_container *pDestContainer, _t_src_container *pSrcContainer, _t_ext_container *pExtContainer, _t_dest_iterator &rDestIter, _t_src_iterator &rSrcIter, _t_ext_iterator &rExtIter)
 {
 	uint32_t					nLastKey = 0;
@@ -327,7 +327,7 @@ void TestBTreeMapSTLifInsertViaIteratorPartExtern (const char *pszTitle, int nAr
 	pExtContainer->clear ();
 }
 
-template <class _t_container, class _t_iterator, class _t_ext_iterator>
+template<class _t_container, class _t_iterator, class _t_ext_iterator>
 void generic_insert (_t_container *pContainer, const _t_iterator &rIterPos, _t_ext_iterator &rExtFirst, _t_ext_iterator &rExtLast, ::std::true_type)
 {
 	rIterPos;
@@ -335,20 +335,18 @@ void generic_insert (_t_container *pContainer, const _t_iterator &rIterPos, _t_e
 	pContainer->insert (rExtFirst, rExtLast);
 }
 
-template <class _t_container, class _t_iterator, class _t_ext_iterator>
+template<class _t_container, class _t_iterator, class _t_ext_iterator>
 void generic_insert (_t_container *pContainer, const _t_iterator &rIterPos, _t_ext_iterator &rExtFirst, _t_ext_iterator &rExtLast, ::std::false_type)
 {
 //	pContainer->insert (rIterPos, rExtFirst, rExtLast);
 	container_insert (pContainer, rIterPos, rExtFirst, rExtLast);
 }
 
-template <class _t_dest_container, class _t_src_container, class _t_ext_container, class _t_dest_iterator, class _t_src_iterator, class _t_ext_iterator>
+template<class _t_dest_container, class _t_src_container, class _t_ext_container, class _t_dest_iterator, class _t_src_iterator, class _t_ext_iterator>
 void TestBTreeMapSTLifInsertViaIteratorSameExtern (const char *pszTitle, int nArg, uint32_t nNumInstances, uint32_t nNumEntries, _t_dest_container *pDestContainer, _t_src_container *pSrcContainer, _t_ext_container *pExtContainer, _t_dest_iterator &rDestIter, _t_src_iterator &rSrcIter, _t_ext_iterator &rExtIter)
 {
 	typedef typename ::std::map<typename _t_ext_iterator::value_type::first_type, typename _t_ext_iterator::value_type::second_type>		map_t;
 	typedef typename ::std::multimap<typename _t_ext_iterator::value_type::first_type, typename _t_ext_iterator::value_type::second_type>	mmap_t;
-
-	typedef typename _t_dest_container::data_t																								data_t;
 
 	typename ::std::conditional< ::std::is_same<_t_ext_container, map_t> ::value || ::std::is_same<_t_ext_container, mmap_t> ::value, ::std::true_type, ::std::false_type> ::type
 								sSelectInsertMethod;
@@ -447,7 +445,7 @@ void TestBTreeMapSTLifInsertViaIteratorSameExtern (const char *pszTitle, int nAr
 	
 }
 
-template <class _t_map>
+template<class _t_map>
 void TestBTreeMapSTLifInsertViaIterator (_t_map *pClM, uint32_t nNumEntries)
 {
 	typedef typename _t_map::value_type													value_t;
@@ -494,7 +492,6 @@ void TestBTreeMapSTLifInsertViaIterator (_t_map *pClM, uint32_t nNumEntries)
 	citvec_t									sCItVec;
 	ritvec_t									sRItVec;
 	critvec_t									sCRItVec;
-	CBTreeIOpropertiesRAM						sRAMproperties;
 	value_t										sMapPairData;
 	CBTreeTestBenchMap<uint32_t, second_type>	sMap;
 	itmap_t										sItMap;
@@ -507,7 +504,7 @@ void TestBTreeMapSTLifInsertViaIterator (_t_map *pClM, uint32_t nNumEntries)
 	ritmmap_t									sRItMMap;
 	critmmap_t									sCRItMMap;
 	
-	cout << "exercises method compatible to STL interface CBTreeMap<>:: insert<_t_iterator> (_t_iterator, _t_iterator)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeMap[Multi]<>:: insert<_t_iterator> (_t_iterator, _t_iterator)" << ::std::endl;
 
 	TestBTreeMapSTLifInsertViaIteratorPart ("target::insert<_t_obj::iter_t> (iter_t, iter_t)", 0, 1, nNumEntries, &sClMMTarget, pClM, sIterA, sIterB);
 	TestBTreeMapSTLifInsertViaIteratorPart ("target::insert<_t_obj::citer_t> (citer_t, citer_t)", 0, 1, nNumEntries, &sClMMTarget, pClM, sCIterA, sCIterB);
@@ -600,7 +597,7 @@ void TestBTreeMapSTLifInsertViaIterator (_t_map *pClM, uint32_t nNumEntries)
 	TestBTreeMapSTLifInsertViaIteratorPartExtern ("target::insert<mmap::criter_t> (>criter_t, criter_t<)", 0, 1, (int) (nNumEntries / 4), &sClMMTarget, pClM, &sMMap, sCRIterA, sCRIterB, sCItMMap);
 }
 
-template <class _t_container>
+template<class _t_container>
 void TestBTreeSTLmap (uint32_t nTestNum, _t_container *pMapWrapper);
 
 #endif // !BTREEMAPTESTBENCH_H
