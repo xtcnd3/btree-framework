@@ -14,7 +14,7 @@
 
 #include "btreekeysortitertestbench.h"
 
-template <class _t_container, class _t_reference>
+template<class _t_container, class _t_reference>
 void TransferKeySortIterRefToTestContainer (_t_container *pContainer, _t_reference *pReference)
 {
 	typedef typename _t_container::value_type			data_t;
@@ -35,7 +35,7 @@ void TransferKeySortIterRefToTestContainer (_t_container *pContainer, _t_referen
 	}
 }
 
-template <class _t_container, class _t_reference, class _t_iterator, class _t_ref_iterator, class _t_sizetype>
+template<class _t_container, class _t_reference, class _t_iterator, class _t_ref_iterator, class _t_sizetype>
 void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pReference, _t_iterator sIter, _t_ref_iterator sIterRef, _t_sizetype nIter, _t_sizetype nRIter, _t_sizetype nPos, uint32_t nTurn)
 {
 	typedef typename _t_container::value_type					data_t;
@@ -106,8 +106,8 @@ void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pRe
 	}
 }
 
-template <class _t_container, class _t_reference>
-void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pReference, bool bDescend, uint32_t nNumEntries, uint32_t nStepSize, uint32_t nTurnArounds, bool bFillArray = true)
+template<class _t_container, class _t_reference>
+void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pReference, bool bDescend, typename _t_container::size_type nNumEntries, typename _t_container::size_type nStepSize, uint32_t nTurnArounds, bool bFillArray = true)
 {
 	typedef typename _t_container::iterator						iter_t;
 	typedef typename _t_container::const_iterator				citer_t;
@@ -117,9 +117,10 @@ void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pRe
 	typedef typename _t_reference::const_iterator				citer_ref_t;
 
 	typedef typename _t_container::size_type					size_type;
-
 	typedef typename _t_container::value_type					data_t;
+
 	typedef typename _t_reference::value_type					data_ref_t;
+	typedef typename _t_reference::size_type					size_type_ref;
 
 	uint32_t				nSeed = 0;
 	iter_t					sIter;
@@ -132,33 +133,34 @@ void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pRe
 	size_type				nIter;
 	size_type				nRIter;
 	uint32_t				nTurn;
-	uint32_t				nThisStepSize;
+	size_type				nThisStepSize;
+	size_type_ref			nNumEntriesRef = (size_type_ref) nNumEntries;
 
-	cout << "basic read-only iterator test ";
+	::std::cout << "basic read-only iterator test ";
 
 	if (bDescend == false)
 	{
-		cout << "ascends ";
+		::std::cout << "ascends ";
 	}
 	else
 	{
-		cout << "descends ";
+		::std::cout << "descends ";
 	}
 	
-	cout << nNumEntries << " entries ";
-	cout << "with step size " << nStepSize;
-	cout << " and turns around " << nTurnArounds << " times." << endl;
+	::std::cout << nNumEntries << " entries ";
+	::std::cout << "with step size " << nStepSize;
+	::std::cout << " and turns around " << nTurnArounds << " times." << ::std::endl;
 
 	if (bFillArray)
 	{
-		associative_container_add_primitive (pReference, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
+		associative_container_add_primitive (pReference, nNumEntriesRef, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 
 		TransferKeySortIterRefToTestContainer (pContainer, pReference);
 	}
 
 	for (nTurn = 0; nTurn <= nTurnArounds; nTurn++)
 	{
-		cout << "turn: " << nTurn << endl;
+		::std::cout << "turn: " << nTurn << ::std::endl;
 
 		bool	bForward = (((nTurn & 0x1) == 0x0) != bDescend);
 
@@ -220,7 +222,7 @@ void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pRe
 				}
 			}
 
-			cout << i << " " << "\r" << flush;
+			::std::cout << i << " " << "\r" << ::std::flush;
 
 			sCIterRef = pReference->cbegin ();
 
@@ -266,79 +268,35 @@ void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pRe
 			}
 		}
 
-		cout << endl;
+		::std::cout << ::std::endl;
 	}
 }
 
-template <class _t_container, class _t_reference>
-void TestBTreeKeySortConstIterNodeSizeVsStepSize (_t_container *pContainer, _t_reference *pReference, bool bDescend, typename _t_container::datalayerproperties_t &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, uint32_t nNumEntries, typename _t_container::subnodeiter_t nFromNodeSize, typename _t_container::subnodeiter_t nToNodeSize, uint32_t nFromStepSize, uint32_t nToStepSize)
+template<class _t_container, class _t_reference>
+void TestBTreeKeySortConstIterNodeSizeVsStepSize (_t_container *pContainer, _t_reference *pReference, bool bDescend, typename _t_container::size_type nNumEntries, uint32_t nFromNodeSize, uint32_t nToNodeSize, uint32_t nFromStepSize, uint32_t nToStepSize)
 {
-	typedef typename _t_container::value_type			data_t;
-	typedef typename _t_container::subnodeiter_t		subnodeiter_t;
+	typedef typename _t_container::size_type		size_type;
+	typedef typename _t_reference::size_type		size_type_ref;
 
-	typedef typename _t_reference::const_iterator		citer_ref_t;
-
-	typedef ::std::vector<uint32_t>::iterator			vec_iter_t;
-	typedef ::std::vector<uint32_t>						vector_t;
-
-	subnodeiter_t		nNodeSize;
-	uint32_t			nStepSize;
-	_t_container		*pTestContainer;
+	size_type			nStepSize;
+	size_type_ref		nNumEntriesRef = (size_type_ref) nNumEntries;
 	uint32_t			nSeed;
-	vector_t			sPrimeNodeSizeVector;
-	vec_iter_t			sVecIter;
-	uint32_t			nPrime;
-	citer_ref_t			sCIterRefBegin;
-	citer_ref_t			sCIterRefEnd;
-
+	
 	nSeed = 0;
 
-	associative_container_add_primitive (pReference, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
+	associative_container_add_primitive (pReference, nNumEntriesRef, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 		
-	for (nNodeSize = nFromNodeSize; nNodeSize < nToNodeSize; nNodeSize++)
+	TransferKeySortIterRefToTestContainer (pContainer, pReference);
+	
+	for (nStepSize = nFromStepSize; nStepSize < nToStepSize; nStepSize <<= 1)
 	{
-		sPrimeNodeSizeVector.push_back (nNodeSize);
+		TestBTreeKeySortConstIterBasic (pContainer, pReference, bDescend, nNumEntries, nStepSize, 0, false);
 	}
 
-	while (sPrimeNodeSizeVector.size () > 0)
-	{
-		nNodeSize = sPrimeNodeSizeVector.at (0);
-
-		pTestContainer = new _t_container (rDataLayerProperties, &sCacheDesc, nNodeSize);
-
-		if (pTestContainer == NULL)
-		{
-			::std::cerr << "ERROR: insufficient memory!" << ::std::endl;
-
-			exit (-1);
-		}
-
-		TransferKeySortIterRefToTestContainer (pTestContainer, pReference);
-		
-		for (nStepSize = nFromStepSize; nStepSize < nToStepSize; nStepSize <<= 1)
-		{
-			TestBTreeKeySortConstIterBasic (pTestContainer, pReference, bDescend, nNumEntries, nStepSize, 0, false);
-		}
-
-		nPrime = sPrimeNodeSizeVector.at (0);
-
-		for (sVecIter = sPrimeNodeSizeVector.end (); sVecIter != sPrimeNodeSizeVector.begin (); )
-		{
-			sVecIter--;
-
-			if (((*sVecIter) % nPrime) == 0)
-			{
-				sPrimeNodeSizeVector.erase (sVecIter);
-
-				sVecIter = sPrimeNodeSizeVector.end ();
-			}
-		}
-		
-		delete pTestContainer;
-	}
+	pContainer->clear ();
 }
 
-template <class _t_subscripttype, class _t_container, class _t_iterator>
+template<class _t_subscripttype, class _t_container, class _t_iterator>
 void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, _t_container *pContainerRef, _t_iterator &rIter, _t_subscripttype &rI, bool bForward)
 {
 	typedef typename _t_container::value_type						data_t;
@@ -407,8 +365,8 @@ void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, _t_container *pC
 	pContainerRef->clear ();
 }
 
-template <class _t_subscripttype, class _t_container>
-void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, uint32_t nNumEntries)
+template<class _t_subscripttype, class _t_container>
+void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, _t_container *pCntContainer, typename _t_container::size_type nNumEntries)
 {
 	typedef typename _t_container::value_type						data_t;
 
@@ -423,9 +381,8 @@ void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, uint32_t nNumEnt
 	riter_t					sRIter;
 	criter_t				sCRIter;
 	_t_subscripttype		i;
-	_t_container			sContainerRef (*pContainer);
 	
-	cout << "basic keysort iterator sub-scription test" << endl;
+	::std::cout << "basic keysort iterator sub-scription test" << ::std::endl;
 	
 #if defined(__GNUC__) || defined(__GNUG__)
 
@@ -434,35 +391,35 @@ void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, uint32_t nNumEnt
 
 	if (pszTypeid != NULL)
 	{
-		cout << "_t_sizetype is set to: " << pszTypeid << endl;
+		::std::cout << "_t_sizetype is set to: " << pszTypeid << ::std::endl;
 		
 		free ((void *) pszTypeid);
 	}
 	else
 	{
-		cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << endl;
+		::std::cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << ::std::endl;
 	}
 	
 #else
 
-	cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << endl;
+	::std::cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << ::std::endl;
 	
 #endif
 
 	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 
-	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sIter, i, true);
-	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sCIter, i, true);
-	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sRIter, i, true);
-	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sCRIter, i, true);
+	TestBTreeKeySortIterSubScriptor (pContainer, pCntContainer, sIter, i, true);
+	TestBTreeKeySortIterSubScriptor (pContainer, pCntContainer, sCIter, i, true);
+	TestBTreeKeySortIterSubScriptor (pContainer, pCntContainer, sRIter, i, true);
+	TestBTreeKeySortIterSubScriptor (pContainer, pCntContainer, sCRIter, i, true);
 
-	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sIter, i, false);
-	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sCIter, i, false);
-	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sRIter, i, false);
-	TestBTreeKeySortIterSubScriptor (pContainer, &sContainerRef, sCRIter, i, false);
+	TestBTreeKeySortIterSubScriptor (pContainer, pCntContainer, sIter, i, false);
+	TestBTreeKeySortIterSubScriptor (pContainer, pCntContainer, sCIter, i, false);
+	TestBTreeKeySortIterSubScriptor (pContainer, pCntContainer, sRIter, i, false);
+	TestBTreeKeySortIterSubScriptor (pContainer, pCntContainer, sCRIter, i, false);
 }
 
-template <class _t_offsettype, class _t_container, class _t_iterator>
+template<class _t_offsettype, class _t_container, class _t_iterator>
 void TestBTreeKeySortIterCompound (_t_container *pContainer, _t_container *pContainerRef, _t_iterator &rIter, _t_offsettype &rI, bool bForward)
 {
 	typedef typename _t_container::value_type						data_t;
@@ -539,8 +496,8 @@ void TestBTreeKeySortIterCompound (_t_container *pContainer, _t_container *pCont
 	pContainerRef->clear ();
 }
 
-template <class _t_offsettype, class _t_container>
-void TestBTreeKeySortIterCompound (_t_container *pContainer, uint32_t nNumEntries)
+template<class _t_offsettype, class _t_container>
+void TestBTreeKeySortIterCompound (_t_container *pContainer, _t_container *pCntContainer, typename _t_container::size_type nNumEntries)
 {
 	typedef typename _t_container::iterator							iter_t;
 	typedef typename _t_container::const_iterator					citer_t;
@@ -553,30 +510,29 @@ void TestBTreeKeySortIterCompound (_t_container *pContainer, uint32_t nNumEntrie
 	criter_t				sRIter;
 	criter_t				sCRIter;
 	_t_offsettype			i;
-	_t_container			sContainerRef (*pContainer);
 	::std::string			strType;
 	
-	cout << "basic keysort iterator compound operator test" << endl;
+	::std::cout << "basic keysort iterator compound operator test" << ::std::endl;
 
 	get_typename (i, strType);
 	
-	cout << "_t_sizetype is set to: " << strType << endl;
+	::std::cout << "_t_sizetype is set to: " << strType << ::std::endl;
 	
 	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 
-	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sIter, i, true);
-	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sCIter, i, true);
-	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sRIter, i, true);
-	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sCRIter, i, true);
+	TestBTreeKeySortIterCompound (pContainer, pCntContainer, sIter, i, true);
+	TestBTreeKeySortIterCompound (pContainer, pCntContainer, sCIter, i, true);
+	TestBTreeKeySortIterCompound (pContainer, pCntContainer, sRIter, i, true);
+	TestBTreeKeySortIterCompound (pContainer, pCntContainer, sCRIter, i, true);
 
-	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sIter, i, false);
-	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sCIter, i, false);
-	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sRIter, i, false);
-	TestBTreeKeySortIterCompound (pContainer, &sContainerRef, sCRIter, i, false);
+	TestBTreeKeySortIterCompound (pContainer, pCntContainer, sIter, i, false);
+	TestBTreeKeySortIterCompound (pContainer, pCntContainer, sCIter, i, false);
+	TestBTreeKeySortIterCompound (pContainer, pCntContainer, sRIter, i, false);
+	TestBTreeKeySortIterCompound (pContainer, pCntContainer, sCRIter, i, false);
 }
 
-template <class _t_container>
-void TestBTreeKeySortIterCompoundIter (_t_container *pContainer, uint32_t nNumEntries)
+template<class _t_container>
+void TestBTreeKeySortIterCompoundIter (_t_container *pContainer, _t_container *pCntContainer, typename _t_container::size_type nNumEntries)
 {
 	typedef typename _t_container::value_type				data_t;
 
@@ -586,15 +542,14 @@ void TestBTreeKeySortIterCompoundIter (_t_container *pContainer, uint32_t nNumEn
 	citer_t					sCIter;
 	data_t					sData;
 	citer_t					sCI;
-	_t_container			sContainerRef (*pContainer);
 	
-	cout << "basic keysort iterator compound operator (iterator) test" << endl;
+	::std::cout << "basic keysort iterator compound operator (iterator) test" << ::std::endl;
 	
 	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 	
 	sCIter = pContainer->cbegin ();
 	
-	cout << "forward iterator ";
+	::std::cout << "forward iterator ";
 
 	for (sCI = pContainer->cbegin (); sCI != pContainer->cend (); sCI++)
 	{
@@ -602,28 +557,28 @@ void TestBTreeKeySortIterCompoundIter (_t_container *pContainer, uint32_t nNumEn
 		{
 			sData = *sCIter;
 			
-			sContainerRef.insert (sData);
+			pCntContainer->insert (sData);
 		}
 		sCIter -= sCI;
 	}
 
-	cout << "testing ";
+	::std::cout << "testing ";
 
-	if (sContainerRef != *pContainer)
+	if (*pCntContainer != *pContainer)
 	{
-		cerr << endl;
-		cerr << "keysort mismatch (forward iterator compound operation)!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "keysort mismatch (forward iterator compound operation)!" << ::std::endl;
 		
 		exit (-1);
 	}
 
-	cout << "passed" << endl;
+	::std::cout << "passed" << ::std::endl;
 
-	sContainerRef.clear ();
+	pCntContainer->clear ();
 
 	sCIter = pContainer->cend ();
 	
-	cout << "reverse iterator ";
+	::std::cout << "reverse iterator ";
 
 	for (sCI = pContainer->cend (); sCI != pContainer->cbegin (); )
 	{
@@ -635,27 +590,29 @@ void TestBTreeKeySortIterCompoundIter (_t_container *pContainer, uint32_t nNumEn
 			{
 				sData = *sCIter;
 				
-				sContainerRef.insert (sData);
+				pCntContainer->insert (sData);
 			}
 			sCIter -= sCI;
 		}
 		sCI += pContainer->size ();
 	}
 
-	cout << "testing ";
+	::std::cout << "testing ";
 
-	if (sContainerRef != *pContainer)
+	if (*pCntContainer != *pContainer)
 	{
-		cerr << endl;
-		cerr << "keysort mismatch (reverse iterator compound operation)!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "keysort mismatch (reverse iterator compound operation)!" << ::std::endl;
 		
 		exit (-1);
 	}
 
-	cout << "passed" << endl;
+	::std::cout << "passed" << ::std::endl;
+
+	pCntContainer->clear ();
 }
 
-template <class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
+template<class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
 void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_reference *pReference, _t_dest_iterator &rIterDest, _t_operand_a &rOperandA, _t_operand_b &rOperandB, const typename _t_container::size_type nExpectedOffset, ::std::false_type)
 {
 	typedef typename _t_container::size_type		sizetype;
@@ -724,7 +681,7 @@ void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_refer
 	::std::cout << "passed";
 }
 
-template <class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
+template<class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
 void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_reference *pReference, _t_dest_iterator &rDiff, _t_operand_a &rOperandA, _t_operand_b &rOperandB, const typename _t_container::size_type nExpectedOffset, ::std::true_type)
 {
 	typedef typename _t_container::size_type		sizetype;
@@ -748,7 +705,7 @@ void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_refer
 	TestBTreeKeySortIterArithmeticOperators (pContainer, pReference, rOperandB, rOperandA, rDiff, nNewExpectedOffset, sFalse);
 }
 
-template <class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
+template<class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
 void TestBTreeKeySortIterArithmeticOperatorAdd (_t_container *pContainer, _t_reference *pReference, const char *pszDest, const char *pszOperandA, const char *pszOperandB, _t_dest_iterator &rIterDest, _t_operand_a &rOperandA, _t_operand_b &rOperandB, const typename _t_container::size_type nExpectedOffset)
 {
 	typename ::std::is_integral<_t_dest_iterator>::type		sDestSelect;
@@ -762,7 +719,7 @@ void TestBTreeKeySortIterArithmeticOperatorAdd (_t_container *pContainer, _t_ref
 	::std::cout << ::std::endl;
 }
 
-template <class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
+template<class _t_container, class _t_reference, class _t_dest_iterator, class _t_operand_a, class _t_operand_b>
 void TestBTreeKeySortIterArithmeticOperatorSub (_t_container *pContainer, _t_reference *pReference, const char *pszDest, const char *pszOperandA, const char *pszOperandB, _t_dest_iterator &rIterDest, _t_operand_a &rOperandA, _t_operand_b &rOperandB, const typename _t_container::size_type nExpectedOffset)
 {
 	typename ::std::is_integral<_t_dest_iterator>::type		sDestSelect;
@@ -776,11 +733,13 @@ void TestBTreeKeySortIterArithmeticOperatorSub (_t_container *pContainer, _t_ref
 	::std::cout << ::std::endl;
 }
 
-template <class _t_container, class _t_reference>
-void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_reference *pReference, uint32_t nNumEntries)
+template<class _t_container, class _t_reference>
+void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_reference *pReference, typename _t_container::size_type nNumEntries)
 {
 	typedef typename _t_container::value_type					data_t;
-	typedef typename _t_container::size_type					sizetype;
+	typedef typename _t_container::size_type					size_type;
+
+	typedef typename _t_reference::size_type					size_type_ref;
 
 	typedef typename _t_container::iterator						iter_t;
 	typedef typename _t_container::const_iterator				citer_t;
@@ -802,13 +761,14 @@ void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_refer
 	citer_t					sCIterEnd;
 	riter_t					sRIterEnd;
 	criter_t				sCRIterEnd;
-	sizetype				nOffset = 0;
+	size_type				nOffset = 0;
 	int						nOffsetInt;
-	sizetype				nResult;
+	size_type				nResult;
+	size_type_ref			nNumEntriesRef = (size_type_ref) nNumEntries;
 	
-	cout << "basic keysort iterator arithmetic operators test" << endl;
+	::std::cout << "basic keysort iterator arithmetic operators test" << ::std::endl;
 
-	associative_container_add_primitive (pReference, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
+	associative_container_add_primitive (pReference, nNumEntriesRef, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 
 	TransferKeySortIterRefToTestContainer (pContainer, pReference);
 
@@ -864,14 +824,14 @@ void TestBTreeKeySortIterArithmeticOperators (_t_container *pContainer, _t_refer
 	}
 }
 
-template <class _t_lhiter, class _t_rhiter>
+template<class _t_lhiter, class _t_rhiter>
 void TestBTreeKeySortIterCompareOperators (_t_lhiter sLHIterBegin, _t_lhiter sLHIterEnd, _t_rhiter sRHIterBegin, _t_rhiter sRHIterEnd)
 {
 	_t_lhiter		sLhs;
 	_t_rhiter		sRhs;
 
 	{
-		cout << " <";
+		::std::cout << " <";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -904,7 +864,7 @@ void TestBTreeKeySortIterCompareOperators (_t_lhiter sLHIterBegin, _t_lhiter sLH
 	}
 
 	{
-		cout << " <=";
+		::std::cout << " <=";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -937,7 +897,7 @@ void TestBTreeKeySortIterCompareOperators (_t_lhiter sLHIterBegin, _t_lhiter sLH
 	}
 
 	{
-		cout << " >";
+		::std::cout << " >";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -970,7 +930,7 @@ void TestBTreeKeySortIterCompareOperators (_t_lhiter sLHIterBegin, _t_lhiter sLH
 	}
 
 	{
-		cout << " >=";
+		::std::cout << " >=";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -1003,7 +963,7 @@ void TestBTreeKeySortIterCompareOperators (_t_lhiter sLHIterBegin, _t_lhiter sLH
 	}
 
 	{
-		cout << " ==";
+		::std::cout << " ==";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -1036,7 +996,7 @@ void TestBTreeKeySortIterCompareOperators (_t_lhiter sLHIterBegin, _t_lhiter sLH
 	}
 
 	{
-		cout << " !=";
+		::std::cout << " !=";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -1068,11 +1028,11 @@ void TestBTreeKeySortIterCompareOperators (_t_lhiter sLHIterBegin, _t_lhiter sLH
 		}
 	}
 
-	cout << endl;
+	::std::cout << ::std::endl;
 }
 
-template <class _t_container>
-void TestBTreeKeySortIterCompareOperators (_t_container *pContainer, uint32_t nNumEntries)
+template<class _t_container>
+void TestBTreeKeySortIterCompareOperators (_t_container *pContainer, typename _t_container::size_type nNumEntries)
 {
 	typedef typename _t_container::iterator						iter_t;
 	typedef typename _t_container::const_iterator				citer_t;
@@ -1081,29 +1041,29 @@ void TestBTreeKeySortIterCompareOperators (_t_container *pContainer, uint32_t nN
 
 	uint32_t				nSeed = 0;
 	
-	cout << "basic array iterator compare operators test" << endl;
+	::std::cout << "basic array iterator compare operators test" << ::std::endl;
 
 	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 	
-	cout << "iterator versus iterator";
+	::std::cout << "iterator versus iterator";
 	
 	TestBTreeKeySortIterCompareOperators (pContainer->begin (), pContainer->end (), pContainer->begin (), pContainer->end ());
 
-	cout << "const_iterator versus const_iterator";
+	::std::cout << "const_iterator versus const_iterator";
 	
 	TestBTreeKeySortIterCompareOperators (pContainer->cbegin (), pContainer->cend (), pContainer->cbegin (), pContainer->cend ());
 
-	cout << "reverse_iterator versus reverse_iterator";
+	::std::cout << "reverse_iterator versus reverse_iterator";
 
 	TestBTreeKeySortIterCompareOperators (pContainer->rbegin (), pContainer->rend (), pContainer->rbegin (), pContainer->rend ());
 
-	cout << "const_reverse_iterator versus const_reverse_iterator";
+	::std::cout << "const_reverse_iterator versus const_reverse_iterator";
 
 	TestBTreeKeySortIterCompareOperators (pContainer->crbegin (), pContainer->crend (), pContainer->crbegin (), pContainer->crend ());
 }
 
-template <class _t_container>
-void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntries)
+template<class _t_container>
+void TestBTreeKeySortIterConstSwap (_t_container *pContainer, typename _t_container::size_type nNumEntries)
 {
 	typedef typename _t_container::iterator							iter_t;
 	typedef typename _t_container::const_iterator					citer_t;
@@ -1120,7 +1080,7 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 	criter_t				sCRIter;
 	criter_t				sCRIter2;
 	
-	cout << "basic keysort const iterator swap test" << endl;
+	::std::cout << "basic keysort const iterator swap test" << ::std::endl;
 
 	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 
@@ -1134,14 +1094,14 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 	get_end (pContainer, sRIter2);
 	get_end (pContainer, sCRIter2);
 	
-	cout << "iterator ";
+	::std::cout << "iterator ";
 
 	if (sIter >= sIter2)
 	{
 		exit (-1);
 	}
 
-	cout << "swap ";
+	::std::cout << "swap ";
 
 	sIter.swap (sIter2);
 
@@ -1150,7 +1110,7 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 		exit (-1);
 	}
 
-	cout << "swap ";
+	::std::cout << "swap ";
 
 	sIter2.swap (sIter);
 	
@@ -1159,16 +1119,16 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 		exit (-1);
 	}
 
-	cout << endl;
+	::std::cout << ::std::endl;
 
-	cout << "const_iterator ";
+	::std::cout << "const_iterator ";
 
 	if (sCIter >= sCIter2)
 	{
 		exit (-1);
 	}
 
-	cout << "swap ";
+	::std::cout << "swap ";
 
 	sCIter.swap (sCIter2);
 
@@ -1177,7 +1137,7 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 		exit (-1);
 	}
 
-	cout << "swap ";
+	::std::cout << "swap ";
 
 	sCIter2.swap (sCIter);
 	
@@ -1186,16 +1146,16 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 		exit (-1);
 	}
 
-	cout << endl;
+	::std::cout << ::std::endl;
 
-	cout << "reverse_iterator ";
+	::std::cout << "reverse_iterator ";
 
 	if (sRIter >= sRIter2)
 	{
 		exit (-1);
 	}
 
-	cout << "swap ";
+	::std::cout << "swap ";
 
 	sRIter.swap (sRIter2);
 
@@ -1204,7 +1164,7 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 		exit (-1);
 	}
 
-	cout << "swap ";
+	::std::cout << "swap ";
 
 	sRIter2.swap (sRIter);
 	
@@ -1213,16 +1173,16 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 		exit (-1);
 	}
 
-	cout << endl;
+	::std::cout << ::std::endl;
 	
-	cout << "const_reverse_iterator ";
+	::std::cout << "const_reverse_iterator ";
 
 	if (sCRIter >= sCRIter2)
 	{
 		exit (-1);
 	}
 
-	cout << "swap ";
+	::std::cout << "swap ";
 
 	sCRIter.swap (sCRIter2);
 
@@ -1231,7 +1191,7 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 		exit (-1);
 	}
 
-	cout << "swap ";
+	::std::cout << "swap ";
 
 	sCRIter2.swap (sCRIter);
 	
@@ -1240,178 +1200,380 @@ void TestBTreeKeySortIterConstSwap (_t_container *pContainer, uint32_t nNumEntri
 		exit (-1);
 	}
 
-	cout << endl;
+	::std::cout << ::std::endl;
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeKeySortIter (uint32_t nTest, _t_subnodeiter nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, int argc, char **argv)
+template<class _t_sizetype>
+void TestBTreeKeySortIter (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize)
 {
-	typedef CBTreeKeySort <keySortEntry_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-																								container_t;
+	typedef	keySortEntry_t																		data_t;
 
 	typedef typename ::std::multimap<const uint32_t, keySortMap_t, multiMapMemCmp<uint32_t> >	reference_memcmp_t;
+	typedef CBTreeAssociativeIf<data_t, uint32_t, _t_sizetype>									container_t;
+	typedef typename ::std::vector<container_t *>												test_vector_t;
 
-	container_t											*pClKeySort;
-	reference_memcmp_t									*pClRefMemCmpKeySort;
+	test_vector_t																	asContainers;
+	reference_memcmp_t																*pClRefMemCmpKeySort;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t>		sRAMprop6565;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t>		sRAMprop6555;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t>		sRAMprop5555;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t>		sRAMprop5554;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t>		sRAMprop5454;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t>		sRAMprop5444;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t>		sRAMprop4444;
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t>		sFilePropertiesMin6565 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesMin6555 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesMin5555 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t>		sFilePropertiesMin5554 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t>		sFilePropertiesMin5454 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t>		sFilePropertiesDefault6565 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesDefault6555 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesDefault5555 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t>		sFilePropertiesDefault5554 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t>		sFilePropertiesDefault5454 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t>		sFilePropertiesLarge6565 ("./", 16777216);
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesLarge6555 ("./", 16777216);
+	bayerTreeCacheDescription_t														sCacheDescPageSize = {nPageSize};
+	bayerTreeCacheDescription_t														sCacheDescMin = {1};
+	bayerTreeCacheDescription_t														sCacheDescNearestBigger = {nPageSize * 2 / 3};
+	bayerTreeCacheDescription_t														sCacheDescLarge = {nPageSize * 16};
+	uint32_t																		i = 0;
+	container_t																		*pContainer;
 
-	cout << "b-tree keysort iterator test bench selected" << endl;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_n;
+
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_2n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_2n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_2n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_2n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_2n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_2n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_2n;
+
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_4n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_4n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_4n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_4n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_4n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_4n;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_4n;
+
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565min;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555min;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555min;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554min;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454min;
+
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565default;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555default;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555default;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554default;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454default;
+
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565large;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555large;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555large;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554large;
+	CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454large;
+
+	::std::cout << "b-tree keysort iterator test bench selected" << ::std::endl;
+
+	m_pContainerRAM6565_n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sRAMprop6565, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM6555_n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sRAMprop6555, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM5555_n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sRAMprop5555, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM5554_n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sRAMprop5554, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM5454_n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sRAMprop5454, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM5444_n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> > (sRAMprop5444, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM4444_n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> > (sRAMprop4444, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM6565_2n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sRAMprop6565, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM6555_2n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sRAMprop6555, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM5555_2n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sRAMprop5555, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM5554_2n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sRAMprop5554, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM5454_2n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sRAMprop5454, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM5444_2n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> > (sRAMprop5444, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM4444_2n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> > (sRAMprop4444, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM6565_4n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sRAMprop6565, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM6555_4n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sRAMprop6555, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM5555_4n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sRAMprop5555, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM5554_4n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sRAMprop5554, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM5454_4n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sRAMprop5454, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM5444_4n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> > (sRAMprop5444, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM4444_4n = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> > (sRAMprop4444, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerFile6565min = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sFilePropertiesMin6565, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerFile6555min = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesMin6555, &sCacheDescPageSize, nNodeSize * 8);
+	m_pContainerFile5555min = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesMin5555, &sCacheDescMin, nNodeSize * 7);
+	m_pContainerFile5554min = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sFilePropertiesMin5554, &sCacheDescNearestBigger, nNodeSize * 6);
+	m_pContainerFile5454min = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sFilePropertiesMin5454, &sCacheDescLarge, nNodeSize * 5);
+
+	m_pContainerFile6565default = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sFilePropertiesDefault6565, &sCacheDescNearestBigger, nNodeSize * 3);
+	m_pContainerFile6555default = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesDefault6555, &sCacheDescNearestBigger, nNodeSize * 2);
+	m_pContainerFile5555default = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesDefault5555, &sCacheDescLarge, nNodeSize);
+	m_pContainerFile5554default = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sFilePropertiesDefault5554, &sCacheDescPageSize, nNodeSize * 8);
+	m_pContainerFile5454default = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sFilePropertiesDefault5454, &sCacheDescMin, nNodeSize * 7);
+
+	m_pContainerFile6565large = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sFilePropertiesLarge6565, &sCacheDescPageSize, nNodeSize * 5);
+	m_pContainerFile6555large = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesLarge6555, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerFile5555large = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesDefault5555, &sCacheDescMin, nNodeSize * 3);
+	m_pContainerFile5554large = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sFilePropertiesDefault5554, &sCacheDescNearestBigger, nNodeSize * 2);
+	m_pContainerFile5454large = new CBTreeKeySort<data_t, uint32_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sFilePropertiesDefault5454, &sCacheDescLarge, nNodeSize);
+
+	if (NULL == m_pContainerRAM6565_n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6565_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6555_n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6555_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5555_n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5555_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5554_n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5554_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5454_n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5454_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5444_n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5444_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM4444_n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM4444_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6565_2n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6565_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6555_2n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6555_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5555_2n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5555_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5554_2n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5554_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5454_2n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5454_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5444_2n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5444_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM4444_2n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM4444_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6565_4n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6565_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6555_4n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6555_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5555_4n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5555_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5554_4n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5554_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5454_4n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5454_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5444_4n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5444_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM4444_4n) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM4444_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile6565min) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6565min)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile6555min) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6555min)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5555min) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5555min)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5554min) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5554min)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5454min) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5454min)" << ::std::endl; exit (-1);}
+
+	if (NULL == m_pContainerFile6565default) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6565default)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile6555default) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6555default)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5555default) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5555default)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5554default) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5554default)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5454default) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5454default)" << ::std::endl; exit (-1);}
+
+	if (NULL == m_pContainerFile6565large) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6565large)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile6555large) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6555large)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5555large) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5555large)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5554large) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5554large)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5454large) {::std::cerr << "TestBTreeKeySortIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5454large)" << ::std::endl; exit (-1);}
+
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6565_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6555_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5555_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5554_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5454_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5444_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM4444_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6565_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6555_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5555_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5554_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5454_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5444_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM4444_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6565_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6555_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5555_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5554_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5454_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5444_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM4444_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6565min); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6555min); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5555min); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5554min); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5454min); asContainers.push_back (pContainer);
+
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6565default); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6555default); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5555default); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5554default); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5454default); asContainers.push_back (pContainer);
+
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6565large); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6555large); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5555large); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5554large); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5454large); asContainers.push_back (pContainer);
 
 	pClRefMemCmpKeySort = new reference_memcmp_t ();
 
 	if (pClRefMemCmpKeySort == NULL)
 	{
-		cerr << "ERROR: Insufficient memory!" << endl;
+		::std::cerr << "ERROR: Insufficient memory!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	pClKeySort = new container_t (rDataLayerProperties, &sCacheDesc, nNodeSize);
-
-	if (pClKeySort == NULL)
+	for (i = 0; i < asContainers.size (); i++)
 	{
-		cerr << "ERROR: Insufficient memory!" << endl;
+		pContainer = asContainers[i];
 
-		exit (-1);
+		switch (nTest)
+		{
+		case BTREETEST_KEY_SORT_ITER_CONST_ASCEND	:
+			{
+				TestBTreeKeySortConstIterBasic (pContainer, pClRefMemCmpKeySort, false, 128, 1, 0);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_ASCEND_SMALL	:
+			{
+				TestBTreeKeySortConstIterBasic (pContainer, pClRefMemCmpKeySort, false, 16, 1, 0);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_DESCEND	:
+			{
+				TestBTreeKeySortConstIterBasic (pContainer, pClRefMemCmpKeySort, true, 128, 1, 0);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_DESCEND_SMALL	:
+			{
+				TestBTreeKeySortConstIterBasic (pContainer, pClRefMemCmpKeySort, true, 16, 1, 0);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_ASCEND	:
+			{
+				TestBTreeKeySortConstIterBasic (pContainer, pClRefMemCmpKeySort, false, 128, 5, 3);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_ASCEND_SMALL	:
+			{
+				TestBTreeKeySortConstIterBasic (pContainer, pClRefMemCmpKeySort, false, 16, 2, 3);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_DESCEND	:
+			{
+				TestBTreeKeySortConstIterBasic (pContainer, pClRefMemCmpKeySort, true, 128, 4, 3);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_DESCEND_SMALL	:
+			{
+				TestBTreeKeySortConstIterBasic (pContainer, pClRefMemCmpKeySort, true, 16, 2, 3);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_NODESIZE_VS_STEPSIZE_ASCEND		:
+			{
+				TestBTreeKeySortConstIterNodeSizeVsStepSize (pContainer, pClRefMemCmpKeySort, false, 512, 3, 257, 1, 513);
+				
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_NODESIZE_VS_STEPSIZE_DESCEND	:
+			{
+				TestBTreeKeySortConstIterNodeSizeVsStepSize (pContainer, pClRefMemCmpKeySort, true, 512, 3, 257, 1, 513);
+
+				break;
+			}
+
+
+		case BTREETEST_KEY_SORT_ITER_SUBSCRIPTOR	:
+			{
+				container_t		*pCntContainer = asContainers[(i + 1) % asContainers.size ()];
+
+				TestBTreeKeySortIterSubScriptor<_t_sizetype> (pContainer, pCntContainer, 128);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_SUBSCRIPTOR_INT	:
+			{
+				container_t		*pCntContainer = asContainers[(i + 1) % asContainers.size ()];
+
+				TestBTreeKeySortIterSubScriptor<int> (pContainer, pCntContainer, 128);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_COMPOUND	:
+			{
+				container_t		*pCntContainer = asContainers[(i + 1) % asContainers.size ()];
+
+				TestBTreeKeySortIterCompound<_t_sizetype> (pContainer, pCntContainer, 128);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_COMPOUND_INT	:
+			{
+				container_t		*pCntContainer = asContainers[(i + 1) % asContainers.size ()];
+
+				TestBTreeKeySortIterCompound<int> (pContainer, pCntContainer, 128);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_COMPOUND_ITER	:
+			{
+				container_t		*pCntContainer = asContainers[(i + 1) % asContainers.size ()];
+
+				TestBTreeKeySortIterCompoundIter (pContainer, pCntContainer, 128);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_ARITHMETIC_OPERATORS	:
+			{
+				TestBTreeKeySortIterArithmeticOperators (pContainer, pClRefMemCmpKeySort, 64);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_COMPARE_OPERATORS	:
+			{
+				TestBTreeKeySortIterCompareOperators (pContainer, 16);
+
+				break;
+			}
+
+		case BTREETEST_KEY_SORT_ITER_CONST_SWAP	:
+			{
+				TestBTreeKeySortIterConstSwap (pContainer, 16);
+
+				break;
+			}
+
+		default									:
+			{
+				::std::cerr << "ERROR: TestBTreeKeySortIter: Unknown test or test not specified!" << ::std::endl;
+
+				exit (-1);
+
+				break;
+			}
+		}
+
+		pContainer->clear ();
+
+		pClRefMemCmpKeySort->clear ();
 	}
 
-	switch (nTest)
+	for (i = 0; i < asContainers.size (); i++)
 	{
-	case BTREETEST_KEY_SORT_ITER_CONST_ASCEND	:
-		{
-			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, false, 128, 1, 0);
+		pContainer = asContainers[i];
 
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_ASCEND_SMALL	:
-		{
-			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, false, 16, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_DESCEND	:
-		{
-			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, true, 128, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_DESCEND_SMALL	:
-		{
-			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, true, 16, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_ASCEND	:
-		{
-			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, false, 128, 5, 3);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_ASCEND_SMALL	:
-		{
-			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, false, 16, 2, 3);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_DESCEND	:
-		{
-			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, true, 128, 4, 3);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_CMPLX_DESCEND_SMALL	:
-		{
-			TestBTreeKeySortConstIterBasic (pClKeySort, pClRefMemCmpKeySort, true, 16, 2, 3);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_NODESIZE_VS_STEPSIZE_ASCEND		:
-		{
-			TestBTreeKeySortConstIterNodeSizeVsStepSize (pClKeySort, pClRefMemCmpKeySort, false, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
-			
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_NODESIZE_VS_STEPSIZE_DESCEND	:
-		{
-			TestBTreeKeySortConstIterNodeSizeVsStepSize (pClKeySort, pClRefMemCmpKeySort, true, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
-
-			break;
-		}
-
-
-	case BTREETEST_KEY_SORT_ITER_SUBSCRIPTOR	:
-		{
-			TestBTreeKeySortIterSubScriptor<_t_sizetype> (pClKeySort, 128);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_SUBSCRIPTOR_INT	:
-		{
-			TestBTreeKeySortIterSubScriptor<int> (pClKeySort, 128);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_COMPOUND	:
-		{
-			TestBTreeKeySortIterCompound<_t_sizetype> (pClKeySort, 128);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_COMPOUND_INT	:
-		{
-			TestBTreeKeySortIterCompound<int> (pClKeySort, 128);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_COMPOUND_ITER	:
-		{
-			TestBTreeKeySortIterCompoundIter (pClKeySort, 128);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_ARITHMETIC_OPERATORS	:
-		{
-			TestBTreeKeySortIterArithmeticOperators (pClKeySort, pClRefMemCmpKeySort, 40);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_COMPARE_OPERATORS	:
-		{
-			TestBTreeKeySortIterCompareOperators (pClKeySort, 16);
-
-			break;
-		}
-
-	case BTREETEST_KEY_SORT_ITER_CONST_SWAP	:
-		{
-			TestBTreeKeySortIterConstSwap (pClKeySort, 16);
-
-			break;
-		}
-
-	default									:
-		{
-			cerr << "ERROR: TestBTreeKeySortIter: Unknown test or test not specified!" << endl;
-
-			break;
-		}
+		delete pContainer;
 	}
 
 	delete pClRefMemCmpKeySort;
-
-	delete pClKeySort;
 }
