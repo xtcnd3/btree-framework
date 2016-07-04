@@ -17,10 +17,10 @@
 
 #include "./associative/btreemultiset.h"
 
-template <class _t_keytype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeMultiSet
-	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize)
-	:	CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_keytype, class _t_datalayerproperties>
+CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::CBTreeMultiSet
+	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
+	:	CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties>
 		(
 			rDataLayerProperties, 
 			psCacheDescription, 
@@ -29,32 +29,32 @@ CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalaye
 {
 }
 
-template <class _t_keytype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeMultiSet
+template<class _t_keytype, class _t_datalayerproperties>
+CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::CBTreeMultiSet
 	(const CBTreeMultiSet_t &rBT, bool bAssign)
-	:	CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties>
 	(
-		dynamic_cast<const CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), 
+		dynamic_cast<const CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties> &> (rBT), 
 		bAssign
 	)
 {
 }
 
-template <class _t_keytype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeMultiSet ()
+template<class _t_keytype, class _t_datalayerproperties>
+CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::~CBTreeMultiSet ()
 {
 }
 
-template <class _t_keytype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (CBTreeAssociativeIf<_t_keytype, _t_keytype, _t_sizetype> &rContainerIf)
+template<class _t_keytype, class _t_datalayerproperties>
+void CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::swap (typename CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::CBTreeAssociativeIf_t &rContainerIf)
 {
 	CBTreeMultiSet_t		&rContainer = dynamic_cast<CBTreeMultiSet_t &> (rContainerIf);
 
 	this->swap (rContainer);
 }
 
-template <class _t_keytype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rContainer)
+template<class _t_keytype, class _t_datalayerproperties>
+void CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::swap (typename CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::CBTreeMultiSet_t &rContainer)
 {
 	if (this != &rContainer)
 	{
@@ -62,9 +62,9 @@ void CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_dat
 	}
 }
 
-template <class _t_keytype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_compare
-	CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_comp () const
+template<class _t_keytype, class _t_datalayerproperties>
+typename CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::key_compare
+	CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::key_comp () const
 {
 	key_compare		sRslt;
 
@@ -73,9 +73,9 @@ typename CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 	return (sRslt);
 }
 
-template <class _t_keytype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::value_compare
-	CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::value_comp () const
+template<class _t_keytype, class _t_datalayerproperties>
+typename CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::value_compare
+	CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::value_comp () const
 {
 	value_compare		sRslt;
 
@@ -84,8 +84,8 @@ typename CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 	return (sRslt);
 }
 
-template <class _t_keytype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_swap (CBTreeMultiSet<_t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rContainer)
+template<class _t_keytype, class _t_datalayerproperties>
+void CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::_swap (typename CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::CBTreeMultiSet_t &rContainer)
 {
 	CBTreeAssociativeBase_t		&rSTLbaseContainerContainer = dynamic_cast <CBTreeAssociativeBase_t &> (rContainer);
 	
