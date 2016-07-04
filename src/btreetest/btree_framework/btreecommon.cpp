@@ -15,7 +15,7 @@
 
 #include "btreecommon.h"
 
-template <class _t_type, typename _t_intrinsic>
+template<class _t_type, typename _t_intrinsic>
 void xor_swap (_t_type &rLhs, _t_type &rRhs)
 {
 	_t_intrinsic		*pnLeft = (_t_intrinsic *) &rLhs;
@@ -26,7 +26,7 @@ void xor_swap (_t_type &rLhs, _t_type &rRhs)
 	(*pnLeft) = (*pnLeft) ^ (*pnRight);
 }
 
-template <class _t_type>
+template<class _t_type>
 void fast_swap (_t_type &rLhs, _t_type &rRhs)
 {
 	switch (sizeof (_t_type))
