@@ -16,14 +16,14 @@
 
 #include "btreekeysort.h"
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySort
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::CBTreeKeySort
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
 		const bayerTreeCacheDescription_t *psCacheDescription, 
-		_t_subnodeiter nNodeSize
+		typename _t_datalayerproperties::sub_node_iter_type nNodeSize
 	)
-	:	CBTreeAssociative <_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
 	(
 		rDataLayerProperties, 
 		psCacheDescription, 
@@ -32,32 +32,32 @@ CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_data
 {
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySort (CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
-	:	CBTreeAssociative <_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::CBTreeKeySort (CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rBT, bool bAssign)
+	:	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
 	(
-		dynamic_cast <CBTreeAssociative <_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), bAssign
+		dynamic_cast <CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &> (rBT), bAssign
 	)
 {
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeKeySort ()
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::~CBTreeKeySort ()
 {
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (CBTreeAssociativeIf<_t_data, _t_key, _t_sizetype> &rContainerIf)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::swap (CBTreeAssociativeIf<_t_data, _t_key, typename _t_datalayerproperties::size_type> &rContainerIf)
 {
 	CBTreeKeySort_t		&rContainer = dynamic_cast<CBTreeKeySort_t &> (rContainerIf);
 
 	this->swap (rContainer);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap 
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::swap 
 	(
-		CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rContainer
+		CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rContainer
 	)
 {
 	if (this != &rContainer)
@@ -78,11 +78,11 @@ If false is returned the data was destroyed already.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ()
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::clear ()
 {
 	// since the compiler cannot know if you want to call CBTreeKeySortDataIf::clear or CBTreeBaseDefaults::clear the code has to be explicit
-	CBTreeBase_t::clear ();
+	CBTreeBaseDefaults_t::clear ();
 }
 
 /*
@@ -95,9 +95,9 @@ The result is a reference to this instance.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
-	(const CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::operator=
+	(const CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rBT)
 {
 	// if this is not the same instance as the referenced b-tree (rBT) ...
 	if (this != &rBT)
@@ -112,8 +112,8 @@ CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_data
 	return (*this);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_iter_data (void *pState, const _t_data &rData)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::set_iter_data (void *pState, const typename CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::value_type &rData)
 {
 	iterator_state_t	*pIterState = (iterator_state_t *) pState;
 	const_iterator		sCIter (this, pIterState->nAssociatedPos, pState, this->get_time_stamp (), false);
@@ -131,19 +131,18 @@ void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 	}
 	else
 	{
-		this->erase (sCIter);
+		CBTreeKeySort_t::erase (sCIter);
 
-		this->insert (rData);
+		CBTreeKeySort_t::insert (rData);
 	}
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_swap
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::_swap
 	(
-		CBTreeKeySort<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rContainer
+		CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rContainer
 	)
 {
-	//CBTreeAssociative_t	&rThisAssociative = dynamic_cast <CBTreeAssociative_t &> (*this);
 	CBTreeAssociative_t	&rKeySortAssociative = dynamic_cast <CBTreeAssociative_t &> (rContainer);
 
 	CBTreeAssociative_t::_swap (rKeySortAssociative);
