@@ -13,18 +13,24 @@
 
 #include "btreearraytestprimitive.h"
 
-void arrayPrim_add (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere)
-{
-	typedef			CBTreeArrayIf<arrayEntry_t>::const_iterator			citer_t;
+#ifndef	BTREEARRAYTESTPRIMITIVE_CPP 
+#define	BTREEARRAYTESTPRIMITIVE_CPP
 
-	uint64_t		nPos;
-	uint32_t		ui32;
-	arrayEntry_t	sData;
+template<class _t_container>
+void arrayPrim_add (_t_container *pContainer, typename _t_container::size_type nEntries, btreetest_array_primitive_seek_e eWhere)
+{
+	typedef typename _t_container::const_iterator			citer_t;
+	typedef typename _t_container::size_type				size_type;
+	typedef typename _t_container::value_type				value_type;
+
+	size_type		nPos;
+	size_type		i;
+	value_type		sData;
 	citer_t			sCIter;
 
-	for (ui32 = 0; ui32 < nEntries; ui32++)
+	for (i = 0; i < nEntries; i++)
 	{
-		cout << "insert: " << ui32 << " / " << nEntries << "\r" << flush;
+		::std::cout << "insert: " << i << " / " << nEntries << "\r" << ::std::flush;
 
 		sData.nDebug = g_nDebug;
 		sData.nData = generate_rand32 ();
@@ -42,21 +48,21 @@ void arrayPrim_add (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, bt
 
 		case BTREETEST_ARRAY_PRIMITIVE_SEEK_END		:
 			{
-				nPos = pClArray->size ();
+				nPos = pContainer->size ();
 				
 				break;
 			}
 
 		case BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM	:
 			{
-				nPos = generate_rand64 () % (pClArray->size () + 1);
+				nPos = generate_rand64 () % (pContainer->size () + 1);
 
 				break;
 			}
 
 		default									:
 			{
-				cerr << "ERROR: arrayPrim_add: eWhere corrupted or not set!" << endl;
+				::std::cerr << "ERROR: arrayPrim_add: eWhere corrupted or not set!" << ::std::endl;
 
 				exit (-1);
 
@@ -64,27 +70,29 @@ void arrayPrim_add (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, bt
 			}
 		}
 
-		sCIter = pClArray->cbegin ();
+		sCIter = pContainer->cbegin ();
 
-		::std::advance<citer_t, uint64_t> (sCIter, nPos);
+		::std::advance (sCIter, nPos);
 
-		pClArray->insert (sCIter, sData);
+		pContainer->insert (sCIter, sData);
 	}
 
-	cout << "insert: " << ui32 << " / " << nEntries << endl;
+	::std::cout << "insert: " << i << " / " << nEntries << ::std::endl;
 }
 
-void arrayPrim_remove (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere)
+template<class _t_container>
+void arrayPrim_remove (_t_container *pContainer, typename _t_container::size_type nEntries, btreetest_array_primitive_seek_e eWhere)
 {
-	typedef			CBTreeArrayIf<arrayEntry_t>::const_iterator			citer_t;
+	typedef typename _t_container::const_iterator			citer_t;
+	typedef typename _t_container::size_type				size_type;
 
-	uint64_t		nPos;
-	uint32_t		ui32;
+	size_type		nPos;
+	size_type		i;
 	citer_t			sCIter;
 	
-	for (ui32 = 0; ui32 < nEntries; ui32++)
+	for (i = 0; i < nEntries; i++)
 	{
-		cout << "remove: " << ui32 << " / " << nEntries << "\r" << flush;
+		::std::cout << "remove: " << i << " / " << nEntries << "\r" << ::std::flush;
 
 		switch (eWhere)
 		{
@@ -97,7 +105,7 @@ void arrayPrim_remove (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries,
 
 		case BTREETEST_ARRAY_PRIMITIVE_SEEK_END		:
 			{
-				nPos = pClArray->size ();
+				nPos = pContainer->size ();
 				nPos--;
 				
 				break;
@@ -105,14 +113,14 @@ void arrayPrim_remove (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries,
 
 		case BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM	:
 			{
-				nPos = generate_rand64 () % pClArray->size ();
+				nPos = generate_rand64 () % pContainer->size ();
 
 				break;
 			}
 
 		default									:
 			{
-				cerr << "ERROR: arrayPrim_remove: eWhere corrupted or not set!" << endl;
+				::std::cerr << "ERROR: arrayPrim_remove: eWhere corrupted or not set!" << ::std::endl;
 
 				exit (-1);
 
@@ -120,25 +128,31 @@ void arrayPrim_remove (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries,
 			}
 		}
 
-		sCIter = pClArray->cbegin ();
+		sCIter = pContainer->cbegin ();
 
-		::std::advance<citer_t, uint64_t> (sCIter, nPos);
+		::std::advance (sCIter, nPos);
 
-		pClArray->erase (sCIter);
+		pContainer->erase (sCIter);
 	}
 
-	cout << "remove: " << ui32 << " / " << nEntries << endl;
+	::std::cout << "remove: " << i << " / " << nEntries << ::std::endl;
 }
 
-void arrayPrim_replace (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere)
+template<class _t_container>
+void arrayPrim_replace (_t_container *pContainer, typename _t_container::size_type nEntries, btreetest_array_primitive_seek_e eWhere)
 {
-	uint64_t		nPos;
-	uint32_t		ui32;
-	arrayEntry_t	sData;
+	typedef typename _t_container::const_iterator			citer_t;
+	typedef typename _t_container::size_type				size_type;
+	typedef typename _t_container::value_type				value_type;
 
-	for (ui32 = 0; ui32 < nEntries; ui32++)
+	citer_t			sCIter;
+	size_type		nPos;
+	size_type		i;
+	value_type		sData;
+
+	for (i = 0; i < nEntries; i++)
 	{
-		cout << "replace: " << ui32 << " / " << nEntries << "\r" << flush;
+		::std::cout << "replace: " << i << " / " << nEntries << "\r" << ::std::flush;
 
 		sData.nDebug = g_nDebug;
 		sData.nData = generate_rand32 ();
@@ -156,7 +170,7 @@ void arrayPrim_replace (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries
 
 		case BTREETEST_ARRAY_PRIMITIVE_SEEK_END		:
 			{
-				nPos = pClArray->size ();
+				nPos = pContainer->size ();
 				nPos--;
 				
 				break;
@@ -164,14 +178,14 @@ void arrayPrim_replace (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries
 
 		case BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM	:
 			{
-				nPos = generate_rand64 () % pClArray->size ();
+				nPos = generate_rand64 () % pContainer->size ();
 
 				break;
 			}
 
 		default									:
 			{
-				cerr << "ERROR: arrayPrim_replace: eWhere corrupted or not set!" << endl;
+				::std::cerr << "ERROR: arrayPrim_replace: eWhere corrupted or not set!" << ::std::endl;
 
 				exit (-1);
 
@@ -179,39 +193,14 @@ void arrayPrim_replace (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries
 			}
 		}
 
-		pClArray->at (nPos) = sData;
+		sCIter = pContainer->cbegin ();
+
+		::std::advance (sCIter, nPos);
+
+		pContainer->replace (sCIter, sData);
 	}
 
-	cout << "replace: " << ui32 << " / " << nEntries << endl;
+	::std::cout << "replace: " << i << " / " << nEntries << ::std::endl;
 }
 
-bool arrayPrim_compare (CBTreeArrayIf<arrayEntry_t> *pClArray0, CBTreeArrayIf<arrayEntry_t> *pClArray1)
-{
-	uint64_t		ui64;
-
-	if (pClArray0 == pClArray1)
-	{
-		return (true);
-	}
-
-	if (pClArray0->size () != pClArray1->size ())
-	{
-		return (false);
-	}
-
-	for (ui64 = 0; ui64 < pClArray0->size (); ui64++)
-	{
-		arrayEntry_t	sData0;
-		arrayEntry_t	sData1;
-
-		sData0 = pClArray0->at (ui64);
-		sData1 = pClArray1->at (ui64);
-
-		if (sData0.nData != sData1.nData)
-		{
-			return (false);
-		}
-	}
-
-	return (true);
-}
+#endif // BTREEARRAYTESTPRIMITIVE_CPP
