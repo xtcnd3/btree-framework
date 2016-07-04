@@ -40,7 +40,7 @@ btree_time_stamp_t CBTreeSuper::get_time_stamp () const
 
 void CBTreeSuper::update_time_stamp ()
 {
-	m_sTimeStamp.sTime = ::std::clock ();
+	m_sTimeStamp.sTime = ::std::chrono::high_resolution_clock::now ();
 	m_sTimeStamp.nAccCtr++;
 }
 
