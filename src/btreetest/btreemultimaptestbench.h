@@ -50,26 +50,26 @@ public:
 				~CBTreeTestBenchMultiMap<_t_key, _t_map> ()	
 				{};
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	void insert (const typename ::std::multimap<_t_key, _t_map>::iterator &rDummyIter, _t_iterator &rIterFirst, _t_iterator &rIterLast)
 	{
 		rDummyIter;
 
-		::std::multimap<_t_key, _t_map>::template insert <_t_iterator> (rIterFirst, rIterLast);
+		::std::multimap<_t_key, _t_map>::insert (rIterFirst, rIterLast);
 	};
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	void insert (const typename ::std::multimap<_t_key, _t_map>::const_iterator &rDummyIter, _t_iterator &rIterFirst, _t_iterator &rIterLast)
 	{
 		rDummyIter;
 
-		::std::multimap<_t_key, _t_map>::template insert <_t_iterator> (rIterFirst, rIterLast);
+		::std::multimap<_t_key, _t_map>::insert (rIterFirst, rIterLast);
 	};
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	void insert (_t_iterator &rIterFirst, _t_iterator &rIterLast)
 	{
-		::std::multimap<_t_key, _t_map>::template insert <_t_iterator> (rIterFirst, rIterLast);
+		::std::multimap<_t_key, _t_map>::insert (rIterFirst, rIterLast);
 	};
 
 	typename ::std::multimap<_t_key, _t_map>::iterator insert (const typename ::std::multimap<_t_key, _t_map>::value_type &rVal)
@@ -78,7 +78,7 @@ public:
 	};
 };
 
-typedef CBTreeTestBenchMultiMap<const uint32_t, multiMapMap_t>			multimap_reference_t;
+typedef CBTreeTestBenchMultiMap<uint32_t, multiMapMap_t>				multimap_reference_t;
 
 typedef enum
 {
@@ -95,7 +95,7 @@ typedef enum
 	BTREETEST_MULTIMAP_STL_IF_LOWER_BOUND_UPPER_BOUND
 } btreetest_multimap_t;
 
-template <class _t_container>
+template<class _t_container>
 void TestBTreeSTLmultiMap (uint32_t nTestNum, _t_container *pMMapWrapper);
 
 #endif // !BTREEMULTIMAPTESTBENCH_H
