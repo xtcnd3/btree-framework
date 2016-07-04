@@ -17,10 +17,10 @@
 
 #include "./associative/btreemap.h"
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeMap
-	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize)
-	:	CBTreeAssociativeBase<::std::pair<_t_keytype, _t_maptype>, _t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap
+	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
+	:	CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties>
 		(
 			rDataLayerProperties, 
 			psCacheDescription, 
@@ -29,46 +29,46 @@ CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_d
 {
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeMap
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap
 	(const CBTreeMap_t &rBT, bool bAssign)
-	:	CBTreeAssociativeBase<::std::pair<_t_keytype, _t_maptype>, _t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties>
 	(
-		dynamic_cast<const CBTreeAssociativeBase<::std::pair<_t_keytype, _t_maptype>, _t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), 
+		dynamic_cast<const CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties> &> (rBT), 
 		bAssign
 	)
 {
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeMap ()
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::~CBTreeMap ()
 {
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator>
-void CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (_t_iterator sItFirst, _t_iterator sItLast)
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+template<class _t_iterator>
+void CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::insert (_t_iterator sItFirst, _t_iterator sItLast)
 {
 	_t_iterator		sIt;
 	bool			bSelfReverse;
-	bool			bSelfReference = CBTreeMap_t::template test_self_reference_of_iterator_to_this<_t_iterator> (sItFirst, sItLast, bSelfReverse, NULL, NULL);
+	bool			bSelfReference = CBTreeMap_t::test_self_reference_of_iterator_to_this (sItFirst, sItLast, bSelfReverse, NULL, NULL);
 
 	if (!bSelfReference)
 	{
 		for (sIt = sItFirst; sIt != sItLast; sIt++)
 		{
-			CBTreeMap_t::insert ((value_t) (*sIt));
+			CBTreeMap_t::insert ((value_type) (*sIt));
 		}
 	}
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (const typename CBTreeMap_t::value_t &rData)
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::iterator
+	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::insert (const typename CBTreeMap_t::value_type &rData)
 {
 	iterator			sIter;
 
-	_t_sizetype			nPresent = CBTreeAssociativeBase_t::count (rData.first);
+	size_type			nPresent = CBTreeAssociativeBase_t::count (rData.first);
 
 	if (nPresent == 0)
 	{
@@ -82,16 +82,16 @@ typename CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodei
 	return (sIter);
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (CBTreeAssociativeIf< ::std::pair<_t_keytype, _t_maptype>, _t_keytype, _t_sizetype> &rContainerIf)
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+void CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::swap (typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeAssociativeIf_t &rContainerIf)
 {
 	CBTreeMap_t		&rContainer = dynamic_cast<CBTreeMap_t &> (rContainerIf);
 
 	this->swap (rContainer);
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rContainer)
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+void CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::swap (typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap_t &rContainer)
 {
 	if (this != &rContainer)
 	{
@@ -99,9 +99,9 @@ void CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter,
 	}
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_compare
-	CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_comp () const
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_compare
+	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_comp () const
 {
 	key_compare		sRslt;
 
@@ -110,9 +110,9 @@ typename CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodei
 	return (sRslt);
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::value_compare
-	CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::value_comp () const
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_compare
+	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_comp () const
 {
 	value_compare		sRslt;
 
@@ -121,16 +121,16 @@ typename CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodei
 	return (sRslt);
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_keytype *CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_keytype *pKey, const value_t &rData) const
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::extract_key (typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *pKey, const typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type &rData) const
 {
 	*pKey = rData.first;
 
 	return (pKey);
 }
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_swap (CBTreeMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rContainer)
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+void CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::_swap (typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap_t &rContainer)
 {
 	CBTreeAssociativeBase_t		&rSTLbaseContainerContainer = dynamic_cast <CBTreeAssociativeBase_t &> (rContainer);
 	
