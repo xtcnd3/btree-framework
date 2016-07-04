@@ -14,20 +14,20 @@
 
 #include "btreekeysorttestbench.h"
 
-template <class _t_container>
-void TestBTreeKeySortBasic (_t_container *pContainer, uint32_t nMaxEntries, uint32_t nVariation, uint32_t nRepetitions, btreetest_key_generation_e eGeneratorAdd, btreetest_key_generation_e eGeneratorRemove)
+template<class _t_container>
+void TestBTreeKeySortBasic (_t_container *pContainer, typename _t_container::size_type nMaxEntries, typename _t_container::size_type nVariation, uint32_t nRepetitions, btreetest_key_generation_e eGeneratorAdd, btreetest_key_generation_e eGeneratorRemove)
 {
-	uint32_t			ui32;
-	uint32_t			nLastKey;
-	uint32_t			nLastKeyInit;
+	uint32_t								ui32;
+	typename _t_container::key_type			nLastKey;
+	typename _t_container::key_type			nLastKeyInit;
 
-	cout << "basic test adds data at ";
+	::std::cout << "basic test adds data at ";
 
 	switch (eGeneratorAdd)
 	{
 	case BTREETEST_KEY_GENERATION_DESCEND	:
 		{
-			cout << "the beginning ";
+			::std::cout << "the beginning ";
 
 			nLastKeyInit = ~0x0;
 
@@ -36,7 +36,7 @@ void TestBTreeKeySortBasic (_t_container *pContainer, uint32_t nMaxEntries, uint
 
 	case BTREETEST_KEY_GENERATION_ASCEND		:
 		{
-			cout << "the end ";
+			::std::cout << "the end ";
 
 			nLastKeyInit = 0x0;
 
@@ -45,7 +45,7 @@ void TestBTreeKeySortBasic (_t_container *pContainer, uint32_t nMaxEntries, uint
 
 	case BTREETEST_KEY_GENERATION_RANDOM		:
 		{
-			cout << "a random position ";
+			::std::cout << "a random position ";
 
 			nLastKeyInit = 0x0;
 
@@ -54,7 +54,7 @@ void TestBTreeKeySortBasic (_t_container *pContainer, uint32_t nMaxEntries, uint
 
 	case BTREETEST_KEY_GENERATION_CONST		:
 		{
-			cout << "the same position ";
+			::std::cout << "the same position ";
 
 			nLastKeyInit = 0x0;
 
@@ -63,53 +63,53 @@ void TestBTreeKeySortBasic (_t_container *pContainer, uint32_t nMaxEntries, uint
 
 	default									:
 		{
-			cout << "? ";
+			::std::cout << "? ";
 
 			break;
 		}
 	}
 
-	cout << "and removes it again at ";
+	::std::cout << "and removes it again at ";
 
 	switch (eGeneratorRemove)
 	{
 	case BTREETEST_KEY_GENERATION_DESCEND	:
 		{
-			cout << "the beginning";
+			::std::cout << "the beginning";
 
 			break;
 		}
 
 	case BTREETEST_KEY_GENERATION_ASCEND		:
 		{
-			cout << "the end";
+			::std::cout << "the end";
 
 			break;
 		}
 
 	case BTREETEST_KEY_GENERATION_RANDOM		:
 		{
-			cout << "a random position";
+			::std::cout << "a random position";
 
 			break;
 		}
 
 	case BTREETEST_KEY_GENERATION_CONST		:
 		{
-			cout << "the same position";
+			::std::cout << "the same position";
 
 			break;
 		}
 
 	default									:
 		{
-			cout << "?";
+			::std::cout << "?";
 
 			break;
 		}
 	}
 
-	cout << endl;
+	::std::cout << ::std::endl;
 
 	nLastKey = nLastKeyInit;
 
@@ -117,7 +117,7 @@ void TestBTreeKeySortBasic (_t_container *pContainer, uint32_t nMaxEntries, uint
 
 	for (ui32 = 0; ui32 < nRepetitions; ui32++)
 	{
-		cout << "cycle: " << ui32 + 1 << endl;
+		::std::cout << "cycle: " << ui32 + 1 << ::std::endl;
 
 		nLastKey = nLastKeyInit;
 
@@ -132,27 +132,27 @@ void TestBTreeKeySortBasic (_t_container *pContainer, uint32_t nMaxEntries, uint
 
 	associative_container_remove_primitive (pContainer, nMaxEntries, ~0x0, nLastKey, eGeneratorRemove);
 
-	cout << "finished..." << endl;
+	::std::cout << "finished..." << ::std::endl;
 }
 
-template <class _t_container>
-void TestBTreeKeySortRemoveAll (_t_container *pContainer, uint32_t nEntries)
+template<class _t_container>
+void TestBTreeKeySortRemoveAll (_t_container *pContainer, typename _t_container::size_type nEntries)
 {
-	uint32_t			nLastKey = 0;
-	
-	cout << "test inserts data and empties the data container by calling clear" << endl;
+	typename _t_container::key_type			nLastKey = 0;
+
+	::std::cout << "test inserts data and empties the data container by calling clear" << ::std::endl;
 
 	associative_container_add_primitive (pContainer, nEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
 	pContainer->clear ();
 }
 
-template <class _t_container>
-void TestBTreeKeySortMultiRemove (_t_container *pContainer, uint32_t nEntries)
+template<class _t_container>
+void TestBTreeKeySortMultiRemove (_t_container *pContainer, typename _t_container::size_type nEntries)
 {
-	uint32_t			nLastKey = 0;
-	
-	cout << "test removes key sets" << endl;
+	typename _t_container::key_type			nLastKey = 0;
+
+	::std::cout << "test removes key sets" << ::std::endl;
 
 	associative_container_add_primitive (pContainer, nEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
@@ -163,71 +163,71 @@ void TestBTreeKeySortMultiRemove (_t_container *pContainer, uint32_t nEntries)
 	associative_container_remove_primitive (pContainer, nEntries, ~0x0, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 }
 
-template <class _t_container>
-void TestBTreeKeySortUnload (_t_container *pContainer, uint32_t nInitEntries, uint32_t nAddEntries, uint32_t nRemoveEntries, uint32_t nExitEntries)
+template<class _t_container>
+void TestBTreeKeySortUnload (_t_container *pContainer, typename _t_container::size_type nInitEntries, typename _t_container::size_type nAddEntries, typename _t_container::size_type nRemoveEntries, typename _t_container::size_type nExitEntries)
 {
-	uint32_t			nLastKey = 0;
-	
-	cout << "test uses unload after every operation" << endl;
+	typename _t_container::key_type			nLastKey = 0;
 
-	cout << "unloading..." << endl;
+	::std::cout << "test uses unload after every operation" << ::std::endl;
+
+	::std::cout << "unloading..." << ::std::endl;
 
 	pContainer->unload ();
 
 	associative_container_add_primitive (pContainer, nInitEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
-	cout << "unloading..." << endl;
-	
+	::std::cout << "unloading..." << ::std::endl;
+
 	pContainer->unload ();
 
 	nLastKey++;
 
 	associative_container_add_primitive (pContainer, nAddEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
-	cout << "unloading..." << endl;
-	
+	::std::cout << "unloading..." << ::std::endl;
+
 	pContainer->unload ();
 
 	associative_container_remove_primitive (pContainer, nRemoveEntries, ~0x0, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
-	cout << "unloading..." << endl;
+	::std::cout << "unloading..." << ::std::endl;
 
 	pContainer->unload ();
 
 	nLastKey--;
 
 	associative_container_remove_primitive (pContainer, nExitEntries, ~0x0, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
-	
-	cout << "unloading..." << endl;
-	
+
+	::std::cout << "unloading..." << ::std::endl;
+
 	pContainer->unload ();
 
 	associative_container_add_primitive (pContainer, nInitEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
-	cout << "unloading..." << endl;
-	
+	::std::cout << "unloading..." << ::std::endl;
+
 	pContainer->unload ();
 
-	cout << "unloading..." << endl;
-	
+	::std::cout << "unloading..." << ::std::endl;
+
 	pContainer->unload ();
 
-	cout << "remove all" << endl;
+	::std::cout << "remove all" << ::std::endl;
 
 	pContainer->clear ();
 
-	cout << "unloading..." << endl;
-	
+	::std::cout << "unloading..." << ::std::endl;
+
 	pContainer->unload ();
 }
 
-template <class _t_container>
-void TestBTreeKeySortRemoveInstance (_t_container *pContainer, uint32_t nEntries, uint32_t nInstances)
+template<class _t_container>
+void TestBTreeKeySortRemoveInstance (_t_container *pContainer, typename _t_container::size_type nEntries, uint32_t nInstances)
 {
-	uint32_t			ui32;
-	uint32_t			nLastKey = 0;
+	uint32_t								ui32;
+	typename _t_container::key_type			nLastKey = 0;
 
-	cout << "test removes key instances" << endl;
+	::std::cout << "test removes key instances" << ::std::endl;
 
 	for (ui32 = 0; ui32 < nInstances; ui32++)
 	{
@@ -241,302 +241,14 @@ void TestBTreeKeySortRemoveInstance (_t_container *pContainer, uint32_t nEntries
 	associative_container_remove_primitive (pContainer, nEntries, ~0x0, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 }
 
-//template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
-//void BTreeKeySortMulti (_t_obj **ppClKeySort, uint32_t nNumArray, uint32_t nAddEntries, uint32_t nAddMultiple, uint32_t nRemoveEntries, uint32_t nRemoveMultiple)
-//{
-//	uint32_t				ui32, uj32;
-//	bool					bError = false;
-//	_t_objprim				**pClKeySortPrim;
-//	std::stringstream		aszArrayName;
-//
-//	pClKeySortPrim = new _t_objprim * [nNumArray];
-//
-//	if (pClKeySortPrim == NULL)
-//	{
-//		cerr << "ERROR: insufficient memory!" << endl;
-//
-//		exit (-1);
-//	}
-//
-//	for (ui32 = 0; ui32 < nNumArray; ui32++)
-//	{
-//		pClKeySortPrim[ui32] = dynamic_cast <_t_objprim *> (ppClKeySort[ui32]);
-//	}
-//
-//	for (ui32 = 0; ui32 < nAddMultiple; ui32++)
-//	{
-//		nDebug = 0;
-//
-//		for (uj32 = 0; uj32 < nNumArray; uj32++)
-//		{
-//			associative_container_add_primitive (pClKeySortPrim[uj32], nAddEntries, nDebug, ui32, BTREETEST_KEY_GENERATION_RANDOM);
-//		}
-//
-//		for (uj32 = 1; uj32 < nNumArray; uj32++)
-//		{
-//			if ((* (ppClKeySort[0])) != (* (ppClKeySort[uj32])))
-//			{
-//				cerr << "ERROR: array " << uj32 << " mismatches master array" << endl;
-//
-//				bError = true;
-//			}
-//		}
-//
-//		if (bError)
-//		{
-//			for (uj32 = 0; uj32 < nNumArray; uj32++)
-//			{
-//				aszArrayName.clear ();
-//				aszArrayName << "array" << aszArrayName.width (2) << aszArrayName.fill ('0') << uj32 << ".html" << aszArrayName.width (0) << aszArrayName.fill (' ');
-//
-//				cerr << "outputting " << aszArrayName.str ().c_str () << endl;
-//
-//				ppClKeySort[ui32]->show_integrity (aszArrayName.str ().c_str ());
-//			}
-//
-//			exit (-1);
-//		}
-//	}
-//
-//	for (ui32 = 0; ui32 < nRemoveMultiple; ui32++)
-//	{
-//		for (uj32 = 0; uj32 < nNumArray; uj32++)
-//		{
-//			associative_container_remove_primitive (pClKeySortPrim[uj32], nRemoveEntries, 0, ui32, BTREETEST_KEY_GENERATION_RANDOM);
-//		}
-//
-//		for (uj32 = 1; uj32 < nNumArray; uj32++)
-//		{
-//			if ((* (ppClKeySort[0])) != (* (ppClKeySort[uj32])))
-//			{
-//				cerr << "ERROR: array " << uj32 << " mismatches master array" << endl;
-//
-//				bError = true;
-//			}
-//		}
-//
-//		if (bError)
-//		{
-//			for (uj32 = 0; uj32 < nNumArray; uj32++)
-//			{
-//				aszArrayName.clear ();
-//				aszArrayName << "array" << aszArrayName.width (2) << aszArrayName.fill ('0') << uj32 << ".html" << aszArrayName.width (0) << aszArrayName.fill (' ');
-//
-//				cerr << "outputting " << aszArrayName.str().c_str() << endl;
-//
-//				ppClKeySort[ui32]->show_integrity (aszArrayName.str ().c_str ());
-//			}
-//
-//			exit (-1);
-//		}
-//	}
-//
-//	delete [] pClKeySortPrim;
-//}
-//
-//template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
-//void TestBTreeKeySortMultiNodeSizes (_t_obj *pClMaster, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nFromNodeSize, uint32_t nToNodeSize, uint32_t nAddEntries, uint32_t nAddMultiple, uint32_t nRemoveEntries, uint32_t nRemoveMultiple)
-//{
-//	uint32_t		nDebug = 0;
-//	uint32_t		ui32;
-//	uint32_t		nNumInst;
-//	_t_obj			**ppClKeySort;
-//
-//	cout << "test exercises several instances using different node size settings" << endl;
-//
-//	nNumInst = nToNodeSize - nFromNodeSize + 2;
-//
-//	ppClKeySort = new _t_obj * [nNumInst];
-//
-//	if (ppClKeySort == NULL)
-//	{
-//		cerr << "ERROR: insufficient memory!" << endl;
-//
-//		exit (-1);
-//	}
-//
-//	ppClKeySort[0] = pClMaster;
-//	
-//	for (ui32 = nFromNodeSize; ui32 <= nToNodeSize; ui32++)
-//	{
-//		ppClKeySort[ui32 - nFromNodeSize + 1] = new _t_obj (rDataLayerProperties, psCacheDescription, ui32, NULL);
-//
-//		if (ppClKeySort[ui32 - nFromNodeSize + 1] == NULL)
-//		{
-//			cerr << "ERROR: insufficient memory!" << endl;
-//
-//			exit (-1);
-//		}
-//	}
-//
-//	BTreeKeySortMulti<_t_obj, _t_objprim, _t_datalayerproperties, _t_datalayer> (ppClKeySort, nNumInst, nAddEntries, nAddMultiple, nRemoveEntries, nRemoveMultiple);
-//
-//	for (ui32 = nFromNodeSize; ui32 <= nToNodeSize; ui32++)
-//	{
-//		delete ppClKeySort[ui32 - nFromNodeSize + 1];
-//	}
-//
-//	delete [] ppClKeySort;
-//}
-//
-//template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
-//void TestBTreeKeySortMultiCacheSize (_t_obj *pClMaster, uint32_t nNumInst, uint32_t nNumMultiCacheSizes, bayerTreeCacheDescription_t *psMultiCacheDesc, _t_datalayerproperties **ppMultiCacheSizeDataLayerProperties, uint32_t nNodeSize, uint32_t nAddEntries, uint32_t nAddMultiple, uint32_t nRemoveEntries, uint32_t nRemoveMultiple)
-//{
-//	uint32_t						nDebug = 0;
-//	uint32_t						ui32;
-//	_t_obj							**ppClKeySort;
-//	
-//	cout << "test exercises several instances using different cache settings" << endl;
-//
-//	ppClKeySort = new _t_obj * [nNumInst + 1];
-//
-//	if (ppClKeySort == NULL)
-//	{
-//		cerr << "ERROR: insufficient memory!" << endl;
-//
-//		exit (-1);
-//	}
-//
-//	ppClKeySort[0] = pClMaster;
-//	
-//	for (ui32 = 0; ui32 < nNumMultiCacheSizes; ui32++)
-//	{
-//		ppClKeySort[ui32 + 1] = new _t_obj (*(ppMultiCacheSizeDataLayerProperties[ui32]), &(psMultiCacheDesc[ui32]), nNodeSize, NULL);
-//
-//		if (ppClKeySort[ui32 + 1] == NULL)
-//		{
-//			cerr << "ERROR: insufficient memory!" << endl;
-//
-//			exit (-1);
-//		}
-//	}
-//
-//	BTreeKeySortMulti<_t_obj, _t_objprim, _t_datalayerproperties, _t_datalayer> (ppClKeySort, nNumInst + 1, nAddEntries, nAddMultiple, nRemoveEntries, nRemoveMultiple);
-//
-//	for (ui32 = 0; ui32 < nNumMultiCacheSizes; ui32++)
-//	{
-//		delete ppClKeySort[ui32 + 1];
-//	}
-//
-//	delete [] ppClKeySort;
-//}
-//
-//template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
-//void TestBTreeKeySortMultiTemplateParams (_t_obj *pClMaster, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nNumMultiTemplateParams, _t_objprim **ppClKeySortPrim, uint32_t nNodeSize, uint32_t nAddEntries, uint32_t nAddMultiple, uint32_t nRemoveEntries, uint32_t nRemoveMultiple)
-//{
-//	const uint32_t		nNumInst = nNumMultiTemplateParams + 1;
-//	uint32_t			nDebug = 0;
-//	uint32_t			ui32;
-//	uint32_t			uj32;
-//	bool				bError = false;
-//	_t_objprim			**ppClKeySortPrimAll;
-//
-//	cout << "test exercises several instances using different template parameter settings" << endl;
-//
-//	ppClKeySortPrimAll = new _t_objprim * [nNumInst];
-//
-//	if (ppClKeySortPrimAll == NULL)
-//	{
-//		cerr << "ERROR: insufficient memory!";
-//
-//		exit (-1);
-//	}
-//
-//	ppClKeySortPrimAll[0] = dynamic_cast <_t_objprim *> (pClMaster);
-//
-//	for (ui32 = 0; ui32 < nNumMultiTemplateParams; ui32++)
-//	{
-//		ppClKeySortPrimAll[ui32 + 1] = ppClKeySortPrim[ui32];
-//	}
-//
-//	for (ui32 = 0; ui32 < nAddMultiple; ui32++)
-//	{
-//		nDebug = 0;
-//
-//		for (uj32 = 0; uj32 < nNumInst; uj32++)
-//		{
-//			associative_container_add_primitive (ppClKeySortPrimAll[uj32], nAddEntries, nDebug, ui32, BTREETEST_KEY_GENERATION_RANDOM);
-//		}
-//
-//		for (uj32 = 1; uj32 < nNumInst; uj32++)
-//		{
-//			if (!associative_container_compare_primitive (ppClKeySortPrimAll[0], ppClKeySortPrimAll[uj32]))
-//			{
-//				cerr << "ERROR: array " << uj32 << " mismatches master array!" << endl;
-//
-//				bError = true;
-//			}
-//		}
-//
-//		if (bError)
-//		{
-//			for (ui32 = 0; ui32 < nNumInst; ui32++)
-//			{
-//				_t_obj			*pContainer;
-//				std::stringstream	strFileName;
-//
-//				pContainer = dynamic_cast <_t_obj *> (ppClKeySortPrimAll[ui32]);
-//
-//				strFileName << "keysort" << ui32 << ".html";
-//
-//				pContainer->show_integrity (strFileName.str ().c_str ());
-//			}
-//
-//
-//			break;
-//		}
-//	}
-//
-//	if (!bError)
-//	{
-//		for (ui32 = 0; ui32 < nRemoveMultiple; ui32++)
-//		{
-//			for (uj32 = 0; uj32 < nNumInst; uj32++)
-//			{
-//				associative_container_remove_primitive (ppClKeySortPrimAll[uj32], nRemoveEntries, 0, ui32, BTREETEST_KEY_GENERATION_RANDOM);
-//			}
-//
-//			for (uj32 = 1; uj32 < nNumInst; uj32++)
-//			{
-//				if (!associative_container_compare_primitive (ppClKeySortPrimAll[0], ppClKeySortPrimAll[uj32]))
-//				{
-//					cerr << "ERROR: array " << uj32 << " mismatches master array!" << endl;
-//
-//					bError = true;
-//				}
-//			}
-//
-//			if (bError)
-//			{
-//				for (ui32 = 0; ui32 < nNumInst; ui32++)
-//				{
-//					_t_obj			*pContainer;
-//					std::stringstream	strFileName;
-//
-//					pContainer = dynamic_cast <_t_obj *> (ppClKeySortPrimAll[ui32]);
-//
-//					strFileName << "keysort" << ui32 << ".html";
-//
-//					pContainer->show_integrity (strFileName.str ().c_str ());
-//				}
-//
-//
-//				break;
-//			}
-//		}
-//	}
-//
-//	delete [] ppClKeySortPrimAll;
-//}
-//
-template <class _t_container>
+template<class _t_container>
 void TestBTreeKeySortCCdeterminePosition (_t_container *pContainer, uint32_t nNodeSize)
 {
-	uint32_t			nKey = 0xABCDEF98;
-	uint32_t			nEntries;
-	uint32_t			nInst;
-	
-	cout << "test exercises code coverage regarding determinePosition" << endl;
+	typename _t_container::key_type				nKey = 0xABCDEF98;
+	typename _t_container::size_type			nEntries;
+	uint32_t									nInst;
+
+	::std::cout << "test exercises code coverage regarding determinePosition" << ::std::endl;
 
 	nEntries = nNodeSize * 2 + (nNodeSize * 2) - 1;
 
@@ -547,16 +259,16 @@ void TestBTreeKeySortCCdeterminePosition (_t_container *pContainer, uint32_t nNo
 	associative_container_remove_primitive (pContainer, 1, nInst, nKey, BTREETEST_KEY_GENERATION_CONST);
 }
 
-template <class _t_container>
+template<class _t_container>
 void TestBTreeKeySortCCfindFirstKey (_t_container *pContainer, uint32_t nNodeSize)
 {
-	uint32_t												nKey = 0xABCDEF98;
-	uint32_t												nEntries;
+	typename _t_container::key_type							nKey = 0xABCDEF98;
+	typename _t_container::size_type						nEntries;
 	uint32_t												nInst;
 	uint32_t												ui32;
-	::std::multimap<uint32_t, keySortMap_t>::iterator		sIter;
+	typename _t_container::iterator							sIter;
 
-	cout << "test exercises code coverage regarding findFirstKey" << endl;
+	::std::cout << "test exercises code coverage regarding findFirstKey" << ::std::endl;
 
 	for (ui32 = 0, nEntries = 1; ui32 < 6; ui32++)
 	{
@@ -567,10 +279,9 @@ void TestBTreeKeySortCCfindFirstKey (_t_container *pContainer, uint32_t nNodeSiz
 
 	while (pContainer->size () > 0)
 	{
-		//pContainer->get (sKey, 0, &sEntry);
 		sIter = pContainer->lower_bound (nKey);
 
-		::std::multimap<uint32_t, keySortMap_t>::value_type		sValue (*sIter);
+		typename _t_container::value_type		sValue (*sIter);
 
 		nInst = generate_rand32 () % pContainer->size ();
 		nInst /= 2;
@@ -581,12 +292,12 @@ void TestBTreeKeySortCCfindFirstKey (_t_container *pContainer, uint32_t nNodeSiz
 	}
 }
 
-template <class _t_container>
-void TestBTreeKeySortHTMLoutput (_t_container *pContainer, uint32_t nEntries)
+template<class _t_container>
+void TestBTreeKeySortHTMLoutput (_t_container *pContainer, typename _t_container::size_type nEntries)
 {
-	uint32_t			nLastKey = 0;
+	typename _t_container::key_type			nLastKey = 0;
 
-	cout << "tests if instance is left in undefined state after HTML output" << endl;
+	::std::cout << "tests if instance is left in undefined state after HTML output" << ::std::endl;
 
 	associative_container_add_primitive (pContainer, nEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
@@ -603,17 +314,17 @@ void TestBTreeKeySortHTMLoutput (_t_container *pContainer, uint32_t nEntries)
 	associative_container_add_primitive (pContainer, nEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 }
 
-template <class _t_container>
+template<class _t_container>
 void TestBTreeKeySortCopyConstructorTest (_t_container *pClRef, _t_container sClCopy)
 {
 	if (sClCopy != *pClRef)
 	{
-		cerr << endl << "ERROR: copied instance mismatches reference!" << endl;
-		cerr << "outputting reference to cc_reference.html" << endl;
+		::std::cerr << ::std::endl << "ERROR: copied instance mismatches reference!" << ::std::endl;
+		::std::cerr << "outputting reference to cc_reference.html" << ::std::endl;
 
 		pClRef->show_integrity ("cc_reference.html");
 
-		cerr << "outputting copied instance to cc_copy.html" << endl;
+		::std::cerr << "outputting copied instance to cc_copy.html" << ::std::endl;
 
 		sClCopy.show_integrity ("cc_copy.html");
 
@@ -621,12 +332,12 @@ void TestBTreeKeySortCopyConstructorTest (_t_container *pClRef, _t_container sCl
 	}
 }
 
-template <class _t_container>
-void TestBTreeKeySortCopyConstructor (_t_container *pContainer, uint32_t nEntries)
+template<class _t_container>
+void TestBTreeKeySortCopyConstructor (_t_container *pContainer, typename _t_container::size_type nEntries)
 {
-	uint32_t			nLastKey = 0;
-	
-	cout << "exercises keysort type copy constructor" << endl;
+	typename _t_container::key_type			nLastKey = 0;
+
+	::std::cout << "exercises keysort type copy constructor" << ::std::endl;
 
 	TestBTreeKeySortCopyConstructorTest (pContainer, *pContainer);
 
@@ -635,13 +346,13 @@ void TestBTreeKeySortCopyConstructor (_t_container *pContainer, uint32_t nEntrie
 	TestBTreeKeySortCopyConstructorTest (pContainer, *pContainer);
 
 	nLastKey++;
-	
+
 	associative_container_add_primitive (pContainer, nEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
 	TestBTreeKeySortCopyConstructorTest (pContainer, *pContainer);
-	
+
 	nLastKey++;
-	
+
 	associative_container_add_primitive (pContainer, nEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
 	TestBTreeKeySortCopyConstructorTest (pContainer, *pContainer);
@@ -667,37 +378,19 @@ void TestBTreeKeySortCopyConstructor (_t_container *pContainer, uint32_t nEntrie
 	TestBTreeKeySortCopyConstructorTest (pContainer, *pContainer);
 }
 
-//template <class _t_container>
-//void TestBTreeKeySortCompare (_t_container *pClRef, _t_container *pClCopy)
-//{
-//	if (*pClCopy != *pClRef)
-//	{
-//		cerr << endl << "ERROR: copied instance mismatches reference!" << endl;
-//		cerr << "outputting reference to comp_reference.html" << endl;
-//
-//		pClRef->show_integrity ("comp_reference.html");
-//
-//		cerr << "outputting copied instance to comp_copy.html" << endl;
-//
-//		pClCopy->show_integrity ("comp_copy.html");
-//
-//		exit (-1);
-//	}
-//}
-
-template <class _t_container>
-void TestBTreeKeySortOperatorOverloadAssign (_t_container *pContainer, uint32_t nEntries)
+template<class _t_container>
+void TestBTreeKeySortOperatorOverloadAssign (_t_container *pContainer, typename _t_container::size_type nEntries)
 {
-	uint32_t			nLastKey = 0;
-	_t_container		*pTarget;
-	
-	cout << "exercises keysort type operator=" << endl;
+	typename _t_container::key_type			nLastKey = 0;
+	_t_container							*pTarget;
+
+	::std::cout << "exercises keysort type operator=" << ::std::endl;
 
 	pTarget = new _t_container (*pContainer);
 
 	if (pTarget == NULL)
 	{
-		cerr << "ERROR: Insufficient memory!" << endl;
+		::std::cerr << "ERROR: Insufficient memory!" << ::std::endl;
 
 		exit (-1);
 	}
@@ -705,75 +398,75 @@ void TestBTreeKeySortOperatorOverloadAssign (_t_container *pContainer, uint32_t 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	associative_container_add_primitive (pContainer, nEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	nLastKey++;
-	
+
 	associative_container_add_primitive (pContainer, nEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	nLastKey++;
-	
+
 	associative_container_add_primitive (pContainer, nEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	pContainer->unload ();
 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	nLastKey = 0;
-	
+
 	associative_container_remove_primitive (pContainer, nEntries, ~0, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	nLastKey += 2;
-	
+
 	associative_container_remove_primitive (pContainer, nEntries, ~0, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	pContainer->clear ();
 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	delete pTarget;
 }
 
-template <class _t_container>
-void TestBTreeKeySortOperatorOverloadAssignMultiInstance (_t_container *pContainer, uint32_t nOuterEntries, uint32_t nInnerEntries, uint32_t nMulti)
+template<class _t_container>
+void TestBTreeKeySortOperatorOverloadAssignMultiInstance (_t_container *pContainer, typename _t_container::size_type nOuterEntries, typename _t_container::size_type nInnerEntries, uint32_t nMulti)
 {
-	uint32_t			nLastKey = 0;
-	uint32_t			ui32;
-	uint32_t			nEntries;
-	_t_container		*pTarget;
+	typename _t_container::key_type				nLastKey = 0;
+	typename _t_container::size_type			ui32;
+	typename _t_container::size_type			nEntries;
+	_t_container								*pTarget;
 
-	cout << "exercises keysort type operator= while more than one instance per key is in use" << endl;
+	::std::cout << "exercises keysort type operator= while more than one instance per key is in use" << ::std::endl;
 
 	pTarget = new _t_container (*pContainer);
 
 	if (pTarget == NULL)
 	{
-		cerr << "ERROR: Insufficient memory!" << endl;
+		::std::cerr << "ERROR: Insufficient memory!" << ::std::endl;
 
 		exit (-1);
 	}
@@ -781,7 +474,7 @@ void TestBTreeKeySortOperatorOverloadAssignMultiInstance (_t_container *pContain
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	for (ui32 = 0; ui32 < nMulti; ui32++)
 	{
 		if ((ui32 == 0) || (ui32 == (nMulti - 1)))
@@ -809,7 +502,7 @@ void TestBTreeKeySortOperatorOverloadAssignMultiInstance (_t_container *pContain
 	associative_container_compare_primitive (pContainer, pTarget);
 
 	nLastKey = 0;
-	
+
 	associative_container_remove_primitive (pContainer, nOuterEntries, 0, nLastKey, BTREETEST_KEY_GENERATION_CONST);
 
 	nLastKey++;
@@ -817,29 +510,29 @@ void TestBTreeKeySortOperatorOverloadAssignMultiInstance (_t_container *pContain
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	associative_container_remove_primitive (pContainer, nInnerEntries, 0, nLastKey, BTREETEST_KEY_GENERATION_CONST);
 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	pContainer->clear ();
 
 	*pTarget = *pContainer;
 
 	associative_container_compare_primitive (pContainer, pTarget);
-	
+
 	delete pTarget;
 }
 
-template <class _t_container>
+template<class _t_container>
 void TestBTreeKeySortLowerBoundOnLeafNode (_t_container *pContainer, uint32_t nNodeSize)
 {
 	typename _t_container::const_iterator	sCIter;
-	uint32_t								nLastKey = 0;
-	uint64_t								nRslt;
-	
+	typename _t_container::key_type			nLastKey = 0;
+	typename _t_container::size_type		nRslt;
+
 	::std::cout << "exercises lower_bound on leaf node with node size " << nNodeSize << ::std::endl;
 
 	associative_container_add_primitive (pContainer, nNodeSize * 2 - 1, nLastKey, BTREETEST_KEY_GENERATION_CONST);
@@ -943,28 +636,28 @@ void TestBTreeKeySortLowerBoundOnLeafNode (_t_container *pContainer, uint32_t nN
 	}
 }
 
-template <class _t_container>
-void TestBTreeKeySortSerialize (_t_container *pContainer, uint32_t nInstance, uint32_t nSize, uint32_t nWindowSize)
+template<class _t_container>
+void TestBTreeKeySortSerialize (_t_container *pContainer, uint32_t nInstance, typename _t_container::size_type nSize, typename _t_container::size_type nWindowSize)
 {
 	typedef typename _t_container::value_type				data_t;
 	typedef typename _t_container::const_iterator			citer_t;
 
-	uint32_t			nLastKey = 0;
-	uint32_t			ui32;
-	uint64_t			nRslt;
-	data_t				*pnData;
-	
-	cout << "exercises serialize method" << endl;
+	typename _t_container::key_type			nLastKey = 0;
+	uint32_t								ui32;
+	typename _t_container::size_type		nRslt;
+	data_t									*pnData;
+
+	::std::cout << "exercises serialize method" << ::std::endl;
 
 	pnData = new data_t [nWindowSize];
 
 	if (pnData == NULL)
 	{
-		cerr << "ERROR: TestBTreeKeySortSerialize: insufficient memory!" << endl;
+		::std::cerr << "ERROR: TestBTreeKeySortSerialize: insufficient memory!" << ::std::endl;
 
 		exit (-1);
 	}
-	
+
 	for (ui32 = 0; ui32 < nInstance; ui32++)
 	{
 		associative_container_add_primitive (pContainer, nSize, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
@@ -978,7 +671,7 @@ void TestBTreeKeySortSerialize (_t_container *pContainer, uint32_t nInstance, ui
 
 		::std::cout << "testing from " << ui32 << " to " << ui32 + nWindowSize << ::std::endl;
 
-		if ((uint32_t) nRslt != nWindowSize)
+		if (nRslt != nWindowSize)
 		{
 			::std::cerr << "ERROR: TestBTreeKeySortSerialize: size mismatch!" << ::std::endl;
 			::std::cerr << "iteration: " << ui32 << ::std::endl;
@@ -997,37 +690,37 @@ void TestBTreeKeySortSerialize (_t_container *pContainer, uint32_t nInstance, ui
 	delete [] pnData;
 }
 
-template <class _t_container>
-void TestBTreeKeySortSerializeIncomplete (_t_container *pContainer, uint32_t nNodeSize, uint32_t nSize, uint32_t nWindowSize, uint32_t nOffset)
+template<class _t_container>
+void TestBTreeKeySortSerializeIncomplete (_t_container *pContainer, uint32_t nNodeSize, typename _t_container::size_type nSize, typename _t_container::size_type nWindowSize, typename _t_container::size_type nOffset)
 {
 	typedef typename _t_container::value_type			data_t;
 
-	uint32_t			nLastKey = 0;
-	uint64_t			nRslt;
-	data_t				*pnData;
-	
-	cout << "exercises serialize method with an incomplete transfer" << endl;
+	typename _t_container::key_type		nLastKey = 0;
+	typename _t_container::size_type	nRslt;
+	data_t								*pnData;
+
+	::std::cout << "exercises serialize method with an incomplete transfer" << ::std::endl;
 
 	pnData = new data_t [nWindowSize];
 
 	if (pnData == NULL)
 	{
-		cerr << "ERROR: TestBTreeKeySortSerialize: insufficient memory!" << endl;
+		::std::cerr << "ERROR: TestBTreeKeySortSerialize: insufficient memory!" << ::std::endl;
 
 		exit (-1);
 	}
-	
+
 	associative_container_add_primitive (pContainer, nSize, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
-	cout << "testing from " << nOffset << " to " << nWindowSize + nOffset << endl;
+	::std::cout << "testing from " << nOffset << " to " << nWindowSize + nOffset << ::std::endl;
 
 	nRslt = pContainer->serialize (nOffset, nWindowSize, pnData);
 
-	if ((uint32_t) nRslt != (nSize - nOffset))
+	if (nRslt != (nSize - nOffset))
 	{
-		cerr << "ERROR: TestBTreeKeySortSerialize: size mismatch!" << endl;
-		cerr << "expected size: " << nSize - nOffset << endl;
-		cerr << "returned size: " << nRslt << endl;
+		::std::cerr << "ERROR: TestBTreeKeySortSerialize: size mismatch!" << ::std::endl;
+		::std::cerr << "expected size: " << nSize - nOffset << ::std::endl;
+		::std::cerr << "returned size: " << nRslt << ::std::endl;
 
 		exit (-1);
 	}
@@ -1035,30 +728,30 @@ void TestBTreeKeySortSerializeIncomplete (_t_container *pContainer, uint32_t nNo
 	delete [] pnData;
 }
 
-template <class _t_container>
+template<class _t_container>
 void TestBTreeKeySortSTLifInsert (_t_container *pContainer, uint32_t nNumEntries)
 {
 	typedef typename _t_container::value_type			data_t;
 	typedef typename _t_container::const_iterator		citer_t;
 
-	citer_t				sCIter;
-	citer_t				sCIterRd;
-	uint32_t			i;
-	data_t				sEntry;
-	uint32_t			nCnt;
-	uint32_t			nKey;
+	citer_t									sCIter;
+	citer_t									sCIterRd;
+	uint32_t								i;
+	data_t									sEntry;
+	uint32_t								nCnt;
+	typename _t_container::key_type			nKey;
 
-	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: insert (const _t_data &)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: insert (const _t_data &)" << ::std::endl;
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		cout << i << " / " << nNumEntries << "\r";
+		::std::cout << i << " / " << nNumEntries << "\r";
 
 		do
 		{
 			nKey = generate_rand32 ();
 		} while (pContainer->count (nKey) != 0);
-		
+
 		set_entry_key (sEntry, nKey);
 		set_entry_data (sEntry, generate_rand32 ());
 		set_entry_debug (sEntry, i);
@@ -1079,10 +772,10 @@ void TestBTreeKeySortSTLifInsert (_t_container *pContainer, uint32_t nNumEntries
 
 		if (sCIterRd != pContainer->cbegin ())
 		{
-			cerr << endl;
-			cerr << "ERROR: TestBTreeKeySortSTLinsert: returned key doesn't fulfill required sort condition! (<=)" << endl;
-			cerr << "new entry key: " << get_entry_key (sEntry) << endl;
-			cerr << " returned key: " << (*sCIterRd).first << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "ERROR: TestBTreeKeySortSTLinsert: returned key doesn't fulfill required sort condition! (<=)" << ::std::endl;
+			::std::cerr << "new entry key: " << get_entry_key (sEntry) << ::std::endl;
+			::std::cerr << " returned key: " << (*sCIterRd).first << ::std::endl;
 
 			exit (-1);
 		}
@@ -1101,20 +794,20 @@ void TestBTreeKeySortSTLifInsert (_t_container *pContainer, uint32_t nNumEntries
 
 		if (sCIterRd != pContainer->cend ())
 		{
-			cerr << endl;
-			cerr << "ERROR: TestBTreeKeySortSTLinsert: returned key doesn't fulfill required sort condition! (>=)" << endl;
-			cerr << "new entry key: " << get_entry_key (sEntry) << endl;
-			cerr << " returned key: " << (*sCIterRd).first << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "ERROR: TestBTreeKeySortSTLinsert: returned key doesn't fulfill required sort condition! (>=)" << ::std::endl;
+			::std::cerr << "new entry key: " << get_entry_key (sEntry) << ::std::endl;
+			::std::cerr << " returned key: " << (*sCIterRd).first << ::std::endl;
 
 			exit (-1);
 		}
 	}
 
-	cout << i << " / " << nNumEntries << "\n";
+	::std::cout << i << " / " << nNumEntries << "\n";
 }
 
-template <class _t_dest_container, class _t_src_container, class _t_container, class _t_iterator, class _t_ext_iterator>
-void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_via_iterator_e eTest, const char *pszTestTitle, int nArg, uint32_t nNumInstances, _t_dest_container *pDestContainer, _t_src_container *pSrcContainer, _t_container *pContainer, _t_iterator &rIterA, _t_iterator &rIterB, _t_ext_iterator &rExtIterA, _t_ext_iterator &rExtIterB, uint32_t nNumEntries, uint32_t &rLastKey)
+template<class _t_dest_container, class _t_src_container, class _t_container, class _t_iterator, class _t_ext_iterator>
+void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_via_iterator_e eTest, const char *pszTestTitle, int nArg, uint32_t nNumInstances, _t_dest_container *pDestContainer, _t_src_container *pSrcContainer, _t_container *pContainer, _t_iterator &rIterA, _t_iterator &rIterB, _t_ext_iterator &rExtIterA, _t_ext_iterator &rExtIterB, typename _t_src_container::size_type nNumEntries, typename _t_src_container::key_type &rLastKey)
 {
 	typedef typename _t_src_container::size_type				size_type;
 
@@ -1138,9 +831,9 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 	{
 		case BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART:
 		{
-			::std::advance<_t_iterator, int> (sIterBegin, nArg);
-			::std::advance<_t_iterator, int> (sIterEnd, 0 - nArg);
-			
+			::std::advance (sIterBegin, nArg);
+			::std::advance (sIterEnd, 0 - nArg);
+
 			pDestContainer->insert (sIterBegin, sIterEnd);
 
 			break;
@@ -1176,7 +869,7 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 			while (rIterA != sIterEnd)
 			{
 				pDestContainer->insert (rIterA, rIterB);
-		
+
 				rIterA++;
 				rIterB++;
 
@@ -1201,8 +894,8 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 			get_begin (pDestContainer, sIterBegin);
 			get_end (pDestContainer, sIterEnd);
 
-			::std::advance<_t_iterator, int> (sIterBegin, nArg);
-			::std::advance<_t_iterator, int> (sIterEnd, 0 - nArg);
+			::std::advance (sIterBegin, nArg);
+			::std::advance (sIterEnd, 0 - nArg);
 
 			if (!is_const_iterator (pDestContainer, sIterBegin))
 			{
@@ -1244,9 +937,9 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 
 			get_begin (pContainer, sExtIterBegin);
 			get_end (pContainer, sExtIterEnd);
-	
-			::std::advance<_t_ext_iterator, int> (sExtIterBegin, nArg);
-			::std::advance<_t_ext_iterator, int> (sExtIterEnd, 0 - nArg);
+
+			::std::advance (sExtIterBegin, nArg);
+			::std::advance (sExtIterEnd, 0 - nArg);
 
 			pDestContainer->insert (sExtIterBegin, sExtIterEnd);
 
@@ -1263,11 +956,11 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 			get_end (pContainer, sExtIterEnd);
 
 			nSize = pDestContainer->size ();
-		
+
 			while (rExtIterA != sExtIterEnd)
 			{
 				pDestContainer->insert (rExtIterA, rExtIterB);
-		
+
 				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorEx: empty equivalent or same extern test (A == B): container size changed!" << ::std::endl;
@@ -1276,7 +969,7 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 				}
 
 				pDestContainer->insert (rExtIterB, rExtIterA);
-		
+
 				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorEx: empty equivalent or same extern test (B == A): container size changed!" << ::std::endl;
@@ -1285,7 +978,7 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 				}
 
 				pDestContainer->insert (rExtIterA, rExtIterA);
-		
+
 				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorEx: empty equivalent or same extern test (A == A): container size changed!" << ::std::endl;
@@ -1294,7 +987,7 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 				}
 
 				pDestContainer->insert (rExtIterB, rExtIterB);
-		
+
 				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorEx: empty equivalent or same extern test (B == B): container size changed!" << ::std::endl;
@@ -1316,7 +1009,7 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 			while (rExtIterA != sExtIterEnd)
 			{
 				pDestContainer->insert (rExtIterA, rExtIterB);
-		
+
 				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorEx: equivalent or same extern test (A == B): container size changed!" << ::std::endl;
@@ -1325,7 +1018,7 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 				}
 
 				pDestContainer->insert (rExtIterB, rExtIterA);
-		
+
 				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorEx: equivalent or same extern test (B == A): container size changed!" << ::std::endl;
@@ -1334,7 +1027,7 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 				}
 
 				pDestContainer->insert (rExtIterA, rExtIterA);
-		
+
 				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorEx: equivalent or same extern test (A == A): container size changed!" << ::std::endl;
@@ -1343,7 +1036,7 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 				}
 
 				pDestContainer->insert (rExtIterB, rExtIterB);
-		
+
 				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorEx: equivalent or same extern test (B == B): container size changed!" << ::std::endl;
@@ -1373,17 +1066,17 @@ void TestBTreeKeySortSTLifInsertViaIteratorEx (btreetest_keysort_stl_if_insert_v
 	pSrcContainer->clear ();
 }
 
-template <class _t_dest_container, class _t_src_container, class _t_data, class _t_dest_iterator, class _t_src_iterator>
-void TestBTreeKeySortSTLifInsertViaIteratorPairEx (btreetest_keysort_stl_if_insert_via_iterator_e eTest, const char *pszTestTitle, int nArg, uint32_t nNumInstances, _t_dest_container *pDestContainer, _t_src_container *pSrcContainer, _t_data &rKeySortPairData, _t_dest_iterator &rDestIter, _t_src_iterator &rSrcIter, uint32_t nNumEntries)
+template<class _t_dest_container, class _t_src_container, class _t_data, class _t_dest_iterator, class _t_src_iterator>
+void TestBTreeKeySortSTLifInsertViaIteratorPairEx (btreetest_keysort_stl_if_insert_via_iterator_e eTest, const char *pszTestTitle, int nArg, uint32_t nNumInstances, _t_dest_container *pDestContainer, _t_src_container *pSrcContainer, _t_data &rKeySortPairData, _t_dest_iterator &rDestIter, _t_src_iterator &rSrcIter, typename _t_src_container::size_type nNumEntries)
 {
-	_t_src_iterator		sSrcIterBegin;
-	_t_src_iterator		sSrcIterBeginB;
-	_t_src_iterator		sSrcIterEnd;
-	_t_dest_iterator	sDestIterBegin;
-	_t_dest_iterator	sDestIterBeginB;
-	_t_dest_iterator	sDestIterEnd;
-	size_t				nSize;
-	uint32_t			ui32;
+	_t_src_iterator									sSrcIterBegin;
+	_t_src_iterator									sSrcIterBeginB;
+	_t_src_iterator									sSrcIterEnd;
+	_t_dest_iterator								sDestIterBegin;
+	_t_dest_iterator								sDestIterBeginB;
+	_t_dest_iterator								sDestIterEnd;
+	typename _t_src_container::size_type			nSize;
+	typename _t_src_container::size_type			ui32;
 
 	::std::cout << pszTestTitle << ::std::endl;
 
@@ -1403,31 +1096,31 @@ void TestBTreeKeySortSTLifInsertViaIteratorPairEx (btreetest_keysort_stl_if_inse
 	get_begin (pSrcContainer, sSrcIterBegin);
 	get_end (pSrcContainer, sSrcIterEnd);
 
-	nSize = (size_t) pSrcContainer->size ();
+	nSize = pSrcContainer->size ();
 
 	switch (eTest)
 	{
 		case BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART:
 		{
-			::std::advance<_t_src_iterator, int> (sSrcIterBegin, nArg);
-			::std::advance<_t_src_iterator, int> (sSrcIterEnd, 0 - nArg);
-			
-			pDestContainer->template insert <_t_src_iterator> (sSrcIterBegin, sSrcIterEnd);
+			::std::advance (sSrcIterBegin, nArg);
+			::std::advance (sSrcIterEnd, 0 - nArg);
+
+			pDestContainer->insert (sSrcIterBegin, sSrcIterEnd);
 
 			break;
 		}
 
 		case BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT:
 		{
-			pDestContainer->template insert <_t_src_iterator> (sSrcIterBegin, sSrcIterEnd);
+			pDestContainer->insert (sSrcIterBegin, sSrcIterEnd);
 
 			while (sSrcIterBegin != sSrcIterEnd)
 			{
-				pDestContainer->template insert <_t_src_iterator> (sSrcIterBegin, sSrcIterBegin);
+				pDestContainer->insert (sSrcIterBegin, sSrcIterBegin);
 
-				::std::advance<_t_src_iterator, int> (sSrcIterBegin, 1);
+				::std::advance (sSrcIterBegin, 1);
 
-				if (nSize != (size_t) pDestContainer->size ())
+				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorPairEx: equivalent or same test 1: container size changed!" << ::std::endl;
 
@@ -1440,12 +1133,12 @@ void TestBTreeKeySortSTLifInsertViaIteratorPairEx (btreetest_keysort_stl_if_inse
 
 			while (sSrcIterBegin != sSrcIterEnd)
 			{
-				pDestContainer->template insert <_t_src_iterator> (sSrcIterBegin, sSrcIterBeginB);
+				pDestContainer->insert (sSrcIterBegin, sSrcIterBeginB);
 
-				::std::advance<_t_src_iterator, int> (sSrcIterBegin, 1);
-				::std::advance<_t_src_iterator, int> (sSrcIterBeginB, 1);
+				::std::advance (sSrcIterBegin, 1);
+				::std::advance (sSrcIterBeginB, 1);
 
-				if (nSize != (size_t) pDestContainer->size ())
+				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorPairEx: equivalent or same test 2: container size changed!" << ::std::endl;
 
@@ -1458,19 +1151,19 @@ void TestBTreeKeySortSTLifInsertViaIteratorPairEx (btreetest_keysort_stl_if_inse
 
 			while (sSrcIterBegin != sSrcIterEnd)
 			{
-				pDestContainer->template insert <_t_src_iterator> (sSrcIterBeginB, sSrcIterBegin);
+				pDestContainer->insert (sSrcIterBeginB, sSrcIterBegin);
 
-				::std::advance<_t_src_iterator, int> (sSrcIterBegin, 1);
-				::std::advance<_t_src_iterator, int> (sSrcIterBeginB, 1);
+				::std::advance (sSrcIterBegin, 1);
+				::std::advance (sSrcIterBeginB, 1);
 
-				if (nSize != (size_t) pDestContainer->size ())
+				if (nSize != pDestContainer->size ())
 				{
 					::std::cerr << "TestBTreeKeySortSTLifInsertViaIteratorPairEx: equivalent or same test 3: container size changed!" << ::std::endl;
 
 					exit (-1);
 				}
 			}
-			
+
 			break;
 		}
 
@@ -1488,11 +1181,11 @@ void TestBTreeKeySortSTLifInsertViaIteratorPairEx (btreetest_keysort_stl_if_inse
 	pDestContainer->clear ();
 }
 
-template <class _t_container, class _t_pair_container>
-void TestBTreeKeySortSTLifInsertViaIterator (_t_container *pContainer, _t_pair_container *pPairContainer, uint32_t nNumEntries, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nNodeSize)
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySortSTLifInsertViaIterator (_t_container *pContainer, _t_pair_container *pPairContainer, typename _t_container::size_type nNumEntries, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nNodeSize)
 {
-	typedef ::std::list<typename _t_container::value_type>						list_t;
-	typedef ::std::vector<typename _t_container::value_type>						vector_t;
+	typedef ::std::list<typename _t_container::value_type>								list_t;
+	typedef ::std::vector<typename _t_container::value_type>							vector_t;
 	typedef	::std::map<uint32_t, keySortMap_t>											map_t;
 	typedef ::std::multimap<uint32_t, keySortMap_t>										mmap_t;
 
@@ -1523,9 +1216,10 @@ void TestBTreeKeySortSTLifInsertViaIterator (_t_container *pContainer, _t_pair_c
 	typedef typename mmap_t::const_iterator												citmmap_t;
 	typedef typename mmap_t::reverse_iterator											ritmmap_t;
 	typedef typename mmap_t::const_reverse_iterator										critmmap_t;
-	
+
+	typename _t_pair_container::size_type		nNumEntriesPair = (typename _t_pair_container::size_type) nNumEntries;
 	_t_container								sContainerTarget (*pContainer);
-	uint32_t									nLastKey = 0;
+	typename _t_container::key_type				nLastKey = 0;
 	citer_t										sCIterA, sCIterB;
 	criter_t									sCRIterA, sCRIterB;
 
@@ -1540,7 +1234,6 @@ void TestBTreeKeySortSTLifInsertViaIterator (_t_container *pContainer, _t_pair_c
 	citvec_t									sCItVecBegin, sCItVecEnd;
 	ritvec_t									sRItVecBegin, sRItVecEnd;
 	critvec_t									sCRItVecBegin, sCRItVecEnd;
-	CBTreeIOpropertiesRAM						sRAMproperties;
 	_t_pair_container							sKeySortTargetPair (*pPairContainer);
 	keySortPair_t								sKeySortPairData;
 	citer_pair_t								sCIterTargetPair, sCIterPair;
@@ -1556,8 +1249,7 @@ void TestBTreeKeySortSTLifInsertViaIterator (_t_container *pContainer, _t_pair_c
 	ritmmap_t									sRItMMap;
 	critmmap_t									sCRItMMap;
 
-	
-	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: insert<_t_iterator> (_t_iterator, _t_iterator)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: insert<_t_iterator> (_t_iterator, _t_iterator)" << ::std::endl;
 
 	TestBTreeKeySortSTLifInsertViaIteratorEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_obj::citer_t> (citer_t, citer_t)", 0, 0, &sContainerTarget, pContainer, &sList, sCIterA, sCIterB, sCItListBegin, sCItListEnd, nNumEntries, nLastKey);
 	TestBTreeKeySortSTLifInsertViaIteratorEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_obj::criter_t> (criter_t, criter_t)", 0, 0, &sContainerTarget, pContainer, &sList, sCRIterA, sCRIterB, sCRItListBegin, sCRItListEnd, nNumEntries, nLastKey);
@@ -1604,91 +1296,92 @@ void TestBTreeKeySortSTLifInsertViaIterator (_t_container *pContainer, _t_pair_c
 	TestBTreeKeySortSTLifInsertViaIteratorEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT_EXTERN, "target::insert<vector::riter_t> (riter_t == riter_t)", 0, 0, &sContainerTarget, pContainer, &sVector, sCIterA, sCIterB, sRItVecBegin, sRItVecEnd, nNumEntries, nLastKey);
 	TestBTreeKeySortSTLifInsertViaIteratorEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT_EXTERN, "target::insert<vector::criter_t> (criter_t == criter_t)", 0, 0, &sContainerTarget, pContainer, &sVector, sCIterA, sCIterB, sCRItVecBegin, sCRItVecEnd, nNumEntries, nLastKey);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::citer_t> (citer_t, citer_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::criter_t> (criter_t, criter_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::citer_t> (citer_t, citer_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::criter_t> (criter_t, criter_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<_t_container<pair>::citer_t> (citer_t == citer_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<_t_container<pair>::criter_t> (criter_t == criter_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<_t_container<pair>::citer_t> (citer_t == citer_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<_t_container<pair>::criter_t> (criter_t == criter_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::citer_t> (>citer_t, citer_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::criter_t> (>criter_t, criter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::citer_t> (>citer_t, citer_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::criter_t> (>criter_t, criter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::citer_t> (target::citer_t, target::citer_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::criter_t> (target::criter_t, target::criter_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::citer_t> (target::citer_t, target::citer_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::criter_t> (target::criter_t, target::criter_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<_t_container<pair>::citer_t> (target::citer_t == target::citer_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<_t_container<pair>::criter_t> (target::criter_t == target::criter_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<_t_container<pair>::citer_t> (target::citer_t == target::citer_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<_t_container<pair>::criter_t> (target::criter_t == target::criter_t)", 0, 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::citer_t> (>target::citer_t, target::citer_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::criter_t> (>target::criter_t, target::criter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::citer_t> (>target::citer_t, target::citer_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCIterTargetPair, sCIterPair, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<_t_container<pair>::criter_t> (>target::criter_t, target::criter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, pPairContainer, sKeySortPairData, sCRIterTargetPair, sCRIterPair, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::iter_t> (iter_t, iter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sItMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::citer_t> (citer_t, citer_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCItMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::riter_t> (riter_t, riter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sRItMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::criter_t> (criter_t, criter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCRItMap, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::iter_t> (iter_t, iter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sItMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::citer_t> (citer_t, citer_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCItMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::riter_t> (riter_t, riter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sRItMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::criter_t> (criter_t, criter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCRItMap, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::map::iter_t> (iter_t == iter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sItMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::map::citer_t> (citer_t == citer_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCItMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::map::riter_t> (riter_t == riter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sRItMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::map::criter_t> (criter_t == criter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCRItMap, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::map::iter_t> (iter_t == iter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sItMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::map::citer_t> (citer_t == citer_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCItMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::map::riter_t> (riter_t == riter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sRItMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::map::criter_t> (criter_t == criter_t)", 0, 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCRItMap, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::iter_t> (>iter_t, iter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sItMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::citer_t> (>citer_t, citer_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCItMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::riter_t> (>riter_t, riter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sRItMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::criter_t> (>criter_t, criter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCRItMap, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::iter_t> (>iter_t, iter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sItMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::citer_t> (>citer_t, citer_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCItMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::riter_t> (>riter_t, riter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sRItMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::map::criter_t> (>criter_t, criter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMap, sKeySortPairData, sCIterTargetPair, sCRItMap, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::iter_t> (iter_t, iter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sItMMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::citer_t> (citer_t, citer_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCItMMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::riter_t> (riter_t, riter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sRItMMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::criter_t> (criter_t, criter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCRItMMap, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::iter_t> (iter_t, iter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sItMMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::citer_t> (citer_t, citer_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCItMMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::riter_t> (riter_t, riter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sRItMMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::criter_t> (criter_t, criter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCRItMMap, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::multimap::iter_t> (iter_t == iter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sItMMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::multimap::citer_t> (citer_t == citer_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCItMMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::multimap::riter_t> (riter_t == riter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sRItMMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::multimap::criter_t> (criter_t == criter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCRItMMap, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::multimap::iter_t> (iter_t == iter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sItMMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::multimap::citer_t> (citer_t == citer_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCItMMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::multimap::riter_t> (riter_t == riter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sRItMMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT, "target::insert<std::multimap::criter_t> (criter_t == criter_t)", 0, 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCRItMMap, nNumEntriesPair);
 
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::iter_t> (>iter_t, iter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sItMMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::citer_t> (>citer_t, citer_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCItMMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::riter_t> (>riter_t, riter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sRItMMap, nNumEntries);
-	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::criter_t> (>criter_t, criter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCRItMMap, nNumEntries);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::iter_t> (>iter_t, iter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sItMMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::citer_t> (>citer_t, citer_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCItMMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::riter_t> (>riter_t, riter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sRItMMap, nNumEntriesPair);
+	TestBTreeKeySortSTLifInsertViaIteratorPairEx (BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_PART, "target::insert<std::multimap::criter_t> (>criter_t, criter_t<)", (int) (nNumEntries / 4), 0, &sKeySortTargetPair, &sMMap, sKeySortPairData, sCIterTargetPair, sCRItMMap, nNumEntriesPair);
 }
 
-template <class _t_container, class _t_pair_container>
-void TestBTreeKeySortSTLifSwap (_t_container *pContainer, _t_pair_container *pPairContainer, uint32_t nNumEntries)
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySortSTLifSwap (_t_container *pContainer, _t_pair_container *pPairContainer, typename _t_container::size_type nNumEntries)
 {
 	typedef typename _t_container::const_iterator						citer_t;
 
 	typedef typename _t_pair_container::const_iterator					citer_pair_t;
-	
-	uint32_t						nLastKey = 0;
-	_t_container					sContainerTarget (*pContainer);
-	_t_container					sContainerRef (*pContainer);
-	_t_container					sContainerTargetRef (*pContainer);
-	_t_pair_container				sContainerPairTarget (*pPairContainer);
-	_t_pair_container				sContainerPairRef (*pPairContainer);
-	_t_pair_container				sContainerPairTargetRef (*pPairContainer);
-	uint32_t						i;
 
-	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeysort<>:: swap ()" << endl;
+	typename _t_container::key_type			nLastKey = 0;
+	typename _t_pair_container::size_type	nNumEntriesPair = (typename _t_pair_container::size_type) nNumEntries;
+	_t_container							sContainerTarget (*pContainer);
+	_t_container							sContainerRef (*pContainer);
+	_t_container							sContainerTargetRef (*pContainer);
+	_t_pair_container						sContainerPairTarget (*pPairContainer);
+	_t_pair_container						sContainerPairRef (*pPairContainer);
+	_t_pair_container						sContainerPairTargetRef (*pPairContainer);
+	typename _t_pair_container::size_type	i;
+
+	::std::cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeysort<>:: swap ()" << ::std::endl;
 
 	associative_container_add_primitive (pContainer, nNumEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
-	sContainerRef.template insert<citer_t> (pContainer->cbegin (), pContainer->cend ());
+	sContainerRef.insert (pContainer->cbegin (), pContainer->cend ());
 
 	if ((*pContainer) != sContainerRef)
 	{
-		cerr << "ERROR: Unexpected keysort mismatch!" << endl;
+		::std::cerr << "ERROR: Unexpected keysort mismatch!" << ::std::endl;
 
 		exit (-1);
 	}
 
 	associative_container_add_primitive (&sContainerTarget, nNumEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
-	sContainerTargetRef.template insert<citer_t> (sContainerTarget.cbegin (), sContainerTarget.cend ());
+	sContainerTargetRef.insert (sContainerTarget.cbegin (), sContainerTarget.cend ());
 
 	if (sContainerTarget != sContainerTargetRef)
 	{
-		cerr << "ERROR: Unexpected target mismatch!" << endl;
+		::std::cerr << "ERROR: Unexpected target mismatch!" << ::std::endl;
 
 		exit (-1);
 	}
@@ -1697,14 +1390,14 @@ void TestBTreeKeySortSTLifSwap (_t_container *pContainer, _t_pair_container *pPa
 
 	if ((*pContainer) != sContainerTargetRef)
 	{
-		cerr << "ERROR: array mismatches target reference!" << endl;
+		::std::cerr << "ERROR: array mismatches target reference!" << ::std::endl;
 
 		exit (-1);
 	}
 
 	if (sContainerTarget != sContainerRef)
 	{
-		cerr << "ERROR: target mismatches array reference!" << endl;
+		::std::cerr << "ERROR: target mismatches array reference!" << ::std::endl;
 
 		exit (-1);
 	}
@@ -1713,41 +1406,41 @@ void TestBTreeKeySortSTLifSwap (_t_container *pContainer, _t_pair_container *pPa
 
 	if ((*pContainer) != sContainerRef)
 	{
-		cerr << "ERROR: array mismatches array reference!" << endl;
+		::std::cerr << "ERROR: array mismatches array reference!" << ::std::endl;
 
 		exit (-1);
 	}
 
 	if (sContainerTarget != sContainerTargetRef)
 	{
-		cerr << "ERROR: target mismatches target reference!" << endl;
+		::std::cerr << "ERROR: target mismatches target reference!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	for (i = 0; i < nNumEntries; i++)
+	for (i = 0; i < nNumEntriesPair; i++)
 	{
 		keySortPair_t			sEntryPair (generate_rand32 (), {generate_rand32 (), g_nDebug});
-		
+
 		g_nDebug++;
 
 		pPairContainer->insert (sEntryPair);
 
-		cout << i << " / " << nNumEntries << "\r";
+		::std::cout << i << " / " << nNumEntriesPair << "\r";
 	}
 
-	cout << i << " / " << nNumEntries << endl;
+	::std::cout << i << " / " << nNumEntriesPair << ::std::endl;
 
-	sContainerPairRef.template insert<citer_pair_t> (pPairContainer->cbegin (), pPairContainer->cend ());
+	sContainerPairRef.insert (pPairContainer->cbegin (), pPairContainer->cend ());
 
 	if (((_t_pair_container &) *pPairContainer) != sContainerPairRef)
 	{
-		cerr << "ERROR: Unexpected keysort mismatch! (pair)" << endl;
+		::std::cerr << "ERROR: Unexpected keysort mismatch! (pair)" << ::std::endl;
 
 		exit (-1);
 	}
 
-	for (i = 0; i < nNumEntries; i++)
+	for (i = 0; i < nNumEntriesPair; i++)
 	{
 		keySortPair_t			sEntryPair (generate_rand32 (), {generate_rand32 (), g_nDebug});
 
@@ -1755,16 +1448,16 @@ void TestBTreeKeySortSTLifSwap (_t_container *pContainer, _t_pair_container *pPa
 
 		sContainerPairTarget.insert (sEntryPair);
 
-		cout << i << " / " << nNumEntries << "\r";
+		::std::cout << i << " / " << nNumEntriesPair << "\r";
 	}
 
-	cout << i << " / " << nNumEntries << endl;
+	::std::cout << i << " / " << nNumEntriesPair << ::std::endl;
 
-	sContainerPairTargetRef.template insert<citer_pair_t> (sContainerPairTarget.cbegin (), sContainerPairTarget.cend ());
+	sContainerPairTargetRef.insert (sContainerPairTarget.cbegin (), sContainerPairTarget.cend ());
 
 	if (sContainerPairTarget != sContainerPairTargetRef)
 	{
-		cerr << "ERROR: Unexpected target mismatch! (pair)" << endl;
+		::std::cerr << "ERROR: Unexpected target mismatch! (pair)" << ::std::endl;
 
 		exit (-1);
 	}
@@ -1773,14 +1466,14 @@ void TestBTreeKeySortSTLifSwap (_t_container *pContainer, _t_pair_container *pPa
 
 	if (((_t_pair_container &) *pPairContainer) != sContainerPairTargetRef)
 	{
-		cerr << "ERROR: array mismatches target reference! (pair)" << endl;
+		::std::cerr << "ERROR: array mismatches target reference! (pair)" << ::std::endl;
 
 		exit (-1);
 	}
 
 	if (sContainerPairTarget != sContainerPairRef)
 	{
-		cerr << "ERROR: target mismatches array reference! (pair)" << endl;
+		::std::cerr << "ERROR: target mismatches array reference! (pair)" << ::std::endl;
 
 		exit (-1);
 	}
@@ -1789,66 +1482,102 @@ void TestBTreeKeySortSTLifSwap (_t_container *pContainer, _t_pair_container *pPa
 
 	if (((_t_pair_container &) *pPairContainer) != sContainerPairRef)
 	{
-		cerr << "ERROR: array mismatches array reference! (pair)" << endl;
+		::std::cerr << "ERROR: array mismatches array reference! (pair)" << ::std::endl;
 
 		exit (-1);
 	}
 
 	if (sContainerPairTarget != sContainerPairTargetRef)
 	{
-		cerr << "ERROR: target mismatches target reference! (pair)" << endl;
+		::std::cerr << "ERROR: target mismatches target reference! (pair)" << ::std::endl;
 
 		exit (-1);
 	}
 }
 
-template <class _t_container, class _t_pair_container>
-void TestBTreeKeySortSTLifFind (_t_container *pContainer, _t_pair_container *pPairContainer, uint32_t nNumEntries)
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySortSTLifFind (_t_container *pContainer, _t_pair_container *pPairContainer, typename _t_container::size_type nNumEntries)
 {
 	typedef typename _t_container::const_iterator				citer_t;
 
 	typedef typename _t_pair_container::const_iterator			citer_pair_t;
-	
-	uint32_t						nLastKey = 1;
-	uint32_t						i;
-	citer_t							sCIter;
-	citer_t							sCIterRslt;
-	citer_pair_t					sCItPair;
-	citer_pair_t					sCItPairRslt;
 
-	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeysort<>:: find ()" << endl;
+	typename _t_container::key_type			nLastKey = 1;
+	typename _t_container::key_type			nKey;
+	typename _t_pair_container::key_type	nPairKey;
+	typename _t_pair_container::size_type	nNumEntriesPair = (typename _t_pair_container::size_type) nNumEntries;
+	typename _t_pair_container::size_type	i;
+	citer_t									sCIter;
+	citer_t									sCIterRslt;
+	citer_pair_t							sCItPair;
+	citer_pair_t							sCItPairRslt;
+
+	::std::cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeysort<>:: find ()" << ::std::endl;
 
 	associative_container_add_primitive (pContainer, nNumEntries, nLastKey, BTREETEST_KEY_GENERATION_ASCEND);
 
 	for (sCIter = pContainer->cbegin (); sCIter != pContainer->cend (); sCIter++)
 	{
-		sCIterRslt = pContainer->find (get_entry_key (*sCIter));
+		nKey = get_entry_key (*sCIter);
+
+		if ((nKey & 0x1) == 0x0)
+		{
+			sCIterRslt = pContainer->find (nKey);
+		}
+		else
+		{
+			sCIterRslt = ((const _t_container *) pContainer)->find (nKey);
+		}
 
 		if (sCIter != sCIterRslt)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifFind: ERROR: iterator mismatch!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: iterator mismatch!" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 
-	sCIterRslt = pContainer->find (0);
+	nKey = 0;
+
+	sCIterRslt = pContainer->find (nKey);
 
 	if (sCIterRslt != pContainer->cend ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on lower bound check!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on lower bound check!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sCIterRslt = pContainer->find (nNumEntries + 1);
+	sCIterRslt = ((const _t_container *) pContainer)->find (nKey);
 
 	if (sCIterRslt != pContainer->cend ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on upper bound check!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on lower bound check! (const)" << ::std::endl;
+
+		exit (-1);
+	}
+
+	nKey = nNumEntries + 1;
+
+	sCIterRslt = pContainer->find (nKey);
+
+	if (sCIterRslt != pContainer->cend ())
+	{
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on upper bound check!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	sCIterRslt = ((const _t_container *) pContainer)->find (nKey);
+
+	if (sCIterRslt != pContainer->cend ())
+	{
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on upper bound check! (const)" << ::std::endl;
 
 		exit (-1);
 	}
@@ -1856,66 +1585,102 @@ void TestBTreeKeySortSTLifFind (_t_container *pContainer, _t_pair_container *pPa
 	for (i = 0; i < nNumEntries; i++)
 	{
 		keySortPair_t		sEntryPair (i + 1, {generate_rand32 (), g_nDebug});
-		
+
 		g_nDebug++;
 
 		pPairContainer->insert (sEntryPair);
 
-		cout << i << " / " << nNumEntries << "\r";
+		::std::cout << i << " / " << nNumEntries << "\r";
 	}
 
-	cout << i << " / " << nNumEntries << endl;
+	::std::cout << i << " / " << nNumEntries << ::std::endl;
 
 	for (sCItPair = pPairContainer->cbegin (); sCItPair != pPairContainer->cend (); sCItPair++)
 	{
-		sCItPairRslt = pPairContainer->find (get_entry_key (*sCItPair));
+		nPairKey = get_entry_key (*sCItPair);
+
+		if ((nPairKey & 0x1) == 0x0)
+		{
+			sCItPairRslt = pPairContainer->find (nPairKey);
+		}
+		else
+		{
+			sCItPairRslt = ((const _t_pair_container *) pPairContainer)->find (nPairKey);
+		}
 
 		if (sCItPair != sCItPairRslt)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifFind: ERROR: iterator mismatch! (pair)" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: iterator mismatch! (pair)" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 
-	sCItPairRslt = pPairContainer->find (0);
+	nPairKey = 0;
+
+	sCItPairRslt = pPairContainer->find (nPairKey);
 
 	if (sCItPairRslt != pPairContainer->cend ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on lower bound check! (pair)" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on lower bound check! (pair)" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sCItPairRslt = pPairContainer->find (nNumEntries + 1);
+	sCItPairRslt = ((const _t_pair_container *) pPairContainer)->find (nPairKey);
 
 	if (sCItPairRslt != pPairContainer->cend ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on upper bound check! (pair)" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on lower bound check! (const pair)" << ::std::endl;
+
+		exit (-1);
+	}
+
+	nPairKey = nNumEntries + 1;
+
+	sCItPairRslt = pPairContainer->find (nPairKey);
+
+	if (sCItPairRslt != pPairContainer->cend ())
+	{
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on upper bound check! (pair)" << ::std::endl;
+
+		exit (-1);
+	}
+
+	sCItPairRslt = ((const _t_pair_container *) pPairContainer)->find (nPairKey);
+
+	if (sCItPairRslt != pPairContainer->cend ())
+	{
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifFind: ERROR: find () didn't return cend () on upper bound check! (const pair)" << ::std::endl;
 
 		exit (-1);
 	}
 }
 
-template <class _t_container, class _t_pair_container>
-void TestBTreeKeySortSTLifLowerBoundUpperBound (_t_container *pContainer, _t_pair_container *pPairContainer, uint32_t nNumEntries, uint32_t nInstance)
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySortSTLifLowerBoundUpperBound (_t_container *pContainer, _t_pair_container *pPairContainer, typename _t_container::size_type nNumEntries, uint32_t nInstance)
 {
 	typedef typename _t_container::const_iterator			citer_t;
 
 	typedef typename _t_pair_container::const_iterator		citer_pair_t;
-	
-	uint32_t						nLastKey;
-	uint32_t						i;
-	uint32_t						j;
-	citer_t							sCIterLower;
-	citer_t							sCIterUpper;
-	citer_pair_t					sCItPairLower;
-	citer_pair_t					sCItPairUpper;
 
-	cout << "exercises methods compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeysort<>:: lower_bound () upper_bound () count ()" << endl;
+	typename _t_container::key_type			nLastKey;
+	typename _t_container::key_type			nKey;
+	typename _t_pair_container::key_type	nPairKey;
+	typename _t_pair_container::size_type	nNumEntriesPair = (typename _t_pair_container::size_type) nNumEntries;
+	uint32_t								i;
+	uint32_t								j;
+	citer_t									sCIterLower;
+	citer_t									sCIterUpper;
+	citer_pair_t							sCItPairLower;
+	citer_pair_t							sCItPairUpper;
+
+	::std::cout << "exercises methods compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeysort<>:: lower_bound () upper_bound () count ()" << ::std::endl;
 
 	for (i = 0; i < nInstance; i++)
 	{
@@ -1926,44 +1691,50 @@ void TestBTreeKeySortSTLifLowerBoundUpperBound (_t_container *pContainer, _t_pai
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		sCIterLower = pContainer->lower_bound (i + 1);
-		sCIterUpper = pContainer->upper_bound (i + 1);
+		nKey = i + 1;
+
+		sCIterLower = pContainer->lower_bound (nKey);
+		sCIterUpper = pContainer->upper_bound (nKey);
 
 		::std::advance (sCIterLower, (int) nInstance);
 
 		if (sCIterLower != sCIterUpper)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: boundary mismatch!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: boundary mismatch!" << ::std::endl;
 
 			exit (-1);
 		}
 
-		if (pContainer->count (i + 1) != nInstance)
+		if (pContainer->count (nKey) != nInstance)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: count () returned with unexpected value!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: count () returned with unexpected value!" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 
-	sCIterLower = pContainer->lower_bound (0);
+	nKey = 0;
+
+	sCIterLower = pContainer->lower_bound (nKey);
 
 	if (sCIterLower != pContainer->cbegin ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: lower_bound () didn't return cbegin () when testing for lowest key!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: lower_bound () didn't return cbegin () when testing for lowest key!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sCIterUpper = pContainer->upper_bound (nNumEntries + 1);
+	nKey = nNumEntries + 1;
+
+	sCIterUpper = pContainer->upper_bound (nKey);
 
 	if (sCIterUpper != pContainer->cend ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: upper_bound () didn't return cend () when testing for lowest key!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: upper_bound () didn't return cend () when testing for lowest key!" << ::std::endl;
 
 		exit (-1);
 	}
@@ -1979,68 +1750,138 @@ void TestBTreeKeySortSTLifLowerBoundUpperBound (_t_container *pContainer, _t_pai
 			pPairContainer->insert (sEntryPair);
 		}
 
-		cout << i << " / " << nNumEntries << "\r";
+		::std::cout << i << " / " << nNumEntries << "\r";
 	}
 
-	cout << i << " / " << nNumEntries << endl;
+	::std::cout << i << " / " << nNumEntries << ::std::endl;
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		sCItPairLower = pPairContainer->lower_bound (i + 1);
-		sCItPairUpper = pPairContainer->upper_bound (i + 1);
+		nPairKey = i + 1;
+
+		sCItPairLower = pPairContainer->lower_bound (nPairKey);
+		sCItPairUpper = pPairContainer->upper_bound (nPairKey);
 
 		::std::advance (sCItPairLower, (int) nInstance);
 
 		if (sCItPairLower != sCItPairUpper)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: boundary mismatch! (pair)" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: boundary mismatch! (pair)" << ::std::endl;
 
 			exit (-1);
 		}
 
-		if (pPairContainer->count (i + 1) != nInstance)
+		if (pPairContainer->count (nPairKey) != nInstance)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: count () returned with unexpected value! (pair)" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: count () returned with unexpected value! (pair)" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 
-	sCItPairLower = pPairContainer->lower_bound (0);
+	nPairKey = 0;
+
+	sCItPairLower = pPairContainer->lower_bound (nPairKey);
 
 	if (sCItPairLower != pPairContainer->cbegin ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: lower_bound () didn't return cbegin () when testing for lowest key! (pair)" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: lower_bound () didn't return cbegin () when testing for lowest key! (pair)" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sCItPairUpper = pPairContainer->upper_bound (nNumEntries + 1);
+	nPairKey = nNumEntries + 1;
+
+	sCItPairUpper = pPairContainer->upper_bound (nPairKey);
 
 	if (sCItPairUpper != pPairContainer->cend ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: upper_bound () didn't return cend () when testing for lowest key! (pair)" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeKeySortSTLifLowerBoundUpperBound: ERROR: upper_bound () didn't return cend () when testing for lowest key! (pair)" << ::std::endl;
 
 		exit (-1);
 	}
 }
 
-template <class _t_container, class _t_pair_container>
-void TestBTreeKeySortSTLifEraseViaIterator (_t_container *pContainer, _t_pair_container *pPairContainer, uint32_t nNumEntries)
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySortCCsetIterData (_t_container *pContainer, _t_pair_container *pPairContainer, typename _t_container::size_type nNumEntries)
+{
+	typedef typename _t_container::const_iterator		citer_t;
+	typedef typename _t_container::value_type			value_type;
+	typedef typename _t_container::key_type				key_type;
+	typedef typename _t_container::size_type			size_type;
+
+	typedef typename _t_pair_container::const_iterator	citer_pair_t;
+	typedef typename _t_pair_container::value_type		value_pair_type;
+	typedef typename _t_pair_container::key_type		key_pair_type;
+	typedef typename _t_pair_container::size_type		size_pair_type;
+
+	key_type								nLastKey = 0;
+	key_pair_type							nLastPairKey = 0;
+	citer_t									sCIter;
+	citer_pair_t							sCItPair;
+	size_type								i;
+	size_pair_type							ip;
+
+	::std::cout << "this test exercises method CBTreeKeysort<>::set_iter_data ()" << ::std::endl;
+
+	associative_container_add_primitive (pContainer, nNumEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
+
+	for (i = 0; i < pContainer->size (); i++)
+	{
+		get_begin (pContainer, sCIter);
+
+		::std::advance (sCIter, i);
+
+		value_type			sValue (*sCIter);
+
+		set_entry_data (sValue, ~get_entry_data (sValue));
+
+		if ((i & 0x1) != 0x0)
+		{
+			set_entry_key (sValue, ~get_entry_key (sValue));
+		}
+
+		pContainer->set_iter_data (sCIter, sValue);
+	}
+
+	associative_container_add_primitive (pPairContainer, nNumEntries, nLastPairKey, BTREETEST_KEY_GENERATION_RANDOM);
+
+	for (ip = 0; ip < pPairContainer->size (); ip++)
+	{
+		get_begin (pPairContainer, sCItPair);
+
+		::std::advance (sCItPair, ip);
+
+		value_pair_type			sPairValue (*sCItPair);
+
+		set_entry_data (sPairValue, ~get_entry_data (sPairValue));
+
+		if ((ip & 0x1) != 0x0)
+		{
+			set_entry_key (sPairValue, ~get_entry_key (sPairValue));
+		}
+
+		pPairContainer->set_iter_data (sCItPair, sPairValue);
+	}
+}
+
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySortSTLifEraseViaIterator (_t_container *pContainer, _t_pair_container *pPairContainer, typename _t_container::size_type nNumEntries)
 {
 	typedef typename _t_container::const_iterator					citer_t;
 
 	typedef typename _t_container::size_type						size_type;
+	typedef typename _t_container::key_type							key_type;
 
 	typedef typename _t_pair_container::const_iterator				citer_pair_t;
 
 	typedef typename _t_pair_container::size_type					size_type_pair;
-	
-	uint32_t									nLastKey = 0;
+
+	key_type									nLastKey = 0;
 	citer_t										sCIter;
 	citer_t										sCIterRslt;
 	size_type									nIter;
@@ -2050,8 +1891,9 @@ void TestBTreeKeySortSTLifEraseViaIterator (_t_container *pContainer, _t_pair_co
 	citer_pair_t								sCIterPairRslt;
 	size_type_pair								nIterPair;
 	size_type_pair								nIterPairRslt;
+	size_type_pair								nNumEntriesPair = (size_type_pair) nNumEntries;
 
-	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: erase (const_iterator)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: erase (const_iterator)" << ::std::endl;
 
 	associative_container_add_primitive (pContainer, nNumEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
 
@@ -2069,8 +1911,8 @@ void TestBTreeKeySortSTLifEraseViaIterator (_t_container *pContainer, _t_pair_co
 
 		if (nIter != nIterRslt)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifEraseViaIterator: returned iterator mismatches!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifEraseViaIterator: returned iterator mismatches!" << ::std::endl;
 
 			exit (-1);
 		}
@@ -2085,10 +1927,10 @@ void TestBTreeKeySortSTLifEraseViaIterator (_t_container *pContainer, _t_pair_co
 
 		pPairContainer->insert (sKeySortPairData);
 
-		cout << i << " / " << nNumEntries << "\r";
+		::std::cout << i << " / " << nNumEntries << "\r";
 	}
 
-	cout << i << " / " << nNumEntries << endl;
+	::std::cout << i << " / " << nNumEntries << ::std::endl;
 
 	while (pPairContainer->size () > 0)
 	{
@@ -2104,32 +1946,36 @@ void TestBTreeKeySortSTLifEraseViaIterator (_t_container *pContainer, _t_pair_co
 
 		if (nIterPair != nIterPairRslt)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifEraseViaIterator: returned iterator (pair type) mismatches!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifEraseViaIterator: returned iterator (pair type) mismatches!" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 }
 
-template <class _t_container, class _t_pair_container>
-void TestBTreeKeySortSTLifEraseViaKey (_t_container *pContainer, _t_pair_container *pPairContainer, uint32_t nNumEntries, uint32_t nInstances)
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySortSTLifEraseViaKey (_t_container *pContainer, _t_pair_container *pPairContainer, typename _t_container::size_type nNumEntries, uint32_t nInstances)
 {
-	typedef typename _t_container::const_iterator										citer_t;
+	typedef typename _t_container::const_iterator			citer_t;
 
-	typedef typename _t_container::size_type											size_type;
+	typedef typename _t_container::size_type				size_type;
+	typedef typename _t_container::key_type					key_type;
 
-	typedef typename _t_pair_container::const_iterator									citer_pair_t;
-	
-	uint32_t									nLastKey;
+	typedef typename _t_pair_container::const_iterator		citer_pair_t;
+
+	typedef typename _t_pair_container::key_type			key_type_pair;
+
+	key_type									nLastKey;
 	citer_t										sCIter;
 	uint32_t									i;
 	size_type									nRslt;
 	uint32_t									j;
 	citer_pair_t								sCIterPair;
-	uint32_t									nKey;
+	key_type									nKey;
+	key_type_pair								nKeyPair;
 
-	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: erase (const _t_key)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: erase (const _t_key)" << ::std::endl;
 
 	for (i = 0; i < nInstances; i++)
 	{
@@ -2150,8 +1996,8 @@ void TestBTreeKeySortSTLifEraseViaKey (_t_container *pContainer, _t_pair_contain
 
 		if (nRslt != nInstances)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifEraseViaKey: unexpected number of items deleted!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifEraseViaKey: unexpected number of items deleted!" << ::std::endl;
 
 			exit (-1);
 		}
@@ -2159,22 +2005,22 @@ void TestBTreeKeySortSTLifEraseViaKey (_t_container *pContainer, _t_pair_contain
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		nKey = generate_rand32 ();
+		nKeyPair = generate_rand32 ();
 
 		for (j = 0; j < nInstances; j++)
 		{
 			keySortMap_t					sKeySortMap = {generate_rand32 (), g_nDebug};
-			keySortPair_t					sKeySortPairData (nKey, sKeySortMap);
+			keySortPair_t					sKeySortPairData (nKeyPair, sKeySortMap);
 
 			g_nDebug++;
 
 			pPairContainer->insert (sKeySortPairData);
 		}
 
-		cout << i << " / " << nNumEntries << "\r";
+		::std::cout << i << " / " << nNumEntries << "\r";
 	}
 
-	cout << i << " / " << nNumEntries << endl;
+	::std::cout << i << " / " << nNumEntries << ::std::endl;
 
 	while (pPairContainer->size () > 0)
 	{
@@ -2182,33 +2028,35 @@ void TestBTreeKeySortSTLifEraseViaKey (_t_container *pContainer, _t_pair_contain
 
 		::std::advance (sCIterPair, (int) (generate_rand32 () % pPairContainer->size ()));
 
-		nKey = (*sCIterPair).first;
+		nKeyPair = (*sCIterPair).first;
 
-		nRslt = pPairContainer->erase (nKey);
+		nRslt = pPairContainer->erase (nKeyPair);
 
 		if (nRslt != nInstances)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifEraseViaKey: unexpected number of items deleted! (pair)" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifEraseViaKey: unexpected number of items deleted! (pair)" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 }
 
-template <class _t_container, class _t_pair_container>
-void TestBTreeKeySortSTLifEraseViaIteratorMultiple (_t_container *pContainer, _t_pair_container *pPairContainer, uint32_t nNumEntries, uint32_t nInstances)
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySortSTLifEraseViaIteratorMultiple (_t_container *pContainer, _t_pair_container *pPairContainer, typename _t_container::size_type nNumEntries, uint32_t nInstances)
 {
 	typedef typename _t_container::const_iterator				citer_t;
 
 	typedef typename _t_container::size_type					size_type;
+	typedef typename _t_container::key_type						key_type;
 
 	typedef typename _t_pair_container::const_iterator			citer_pair_t;
 
 	typedef typename _t_pair_container::size_type				size_type_pair;
-	
+	typedef typename _t_pair_container::key_type				key_type_pair;
+
 	uint32_t									nDebug = 0;
-	uint32_t									nLastKey;
+	key_type									nLastKey;
 	citer_t										sCIterBegin;
 	citer_t										sCIterEnd;
 	citer_t										sCIterRslt;
@@ -2221,9 +2069,10 @@ void TestBTreeKeySortSTLifEraseViaIteratorMultiple (_t_container *pContainer, _t
 	citer_pair_t								sCIterPairRslt;
 	size_type_pair								nIterPairBegin;
 	size_type_pair								nIterPairRslt;
-	uint32_t									nKey;
+	key_type_pair								nKeyPair;
+	size_type_pair								nNumEntriesPair = (size_type_pair) nNumEntries;
 
-	cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: erase (const_iterator, const_iterator)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeBaseDefaults<>::CBTreeKeySort<>:: erase (const_iterator, const_iterator)" << ::std::endl;
 
 	for (i = 0; i < nInstances; i++)
 	{
@@ -2251,8 +2100,8 @@ void TestBTreeKeySortSTLifEraseViaIteratorMultiple (_t_container *pContainer, _t
 
 		if (nIterRslt != nIterBegin)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifEraseViaIteratorMultiple: returned iterator mismatches!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifEraseViaIteratorMultiple: returned iterator mismatches!" << ::std::endl;
 
 			exit (-1);
 		}
@@ -2260,22 +2109,22 @@ void TestBTreeKeySortSTLifEraseViaIteratorMultiple (_t_container *pContainer, _t
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		nKey = generate_rand32 ();
+		nKeyPair = generate_rand32 ();
 
 		for (j = 0; j < nInstances; j++)
 		{
 			keySortMap_t				sKeySortMap = {generate_rand32 (), g_nDebug};
-			keySortPair_t				sKeySortPairData (nKey, sKeySortMap);
+			keySortPair_t				sKeySortPairData (nKeyPair, sKeySortMap);
 
 			g_nDebug++;
 
 			pPairContainer->insert (sKeySortPairData);
 		}
 
-		cout << i << " / " << nNumEntries << "\r";
+		::std::cout << i << " / " << nNumEntries << "\r";
 	}
 
-	cout << i << " / " << nNumEntries << endl;
+	::std::cout << i << " / " << nNumEntries << ::std::endl;
 
 	while (pPairContainer->size () > 0)
 	{
@@ -2293,17 +2142,222 @@ void TestBTreeKeySortSTLifEraseViaIteratorMultiple (_t_container *pContainer, _t
 
 		if (nIterPairRslt != nIterPairBegin)
 		{
-			cerr << endl;
-			cerr << "TestBTreeKeySortSTLifEraseViaKey: returned iterator (pair type) mismatches!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeKeySortSTLifEraseViaKey: returned iterator (pair type) mismatches!" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 }
 
-void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, CBTreeKeySortTestWrapper<keySortEntry_t, keySortEntry_t, keysort_reference_t> *pKeySortTestWrapper, CBTreeKeySortTestWrapper<keySortPair_t, keySortPair_t, keysort_reference_t> *pKeySortPairTestWrapper)
+template<class _t_container>
+void TestBTreeKeySortCCoperatorOverloadCompare (_t_container *pContainer, typename _t_container::size_type nNumEntries)
 {
-	cout << "b-tree keysort test bench selected" << endl;
+	typedef typename _t_container::iterator						iter_t;
+	typedef typename _t_container::const_iterator				citer_t;
+
+	typedef typename _t_container::size_type					size_type;
+	typedef typename _t_container::key_type						key_type;
+	typedef typename _t_container::value_type					value_type;
+
+	_t_container		sCntContainer (*pContainer);
+	key_type			nLastKey = 0;
+	citer_t				sCIterHalf;
+	citer_t				sCIterEnd;
+
+	associative_container_add_primitive (pContainer, nNumEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
+
+	if (!pContainer->compare_individual_containers (*pContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container A not equal to container A" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (!sCntContainer.compare_individual_containers (sCntContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! empty container B not equal to empty container B" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (pContainer->compare_individual_containers (sCntContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container A equal to empty container B" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (sCntContainer.compare_individual_containers (*pContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! empty container B equal to container A" << ::std::endl;
+
+		exit (-1);
+	}
+
+	nLastKey = 2;
+
+	associative_container_add_primitive (&sCntContainer, nNumEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
+
+	if (pContainer->compare_individual_containers (sCntContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container A equal to container B" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (sCntContainer.compare_individual_containers (*pContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container B equal to container A" << ::std::endl;
+
+		exit (-1);
+	}
+
+	sCntContainer.clear ();
+
+	nLastKey = 0;
+
+	associative_container_add_primitive (&sCntContainer, nNumEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
+
+	if (!pContainer->compare_individual_containers (sCntContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container A containing the same data as container B not equal to container B containing the same data as container A" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (!sCntContainer.compare_individual_containers (*pContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container B containing the same data as container A not equal to container A containing the same data as container B" << ::std::endl;
+
+		exit (-1);
+	}
+
+	get_begin (&sCntContainer, sCIterHalf);
+	get_end (&sCntContainer, sCIterEnd);
+
+	::std::advance (sCIterHalf, nNumEntries / 2);
+
+	sCntContainer.erase (sCIterHalf, sCIterEnd);
+
+	if (pContainer->compare_individual_containers (sCntContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container A containing the same data as container B and more not equal to container B containing the first half data of container A" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (sCntContainer.compare_individual_containers (*pContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container B containing the first half data of container A not equal to container A containing the same data as container B and more" << ::std::endl;
+
+		exit (-1);
+	}
+
+	associative_container_add_primitive (pContainer, nNumEntries, nLastKey, BTREETEST_KEY_GENERATION_RANDOM);
+
+	{
+		sCntContainer = *pContainer;
+
+		iter_t			sIter;
+
+		get_begin (&sCntContainer, sIter);
+
+		size_type		nSteps = generate_rand32 () % (nNumEntries * 2);
+
+		::std::advance (sIter, nSteps);
+
+		value_type		sValue = *sIter;
+		key_type		sKey = get_entry_key (sValue);
+
+		sKey = ~sKey;
+
+		set_entry_key (sValue, sKey);
+
+		sCntContainer.erase (sIter);
+
+		sCntContainer.insert (sValue);
+
+		if (pContainer->compare_individual_containers (sCntContainer))
+		{
+			::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container A with one or two different key sets different from container B equal to container B" << ::std::endl;
+
+			exit (-1);
+		}
+	}
+
+	{
+		sCntContainer = *pContainer;
+
+		iter_t			sIter;
+
+		get_begin (&sCntContainer, sIter);
+
+		::std::advance (sIter, generate_rand32 () % (nNumEntries * 2));
+
+		value_type		sValue = *sIter;
+
+		set_entry_data (sValue, ~get_entry_data (sValue));
+
+		sCntContainer.erase (sIter);
+
+		sCntContainer.insert (sValue);
+
+		if (pContainer->compare_individual_containers (sCntContainer))
+		{
+			::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container A with one different data entry different from container B equal to container B" << ::std::endl;
+
+			exit (-1);
+		}
+	}
+
+	pContainer->clear ();
+	sCntContainer.clear ();
+
+	nLastKey = 0;
+
+	associative_container_add_primitive (pContainer, 64, nLastKey, BTREETEST_KEY_GENERATION_CONST);
+
+	sCntContainer = *pContainer;
+
+	if (!pContainer->compare_individual_containers (sCntContainer))
+	{
+		::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container A not equal to container B - with container A and B each containing a large key set" << ::std::endl;
+
+		exit (-1);
+	}
+
+	{
+		iter_t			sIter;
+
+		get_begin (&sCntContainer, sIter);
+
+		::std::advance (sIter, generate_rand32 () % sCntContainer.size ());
+
+		value_type		sValue = *sIter;
+
+		set_entry_data (sValue, ~get_entry_data (sValue));
+
+		sCntContainer.erase (sIter);
+
+		sCntContainer.insert (sValue);
+
+		if (pContainer->compare_individual_containers (sCntContainer))
+		{
+			::std::cerr << "TestBTreeKeySortCCoperatorOverloadCompare: ERROR: Unexpected result! container A equal to container B - with container A and B each containing a large key set and one data entry different" << ::std::endl;
+
+			exit (-1);
+		}
+	}
+
+	pContainer->clear ();
+	sCntContainer.clear ();
+}
+
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pKeySortTestWrapper, _t_pair_container *pKeySortPairTestWrapper)
+{
+	::std::cout << "b-tree keysort test bench selected" << ::std::endl;
 
 	switch (nTest)
 	{
@@ -2523,8 +2577,6 @@ void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, C
 
 	case BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR	:
 		{
-			CBTreeIOpropertiesRAM		sRAMproperties;
-			CBTreeIOpropertiesFile		sFileProperties ("./");
 			bayerTreeCacheDescription_t	sCacheDesc = {nPageSize};
 
 			TestBTreeKeySortSTLifInsertViaIterator (pKeySortTestWrapper, pKeySortPairTestWrapper, 64, &sCacheDesc, nNodeSize);
@@ -2574,9 +2626,26 @@ void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, C
 			break;
 		}
 
+	case BTREETEST_KEYSORT_CC_SET_ITER_DATA	:
+		{
+			TestBTreeKeySortCCsetIterData (pKeySortTestWrapper, pKeySortPairTestWrapper, 16);
+
+			break;
+		}
+
+	case BTREETEST_KEYSORT_CC_OPERATOR_OVERLOAD_COMPARE:
+		{
+			TestBTreeKeySortCCoperatorOverloadCompare (pKeySortTestWrapper, 16);
+			TestBTreeKeySortCCoperatorOverloadCompare (pKeySortPairTestWrapper, 16);
+
+			break;
+		}
+
 	default									:
 		{
-			cerr << "ERROR: TestBTreeKeySort: Unknown test or test not specified!" << endl;
+			::std::cerr << "ERROR: TestBTreeKeySort: Unknown test or test not specified!" << ::std::endl;
+
+			exit (-1);
 
 			break;
 		}
