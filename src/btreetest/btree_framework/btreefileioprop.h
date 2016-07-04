@@ -17,37 +17,53 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <type_traits>
 #include <string>
 
 #include "btreecommon.h"
 #include "btreeioprop.h"
+#include "btreeiofile.h"
 
-using namespace std;
-
-class CBTreeIOpropertiesFile : public CBTreeIOproperties
+template<class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_addresstype = uint64_t, class _t_offsettype = uint32_t>
+class CBTreeIOpropertiesFile : public CBTreeIOproperties<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
 {
-#define	BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT	1048576ULL
+#define	BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT	((_t_sizetype) 1048576)
 
 public:
 
-					CBTreeIOpropertiesFile					(
+	typedef CBTreeFileIO<CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype> >
+															data_layer_type;
+
+	typedef _t_sizetype										size_type;
+	typedef _t_nodeiter										node_iter_type;
+	typedef _t_subnodeiter									sub_node_iter_type;
+	typedef _t_addresstype									address_type;
+	typedef _t_offsettype									offset_type;
+
+	typedef ::std::true_type								has_latency;
+
+					CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+															(
 																const char *pszPathName, 
-																uint64_t nAddrSpaceSoftLimit = BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT
+																address_type nAddrSpaceSoftLimit = BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT
 															);
 
-					CBTreeIOpropertiesFile					(CBTreeIOpropertiesFile &rBT);
+					CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+															(CBTreeIOpropertiesFile &rBT);
 
-					~CBTreeIOpropertiesFile					();
+					~CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+															();
 
 	const char		*get_pathname							();
 	
-	uint64_t		get_address_space_soft_limit			();
+	address_type	get_address_space_soft_limit			();
 
 protected:
 
-	string			*m_pStrPathNames;
-	uint64_t		m_nAddrSpaceSoftLimit;
+	::std::string	*m_pStrPathNames;
+	address_type	m_nAddrSpaceSoftLimit;
 };
 
 #endif // BTREEIOFILEPROP_H
 
+#include "btreefileioprop.cpp"
