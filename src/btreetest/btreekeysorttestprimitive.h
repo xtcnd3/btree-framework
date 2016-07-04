@@ -23,6 +23,8 @@
 
 typedef CBTreePairTest<const uint32_t, keySortMap_t>										keySortPair_t;
 
+/*** keySortEntry_t ******************/
+
 void container_data_reset (keySortEntry_t &rEntry);
 void container_data_set (keySortEntry_t &rEntry, uint32_t nDebug, uint32_t &nFromWhereOrSeed, btreetest_key_generation_e eGenerator);
 
@@ -33,6 +35,8 @@ uint32_t get_entry_debug (const keySortEntry_t &rEntry);
 void set_entry_key (keySortEntry_t &rEntry, uint32_t nKey);
 void set_entry_data (keySortEntry_t &rEntry, uint32_t nData);
 void set_entry_debug (keySortEntry_t &rEntry, uint32_t nDebug);
+
+/*** _t_pair *************************/
 
 template<class _t_pair>
 void container_data_reset (_t_pair &rEntry)
@@ -81,7 +85,7 @@ void container_data_set (_t_pair &rEntry, uint32_t nDebug, uint32_t &nFromWhereO
 
 		default									:
 		{
-			cerr << "ERROR: container_data_set<keySortEntry_>: eGenerator corrupted or not set!" << endl;
+			::std::cerr << "ERROR: container_data_set<keySortEntry_>: eGenerator corrupted or not set!" << ::std::endl;
 
 			exit (-1);
 
@@ -129,12 +133,36 @@ void set_entry_debug (_t_pair &rEntry, uint32_t nDebug)
 	rEntry.second.nDebug = nDebug;
 }
 
+/*** uint32_t ************************/
+
+void container_data_reset (uint32_t &rEntry);
+void container_data_set (uint32_t &rEntry, uint32_t nDebug, uint32_t &nFromWhereOrSeed, btreetest_key_generation_e eGenerator);
+
+uint32_t get_entry_key (const uint32_t &rEntry);
+uint32_t get_entry_data (const uint32_t &rEntry);
+uint32_t get_entry_debug (const uint32_t &rEntry);
+
+void set_entry_key (uint32_t &rEntry, uint32_t nKey);
+void set_entry_data (uint32_t &rEntry, uint32_t nData);
+void set_entry_debug (uint32_t &rEntry, uint32_t nDebug);
+
+bool is_entry_not_equal_to_entry (const uint32_t &rLhsEntry, const uint32_t &rRhsEntry);
+
+/*** generic *************************/
+
 template<class _t_dest_data, class _t_src_data>
 void entry_conversion (_t_dest_data &rDstData, const _t_src_data &rSrcData)
 {
 	set_entry_key (rDstData, get_entry_key (rSrcData));
 	set_entry_data (rDstData, get_entry_data (rSrcData));
 	set_entry_debug (rDstData, get_entry_debug (rSrcData));
+}
+
+template<class _t_lhs_data, class _t_rhs_data>
+bool is_entry_not_equal_to_entry (const _t_lhs_data &rLhsEntry, const _t_rhs_data &rRhsEntry)
+{
+	return ((get_entry_key (rLhsEntry) != get_entry_key (rRhsEntry)) ||
+			(get_entry_data (rLhsEntry) != get_entry_data (rRhsEntry)));
 }
 
 #endif // BTREEKEYSORTTESTPRIMITIVE_H
