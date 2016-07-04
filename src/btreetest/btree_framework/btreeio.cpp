@@ -16,22 +16,10 @@
 
 #include "btreeio.h"
 
-using namespace std;
-
-// block [0]
-// |- node desciption[0]         -|- maintainence vector-|-algnm-|--- data[0][] ---|-algnm-|--- sub node numbers[0][] ---|-algnm-|--- serVector[0][] ---|-algnm-|	<-- node[0]
-// |- node desciption[1]         -|- maintainence vector-|-algnm-|--- data[1][] ---|-algnm-|--- sub node numbers[1][] ---|-algnm-|--- serVector[1][] ---|-algnm-|	<-- node[1]
-// |- node desciption[2]         -|- maintainence vector-|...
-// ...
-// |- node desciption[(2^n) - 1] -|- maintainence vector-|...
-// data layer block alignment
-// block [1]
-// |- node desciption[2^n]       -|- maintainence vector-|-algnm-|--- data[0][] ---|-algnm-|--- sub node numbers[0][] ---|-algnm-|--- serVector[0][] ---|-algnm-|	<-- node[0]
-
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeIO
+template<class _t_datalayerproperties>
+CBTreeIO<_t_datalayerproperties>::CBTreeIO
 (
-	_t_addresstype nBlockSize, 
+	typename CBTreeIO<_t_datalayerproperties>::address_type nBlockSize, 
 	uint32_t nNumDataPools, 
 	CBTreeIOperBlockPoolDesc_t *psDataPools
 )
@@ -52,8 +40,10 @@ CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeIO
 	}
 
 #if defined (USE_PERFORMANCE_COUNTERS)
+
 	memset ((void *) &m_anHitCtrs, 0, sizeof (m_anHitCtrs));
 	memset ((void *) &m_anMissCtrs, 0, sizeof (m_anMissCtrs));
+
 #endif
 
 #if defined (_DEBUG)
@@ -61,8 +51,8 @@ CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeIO
 #endif
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::~CBTreeIO ()
+template<class _t_datalayerproperties>
+CBTreeIO<_t_datalayerproperties>::~CBTreeIO ()
 {
 	if (m_psDataPools != NULL)
 	{
@@ -70,21 +60,21 @@ CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::~CBTreeIO 
 	}
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_nodeiter CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_maxNodes ()
+template<class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type CBTreeIO<_t_datalayerproperties>::get_maxNodes ()
 {
 	return (m_nMaxNodes);
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_offsettype CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_dataAlignment ()
+template<class _t_datalayerproperties>
+typename CBTreeIO<_t_datalayerproperties>::offset_type CBTreeIO<_t_datalayerproperties>::get_dataAlignment ()
 {
 	// The keyword 'long' has been purposely choosen, since it will make the compiler to return 4 bytes on 32 bit builds and 8 bytes on 64 bit builds, as oppose to uint32_t and uint64_t.
-	return ((_t_offsettype) (sizeof (long)));
+	return ((offset_type) (sizeof (long)));
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-_t_offsettype CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_alignedOffset (_t_offsettype nOffset)
+template<class _t_datalayerproperties>
+typename CBTreeIO<_t_datalayerproperties>::offset_type CBTreeIO<_t_datalayerproperties>::get_alignedOffset (typename CBTreeIO<_t_datalayerproperties>::offset_type nOffset)
 {
 	nOffset += get_dataAlignment () - 1;
 	nOffset /= get_dataAlignment ();
@@ -93,10 +83,11 @@ _t_offsettype CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettyp
 	return (nOffset);
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_performance_counters (uint64_t (&rHitCtrs)[PERFCTR_TERMINATOR], uint64_t (&rMissCtrs)[PERFCTR_TERMINATOR])
+template<class _t_datalayerproperties>
+void CBTreeIO<_t_datalayerproperties>::get_performance_counters (uint64_t (&rHitCtrs)[PERFCTR_TERMINATOR], uint64_t (&rMissCtrs)[PERFCTR_TERMINATOR])
 {
 #if defined (USE_PERFORMANCE_COUNTERS)
+
 	memcpy ((void *) &rHitCtrs, (void *) m_anHitCtrs, sizeof (m_anHitCtrs));
 	memcpy ((void *) &rMissCtrs, (void *) m_anMissCtrs, sizeof (m_anMissCtrs));
 
@@ -114,13 +105,15 @@ void CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_p
 	}
 
 #else
+
 	memset ((void *) &rHitCtrs, 0, sizeof (rHitCtrs));
 	memset ((void *) &rMissCtrs, 0, sizeof (rMissCtrs));
+
 #endif
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-uint32_t CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pool_entry_size (uint32_t nPool)
+template<class _t_datalayerproperties>
+uint32_t CBTreeIO<_t_datalayerproperties>::get_pool_entry_size (uint32_t nPool)
 {
 #if defined (_DEBUG)
 	BTREEDATA_ASSERT (nPool < m_nNumDataPools, "CBTreeIO::get_pool_entry_size: nPool exceeds available block pools!");
@@ -129,26 +122,26 @@ uint32_t CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::g
 	return (m_psDataPools[nPool].nEntrySize);
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_root_node (_t_nodeiter nRootNode)
+template<class _t_datalayerproperties>
+void CBTreeIO<_t_datalayerproperties>::set_root_node (typename _t_datalayerproperties::node_iter_type nRootNode)
 {
 	nRootNode;
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::terminate_access ()
+template<class _t_datalayerproperties>
+void CBTreeIO<_t_datalayerproperties>::terminate_access ()
 {
 
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-void CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::set_cacheFreeze (bool bEnabled)
+template<class _t_datalayerproperties>
+void CBTreeIO<_t_datalayerproperties>::set_cacheFreeze (bool bEnabled)
 {
 	m_bCacheFreeze = bEnabled;
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-uint32_t CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_pool_total_size (uint32_t nPool)
+template<class _t_datalayerproperties>
+uint32_t CBTreeIO<_t_datalayerproperties>::get_pool_total_size (uint32_t nPool)
 {
 #if defined (_DEBUG)
 	BTREEDATA_ASSERT (nPool < m_nNumDataPools, "CBTreeIO::get_pool_total_size: nPool exceeds available block pools!");
