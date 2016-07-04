@@ -37,7 +37,7 @@
 
 #include "btreekeysorttestwrapper.h"
 
-typedef ::std::multimap<const uint32_t, keySortMap_t>			keysort_reference_t;
+typedef ::std::multimap<uint32_t, keySortMap_t>				keysort_reference_t;
 
 typedef enum
 {
@@ -72,7 +72,9 @@ typedef enum
 	BTREETEST_KEYSORT_STL_IF_ERASE_VIA_ITERATOR_MULTIPLE, 
 	BTREETEST_KEYSORT_STL_IF_SWAP, 
 	BTREETEST_KEYSORT_STL_IF_FIND, 
-	BTREETEST_KEYSORT_STL_IF_LOWER_BOUND_UPPER_BOUND
+	BTREETEST_KEYSORT_STL_IF_LOWER_BOUND_UPPER_BOUND, 
+	BTREETEST_KEYSORT_CC_SET_ITER_DATA, 
+	BTREETEST_KEYSORT_CC_OPERATOR_OVERLOAD_COMPARE
 } btreetest_keysort_e;
 
 typedef enum
@@ -84,9 +86,7 @@ typedef enum
 	BTREETEST_KEYSORT_STL_IF_INSERT_VIA_ITERATOR_SAME_OR_EQUIVALENT_EXTERN, 
 } btreetest_keysort_stl_if_insert_via_iterator_e;
 
-//template <class _t_obj, class _t_objprim, class _t_datalayerproperties, class _t_datalayer>
-//void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, uint32_t nNumMultiCacheSizes, bayerTreeCacheDescription_t *psMultiCacheDesc, uint32_t nNumCacheProperties, _t_datalayerproperties **ppMultiCacheSizeDataLayerProperties, uint32_t nNumMultiTemplateParams, _t_objprim **ppClKeySortsPrim, int argc, char **argv);
-
-void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, CBTreeKeySortTestWrapper<keySortEntry_t, keySortEntry_t, keysort_reference_t> *pKeySortTestWrapper, CBTreeKeySortTestWrapper<keySortPair_t, keySortPair_t, keysort_reference_t> *pKeySortPairTestWrapper);
+template<class _t_container, class _t_pair_container>
+void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pKeySortTestWrapper, _t_pair_container *pKeySortPairTestWrapper);
 
 #endif // BTREEARRAYTESTBENCH_H
