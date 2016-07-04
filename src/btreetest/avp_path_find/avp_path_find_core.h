@@ -168,11 +168,23 @@ typedef struct
 	uint32_t		nOOOvector;		// out of order vector
 } agent_t;
 
-typedef struct
+typedef struct pos_s
 {
 	uint32_t		nPosX;
 	uint32_t		nPosY;
 	uint32_t		nLevel;
+
+	bool	operator==  (const struct pos_s &rRhs) const
+	{
+		return ((this->nPosX == rRhs.nPosX) &&
+				(this->nPosY == rRhs.nPosY) && 
+				(this->nLevel == rRhs.nLevel));
+	};
+
+	bool	operator!=  (const struct pos_s &rRhs) const
+	{
+		return ( ! (*this == rRhs));
+	};
 } pos_t;
 
 typedef struct
@@ -263,24 +275,37 @@ typedef ::std::multiset<agent_t, occupation_compare>		multiset_agent_t;
 
 #else
 
-template <class _t_data, class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_datalayerproperties = CBTreeIOpropertiesRAM, class _t_datalayer = CBTreeRAMIO <_t_nodeiter, _t_subnodeiter> >
-class CBayerTree_intrinsic : public CBTreeKeySort<_t_data, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_data, class _t_datalayerproperties = CBTreeIOpropertiesRAM <> >
+class CBayerTree_intrinsic : public CBTreeKeySort<_t_data, _t_data, _t_datalayerproperties>
 {
 public:
-	CBayerTree_intrinsic<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-		(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nodeSize);
+
+	typedef _t_data														value_type;
+	typedef _t_data														key_type;
+	typedef typename _t_datalayerproperties::size_type					size_type;
+	typedef typename _t_datalayerproperties::node_iter_type				node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type			sub_node_iter_type;
+	typedef _t_datalayerproperties										data_layer_properties_type;
+	typedef typename _t_datalayerproperties::data_layer_type			data_layer_type;
+
+	typedef value_type&													reference;
+	typedef const value_type&											const_reference;
+	typedef value_type*													pointer;
+	typedef const value_type*											const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type				difference_type;
+
+	CBayerTree_intrinsic<_t_data, _t_datalayerproperties>
+		(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nodeSize);
 
 protected:
-	int comp (void *pkey0, void *pkey1) const
-	{
-		_t_data		*ptkey0 = (_t_data *) pkey0;
-		_t_data		*ptkey1 = (_t_data *) pkey1;
 
-		if (*ptkey0 == *ptkey1)
+	int comp (const key_type &rkey0, const key_type &rkey1) const
+	{
+		if (rkey0 == rkey1)
 		{
 			return (0);
 		}
-		else if (*ptkey0 < *ptkey1)
+		else if (rkey0 < rkey1)
 		{
 			return (-1);
 		}
@@ -291,37 +316,47 @@ protected:
 	}
 };
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBayerTree_intrinsic<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBayerTree_intrinsic (_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nodeSize)
-	:	CBTreeKeySort <_t_data, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_data, class _t_datalayerproperties>
+CBayerTree_intrinsic<_t_data, _t_datalayerproperties>::CBayerTree_intrinsic (_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nodeSize)
+	:	CBTreeKeySort <_t_data, _t_data, _t_datalayerproperties>
 		(rDataLayerProperties, psCacheDescription, nodeSize)
 {
 }
 
-template <class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_datalayerproperties = CBTreeIOpropertiesRAM, class _t_datalayer = CBTreeRAMIO <_t_nodeiter, _t_subnodeiter> >
-class CBTreeKeySort_AgentStep : public CBTreeKeySort<agent_step_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_datalayerproperties = CBTreeIOpropertiesRAM <> >
+class CBTreeKeySort_AgentStep : public CBTreeKeySort<agent_step_t, uint32_t, _t_datalayerproperties>
 {
 public:
-	CBTreeKeySort_AgentStep<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-		(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nodeSize);
 
-	CBTreeKeySort_AgentStep<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-		(CBTreeKeySort_AgentStep<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
+	typedef agent_step_t												value_type;
+	typedef uint32_t													key_type;
+	typedef typename _t_datalayerproperties::size_type					size_type;
+	typedef typename _t_datalayerproperties::node_iter_type				node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type			sub_node_iter_type;
+	typedef _t_datalayerproperties										data_layer_properties_type;
+	typedef typename _t_datalayerproperties::data_layer_type			data_layer_type;
+
+
+	CBTreeKeySort_AgentStep<_t_datalayerproperties>
+		(_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nodeSize);
+
+	CBTreeKeySort_AgentStep<_t_datalayerproperties>
+		(CBTreeKeySort_AgentStep<_t_datalayerproperties> &rBT, bool bAssign = true);
 
 protected:
 };
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySort_AgentStep<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySort_AgentStep (_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, uint32_t nodeSize)
-	:	CBTreeKeySort <agent_step_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_datalayerproperties>
+CBTreeKeySort_AgentStep<_t_datalayerproperties>::CBTreeKeySort_AgentStep (_t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nodeSize)
+	:	CBTreeKeySort <agent_step_t, uint32_t, _t_datalayerproperties>
 		(rDataLayerProperties, psCacheDescription, nodeSize)
 {
 }
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySort_AgentStep<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeKeySort_AgentStep
-	(CBTreeKeySort_AgentStep<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
-	:	CBTreeKeySort <agent_step_t, uint32_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_datalayerproperties>
+CBTreeKeySort_AgentStep<_t_datalayerproperties>::CBTreeKeySort_AgentStep
+	(CBTreeKeySort_AgentStep<_t_datalayerproperties> &rBT, bool bAssign)
+	:	CBTreeKeySort <agent_step_t, uint32_t, _t_datalayerproperties>
 		(rBT, bAssign)
 {
 }
@@ -348,6 +383,6 @@ const char *convert_item_to_text (item_e eItem);
 uint32_t convert_item_to_HTML_color (item_e eItem);
 void output_level (FILE *pf, level_t *psLevel, const char *pLevelName, uint32_t nLevel);
 void output_path (const char *pFileName, vector_pos_t *psStepList);
-int avp_path_find_core (int nTestNum, bool bStoreInRAM, const uint32_t nNodeSize, bool bPrintStatistics = false);
+int avp_path_find_core (int nTestNum, const uint32_t nNodeSize, bool bPrintStatistics = false);
 
 #endif // AVP_PATH_FIND_CORE_H
