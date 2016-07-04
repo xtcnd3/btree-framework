@@ -17,54 +17,61 @@
 
 #include "./associative/base/btreeassociativebase.h"
 
-template <class _t_keytype, class _t_maptype, class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_datalayerproperties = CBTreeIOpropertiesRAM, class _t_datalayer = CBTreeRAMIO <_t_nodeiter, _t_subnodeiter> >
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties = CBTreeIOpropertiesRAM <> >
 class CBTreeMultiMap
-	:	public CBTreeAssociativeBase<::std::pair<_t_keytype, _t_maptype>, _t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	public CBTreeAssociativeBase<::std::pair<_t_keytype, _t_maptype>, _t_keytype, _t_datalayerproperties>
 {
 public:
 
+	typedef typename ::std::pair<_t_keytype, _t_maptype>				value_type;
+	typedef _t_keytype													key_type;
+	typedef _t_maptype													map_type;
+	typedef typename _t_datalayerproperties::size_type					size_type;
+	typedef typename _t_datalayerproperties::node_iter_type				node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type			sub_node_iter_type;
+	typedef _t_datalayerproperties										data_layer_properties_type;
+	typedef typename _t_datalayerproperties::data_layer_type			data_layer_type;
+
+	typedef value_type&													reference;
+	typedef const value_type&											const_reference;
+	typedef value_type*													pointer;
+	typedef const value_type*											const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type				difference_type;
+
 	typedef CBTreeMultiMap												CBTreeMultiMap_t;
 
-	typedef CBTreeAssociativeBase< ::std::pair<_t_keytype, _t_maptype>, _t_keytype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	typedef CBTreeAssociativeBase<value_type, _t_keytype, _t_datalayerproperties>
 																		CBTreeAssociativeBase_t;
 
 	typedef typename CBTreeAssociativeBase_t::CBTreeAssociative_t		CBTreeAssociative_t;
 
-	typedef typename CBTreeAssociative_t::CBTreeBase_t					CBTreeBase_t;
+	typedef CBTreeAssociativeIf<value_type, _t_keytype, size_type>		CBTreeAssociativeIf_t;
 
-	typedef CBTreeAssociativeIf< ::std::pair<_t_keytype, _t_maptype>, _t_keytype, _t_sizetype>	CBTreeAssociativeIf_t;
+	typedef typename CBTreeAssociative_t::CBTreeBaseDefaults_t			CBTreeBaseDefaults_t;
 
-	typedef typename CBTreeBase_t::CBTreeBaseIf_t						CBTreeBaseIf_t;
+	typedef typename CBTreeBaseDefaults_t::CBTreeBaseIf_t				CBTreeBaseIf_t;
 
 	typedef typename CBTreeBaseIf_t::CBTreeDefaults_t					CBTreeDefaults_t;
+
+	typedef typename CBTreeDefaults_t::CBTreeIf_t						CBTreeIf_t;
 
 	typedef typename CBTreeAssociativeBase_t::iterator					iterator;
 	typedef typename CBTreeAssociativeBase_t::const_iterator			const_iterator;
 	typedef typename CBTreeAssociativeBase_t::reverse_iterator			reverse_iterator;
 	typedef typename CBTreeAssociativeBase_t::const_reverse_iterator	const_reverse_iterator;
 
-//	typedef typename CBTreeAssociativeBase_t::position_t				position_t;
-	typedef typename ::std::pair<const _t_keytype, _t_maptype>			data_t;
-	typedef _t_sizetype													size_type;
-	typedef _t_nodeiter													nodeiter_t;
-	typedef _t_subnodeiter												subnodeiter_t;
-	typedef _t_datalayerproperties										datalayerproperties_t;
-	typedef _t_datalayer												datalayer_t;
-
-	typedef typename ::std::pair<_t_keytype, _t_maptype>				value_t;
-
 	typedef	typename CBTreeAssociativeIf_t::key_compare					key_compare;
 	typedef typename CBTreeAssociativeIf_t::value_compare				value_compare;
 
 	// construction
-							CBTreeMultiMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+							CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>
+													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
 
-							CBTreeMultiMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+							CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>
 													(const CBTreeMultiMap_t &rBT, bool bAssign = true);
 
 	// destruction
-	virtual					~CBTreeMultiMap<_t_keytype, _t_maptype, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	virtual					~CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>
 													();
 
 	void					swap					(CBTreeAssociativeIf_t &rContainer);
@@ -75,14 +82,14 @@ public:
 	
 protected:
 
-	_t_keytype				*extract_key			(_t_keytype *pKey, const value_t &rData) const;
+	key_type				*extract_key			(key_type *pKey, const value_type &rData) const;
 
 	void					_swap					(CBTreeMultiMap_t &rContainer);
 
 public:
 
-	friend class CBTreeIterator<CBTreeBase_t>;
-	friend class CBTreeConstIterator<CBTreeBase_t>;
+	friend class CBTreeIterator<CBTreeIf_t>;
+	friend class CBTreeConstIterator<CBTreeIf_t>;
 	friend class CBTreeReverseIterator<iterator>;
 	friend class CBTreeConstReverseIterator<const_iterator>;
 
