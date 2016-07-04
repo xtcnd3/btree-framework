@@ -21,25 +21,25 @@
 
 #include "btreeiter.h"
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template<class _t_data, class _t_key, class _t_datalayerproperties>
 class CBTreeAssociative;
 
-template <class _t_sizetype, class _t_key>
+template<class _t_sizetype, class _t_key>
 class CBTreeKeySortPos;
 
 /***********************************************************************/
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer, class _t_iterator>
+template<class _t_data, class _t_key, class _t_datalayerproperties, class _t_iterator>
 struct btree_keysort_self_reference_of_iterator_to_this_arbiter
 {
 	static bool	test_self_reference_of_iterator_to_this
 	(
-		CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>	*pClKeySort, 
+		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>	*pClKeySort, 
 		_t_iterator &sItFirst, 
 		_t_iterator &sItLast, 
 		bool &bSelfReverse, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator			**ppsItFirst, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator			**ppsItLast
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator	**ppsItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator	**ppsItLast
 		
 	)
 	{
@@ -63,20 +63,20 @@ struct btree_keysort_self_reference_of_iterator_to_this_arbiter
 	}
 };
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, typename CBTreeIf<_t_data, _t_sizetype>::iterator >
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator >
 {
 	static bool	test_self_reference_of_iterator_to_this
 	(
-		CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pClKeySort, 
-		typename CBTreeIf<_t_data, _t_sizetype>::iterator					&sItFirst, 
-		typename CBTreeIf<_t_data, _t_sizetype>::iterator					&sItLast, 
-		bool &bSelfReverse, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				**ppsItFirst, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				**ppsItLast
+		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>									*pClKeySort, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator			&sItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator			&sItLast, 
+		bool																						&bSelfReverse, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		**ppsItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		**ppsItLast
 	)
 	{
-		typedef typename CBTreeIf<_t_data, _t_sizetype>::const_iterator		citer_t;
+		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
 		
 		bool	bSelfReference = (pClKeySort == sItFirst.get_container ()) || (pClKeySort == sItLast.get_container ());
 
@@ -100,20 +100,20 @@ struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key,
 	}
 };
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, typename CBTreeIf<_t_data, _t_sizetype>::const_iterator >
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator >
 {
 	static bool	test_self_reference_of_iterator_to_this
 	(
-		CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pClKeySort, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				&sItFirst, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				&sItLast, 
-		bool &bSelfReverse, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				**ppsItFirst, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				**ppsItLast
+		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>									*pClKeySort, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		&sItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		&sItLast, 
+		bool																						&bSelfReverse, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		**ppsItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		**ppsItLast
 	)
 	{
-		typedef typename CBTreeIf<_t_data, _t_sizetype>::const_iterator		citer_t;
+		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
 		
 		bool	bSelfReference = (pClKeySort == sItFirst.get_container ()) || (pClKeySort == sItLast.get_container ());
 
@@ -137,20 +137,20 @@ struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key,
 	}
 };
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, typename CBTreeIf<_t_data, _t_sizetype>::reverse_iterator >
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator >
 {
 	static bool	test_self_reference_of_iterator_to_this
 	(
-		CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pClKeySort, 
-		typename CBTreeIf<_t_data, _t_sizetype>::reverse_iterator			&sItFirst, 
-		typename CBTreeIf<_t_data, _t_sizetype>::reverse_iterator			&sItLast, 
-		bool &bSelfReverse, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				**ppsItFirst, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				**ppsItLast
+		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>										*pClKeySort, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator		&sItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator		&sItLast, 
+		bool																							&bSelfReverse, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItLast
 	)
 	{
-		typedef typename CBTreeIf<_t_data, _t_sizetype>::const_iterator		citer_t;
+		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
 		
 		bool	bSelfReference = (pClKeySort == sItFirst.base ().get_container ()) || (pClKeySort == sItLast.base ().get_container ());
 				
@@ -178,20 +178,20 @@ struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key,
 	}
 };
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, typename CBTreeIf<_t_data, _t_sizetype>::const_reverse_iterator >
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator >
 {
 	static bool	test_self_reference_of_iterator_to_this
 	(
-		CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		*pClKeySort, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_reverse_iterator		&sItFirst, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_reverse_iterator		&sItLast, 
-		bool &bSelfReverse, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				**ppsItFirst, 
-		typename CBTreeIf<_t_data, _t_sizetype>::const_iterator				**ppsItLast
+		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>											*pClKeySort, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator		&sItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator		&sItLast, 
+		bool																								&bSelfReverse, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator				**ppsItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator				**ppsItLast
 	)
 	{
-		typedef typename CBTreeIf<_t_data, _t_sizetype>::const_iterator		citer_t;
+		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
 		
 		bool	bSelfReference = (pClKeySort == sItFirst.base ().get_container ()) || (pClKeySort == sItLast.base ().get_container ());
 				
@@ -221,23 +221,31 @@ struct btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key,
 
 /***********************************************************************/
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template<class _t_data, class _t_key, class _t_datalayerproperties>
 class CBTreeAssociative;
 
-template <class _t_data, class _t_key = _t_data, class _t_sizetype = uint64_t>
+template<class _t_data, class _t_key = _t_data, class _t_sizetype = uint64_t>
 class CBTreeAssociativeIf
 	:	public virtual CBTreeIf<_t_data, _t_sizetype>
 {
 public:
 
-	typedef CBTreeIf<_t_data, _t_sizetype>						CBTreeIf_t;
+	typedef _t_data												value_type;
+	typedef _t_key												key_type;
+	typedef _t_sizetype											size_type;
+	
+	typedef value_type&											reference;
+	typedef const value_type&									const_reference;
+	typedef value_type*											pointer;
+	typedef const value_type*									const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type		difference_type;
+
+	typedef CBTreeIf<value_type, size_type>						CBTreeIf_t;
 
 	typedef typename CBTreeIf_t::iterator						iterator;
 	typedef typename CBTreeIf_t::const_iterator					const_iterator;
 	typedef typename CBTreeIf_t::reverse_iterator				reverse_iterator;
 	typedef typename CBTreeIf_t::const_reverse_iterator			const_reverse_iterator;
-
-	typedef _t_data												value_type;
 
 	template<class _ti_keytype>
 	struct key_compare_s
@@ -255,10 +263,10 @@ public:
 	{
 		bool operator()(const _t_valuetype& rVal0, const _t_valuetype& rVal1) const
 		{
-			_t_key		sKey0;
-			_t_key		sKey1;
-			_t_key		*pKey0 = pThis->extract_key (&sKey0, rVal0);
-			_t_key		*pKey1 = pThis->extract_key (&sKey1, rVal1);
+			key_type		sKey0;
+			key_type		sKey1;
+			key_type		*pKey0 = pThis->extract_key (&sKey0, rVal0);
+			key_type		*pKey1 = pThis->extract_key (&sKey1, rVal1);
 
 			return (pThis->comp (*pKey0, *pKey1) < 0);
 		}
@@ -266,8 +274,8 @@ public:
 		CBTreeAssociativeIf		*pThis;
 	};
 
-	typedef	struct key_compare_s<_t_key>				key_compare;
-	typedef struct value_compare_s<_t_data>				value_compare;
+	typedef	struct key_compare_s<key_type>				key_compare;
+	typedef struct value_compare_s<value_type>			value_compare;
 	
 	// construction
 							CBTreeAssociativeIf<_t_data, _t_key, _t_sizetype>
@@ -281,50 +289,51 @@ public:
 							{
 							};
 
-	virtual iterator		insert						(const _t_data &rData) = 0;
+	virtual iterator		insert						(const value_type &rData) = 0;
 
 	virtual iterator		erase						(const_iterator sCIterPos) = 0;
-	virtual _t_sizetype		erase						(const _t_key &rKey) = 0;
+	virtual size_type		erase						(const key_type &rKey) = 0;
 	virtual iterator		erase						(const_iterator sCIterFirst, const_iterator sCIterLast) = 0;
 
 	virtual void			swap						(CBTreeAssociativeIf &rContainer) = 0;
 
-	virtual iterator		find						(const _t_key &rKey) = 0;
-	virtual const_iterator	find						(const _t_key &rKey) const = 0;
+	virtual iterator		find						(const key_type &rKey) = 0;
+	virtual const_iterator	find						(const key_type &rKey) const = 0;
 
-	virtual iterator		lower_bound					(const _t_key &rKey) = 0;
-	virtual const_iterator	lower_bound					(const _t_key &rKey) const = 0;
+	virtual iterator		lower_bound					(const key_type &rKey) = 0;
+	virtual const_iterator	lower_bound					(const key_type &rKey) const = 0;
 
-	virtual iterator		upper_bound					(const _t_key &rKey) = 0;
-	virtual const_iterator	upper_bound					(const _t_key &rKey) const = 0;
+	virtual iterator		upper_bound					(const key_type &rKey) = 0;
+	virtual const_iterator	upper_bound					(const key_type &rKey) const = 0;
 	
-	virtual void			get_next_key				(const _t_key &rKey, _t_key &rNextKey, bool &bBounce) const = 0;
-	virtual void			get_prev_key				(const _t_key &rKey, _t_key &rPrevKey, bool &bBounce) const = 0;
+	virtual void			get_next_key				(const key_type &rKey, key_type &rNextKey, bool &bBounce) const = 0;
+	virtual void			get_prev_key				(const key_type &rKey, key_type &rPrevKey, bool &bBounce) const = 0;
 
-	virtual _t_sizetype		count						(const _t_key &rKey) const = 0;
+	virtual size_type		count						(const key_type &rKey) const = 0;
 
 	virtual key_compare		key_comp					() const = 0;
 	virtual value_compare	value_comp					() const = 0;
 	
-	virtual _t_sizetype		serialize					(const _t_sizetype nStart, const _t_sizetype nLen, _t_data *pData) const = 0;
+	virtual size_type		serialize					(const size_type nStart, const size_type nLen, value_type *pData) const = 0;
 
 	virtual bool			operator==					(const CBTreeAssociativeIf &rRhs) const = 0;
 	virtual bool			operator!=					(const CBTreeAssociativeIf &rRhs) const = 0;
+
 protected:
 
-	virtual bool			get_at						(const _t_sizetype nPos, _t_data &rData) const = 0;
+	virtual bool			get_at						(const size_type nPos, value_type &rData) const = 0;
 
-	virtual bool			get							(const _t_key &rKey, _t_sizetype nInstance, _t_data *pObj) const = 0;
-	virtual _t_sizetype		get_init_pos_of_key			(const _t_key &rKey) const = 0;
+//	virtual bool			get							(const key_type &rKey, size_type nInstance, value_type *pObj) const = 0;
+	virtual size_type		get_init_pos_of_key			(const key_type &rKey) const = 0;
 	
-	virtual int				comp						(const _t_key &rKey0, const _t_key &rKey1) const = 0;
+	virtual int				comp						(const key_type &rKey0, const key_type &rKey1) const = 0;
 
-	virtual _t_key			*extract_key				(_t_key *pKey, const _t_data &rData) const = 0;
+	virtual key_type		*extract_key				(key_type *pKey, const value_type &rData) const = 0;
 };
 
 /***********************************************************************/
 
-template <class _t_sizetype, class _t_key>
+template<class _t_sizetype, class _t_key>
 class CBTreeKeySortPos
 {
 public:
@@ -332,86 +341,90 @@ public:
 	_t_sizetype		nInstance;
 };
 
-template <class _t_data, class _t_key = _t_data, class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_datalayerproperties = CBTreeIOpropertiesRAM, class _t_datalayer = CBTreeRAMIO <_t_nodeiter, _t_subnodeiter> >
+template<class _t_data, class _t_key = _t_data, class _t_datalayerproperties = CBTreeIOpropertiesRAM <> >
 class CBTreeAssociative
-	:	virtual public CBTreeAssociativeIf<_t_data, _t_key, _t_sizetype>
-	,	public CBTreeBaseDefaults <CBTreeKeySortPos <_t_sizetype, _t_key>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	virtual public CBTreeAssociativeIf<_t_data, _t_key, typename _t_datalayerproperties::size_type>
+	,	public CBTreeBaseDefaults <CBTreeKeySortPos <typename _t_datalayerproperties::size_type, _t_key>, _t_data, _t_datalayerproperties>
 {
 public:
 
-	typedef CBTreeKeySortPos<_t_sizetype, _t_key>					position_t;
+	typedef _t_data													value_type;
+	typedef _t_key													key_type;
+	typedef typename _t_datalayerproperties::size_type				size_type;
+	typedef typename _t_datalayerproperties::node_iter_type			node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type		sub_node_iter_type;
+	typedef _t_datalayerproperties									data_layer_properties_type;
+	typedef typename _t_datalayerproperties::data_layer_type		data_layer_type;
+
+	typedef value_type&												reference;
+	typedef const value_type&										const_reference;
+	typedef value_type*												pointer;
+	typedef const value_type*										const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type			difference_type;
+
+	typedef CBTreeKeySortPos<size_type, key_type>					position_t;
 
 	typedef CBTreeAssociative										CBTreeAssociative_t;
 
-	typedef CBTreeAssociativeIf<_t_data, _t_key, _t_sizetype>		CBTreeAssociativeIf_t;
+	typedef CBTreeAssociativeIf<value_type, key_type, size_type>	CBTreeAssociativeIf_t;
 
-	typedef CBTreeBaseDefaults <position_t, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-																	CBTreeBase_t;
+	typedef CBTreeBaseDefaults<position_t, value_type, data_layer_properties_type>
+																	CBTreeBaseDefaults_t;
 
-	typedef typename CBTreeBase_t::CBTreeBaseIf_t					CBTreeBaseIf_t;
+	typedef typename CBTreeBaseDefaults_t::CBTreeBaseIf_t			CBTreeBaseIf_t;
 
-	typedef typename CBTreeBaseIf_t::CBTreeDefaults_t				CBTreeDefaults_t;
+	typedef CBTreeIf<_t_data, size_type>							CBTreeIf_t;
 
-	typedef CBTreeIf<_t_data, _t_sizetype>							CBTreeIf_t;
+	typedef	typename CBTreeBaseDefaults_t::node_t					node_t;
 
-	typedef	typename CBTreeBase_t::node_t							node_t;
+	typedef	typename CBTreeBaseDefaults_t::iterator					iterator;
+	typedef	typename CBTreeBaseDefaults_t::const_iterator			const_iterator;
+	typedef	typename CBTreeBaseDefaults_t::reverse_iterator			reverse_iterator;
+	typedef	typename CBTreeBaseDefaults_t::const_reverse_iterator	const_reverse_iterator;
 
-	typedef	typename CBTreeBase_t::iterator							iterator;
-	typedef	typename CBTreeBase_t::const_iterator					const_iterator;
-	typedef	typename CBTreeBase_t::reverse_iterator					reverse_iterator;
-	typedef	typename CBTreeBase_t::const_reverse_iterator			const_reverse_iterator;
+	typedef	typename CBTreeBaseDefaults_t::iterator_state_t			iterator_state_t;
 
-	typedef _t_data													data_t;
-	typedef _t_sizetype												size_type;
-	typedef _t_nodeiter												nodeiter_t;
-	typedef _t_subnodeiter											subnodeiter_t;
-	typedef _t_datalayerproperties									datalayerproperties_t;
-	typedef _t_datalayer											datalayer_t;
-
-	typedef	typename CBTreeBaseIf<position_t, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::iterator_state_t
-																	iterator_state_t;
-
-	typedef	typename CBTreeAssociativeIf_t::key_compare			key_compare;
-	typedef typename CBTreeAssociativeIf_t::value_compare		value_compare;
+	typedef	typename CBTreeAssociativeIf_t::key_compare				key_compare;
+	typedef typename CBTreeAssociativeIf_t::value_compare			value_compare;
 
 	// construction
-						CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+						CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
+													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
 
-						CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(const CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
+						CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
+													(const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rBT, bool bAssign = true);
 
 	// destruction
-	virtual				~CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	virtual				~CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
 													();
 	
-	iterator			insert						(const _t_data &rData);
+	iterator			insert						(const value_type &rData);
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	void				insert						(_t_iterator sItFirst, _t_iterator sItLast);
 	
 	iterator			erase						(const_iterator sCIterPos);
-	_t_sizetype			erase						(const _t_key &rKey);
+	size_type			erase						(const key_type &rKey);
 	iterator			erase						(const_iterator sCIterFirst, const_iterator sCIterLast);
 	
-	iterator			find						(const _t_key &rKey);
-	const_iterator		find						(const _t_key &rKey) const;
+	iterator			find						(const key_type &rKey);
+	const_iterator		find						(const key_type &rKey) const;
 
-	iterator			lower_bound					(const _t_key &rKey);
-	const_iterator		lower_bound					(const _t_key &rKey) const;
+	iterator			lower_bound					(const key_type &rKey);
+	const_iterator		lower_bound					(const key_type &rKey) const;
 
-	iterator			upper_bound					(const _t_key &rKey);
-	const_iterator		upper_bound					(const _t_key &rKey) const;
+	iterator			upper_bound					(const key_type &rKey);
+	const_iterator		upper_bound					(const key_type &rKey) const;
 
-	void				get_next_key				(const _t_key &rKey, _t_key &rNextKey, bool &bBounce) const;
-	void				get_prev_key				(const _t_key &rKey, _t_key &rPrevKey, bool &bBounce) const;
+	void				get_next_key				(const key_type &rKey, key_type &rNextKey, bool &bBounce) const;
+	void				get_prev_key				(const key_type &rKey, key_type &rPrevKey, bool &bBounce) const;
 	
-	_t_sizetype			count						(const _t_key &rKey) const;
+	size_type			count						(const key_type &rKey) const;
 
 	key_compare			key_comp					() const;
 	value_compare		value_comp					() const;
 	
-	_t_sizetype			serialize					(const _t_sizetype nStart, const _t_sizetype nLen, _t_data *pData) const;
+	size_type			serialize					(const size_type nStart, const size_type nLen, value_type *pData) const;
 
 	CBTreeAssociative &	operator=					(const CBTreeAssociative &rBT);
 
@@ -422,85 +435,90 @@ protected:
 
 	virtual void		_assign						(const CBTreeIf_t &rContainer);
 
-	bool				get_at						(const _t_sizetype nPos, _t_data &rData) const;
+	bool				get_at						(const size_type nPos, value_type &rData) const;
 	
-	bool				get							(const _t_key &rKey, _t_sizetype nInstance, _t_data *pObj) const;
-	_t_sizetype			get_init_pos_of_key			(const _t_key &rKey) const;
+//	bool				get							(const key_type &rKey, size_type nInstance, value_type *pObj) const;
+	size_type			get_init_pos_of_key			(const key_type &rKey) const;
 	
 	// node operations
-	virtual position_t	determine_position			(position_t sPos, _t_nodeiter nNode, _t_subnodeiter &nSubPos, _t_subnodeiter &nSubData, bool &bFound) const;
+	virtual position_t	determine_position			(position_t sPos, node_iter_type nNode, sub_node_iter_type &nSubPos, sub_node_iter_type &nSubData, bool &bFound) const;
 
-	void				rebuild_node				(const _t_nodeiter nNode, const int32_t triMod = 0, _t_subnodeiter nSubStart = 0);
+	void				rebuild_node				(const node_iter_type nNode, const int32_t triMod = 0, sub_node_iter_type nSubStart = 0);
 
-	virtual position_t	generate_prev_position		(const _t_nodeiter nNode, const _t_subnodeiter nSub, position_t sPos);
-	virtual position_t	generate_next_position		(const _t_nodeiter nNode, const _t_subnodeiter nSub, position_t sPos);
+	virtual position_t	generate_prev_position		(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos);
+	virtual position_t	generate_next_position		(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos);
 
 	// testing
-	virtual int			comp						(const _t_key &rKey0, const _t_key &rKey1) const;
+	virtual int			comp						(const key_type &rKey0, const key_type &rKey1) const;
 
 	// data retrieval
-	virtual _t_key		*extract_key				(_t_key *pKey, const _t_nodeiter nNode, const _t_subnodeiter nEntry) const;
+	virtual key_type	*extract_key				(key_type *pKey, const node_iter_type nNode, const sub_node_iter_type nEntry) const;
 
-	virtual _t_key		*extract_key				(_t_key *pKey, const _t_data &rData) const;
+	virtual key_type	*extract_key				(key_type *pKey, const value_type &rData) const;
 
-	inline _t_key		*extract_dataset_as_key		(_t_key *pKey, const _t_data &rData, typename ::std::true_type) const;
-	inline _t_key		*extract_dataset_as_key		(_t_key *pKey, const _t_data &rData, typename ::std::false_type) const;
+	inline key_type		*extract_dataset_as_key		(key_type *pKey, const value_type &rData, typename ::std::true_type) const;
+	inline key_type		*extract_dataset_as_key		(key_type *pKey, const value_type &rData, typename ::std::false_type) const;
 
-	inline _t_key		*extract_key_directly		(_t_key *pKey, const _t_data &rData, typename ::std::true_type) const;
-	inline _t_key		*extract_key_directly		(_t_key *pKey, const _t_data &rData, typename ::std::false_type) const;
+	inline key_type		*extract_key_directly		(key_type *pKey, const value_type &rData, typename ::std::true_type) const;
+	inline key_type		*extract_key_directly		(key_type *pKey, const value_type &rData, typename ::std::false_type) const;
 
-	inline _t_key		*extract_key				(_t_key *pKey, const _t_data &rData, typename ::std::true_type) const;
-	inline _t_key		*extract_key				(_t_key *pKey, const _t_data &rData, typename ::std::false_type) const;
+	inline key_type		*extract_key				(key_type *pKey, const value_type &rData, typename ::std::true_type) const;
+	inline key_type		*extract_key				(key_type *pKey, const value_type &rData, typename ::std::false_type) const;
 
-	_t_sizetype			get_instancePos				(const _t_nodeiter nNode, const _t_subnodeiter nSub) const;
+	inline bool			compare_entry				(const value_type &rLhs, const value_type &rRhs, typename ::std::true_type) const;
+	inline bool			compare_entry				(const value_type &rLhs, const value_type &rRhs, typename ::std::false_type) const;
+
+	size_type			get_instancePos				(const node_iter_type nNode, const sub_node_iter_type nSub) const;
 
 	// manuvering
-	virtual _t_subnodeiter	get_firstSubPos			(const _t_nodeiter nNode, const _t_key &rKey, bool bReverse = false) const;
-	virtual _t_subnodeiter	find_next_sub_pos		(const _t_nodeiter nNode, position_t &sPos) const;
+	virtual sub_node_iter_type	get_firstSubPos		(const node_iter_type nNode, const key_type &rKey, bool bReverse = false) const;
+	virtual sub_node_iter_type	find_next_sub_pos	(const node_iter_type nNode, position_t &sPos) const;
 
-	virtual bool		find_oneKey					(const _t_key &rKey, _t_nodeiter &nNode, _t_subnodeiter &nSub, _t_sizetype *pnPos = NULL) const;
-	virtual _t_sizetype	find_firstKey				(const _t_nodeiter nFromNode, const _t_subnodeiter nFromSub, _t_nodeiter &nNode, _t_subnodeiter &nSub) const;
+	virtual bool		find_oneKey					(const key_type &rKey, node_iter_type &nNode, sub_node_iter_type &nSub, size_type *pnPos = NULL) const;
+	virtual size_type	find_firstKey				(const node_iter_type nFromNode, const sub_node_iter_type nFromSub, node_iter_type &nNode, sub_node_iter_type &nSub) const;
 
 	void				erase_via_reference			(const_iterator &rCIterPos, bool bReEvaluate = true);
 
-	inline bool			_find						(const _t_key &rKey, _t_nodeiter &rnNode, _t_subnodeiter &rnSub, _t_sizetype &rnPos) const;
+	inline bool			_find						(const key_type &rKey, node_iter_type &rnNode, sub_node_iter_type &rnSub, size_type &rnPos) const;
 	
-	inline void			_lower_bound				(const _t_key &rKey, _t_nodeiter &rnNode, _t_subnodeiter &rnSub, _t_sizetype &rnPos) const;
-	inline bool			_upper_bound				(const _t_key &rKey, _t_nodeiter &rnNode, _t_subnodeiter &rnSub, _t_sizetype &rnPos) const;
+	inline void			_lower_bound				(const key_type &rKey, node_iter_type &rnNode, sub_node_iter_type &rnSub, size_type &rnPos) const;
+	inline bool			_upper_bound				(const key_type &rKey, node_iter_type &rnNode, sub_node_iter_type &rnSub, size_type &rnPos) const;
 
 	// variable size buffer service
-	void				vbufferAllocate				(_t_key **pp);
-	void				vbufferDeallocate			(_t_key **pp);
+	void				vbufferAllocate				(key_type **pp);
+	void				vbufferDeallocate			(key_type **pp);
 
 	void				allocateShortLiveKey		() const;
 	void				freeShortLiveKey			() const;
 
-	virtual bool		show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const;
-	virtual bool		show_node					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const;
+	virtual bool		show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const node_iter_type nNode, const sub_node_iter_type nSubPos) const;
+	virtual bool		show_node					(std::ofstream &ofs, const node_iter_type nNode, const sub_node_iter_type nSubPos) const;
 
 	void				_swap						(CBTreeAssociative &rContainer);
 
 	template<class _t_iterator>
 	bool				test_self_reference_of_iterator_to_this (_t_iterator &sItFirst, _t_iterator &sItLast, bool &bSelfReverse, const_iterator **ppsItFirst, const_iterator **ppsItLast)
 	{
-		return (btree_keysort_self_reference_of_iterator_to_this_arbiter<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, _t_iterator>::test_self_reference_of_iterator_to_this (this, sItFirst, sItLast, bSelfReverse, ppsItFirst, ppsItLast));
+		return (btree_keysort_self_reference_of_iterator_to_this_arbiter<value_type, key_type, data_layer_properties_type, _t_iterator>::test_self_reference_of_iterator_to_this (this, sItFirst, sItLast, bSelfReverse, ppsItFirst, ppsItLast));
 	}
 
 	// protected variables
 
 	// variable size buffers
-	_t_key											**m_ppShortLiveKey;
-	_t_key											**m_ppTempFindFirstKeyKey;
+	key_type										**m_ppShortLiveKey;
+	key_type										**m_ppTempFindFirstKeyKey;
 
-	_t_key											*m_pRemoveKey;
-	_t_key											*m_pTempRemoveKey;
-	_t_key											*m_pInstancesNewKey;
-	_t_key											*m_pTempFindFirstKeyNewKey;
-	_t_key											*m_pAddToNodeKey;
-	_t_key											*m_pGetNewKey;
+	key_type										*m_pRemoveKey;
+	key_type										*m_pTempRemoveKey;
+	key_type										*m_pInstancesNewKey;
+	key_type										*m_pTempFindFirstKeyNewKey;
+	key_type										*m_pAddToNodeKey;
+	key_type										*m_pGetNewKey;
 
 #if defined (_DEBUG)
+
 	bool											*m_pbShortLiveKeyInUse;
+
 #endif
 };
 
