@@ -25,19 +25,13 @@
 #include <memory.h>
 #include <stddef.h>
 
-#if defined (WIN32)
+#if defined (_MSC_VER)
 
- #if defined (_HAS_MFC)
-  #include <afxtempl.h>
- #endif
-
- #if !defined (_HAS_MFC)
-  #include <windows.h>
- #endif
+ #include <windows.h>
 
  #include <io.h>
 
-#elif defined (LINUX)
+#elif defined(__GNUC__) || defined(__GNUG__)
 
  #include <string.h>
  #include <stdlib.h>
@@ -50,7 +44,7 @@
 
 #include "btreeioprop.h"
 
-#define	BTREEDATA_ASSERT(c,m)							if (!(c)) throw (new runtime_error (m))
+#define	BTREEDATA_ASSERT(c,m)							if (!(c)) throw (new ::std::runtime_error (m))
 
 #define RESERVATION_VECTOR_LOG2_BYTES_PER_SUPERBLOCK	6
 
@@ -70,35 +64,39 @@ typedef enum
 	PERFCTR_TERMINATOR
 } bayertree_perfctrs_e;
 
-using namespace std;
-
 typedef struct
 {
 	uint32_t		nTotalSize;
 	uint32_t		nEntrySize;
 } CBTreeIOperBlockPoolDesc_t;
 
-template <class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_addresstype = uint64_t, class _t_offsettype = uint32_t>
+template<class _t_datalayerproperties>
 class CBTreeIO
 {
 public:
 
+	typedef typename _t_datalayerproperties::size_type				size_type;
+	typedef typename _t_datalayerproperties::node_iter_type			node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type		sub_node_iter_type;
+	typedef typename _t_datalayerproperties::address_type			address_type;
+	typedef typename _t_datalayerproperties::offset_type			offset_type;
+
 	// construction
-						CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+						CBTreeIO<_t_datalayerproperties>
 													(
-														_t_addresstype nBlockSize, 
+														address_type nBlockSize, 
 														uint32_t nNumDataPools, 
 														CBTreeIOperBlockPoolDesc_t *psDataPools
 													);
 
-						~CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+						~CBTreeIO<_t_datalayerproperties>
 													();
 
 	// properties
-	_t_nodeiter			get_maxNodes				();
+	node_iter_type		get_maxNodes				();
 	
-	_t_offsettype		get_dataAlignment			();
-	_t_offsettype		get_alignedOffset			(_t_offsettype nOffset);
+	offset_type			get_dataAlignment			();
+	offset_type			get_alignedOffset			(offset_type nOffset);
 
 	// monitoring
 	void				get_performance_counters	(uint64_t (&rHitCtrs)[PERFCTR_TERMINATOR], uint64_t (&rMissCtrs)[PERFCTR_TERMINATOR]);
@@ -107,23 +105,23 @@ public:
 	uint32_t			get_pool_entry_size			(uint32_t nPool);
 
 	// resources
-	virtual void		set_size					(_t_nodeiter nMaxNodes) = 0;
+	virtual void		set_size					(node_iter_type nMaxNodes) = 0;
 	virtual void		unload						() = 0;
 
 	// resource management
-	virtual void		set_root_node				(_t_nodeiter nRootNode);
+	virtual void		set_root_node				(node_iter_type nRootNode);
 	virtual void		terminate_access			();
 
 	// cache management
-	virtual void		unload_from_cache			(_t_nodeiter nNode) = 0;
+	virtual void		unload_from_cache			(node_iter_type nNode) = 0;
 
 	// cache settings
 	void				set_cacheFreeze				(bool bEnabled);
 
 	// cache information
-	virtual bool		is_dataCached				(uint32_t nPool, _t_nodeiter nNode) = 0;
+	virtual bool		is_dataCached				(uint32_t nPool, node_iter_type nNode) = 0;
 
-	virtual void		showdump					(std::ofstream &ofs, _t_nodeiter nTreeSize, char *pAlloc) = 0;
+	virtual void		showdump					(std::ofstream &ofs, node_iter_type nTreeSize, char *pAlloc) = 0;
 
 protected:
 
@@ -132,14 +130,16 @@ protected:
 	uint32_t										m_nNumDataPools;
 	CBTreeIOperBlockPoolDesc_t						*m_psDataPools;
 
-	_t_nodeiter										m_nMaxNodes;
+	node_iter_type									m_nMaxNodes;
 
 	// cache
 	bool											m_bCacheFreeze;
 	
 #if defined (USE_PERFORMANCE_COUNTERS)
+
 	uint64_t										m_anHitCtrs[PERFCTR_TERMINATOR];
 	uint64_t										m_anMissCtrs[PERFCTR_TERMINATOR];
+
 #endif
 };
 
