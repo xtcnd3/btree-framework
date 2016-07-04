@@ -8,7 +8,7 @@
 **
 ** This file contains the declaration of the associative container
 ** test class wrapping abstract accesses to associative container test class
-** and a template based reference container instance, while making sure the
+** and a templatebased reference container instance, while making sure the
 ** associative container instance acts the same way as the abstract reference.
 **
 ************************************************************/
@@ -23,8 +23,9 @@
 #include "btreeassociative.h"
 
 #include "btreetestkeysort.h"
+#include "btreekeysorttestprimitive.h"
 
-template <class _t_data, class _t_value, class _t_ref_container>
+template<class _t_data, class _t_value, class _t_ref_container>
 class CBTreeAssociativeTestWrapper
 {
 public:
@@ -39,19 +40,15 @@ public:
 	typedef typename reference_t::reverse_iterator				reverse_iterator;
 	typedef typename reference_t::const_reverse_iterator		const_reverse_iterator;
 
-	typedef _t_data												data_t;
-	
 	typedef typename reference_t::value_type					value_type;
-
 	typedef typename reference_t::key_type						key_type;
+	typedef typename reference_t::size_type						size_type;
 
-	typedef typename reference_t::size_type						sizetype_ref_t;
+	typedef _t_data												value_test_type;
+	typedef uint32_t											key_test_type;
+	typedef uint64_t											size_test_type;
 
-	typedef sizetype_ref_t										size_type;
-
-	typedef uint64_t											sizetype_test_t;
-
-	typedef CBTreeAssociativeIf<_t_value, uint32_t, sizetype_test_t>
+	typedef CBTreeAssociativeIf<_t_value, key_test_type, size_test_type>
 																CBTreeAssociativeIf_t;
 
 	typedef typename CBTreeAssociativeIf_t::iterator			test_iterator;
@@ -72,7 +69,7 @@ public:
 	virtual					~CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
 																();
 
-	sizetype_ref_t			size								() const;
+	size_type				size								() const;
 
 	void					clear								();
 
@@ -88,17 +85,12 @@ public:
 	const_reverse_iterator	crbegin								() const;
 	const_reverse_iterator	crend								() const;
 
-	void					swap								(CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container> &rContainer);
+	void					swap								(CBTreeAssociativeTestWrapper &rContainer);
 
-//	template<class _t_iterator>
-//	void					insert								(_t_iterator sIterFirst, _t_iterator sIterLast);
 	iterator				insert								(const value_type &rData);
 
-//	template<class _t_iterator, class _t_test_iterator>
-//	void					insert_self_reference				(_t_iterator sIterFirst, _t_iterator sIterLast, _t_test_iterator &rIterTest);
-
 	iterator				erase								(const_iterator sCIterPos);
-	sizetype_ref_t			erase								(key_type &rKey);
+	size_type				erase								(key_type &rKey);
 	iterator				erase								(const_iterator sCIterFirst, const_iterator sCIterLast);
 
 	iterator				find								(key_type &rKey);
@@ -110,19 +102,23 @@ public:
 	iterator				upper_bound							(key_type &rKey);
 	const_iterator			upper_bound							(key_type &rKey) const;
 
-	sizetype_ref_t			count								(key_type &rKey) const;
+	size_type				count								(key_type &rKey) const;
 
-	sizetype_test_t			serialize							(const sizetype_test_t nStart, const sizetype_test_t nLen, value_type *pData) const;
+	size_type				serialize							(const size_type nStart, const size_type nLen, value_type *pData) const;
+
+	void					set_iter_data						(const_iterator sCIter, const value_type &rData);
 
 	void					unload								();
 
-	void					show_integrity						(const char *pszPrefix);
+	bool					compare_individual_containers		(const CBTreeAssociativeTestWrapper &rContainer) const;
 
 	CBTreeAssociativeTestWrapper &
 							operator=							(const CBTreeAssociativeTestWrapper &rContainer);
 
 	bool					operator==							(const CBTreeAssociativeTestWrapper &rContainer) const;
 	bool					operator!=							(const CBTreeAssociativeTestWrapper &rContainer) const;
+
+	void					show_integrity						(const char *pszPrefix);
 
 protected:
 
@@ -131,7 +127,7 @@ protected:
 	void					disable_atomic_testing				() const;
 	void					enable_atomic_testing				() const;
 
-	void					instantiate_reference_container		();
+	void					instantiate_container_array			();
 
 	uint32_t				get_num_containers					() const;
 
