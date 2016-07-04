@@ -14,17 +14,18 @@
 
 #include "btreemultimaptestbench.h"
 
-template <class _t_multimap>
-void TestBTreeMultiMapSTLifAssignmentOperator (_t_multimap *pClMM, uint32_t nNumEntries)
+template<class _t_multimap>
+void TestBTreeMultiMapSTLifAssignmentOperator (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries)
 {
 	typedef typename _t_multimap::const_iterator						citer_t;
+	typedef typename _t_multimap::key_type								key_type;
 
-	_t_multimap									sClMM (*pClMM);
-	uint32_t									nLastKey = 0;
-	citer_t										sIter;
-	citer_t										sIterRslt;
+	_t_multimap					sClMM (*pClMM);
+	key_type					nLastKey = 0;
+	citer_t						sIter;
+	citer_t						sIterRslt;
 	
-	cout << "exercises assignment operator compatible to STL interface CBTreeMultiMap<>:: operator= (CBTreeMultiMap<> &)" << endl;
+	::std::cout << "exercises assignment operator compatible to STL interface CBTreeMultiMap<>:: operator= (CBTreeMultiMap<> &)" << ::std::endl;
 
 	multiMapPrim_add (pClMM, nNumEntries, nLastKey, BTREETEST_MULTIMAP_PRIMITIVE_RANDOM_KEY);
 
@@ -32,36 +33,37 @@ void TestBTreeMultiMapSTLifAssignmentOperator (_t_multimap *pClMM, uint32_t nNum
 
 	if (sClMM != (*pClMM))
 	{
-		cerr << endl;
-		cerr << "TestBTreeMultiMapSTLifAssignmentOperator<>: ERROR: mismatch after assignment operation" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeMultiMapSTLifAssignmentOperator<>: ERROR: mismatch after assignment operation" << ::std::endl;
 
 		exit (-1);
 	}
 }
 
-template <class _t_multimap>
-void TestBTreeMultiMapSTLifInsert (_t_multimap *pClMM, uint32_t nNumEntries)
+template<class _t_multimap>
+void TestBTreeMultiMapSTLifInsert (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries)
 {
-	uint32_t	nLastSeed = 0;
+	typename _t_multimap::key_type	nLastSeed = 0;
 
-	cout << "CBTreeMultiMap::insert (const valuetype &) is exercised" << endl;
+	::std::cout << "CBTreeMultiMap::insert (const valuetype &) is exercised" << ::std::endl;
 
 	multiMapPrim_add (pClMM, nNumEntries, nLastSeed, BTREETEST_MULTIMAP_PRIMITIVE_RANDOM_KEY);
 }
 
-template <class _t_multimap>
-void TestBTreeMultiMapSTLifEraseViaIterator (_t_multimap *pClMM, uint32_t nNumEntries)
+template<class _t_multimap>
+void TestBTreeMultiMapSTLifEraseViaIterator (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries)
 {
 	typedef typename _t_multimap::const_iterator	citer_t;
 	typedef typename _t_multimap::size_type			size_type;
+	typedef typename _t_multimap::key_type			key_type;
 
-	uint32_t									nLastKey = 0;
+	key_type									nLastKey = 0;
 	citer_t										sIter;
 	citer_t										sIterRslt;
 	size_type									nOffset;
 	size_type									nRslt;
 	
-	cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: erase (const_iterator)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: erase (const_iterator)" << ::std::endl;
 
 	multiMapPrim_add (pClMM, nNumEntries, nLastKey, BTREETEST_MULTIMAP_PRIMITIVE_RANDOM_KEY);
 
@@ -79,27 +81,29 @@ void TestBTreeMultiMapSTLifEraseViaIterator (_t_multimap *pClMM, uint32_t nNumEn
 
 		if (nOffset != nRslt)
 		{
-			cerr << endl;
-			cerr << "TestBTreeMultiMapSTLifEraseViaIterator: returned iterator mismatches!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeMultiMapSTLifEraseViaIterator: returned iterator mismatches!" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 }
 
-template <class _t_multimap>
-void TestBTreeMultiMapSTLifEraseViaKey (_t_multimap *pClMM, uint32_t nNumEntries, uint32_t nInstances)
+template<class _t_multimap>
+void TestBTreeMultiMapSTLifEraseViaKey (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries, uint32_t nInstances)
 {
-	typedef typename _t_multimap::const_iterator										citer_t;
+	typedef typename _t_multimap::const_iterator	citer_t;
+	typedef typename _t_multimap::size_type			size_type;
+	typedef typename _t_multimap::key_type			key_type;
+
+	key_type						nLastKey;
+	key_type						nKey;
+	citer_t							sIter;
+	uint32_t						i;
+	size_type						nRslt;
+	size_type						nOffset;
 	
-	uint32_t									nLastKey;
-	uint32_t									nKey;
-	citer_t										sIter;
-	uint32_t									i;
-	typename _t_multimap::size_type				nRslt;
-	typename _t_multimap::size_type				nOffset;
-	
-	cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: erase (const keytype &)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: erase (const keytype &)" << ::std::endl;
 
 	for (i = 0; i < nInstances; i++)
 	{
@@ -110,9 +114,9 @@ void TestBTreeMultiMapSTLifEraseViaKey (_t_multimap *pClMM, uint32_t nNumEntries
 
 	while (pClMM->size () > 0)
 	{
-		sIter = pClMM->cbegin ();
-
 		nOffset = generate_rand32 () % pClMM->size ();
+
+		sIter = pClMM->cbegin ();
 
 		::std::advance (sIter, nOffset);
 
@@ -122,21 +126,22 @@ void TestBTreeMultiMapSTLifEraseViaKey (_t_multimap *pClMM, uint32_t nNumEntries
 
 		if (nRslt != nInstances)
 		{
-			cerr << endl;
-			cerr << "TestBTreeMultiMapSTLifEraseViaKey: unexpected number of items deleted!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeMultiMapSTLifEraseViaKey: unexpected number of items deleted!" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 }
 
-template <class _t_multimap>
-void TestBTreeMultiMapSTLifEraseViaIteratorMultiple (_t_multimap *pClMM, uint32_t nNumEntries, uint32_t nInstances)
+template<class _t_multimap>
+void TestBTreeMultiMapSTLifEraseViaIteratorMultiple (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries, uint32_t nInstances)
 {
 	typedef typename _t_multimap::const_iterator	citer_t;
 	typedef typename _t_multimap::size_type			size_type;
+	typedef typename _t_multimap::key_type			key_type;
 
-	uint32_t									nLastKey;
+	key_type									nLastKey;
 	citer_t										sIterBegin;
 	citer_t										sIterEnd;
 	citer_t										sIterRslt;
@@ -150,7 +155,7 @@ void TestBTreeMultiMapSTLifEraseViaIteratorMultiple (_t_multimap *pClMM, uint32_
 
 #endif
 	
-	cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: erase (const_iterator, const_iterator)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: erase (const_iterator, const_iterator)" << ::std::endl;
 
 	for (i = 0; i < nInstances; i++)
 	{
@@ -180,8 +185,8 @@ void TestBTreeMultiMapSTLifEraseViaIteratorMultiple (_t_multimap *pClMM, uint32_
 
 		if (nRslt != nBegin)
 		{
-			cerr << endl;
-			cerr << "TestBTreeMultiMapSTLifEraseViaIteratorMultiple: returned iterator mismatches!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeMultiMapSTLifEraseViaIteratorMultiple: returned iterator mismatches!" << ::std::endl;
 			::std::cerr << "expected value: " << nBegin << ::std::endl;
 			::std::cerr << "returned value: " << nRslt << ::std::endl;
 
@@ -203,20 +208,22 @@ void TestBTreeMultiMapSTLifEraseViaIteratorMultiple (_t_multimap *pClMM, uint32_
 }
 
 template<class _t_multimap>
-void TestBTreeMultiMapSTLifKeyComp (_t_multimap *pClMM, uint32_t nNumEntries)
+void TestBTreeMultiMapSTLifKeyComp (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries)
 {
 	typedef typename _t_multimap::iterator		iter_t;
+	typedef typename _t_multimap::key_type		key_type;
+	typedef typename _t_multimap::value_type	value_type;
 
-	uint32_t									nLastKey = 0;
+	key_type									nLastKey = 0;
 	iter_t										sIterBegin;
 	iter_t										sIterEnd;
 	iter_t										sIter;
 	iter_t										sIterUpper;
-	uint32_t									nKey;
+	key_type									nKey;
 	uint32_t									nNextKey;
 	typename _t_multimap::key_compare			sMMComp = pClMM->key_comp ();
 	
-	cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: key_comp ()" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: key_comp ()" << ::std::endl;
 
 	multiMapPrim_add (pClMM, nNumEntries, nLastKey, BTREETEST_MULTIMAP_PRIMITIVE_RANDOM_KEY);
 
@@ -225,18 +232,18 @@ void TestBTreeMultiMapSTLifKeyComp (_t_multimap *pClMM, uint32_t nNumEntries)
 
 	for (sIter = sIterBegin; sIter != sIterEnd; sIter++)
 	{
-		nKey = ((typename _t_multimap::value_type)(*sIter)).first;
+		nKey = ((value_type)(*sIter)).first;
 
 		sIterUpper = pClMM->upper_bound (nKey);
 
 		if (sIterUpper != sIterEnd)
 		{
-			nNextKey = ((typename _t_multimap::value_type)(*sIterUpper)).first;
+			nNextKey = ((value_type)(*sIterUpper)).first;
 
 			if (!sMMComp (nKey, nNextKey))
 			{
-				cerr << endl;
-				cerr << "TestBTreeMultiMapSTLifKeyComp: ERROR: CBTreeMultiMap::key_compare (const keytype &, const keytype &) delivered unexpected result!" << endl;
+				::std::cerr << ::std::endl;
+				::std::cerr << "TestBTreeMultiMapSTLifKeyComp: ERROR: CBTreeMultiMap::key_compare (const keytype &, const keytype &) delivered unexpected result!" << ::std::endl;
 
 				exit (-1);
 			}
@@ -245,19 +252,21 @@ void TestBTreeMultiMapSTLifKeyComp (_t_multimap *pClMM, uint32_t nNumEntries)
 }
 
 template<class _t_multimap>
-void TestBTreeMultiMapSTLifValueComp (_t_multimap *pClMM, uint32_t nNumEntries)
+void TestBTreeMultiMapSTLifValueComp (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries)
 {
 	typedef typename _t_multimap::iterator		iter_t;
+	typedef typename _t_multimap::key_type		key_type;
+	typedef typename _t_multimap::value_type	value_type;
 
-	uint32_t									nLastKey = 0;
+	key_type									nLastKey = 0;
 	iter_t										sIterBegin;
 	iter_t										sIterEnd;
 	iter_t										sIter;
 	iter_t										sIterUpper;
-	uint32_t									nKey;
+	key_type									nKey;
 	typename _t_multimap::value_compare			sMMComp = pClMM->value_comp ();
 	
-	cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: value_comp ()" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: value_comp ()" << ::std::endl;
 
 	multiMapPrim_add (pClMM, nNumEntries, nLastKey, BTREETEST_MULTIMAP_PRIMITIVE_RANDOM_KEY);
 
@@ -266,16 +275,16 @@ void TestBTreeMultiMapSTLifValueComp (_t_multimap *pClMM, uint32_t nNumEntries)
 
 	for (sIter = sIterBegin; sIter != sIterEnd; sIter++)
 	{
-		nKey = ((typename _t_multimap::value_type)(*sIter)).first;
+		nKey = ((value_type)(*sIter)).first;
 
 		sIterUpper = pClMM->upper_bound (nKey);
 
 		if (sIterUpper != sIterEnd)
 		{
-			if (!sMMComp (((typename _t_multimap::value_type)(*sIter)), ((typename _t_multimap::value_type)(*sIterUpper))))
+			if (!sMMComp (((value_type)(*sIter)), ((value_type)(*sIterUpper))))
 			{
-				cerr << endl;
-				cerr << "TestBTreeMultiMapSTLifValueComp: ERROR: CBTreeMultiMap::value_compare (const valuetype &, const valuetype &) delivered unexpected result!" << endl;
+				::std::cerr << ::std::endl;
+				::std::cerr << "TestBTreeMultiMapSTLifValueComp: ERROR: CBTreeMultiMap::value_compare (const valuetype &, const valuetype &) delivered unexpected result!" << ::std::endl;
 
 				exit (-1);
 			}
@@ -283,36 +292,37 @@ void TestBTreeMultiMapSTLifValueComp (_t_multimap *pClMM, uint32_t nNumEntries)
 	}
 }
 
-template <class _t_multimap>
-void TestBTreeMultiMapSTLifSwap (_t_multimap *pClMM, uint32_t nNumEntries)
+template<class _t_multimap>
+void TestBTreeMultiMapSTLifSwap (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries)
 {
 	typedef typename _t_multimap::const_iterator			citer_t;
-
-	uint32_t						nLastKey = 0;
+	typedef typename _t_multimap::key_type					key_type;
+	
+	key_type						nLastKey = 0;
 	_t_multimap						sClMultiMapTarget ((const _t_multimap &) *pClMM);
 	_t_multimap						sClMultiMapRef ((const _t_multimap &) *pClMM);
 	_t_multimap						sClMultiMapTargetRef ((const _t_multimap &) *pClMM);
 
-	cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: swap (CBTreeMultiMap &)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: swap (CBTreeMultiMap &)" << ::std::endl;
 
 	multiMapPrim_add (pClMM, nNumEntries, nLastKey, BTREETEST_MULTIMAP_PRIMITIVE_RANDOM_KEY);
 
-	sClMultiMapRef.template insert<citer_t> (pClMM->cbegin (), pClMM->cend ());
+	sClMultiMapRef.insert (pClMM->cbegin (), pClMM->cend ());
 
 	if ((*pClMM) != sClMultiMapRef)
 	{
-		cerr << "ERROR: Unexpected multimap mismatch!" << endl;
+		::std::cerr << "ERROR: Unexpected multimap mismatch!" << ::std::endl;
 
 		exit (-1);
 	}
 
 	multiMapPrim_add (&sClMultiMapTarget, nNumEntries, nLastKey, BTREETEST_MULTIMAP_PRIMITIVE_RANDOM_KEY);
 
-	sClMultiMapTargetRef.template insert<citer_t> (sClMultiMapTarget.cbegin (), sClMultiMapTarget.cend ());
+	sClMultiMapTargetRef.insert (sClMultiMapTarget.cbegin (), sClMultiMapTarget.cend ());
 
 	if (sClMultiMapTarget != sClMultiMapTargetRef)
 	{
-		cerr << "ERROR: Unexpected target mismatch!" << endl;
+		::std::cerr << "ERROR: Unexpected target mismatch!" << ::std::endl;
 
 		exit (-1);
 	}
@@ -321,14 +331,14 @@ void TestBTreeMultiMapSTLifSwap (_t_multimap *pClMM, uint32_t nNumEntries)
 
 	if ((*pClMM) != sClMultiMapTargetRef)
 	{
-		cerr << "ERROR: swapped multimap mismatches target reference!" << endl;
+		::std::cerr << "ERROR: swapped multimap mismatches target reference!" << ::std::endl;
 
 		exit (-1);
 	}
 
 	if (sClMultiMapTarget != sClMultiMapRef)
 	{
-		cerr << "ERROR: target mismatches multimap reference!" << endl;
+		::std::cerr << "ERROR: target mismatches multimap reference!" << ::std::endl;
 
 		exit (-1);
 	}
@@ -337,77 +347,87 @@ void TestBTreeMultiMapSTLifSwap (_t_multimap *pClMM, uint32_t nNumEntries)
 
 	if ((*pClMM) != sClMultiMapRef)
 	{
-		cerr << "ERROR: multimap mismatches multimap reference!" << endl;
+		::std::cerr << "ERROR: multimap mismatches multimap reference!" << ::std::endl;
 
 		exit (-1);
 	}
 
 	if (sClMultiMapTarget != sClMultiMapTargetRef)
 	{
-		cerr << "ERROR: target mismatches target reference!" << endl;
+		::std::cerr << "ERROR: target mismatches target reference!" << ::std::endl;
 
 		exit (-1);
 	}
 }
 
-template <class _t_multimap>
-void TestBTreeMultiMapSTLifFind (_t_multimap *pClMM, uint32_t nNumEntries)
+template<class _t_multimap>
+void TestBTreeMultiMapSTLifFind (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries)
 {
 	typedef typename _t_multimap::const_iterator			citer_t;
+	typedef typename _t_multimap::key_type					key_type;
 
-	uint32_t						nLastKey = 1;
-	citer_t							sCIter;
-	citer_t							sCIterRslt;
+	key_type			nLastKey = 1;
+	key_type			nKey;
+	citer_t				sCIter;
+	citer_t				sCIterRslt;
 	
-	cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: find (const _t_keytype &)" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: find (const _t_keytype &)" << ::std::endl;
 
 	multiMapPrim_add (pClMM, nNumEntries, nLastKey, BTREETEST_MULTIMAP_PRIMITIVE_ASCEND_KEY);
 
 	for (sCIter = pClMM->cbegin (); sCIter != pClMM->cend (); sCIter++)
 	{
-		sCIterRslt = pClMM->find ((*sCIter).first);
+		nKey = (*sCIter).first;
+
+		sCIterRslt = pClMM->find (nKey);
 
 		if (sCIter != sCIterRslt)
 		{
-			cerr << endl;
-			cerr << "TestBTreeMultiMapSTLifFind: ERROR: iterator mismatch!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeMultiMapSTLifFind: ERROR: iterator mismatch!" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 
-	sCIterRslt = pClMM->find (0);
+	nKey = 0;
+
+	sCIterRslt = pClMM->find (nKey);
 
 	if (sCIterRslt != pClMM->cend ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeMultiMapSTLifFind: ERROR: find () didn't return cend () on lower bound check!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeMultiMapSTLifFind: ERROR: find () didn't return cend () on lower bound check!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sCIterRslt = pClMM->find (nNumEntries + 1);
+	nKey = nNumEntries + 1;
+
+	sCIterRslt = pClMM->find (nKey);
 
 	if (sCIterRslt != pClMM->cend ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeMultiMapSTLifFind: ERROR: find () didn't return cend () on upper bound check!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeMultiMapSTLifFind: ERROR: find () didn't return cend () on upper bound check!" << ::std::endl;
 
 		exit (-1);
 	}
 }
 
-template <class _t_multimap>
-void TestBTreeKeySortSTLifLowerBoundUpperBound (_t_multimap *pClMM, uint32_t nNumEntries, uint32_t nInstance)
+template<class _t_multimap>
+void TestBTreeMultiMapSTLifLowerBoundUpperBound (_t_multimap *pClMM, typename _t_multimap::size_type nNumEntries, uint32_t nInstance)
 {
 	typedef typename _t_multimap::const_iterator			citer_t;
+	typedef typename _t_multimap::key_type					key_type;
 
-	uint32_t						nLastKey;
-	uint32_t						i;
-	citer_t							sCIterLower;
-	citer_t							sCIterUpper;
+	key_type			nLastKey;
+	key_type			nKey;
+	uint32_t			i;
+	citer_t				sCIterLower;
+	citer_t				sCIterUpper;
 	
-	cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: lower_bound () upper_bound () count ()" << endl;
+	::std::cout << "exercises method compatible to STL interface CBTreeMultiMap<>:: lower_bound () upper_bound () count ()" << ::std::endl;
 	
 	for (i = 0; i < nInstance; i++)
 	{
@@ -418,53 +438,59 @@ void TestBTreeKeySortSTLifLowerBoundUpperBound (_t_multimap *pClMM, uint32_t nNu
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		sCIterLower = pClMM->lower_bound (i + 1);
-		sCIterUpper = pClMM->upper_bound (i + 1);
+		nKey = i + 1;
+
+		sCIterLower = pClMM->lower_bound (nKey);
+		sCIterUpper = pClMM->upper_bound (nKey);
 
 		::std::advance (sCIterLower, (int) nInstance);
 
 		if (sCIterLower != sCIterUpper)
 		{
-			cerr << endl;
-			cerr << "TestBTreeMultiMapSTLifLowerBoundUpperBound: ERROR: boundary mismatch!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeMultiMapSTLifLowerBoundUpperBound: ERROR: boundary mismatch!" << ::std::endl;
 
 			exit (-1);
 		}
 
-		if (pClMM->count (i + 1) != nInstance)
+		if (pClMM->count (nKey) != nInstance)
 		{
-			cerr << endl;
-			cerr << "TestBTreeMultiMapSTLifLowerBoundUpperBound: ERROR: count () returned with unexpected value!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "TestBTreeMultiMapSTLifLowerBoundUpperBound: ERROR: count () returned with unexpected value!" << ::std::endl;
 
 			exit (-1);
 		}
 	}
 
-	sCIterLower = pClMM->lower_bound (0);
+	nKey = 0;
+
+	sCIterLower = pClMM->lower_bound (nKey);
 
 	if (sCIterLower != pClMM->cbegin ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeMultiMapSTLifLowerBoundUpperBound: ERROR: lower_bound () didn't return cbegin () when testing for lowest key!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeMultiMapSTLifLowerBoundUpperBound: ERROR: lower_bound () didn't return cbegin () when testing for lowest key!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sCIterUpper = pClMM->upper_bound (nNumEntries + 1);
+	nKey = nNumEntries + 1;
+
+	sCIterUpper = pClMM->upper_bound (nKey);
 
 	if (sCIterUpper != pClMM->cend ())
 	{
-		cerr << endl;
-		cerr << "TestBTreeMultiMapSTLifLowerBoundUpperBound: ERROR: upper_bound () didn't return cend () when testing for lowest key!" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "TestBTreeMultiMapSTLifLowerBoundUpperBound: ERROR: upper_bound () didn't return cend () when testing for lowest key!" << ::std::endl;
 
 		exit (-1);
 	}
 }
 
-template <class _t_container>
+template<class _t_container>
 void TestBTreeSTLmultiMap (uint32_t nTestNum, _t_container *pMMapWrapper)
 {
-	cout << "b-tree multi-map test bench selected" << endl;
+	::std::cout << "b-tree multi-map test bench selected" << ::std::endl;
 
 	switch (nTestNum)
 	{
@@ -540,14 +566,16 @@ void TestBTreeSTLmultiMap (uint32_t nTestNum, _t_container *pMMapWrapper)
 	
 	case BTREETEST_MULTIMAP_STL_IF_LOWER_BOUND_UPPER_BOUND	:
 		{
-			TestBTreeKeySortSTLifLowerBoundUpperBound (pMMapWrapper, 64, 5);
+			TestBTreeMultiMapSTLifLowerBoundUpperBound (pMMapWrapper, 64, 5);
 
 			break;
 		}
 	
 	default:
 		{
-			cerr << "ERROR: TestBTreeSTLmultiMap: Unknown test or test not specified!" << endl;
+			::std::cerr << "ERROR: TestBTreeSTLmultiMap: Unknown test or test not specified!" << ::std::endl;
+
+			exit (-1);
 
 			break;
 		}
