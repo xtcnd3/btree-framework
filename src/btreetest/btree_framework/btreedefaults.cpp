@@ -16,15 +16,23 @@
 
 #include "btreedefaults.h"
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults (const bayerTreeCacheDescription_t *psCacheDescription)
 	:	CBTreeIf<_t_data, _t_sizetype> ()
 	,	m_sCacheDescription (*psCacheDescription)
 {
 #if defined (BTREE_ITERATOR_REGISTRATION)
-	m_psIterRegister = new typename ::std::set<const_iterator *> ();
+	
+	m_psIterRegister = new typename ::std::set<iterator *> ();
+	m_psCIterRegister = new typename ::std::set<const_iterator *> ();
+//	m_psRIterRegister = new typename ::std::set<reverse_iterator *> ();
+//	m_psCRIterRegister = new typename ::std::set<const_reverse_iterator *> ();
 
-	BTREE_ASSERT (m_psIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (bayerTreeCacheDescription_t *): insufficient memory!");
+	BTREE_ASSERT (m_psIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (bayerTreeCacheDescription_t *): insufficient memory! (m_psIterRegister)");
+	BTREE_ASSERT (m_psCIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (bayerTreeCacheDescription_t *): insufficient memory! (m_psCIterRegister)");
+//	BTREE_ASSERT (m_psRIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (bayerTreeCacheDescription_t *): insufficient memory! (m_psRIterRegister)");
+//	BTREE_ASSERT (m_psCRIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (bayerTreeCacheDescription_t *): insufficient memory! (m_psCRIterRegister)");
+
 #endif
 
 #if defined (USE_PERFORMANCE_COUNTERS)
@@ -41,14 +49,22 @@ rBT		-	reference to CBTreeDefaults instance to be copied
 
 */
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults (const CBTreeDefaults<_t_data, _t_sizetype> &rBT)
 	:	CBTreeIf<_t_data, _t_sizetype> ()
 {
 #if defined (BTREE_ITERATOR_REGISTRATION)
-	m_psIterRegister = new typename ::std::set<const_iterator *> ();
 
-	BTREE_ASSERT (m_psIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (const CBTreeDefaults<_t_data, _t_sizetype> &): insufficient memory!");
+	m_psIterRegister = new typename ::std::set<iterator *> ();
+	m_psCIterRegister = new typename ::std::set<const_iterator *> ();
+//	m_psRIterRegister = new typename ::std::set<reverse_iterator *> ();
+//	m_psCRIterRegister = new typename ::std::set<const_reverse_iterator *> ();
+
+	BTREE_ASSERT (m_psIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (const CBTreeDefaults<_t_data, _t_sizetype> &): insufficient memory! (m_psIterRegister)");
+	BTREE_ASSERT (m_psCIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (const CBTreeDefaults<_t_data, _t_sizetype> &): insufficient memory! (m_psCIterRegister)");
+//	BTREE_ASSERT (m_psRIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (const CBTreeDefaults<_t_data, _t_sizetype> &): insufficient memory! (m_psRIterRegister)");
+//	BTREE_ASSERT (m_psCRIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (const CBTreeDefaults<_t_data, _t_sizetype> &): insufficient memory! (m_psCRIterRegister)");
+
 #endif
 
 	m_sCacheDescription = rBT.m_sCacheDescription;
@@ -65,19 +81,58 @@ Destructor
 
 */
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeDefaults<_t_data, _t_sizetype>::~CBTreeDefaults ()
 {
 #if defined (BTREE_ITERATOR_REGISTRATION)
 
-	typename ::std::set<const_iterator *>::iterator		sIter = m_psIterRegister->begin ();
-
-	for (; sIter != m_psIterRegister->end (); sIter++)
+	if (m_psIterRegister != NULL)
 	{
-		(*sIter)->detach ();
+		auto	sCIter = m_psIterRegister->cbegin ();
+
+		for (; sCIter != m_psIterRegister->cend (); sCIter++)
+		{
+			(*sCIter)->detach ();
+		}
+
+		delete m_psIterRegister;
 	}
 
-	delete m_psIterRegister;
+	if (m_psCIterRegister != NULL)
+	{
+		auto	sCIter = m_psCIterRegister->cbegin ();
+
+		for (; sCIter != m_psCIterRegister->cend (); sCIter++)
+		{
+			(*sCIter)->detach ();
+		}
+
+		delete m_psCIterRegister;
+	}
+
+//	if (m_psRIterRegister != NULL)
+//	{
+//		auto	sCIter = m_psRIterRegister->cbegin ();
+//
+//		for (; sCIter != m_psRIterRegister->cend (); sCIter++)
+//		{
+//			(*sCIter)->detach ();
+//		}
+//
+//		delete m_psRIterRegister;
+//	}
+//
+//	if (m_psCRIterRegister != NULL)
+//	{
+//		auto	sCIter = m_psCRIterRegister->cbegin ();
+//
+//		for (; sCIter != m_psCRIterRegister->cend (); sCIter++)
+//		{
+//			(*sCIter)->detach ();
+//		}
+//
+//		delete m_psCRIterRegister;
+//	}
 
 #endif
 }
@@ -110,7 +165,7 @@ NB: The defined USE_PERFORMANCE_COUNTERS needs to be defined, otherwise only uns
 
 */
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 void CBTreeDefaults<_t_data, _t_sizetype>::get_performance_counters (uint64_t (&rHitCtrs)[PERFCTR_TERMINATOR], uint64_t (&rMissCtrs)[PERFCTR_TERMINATOR])
 {
 #if defined (USE_PERFORMANCE_COUNTERS)
@@ -132,7 +187,7 @@ void CBTreeDefaults<_t_data, _t_sizetype>::get_performance_counters (uint64_t (&
 #endif
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator CBTreeDefaults<_t_data, _t_sizetype>::cbegin () const
 {
 	typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator			sIter (this, 0, false);
@@ -140,7 +195,7 @@ typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator CBTreeDefaults<_t_
 	return (sIter);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator CBTreeDefaults<_t_data, _t_sizetype>::cend () const
 {
 	typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator			sIter (this, this->size (), false);
@@ -148,7 +203,7 @@ typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator CBTreeDefaults<_t_
 	return (sIter);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::const_reverse_iterator CBTreeDefaults<_t_data, _t_sizetype>::crbegin () const
 {
 	typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator			sIter (this, this->size (), false);
@@ -157,7 +212,7 @@ typename CBTreeDefaults<_t_data, _t_sizetype>::const_reverse_iterator CBTreeDefa
 	return (sRIter);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::const_reverse_iterator CBTreeDefaults<_t_data, _t_sizetype>::crend () const
 {
 	typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator			sIter (this, 0, false);
@@ -166,7 +221,7 @@ typename CBTreeDefaults<_t_data, _t_sizetype>::const_reverse_iterator CBTreeDefa
 	return (sRIter);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::iterator CBTreeDefaults<_t_data, _t_sizetype>::begin ()
 {
 	CBTreeDefaults_t::iterator		sIter (this, 0);
@@ -174,7 +229,7 @@ typename CBTreeDefaults<_t_data, _t_sizetype>::iterator CBTreeDefaults<_t_data, 
 	return (sIter);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::iterator CBTreeDefaults<_t_data, _t_sizetype>::end ()
 {
 	CBTreeDefaults_t::iterator		sIter (this, this->size ());
@@ -182,7 +237,7 @@ typename CBTreeDefaults<_t_data, _t_sizetype>::iterator CBTreeDefaults<_t_data, 
 	return (sIter);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::reverse_iterator CBTreeDefaults<_t_data, _t_sizetype>::rbegin ()
 {
 	CBTreeDefaults_t::iterator			sIter (this, this->size (), false);
@@ -191,7 +246,7 @@ typename CBTreeDefaults<_t_data, _t_sizetype>::reverse_iterator CBTreeDefaults<_
 	return (sRIter);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::reverse_iterator CBTreeDefaults<_t_data, _t_sizetype>::rend ()
 {
 	CBTreeDefaults_t::iterator			sIter (this, 0, false);
@@ -200,31 +255,31 @@ typename CBTreeDefaults<_t_data, _t_sizetype>::reverse_iterator CBTreeDefaults<_
 	return (sRIter);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator CBTreeDefaults<_t_data, _t_sizetype>::begin () const
 {
 	return (this->cbegin ());
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::const_iterator CBTreeDefaults<_t_data, _t_sizetype>::end () const
 {
 	return (this->cend ());
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::const_reverse_iterator CBTreeDefaults<_t_data, _t_sizetype>::rbegin () const
 {
 	return (this->crbegin ());
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 typename CBTreeDefaults<_t_data, _t_sizetype>::const_reverse_iterator CBTreeDefaults<_t_data, _t_sizetype>::rend () const
 {
 	return (this->crend ());
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeDefaults<_t_data, _t_sizetype> &CBTreeDefaults<_t_data, _t_sizetype>::operator=
 	(const CBTreeDefaults<_t_data, _t_sizetype> &rBT)
 {
@@ -240,30 +295,133 @@ CBTreeDefaults<_t_data, _t_sizetype> &CBTreeDefaults<_t_data, _t_sizetype>::oper
 	return (*this);
 }
 
-template <class _t_data, class _t_sizetype>
-void CBTreeDefaults<_t_data, _t_sizetype>::register_iterator (const_iterator *pIter)
+template<class _t_data, class _t_sizetype>
+void CBTreeDefaults<_t_data, _t_sizetype>::register_iterator (iterator *pIter)
 {
 #if defined (BTREE_ITERATOR_REGISTRATION)
 
 	if (m_psIterRegister->count (pIter) == 0)
 	{
 		m_psIterRegister->insert (pIter);
+
+//		printf ("%08lx --> %08lx\n", this, pIter);
 	}
 
 #endif
 }
 
-template <class _t_data, class _t_sizetype>
-void CBTreeDefaults<_t_data, _t_sizetype>::unregister_iterator (const_iterator *pIter)
+template<class _t_data, class _t_sizetype>
+void CBTreeDefaults<_t_data, _t_sizetype>::register_iterator (const_iterator *pCIter)
 {
 #if defined (BTREE_ITERATOR_REGISTRATION)
 
-	m_psIterRegister->erase (pIter);
+//	static uint32_t		nCnt = 0;
+
+	if (m_psCIterRegister->count (pCIter) == 0)
+	{
+		m_psCIterRegister->insert (pCIter);
+
+//		printf ("%5u: %08lx --> %08lx\n", nCnt, this, pCIter);
+	}
+	else
+	{
+//		printf ("%5u: %08lx     %08lx\n", nCnt, this, pCIter);
+	}
+
+//	nCnt++;
 
 #endif
 }
 
-template <class _t_data, class _t_sizetype>
+//template<class _t_data, class _t_sizetype>
+//void CBTreeDefaults<_t_data, _t_sizetype>::register_iterator (reverse_iterator *pRIter)
+//{
+//#if defined (BTREE_ITERATOR_REGISTRATION)
+//
+//	if (m_psRIterRegister->count (pRIter) == 0)
+//	{
+//		m_psRIterRegister->insert (pRIter);
+//	}
+//
+//#endif
+//}
+//
+//template<class _t_data, class _t_sizetype>
+//void CBTreeDefaults<_t_data, _t_sizetype>::register_iterator (const_reverse_iterator *pCRIter)
+//{
+//#if defined (BTREE_ITERATOR_REGISTRATION)
+//
+//	if (m_psCRIterRegister->count (pCRIter) == 0)
+//	{
+//		m_psCRIterRegister->insert (pCRIter);
+//	}
+//
+//#endif
+//}
+
+template<class _t_data, class _t_sizetype>
+void CBTreeDefaults<_t_data, _t_sizetype>::unregister_iterator (iterator *pIter)
+{
+#if defined (BTREE_ITERATOR_REGISTRATION)
+
+	auto	nSize = m_psIterRegister->erase (pIter);
+/*
+	if (nSize == 0)
+	{
+		printf ("%08lx  x  %08lx\n", this, pIter);
+	}
+	else
+	{
+		printf ("%08lx <-- %08lx\n", this, pIter);
+	}
+*/
+#endif
+}
+
+template<class _t_data, class _t_sizetype>
+void CBTreeDefaults<_t_data, _t_sizetype>::unregister_iterator (const_iterator *pCIter)
+{
+#if defined (BTREE_ITERATOR_REGISTRATION)
+
+//	static uint32_t		nCnt = 0;
+
+	auto	nSize = m_psCIterRegister->erase (pCIter);
+/*
+	if (nSize == 0)
+	{
+		printf ("%5u: %08lx  x  %08lx\n", nCnt, this, pCIter);
+	}
+	else
+	{
+		printf ("%5u: %08lx <-- %08lx\n", nCnt, this, pCIter);
+	}
+
+	nCnt++;
+*/
+#endif
+}
+
+//template<class _t_data, class _t_sizetype>
+//void CBTreeDefaults<_t_data, _t_sizetype>::unregister_iterator (reverse_iterator *pRIter)
+//{
+//#if defined (BTREE_ITERATOR_REGISTRATION)
+//
+//	m_psRIterRegister->erase (pRIter);
+//
+//#endif
+//}
+//
+//template<class _t_data, class _t_sizetype>
+//void CBTreeDefaults<_t_data, _t_sizetype>::unregister_iterator (const_reverse_iterator *pCRIter)
+//{
+//#if defined (BTREE_ITERATOR_REGISTRATION)
+//
+//	m_psCRIterRegister->erase (pCRIter);
+//
+//#endif
+//}
+
+template<class _t_data, class _t_sizetype>
 void CBTreeDefaults<_t_data, _t_sizetype>::_swap
 	(
 		CBTreeDefaults<_t_data, _t_sizetype> &rBT
@@ -284,3 +442,4 @@ void CBTreeDefaults<_t_data, _t_sizetype>::_swap
 }
 
 #endif // BTREEDEFAULTS_CPP
+
