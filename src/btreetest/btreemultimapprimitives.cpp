@@ -75,7 +75,7 @@ void multiMapPrim_add (_t_container *pClMM, uint32_t nEntries, uint32_t &nFromWh
 
 		default									:
 			{
-				cerr << "ERROR: multiMapPrim_add: eWhere corrupted or not set!" << endl;
+				::std::cerr << "ERROR: multiMapPrim_add: eWhere corrupted or not set!" << ::std::endl;
 
 				exit (-1);
 
@@ -90,7 +90,7 @@ void multiMapPrim_add (_t_container *pClMM, uint32_t nEntries, uint32_t &nFromWh
 		pClMM->insert (sEntry);
 	}
 
-	cout << "insert: " << ui32 << " / " << nEntries << endl;
+	::std::cout << "insert: " << ui32 << " / " << nEntries << ::std::endl;
 }
 
 #endif // BTREEMULTIMAPPRIMITIVES_CPP
