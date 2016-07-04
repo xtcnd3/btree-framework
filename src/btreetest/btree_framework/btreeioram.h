@@ -15,57 +15,60 @@
 #define	BTREERAMIO_H
 
 #include "btreeiolinear.h"
-#include "btreeramioprop.h"
 
-class CBTreeIOpropertiesRAM;
-
-template <class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_addresstype = uint64_t, class _t_offsettype = uint32_t>
-class CBTreeRAMIO : public CBTreeLinearIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+template<class _t_datalayerproperties>
+class CBTreeRAMIO : public CBTreeLinearIO<_t_datalayerproperties>
 {
 public:
 
-	// construction
-						CBTreeRAMIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
-												(
-													CBTreeIOpropertiesRAM &rDataLayerProperties, 
-													_t_addresstype nBlockSize, 
-													_t_subnodeiter nNodeSize,
-													uint32_t nNumDataPools, 
-													CBTreeIOperBlockPoolDesc_t *psDataPools
-												);
+	typedef typename _t_datalayerproperties::size_type				size_type;
+	typedef typename _t_datalayerproperties::node_iter_type			node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type		sub_node_iter_type;
+	typedef typename _t_datalayerproperties::address_type			address_type;
+	typedef typename _t_datalayerproperties::offset_type			offset_type;
 
-						~CBTreeRAMIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
-												();
+	// construction
+						CBTreeRAMIO<_t_datalayerproperties>
+													(
+														_t_datalayerproperties &rDataLayerProperties, 
+														address_type nBlockSize, 
+														sub_node_iter_type nNodeSize,
+														uint32_t nNumDataPools, 
+														CBTreeIOperBlockPoolDesc_t *psDataPools
+													);
+
+						~CBTreeRAMIO<_t_datalayerproperties>
+													();
 
 	// monitoring
-	void				get_performance_counters				(uint64_t (&rHitCtrs)[PERFCTR_TERMINATOR], uint64_t (&rMissCtrs)[PERFCTR_TERMINATOR]);
+	void				get_performance_counters	(uint64_t (&rHitCtrs)[PERFCTR_TERMINATOR], uint64_t (&rMissCtrs)[PERFCTR_TERMINATOR]);
 
 	// data access primitives
 	template<class _t_dl_data>
-	inline _t_dl_data *	get_pooledData				(uint32_t nPool, _t_nodeiter nNode);
+	inline _t_dl_data *	get_pooledData				(uint32_t nPool, node_iter_type nNode);
 
 	template<class _t_dl_data>
-	inline _t_dl_data *	get_pooledData				(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nEntry);
+	inline _t_dl_data *	get_pooledData				(uint32_t nPool, node_iter_type nNode, sub_node_iter_type nEntry);
 
 	// mid level data access
 	template<class _t_dl_data>
-	void				insert_dataIntoPool			(uint32_t nPool, _t_nodeiter nNode, _t_subnodeiter nNodeLen, _t_subnodeiter nOffset, _t_subnodeiter nDataLen, const _t_dl_data *pData);
+	void				insert_dataIntoPool			(uint32_t nPool, node_iter_type nNode, sub_node_iter_type nNodeLen, sub_node_iter_type nOffset, sub_node_iter_type nDataLen, const _t_dl_data *pData);
 
 	// maintanence
-	void				set_size					(_t_nodeiter nMaxNodes);
+	void				set_size					(node_iter_type nMaxNodes);
 	void				unload						();
 
 	// cache management
-	void				unload_from_cache			(_t_nodeiter nNode);
+	void				unload_from_cache			(node_iter_type nNode);
 
 	// cache information
-	bool				is_dataCached				(uint32_t nPool, _t_nodeiter nNode);
+	bool				is_dataCached				(uint32_t nPool, node_iter_type nNode);
 
-	void				showdump					(std::ofstream &ofs, _t_nodeiter nTreeSize, char *pAlloc);
+	void				showdump					(std::ofstream &ofs, node_iter_type nTreeSize, char *pAlloc);
 
 protected:
 
-	CBTreeIOpropertiesRAM							*m_pClDataLayerProperties;
+	_t_datalayerproperties							*m_pClDataLayerProperties;
 };
 
 #endif // BTREERAMIO_H
