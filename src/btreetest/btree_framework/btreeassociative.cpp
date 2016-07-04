@@ -16,14 +16,14 @@
 
 #include "btreeassociative.h"
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeAssociative
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
 		const bayerTreeCacheDescription_t *psCacheDescription, 
-		_t_subnodeiter nNodeSize
+		typename _t_datalayerproperties::sub_node_iter_type nNodeSize
 	)
-	:	CBTreeBaseDefaults <CBTreeKeySortPos<_t_sizetype, _t_key>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties>
 	(
 		rDataLayerProperties, 
 		psCacheDescription, 
@@ -33,7 +33,7 @@ CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 #if defined (_DEBUG)
 	m_pbShortLiveKeyInUse = new bool (false);
 
-	BTREE_ASSERT (m_pbShortLiveKeyInUse != NULL, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeAssociative (_t_datalayerproperties &, bayerTreeCacheDescription_t *, _t_subnodeiter): insufficient memory!");
+	BTREE_ASSERT (m_pbShortLiveKeyInUse != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type): insufficient memory!");
 #endif
 
 	m_pRemoveKey = NULL;
@@ -45,13 +45,13 @@ CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 
 	m_ppShortLiveKey = new _t_key *;
 
-	BTREE_ASSERT (m_ppShortLiveKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeAssociative (_t_datalayerproperties &, bayerTreeCacheDescription_t *, _t_subnodeiter) (m_ppShortLiveKey): insufficient memory!");
+	BTREE_ASSERT (m_ppShortLiveKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type) (m_ppShortLiveKey): insufficient memory!");
 
 	*m_ppShortLiveKey = NULL;
 
 	m_ppTempFindFirstKeyKey = new _t_key *;
 
-	BTREE_ASSERT (m_ppTempFindFirstKeyKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeAssociative (_t_datalayerproperties &, bayerTreeCacheDescription_t *, _t_subnodeiter) (m_ppTempFindFirstKeyKey): insufficient memory!");
+	BTREE_ASSERT (m_ppTempFindFirstKeyKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type) (m_ppTempFindFirstKeyKey): insufficient memory!");
 
 	*m_ppTempFindFirstKeyKey = NULL;
 	
@@ -67,17 +67,17 @@ CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 	vbufferAllocate (&m_pGetNewKey);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeAssociative (const CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
-	:	CBTreeBaseDefaults <CBTreeKeySortPos<_t_sizetype, _t_key>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rBT, bool bAssign)
+	:	CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties>
 	(
-		dynamic_cast <const CBTreeBaseDefaults <CBTreeKeySortPos<_t_sizetype, _t_key>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT)
+		dynamic_cast <const CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties> &> (rBT)
 	)
 {
 #if defined (_DEBUG)
 	m_pbShortLiveKeyInUse = new bool (false);
 
-	BTREE_ASSERT (m_pbShortLiveKeyInUse != NULL, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeAssociative (CBTreeAssociative<> &): insufficient memory!");
+	BTREE_ASSERT (m_pbShortLiveKeyInUse != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (CBTreeAssociative<> &): insufficient memory!");
 #endif
 
 	m_pRemoveKey = NULL;
@@ -89,13 +89,13 @@ CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 	
 	m_ppShortLiveKey = new _t_key *;
 
-	BTREE_ASSERT (m_ppShortLiveKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeAssociative (CBTreeAssociative<> &) (m_ppShortLiveKey): insufficient memory!");
+	BTREE_ASSERT (m_ppShortLiveKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (CBTreeAssociative<> &) (m_ppShortLiveKey): insufficient memory!");
 
 	*m_ppShortLiveKey = NULL;
 	
 	m_ppTempFindFirstKeyKey = new _t_key *;
 
-	BTREE_ASSERT (m_ppTempFindFirstKeyKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeAssociative (CBTreeAssociative<> &) (m_ppTempFindFirstKeyKey): insufficient memory!");
+	BTREE_ASSERT (m_ppTempFindFirstKeyKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (CBTreeAssociative<> &) (m_ppTempFindFirstKeyKey): insufficient memory!");
 
 	*m_ppTempFindFirstKeyKey = NULL;
 	
@@ -116,8 +116,8 @@ CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 	}
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeAssociative ()
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::~CBTreeAssociative ()
 {
 	vbufferDeallocate (m_ppShortLiveKey);
 	vbufferDeallocate (m_ppTempFindFirstKeyKey);
@@ -149,16 +149,16 @@ the newly added entry, otherwise the method asserts and throws an ::std::run_tim
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
 	(
 		const _t_data &rData
 	)
 {
-	_t_sizetype								nRetval;
-	iterator_state_t						sIterState;
-	CBTreeKeySortPos<_t_sizetype, _t_key>	sPos;
+	size_type					nRetval;
+	iterator_state_t			sIterState;
+	position_t					sPos;
 	
 	this->create_root ();
 
@@ -175,16 +175,16 @@ typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnode
 
 	nRetval = this->add_to_node (sPos, rData, this->m_nRootNode, 0, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos);
 
-	BTREE_ASSERT (nRetval == 1, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (const _t_data &): Failed to create new entry!");
+	BTREE_ASSERT (nRetval == 1, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert (const _t_data &): Failed to create new entry!");
 
 	iterator		sRetval (this, sIterState.nAssociatedPos, &sIterState, this->get_time_stamp (), false);
 
 	return (sRetval);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (_t_iterator sItFirst, _t_iterator sItLast)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+template<class _t_iterator>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert (_t_iterator sItFirst, _t_iterator sItLast)
 {
 	bool			bSelfReverse;
 	_t_iterator		sIt;
@@ -201,12 +201,12 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 		const_iterator						sIt = (const_iterator) (*psItLast);
 		const_iterator						sItLower;
 		const_iterator						sItUpper;
-		_t_data								sData;
-		_t_key								sKey;
-		_t_key								sPrevKey;
+		value_type							sData;
+		key_type							sKey;
+		key_type							sPrevKey;
 		bool								bBounce;
-		_t_key								sFirstKey;
-		_t_key								sLastKey;
+		key_type							sFirstKey;
+		key_type							sLastKey;
 		typename ::std::list<_t_data>		sList;
 
 		sData = *((const_iterator) (*psItFirst));
@@ -244,9 +244,9 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 			sList.clear ();
 
-			sList.template insert <const_iterator> (sList.begin (), sItLower, sItUpper);
+			sList.insert (sList.begin (), sItLower, sItUpper);
 
-			CBTreeAssociative_t::insert<typename ::std::list<_t_data>::const_iterator> (sList.cbegin (), sList.cend ());
+			CBTreeAssociative_t::insert (sList.cbegin (), sList.cend ());
 
 			this->get_prev_key (sKey, sPrevKey, bBounce);
 
@@ -275,31 +275,31 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 		{
 #if defined (_DEBUG)
 
-			_t_sizetype		nSize = this->size ();
+			size_type		nSize = this->size ();
 
 #endif
 
-			CBTreeAssociative_t::insert ((const _t_data &) *sIt);
+			CBTreeAssociative_t::insert ((const value_type &) *sIt);
 
 #if defined (_DEBUG)
 
 			nDebug++;
 
-			BTREE_ASSERT ((nSize + 1) == this->size (), "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert<_t_iterator>: unexpected container size!");
+			BTREE_ASSERT ((nSize + 1) == this->size (), "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert<_t_iterator>: unexpected container size!");
 
 #endif
 		}
 	}
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::erase
 	(
-		typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator sCIterPos
 	)
 {
-	typedef typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator		iter_t;
+	typedef typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator		iter_t;
 
 	this->erase_via_reference (sCIterPos, false);
 
@@ -318,11 +318,11 @@ The method returns number of removed entries.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (const _t_key &rKey)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::erase (const _t_key &rKey)
 {
-		CBTreeKeySortPos<_t_sizetype, _t_key>	sPos;
-	_t_sizetype								nRetval = (_t_sizetype) 0;
+	position_t			sPos;
+	size_type			nRetval = (size_type) 0;
 
 	if (this->m_pData != NULL)
 	{
@@ -335,7 +335,7 @@ _t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subn
 		sPos.nInstance = ~0;
 
 		// for as long as any instnce using the same key is left ...
-		while (count (rKey) > (_t_sizetype) 0)
+		while (count (rKey) > (size_type) 0)
 		{
 			// ... continue removing those entries
 			nRetval += this->remove_from_node (sPos, this->m_nRootNode, 0);
@@ -345,16 +345,17 @@ _t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subn
 	return (nRetval);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::erase
 	(
-		typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterFirst, 
-		typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterLast
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator sCIterFirst, 
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator sCIterLast
 	)
 {
-	_t_sizetype		nDiff = ::std::distance<const_iterator> (sCIterFirst, sCIterLast);
-	_t_sizetype		i;
+	
+	difference_type		nDiff = ::std::distance (sCIterFirst, sCIterLast);
+	difference_type		i;
 
 	for (i = 0; i < nDiff; i++)
 	{
@@ -364,9 +365,9 @@ typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnode
 	return (iterator (this, sCIterFirst.get_pos (), false));
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find
 	(
 		const _t_key &rKey
 	)
@@ -383,9 +384,9 @@ CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 	}
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
-	CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find
 	(
 		const _t_key &rKey
 	) const
@@ -402,9 +403,9 @@ typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnode
 	}
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::lower_bound
 	(
 		const _t_key &rKey
 	)
@@ -416,9 +417,9 @@ typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnode
 	return (iterator (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false));
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
-	CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::lower_bound
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::lower_bound
 	(
 		const _t_key &rKey
 	) const
@@ -430,9 +431,9 @@ typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnode
 	return (const_iterator (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false));
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::upper_bound
 	(
 		const _t_key &rKey
 	)
@@ -449,9 +450,9 @@ typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnode
 	}
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator
-	CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::upper_bound
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::upper_bound
 	(
 		const _t_key &rKey
 	) const
@@ -482,11 +483,11 @@ bBounce is true and rNextKey contains an undefined value.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_next_key (const _t_key &rKey, _t_key &rNextKey, bool &bBounce) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_next_key (const _t_key &rKey, _t_key &rNextKey, bool &bBounce) const
 {
-	_t_nodeiter					nNode, nNextNode;
-	_t_subnodeiter				nSub, nNextSub;
+	node_iter_type					nNode, nNextNode;
+	sub_node_iter_type				nSub, nNextSub;
 	
 	bBounce = false;
 	
@@ -591,11 +592,11 @@ bBounce is true and rNextKey contains an undefined value.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_prev_key (const _t_key &rKey, _t_key &rPrevKey, bool &bBounce) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_prev_key (const _t_key &rKey, _t_key &rPrevKey, bool &bBounce) const
 {
-	_t_nodeiter					nNode, nPrevNode;
-	_t_subnodeiter				nSub, nPrevSub;
+	node_iter_type					nNode, nPrevNode;
+	sub_node_iter_type				nSub, nPrevSub;
 	
 	bBounce = false;
 	
@@ -636,13 +637,13 @@ This method determines the number entries containing the same key as the object 
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::count (const _t_key &rKey) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::count (const _t_key &rKey) const
 {
-	_t_sizetype				nRetval = (_t_sizetype) 0;
-	_t_nodeiter				nNode = this->m_nRootNode, nNodeSeen;
-	_t_subnodeiter			nSubPos, nSubPosSeen;
-	bool					bBounce;
+	size_type					nRetval = (size_type) 0;
+	node_iter_type				nNode = this->m_nRootNode, nNodeSeen;
+	sub_node_iter_type			nSubPos, nSubPosSeen;
+	bool						bBounce;
 
 	// if no data is present ...
 	if (this->empty ())
@@ -694,8 +695,8 @@ _t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subn
 	return (nRetval);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_compare CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_comp () const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::key_compare CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::key_comp () const
 {
 	key_compare		sRetval;
 
@@ -704,8 +705,8 @@ typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnode
 	return (sRetval);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::value_compare CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::value_comp () const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::value_compare CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::value_comp () const
 {
 	value_compare		sRetval;
 
@@ -731,17 +732,17 @@ This method returns the number of items that have been written to the array pDat
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::serialize (const _t_sizetype nStart, const _t_sizetype nLen, _t_data *pData) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::serialize (const typename _t_datalayerproperties::size_type nStart, const typename _t_datalayerproperties::size_type nLen, _t_data *pData) const
 {
-	CBTreeKeySortPos <_t_sizetype, _t_key>	sPos;
-	_t_key									sKey;
-	_t_data									sData;
+	position_t			sPos;
+	key_type			sKey;
+	value_type			sData;
 
 	/*
 	**	The actual serialize process is done by CBTreeBaseDefaults::serialize.
-	**	All this method does is to convert nFrom and nTo into the template parameter _ti_pos (CBTreeKeySortPos <_t_sizetype, _t_key>)
-	**	and nLen. This has to be done, since CBTreeBaseDefaults::serialize has no concept of what an _t_sizetype in terms of a position is.
+	**	All this method does is to convert nFrom and nTo into the templateparameter _ti_pos (CBTreeKeySortPos <size_type, _t_key>)
+	**	and nLen. This has to be done, since CBTreeBaseDefaults::serialize has no concept of what an size_type in terms of a position is.
 	*/
 
 	get_at (nStart, sData);
@@ -757,14 +758,14 @@ _t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subn
 	else
 	{
 		// ... otherwise determine instance
-		_t_sizetype		nInit = get_init_pos_of_key (sKey);
+		size_type		nInit = get_init_pos_of_key (sKey);
 
 		sPos.nInstance = nStart - nInit;
 	}
 
 	sPos.pKey = &sKey;
 
-	return (CBTreeBaseDefaults<CBTreeKeySortPos <_t_sizetype, _t_key>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::serialize (sPos, nLen, pData));
+	return (CBTreeBaseDefaults_t::serialize (sPos, nLen, pData));
 }
 
 /*
@@ -777,15 +778,15 @@ The result is a reference to this instance.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
-	(const CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::operator=
+	(const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rBT)
 {
 	// if this is not the same instance as the referenced b-tree (rBT) ...
 	if (this != &rBT)
 	{
-		CBTreeBase_t		&rBaseThis = dynamic_cast<CBTreeBase_t &> (*this);
-		const CBTreeBase_t	&rBaseBT = dynamic_cast<const CBTreeBase_t &> (rBT);
+		CBTreeBaseDefaults_t		&rBaseThis = dynamic_cast<CBTreeBaseDefaults_t &> (*this);
+		const CBTreeBaseDefaults_t	&rBaseBT = dynamic_cast<const CBTreeBaseDefaults_t &> (rBT);
 		
 		rBaseThis = rBaseBT;
 	}
@@ -793,12 +794,14 @@ CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_
 	return (*this);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (const CBTreeAssociativeIf<_t_data, _t_key, _t_sizetype> &rRhs) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::operator== (const typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociativeIf_t &rRhs) const
 {
+	typedef typename ::operator_test_scope::has_equal_operator<_t_data>::type			has_equal_operator;
+
 	if (this == &rRhs)
 	{
-		true;
+		return (true);
 	}
 
 	if (this->size () != rRhs.size ())
@@ -806,13 +809,17 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 		return (false);
 	}
 
-	const uint32_t		nLocalVectorSize = 32;		// used as number of bits in the local vector
-	const uint32_t		nLoaclVectorShift = 5;
-	const uint32_t		nLoaclVectorMask = 0x1F;
+	has_equal_operator	sSelectHasEqualOperator;
+	const uint32_t		nLocalVectorBits = 32;		// used as number of bits in the local vector
+	const uint32_t		nLocalVectorShift = 5;
+	const uint32_t		nLocalVectorMask = 0x1F;
 	uint32_t			uLocalVector;
 	uint32_t			*pLocalVector;
-	_t_data				sData;
-	_t_key				sKey;
+	uint32_t			ui32;
+	uint32_t			nRemaining;
+	uint32_t			nLocalVectorSize;
+	value_type			sData;
+	key_type			sKey;
 
 	const_iterator		sCIterThis = this->cbegin ();
 	const_iterator		sCIterThisEnd = this->cend ();
@@ -831,11 +838,11 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 		const_iterator		sCIterRhsKeyLower = rRhs.lower_bound (sKey);
 		const_iterator		sCIterRhsKeyUpper = rRhs.upper_bound (sKey);
 		const_iterator		sCIterRhs;
-		_t_sizetype			nCountThis;
-		_t_sizetype			nCountRhs;
-		_t_sizetype			i;
-		_t_data				sDataRhs;
-		_t_key				sKeyRhs;
+		size_type			nCountThis;
+		size_type			nCountRhs;
+		size_type			i;
+		value_type			sDataRhs;
+		key_type			sKeyRhs;
 
 		nCountThis = this->count (sKey);
 
@@ -846,7 +853,9 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 			return (false);
 		}
 
-		if (nCountRhs < nLocalVectorSize)
+		nLocalVectorSize = (((uint32_t) nCountRhs + (nLocalVectorBits - 1)) >> nLocalVectorShift);
+
+		if (nCountRhs < nLocalVectorBits)
 		{
 			uLocalVector = 0;
 
@@ -854,7 +863,7 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 		}
 		else
 		{
-			pLocalVector = (uint32_t *) calloc ((size_t) ((nCountRhs + 1) / nLocalVectorSize), sizeof (*pLocalVector));
+			pLocalVector = (uint32_t *) calloc ((size_t) nLocalVectorSize, sizeof (*pLocalVector));
 		}
 
 		for (sCIter = sCIterThisKeyLower, i = 0; sCIter < sCIterThisKeyUpper; sCIter++, i++)
@@ -869,32 +878,50 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 				if (this->comp (sKey, sKeyRhs) == 0)
 				{
-					if ((pLocalVector[i >> nLoaclVectorShift] &= 1 << (i & nLoaclVectorMask)) == 0)
+					if (this->compare_entry (sData, sDataRhs, sSelectHasEqualOperator))
 					{
-						pLocalVector[i >> nLoaclVectorShift] |= 1 << (i & nLoaclVectorMask);
-
-						if (sCIterRhs == sCIterRhsKeyLower)
+						if ((pLocalVector[i >> nLocalVectorShift] & (1 << (i & nLocalVectorMask))) == 0)
 						{
-							sCIterRhsKeyLower++;
+							pLocalVector[i >> nLocalVectorShift] |= 1 << (i & nLocalVectorMask);
 
-							break;
+							if (sCIterRhs == sCIterRhsKeyLower)
+							{
+								sCIterRhsKeyLower++;
+							}
 						}
 					}
 				}
 			}
+		}
 
-			if (sCIterRhs >= sCIterRhsKeyUpper)
+		nRemaining = (uint32_t) nCountRhs;
+
+		for (ui32 = 0; ui32 < nLocalVectorSize; ui32++)
+		{
+			if (nRemaining >= nLocalVectorBits)
 			{
-				break;
+				if (pLocalVector[ui32] != ~0x0)
+				{
+					break;
+				}
+
+				nRemaining -= nLocalVectorBits;
+			}
+			else
+			{
+				if (pLocalVector[ui32] != (((1U << nRemaining) - 1) & nLocalVectorMask))
+				{
+					break;
+				}
 			}
 		}
 
-		if (nCountRhs >= nLocalVectorSize)
+		if (nCountRhs >= nLocalVectorBits)
 		{
 			free ((void *) pLocalVector);
 		}
 
-		if (sCIter < sCIterThisKeyUpper)
+		if ((sCIter < sCIterThisKeyUpper) || (ui32 < nLocalVectorSize))
 		{
 			return (false);
 		}
@@ -905,15 +932,15 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 	return (true);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (const CBTreeAssociativeIf<_t_data, _t_key, _t_sizetype> &rRhs) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::operator!= (const typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociativeIf_t &rRhs) const
 {
 	return (!(*this == rRhs));
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_assign
-	(const CBTreeIf<_t_data, _t_sizetype> &rContainer)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_assign
+	(const typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeIf_t &rContainer)
 {
 	// remove all data from target container
 	this->clear ();
@@ -929,17 +956,21 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 	
 	// determine initial part of skew width
 	const CBTreeAssociative_t&		rAssociative = dynamic_cast<const CBTreeAssociative_t &> (rContainer);
-	_t_sizetype						nSkewWidth = this->m_nNodeSize * 2;
-	_t_sizetype						nEntries = 1;
-	_t_sizetype						i;
-	_t_sizetype						j;
-	_t_data							sData;
+	size_type						nSkewWidth = this->get_node_max_sub_nodes ();
+	size_type						nEntries = 1;
+	size_type						i;
+	size_type						j;
+	size_type						nAverageNodeSize = this->get_node_max_sub_nodes ();
+	value_type						sData;
+
+	nAverageNodeSize *= 3;
+	nAverageNodeSize /= 4;
 
 	// combine skew width with eventual target tree depth (log t of n, while t is node size and n is tree size)
 	for (nSkewWidth--; nEntries <= rAssociative.size (); nSkewWidth++)
 	{
 		// on average every new layer allows for t times current tree size more entries
-		nEntries *= this->m_nNodeSize;
+		nEntries *= nAverageNodeSize;
 	}
 
 	// copy data using skew width
@@ -966,12 +997,12 @@ This method returns true is the access was successful, otherwise false.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_at (const _t_sizetype nPos, _t_data &rData) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_at (const typename _t_datalayerproperties::size_type nPos, _t_data &rData) const
 {
-	bool			retval = false;
-	_t_nodeiter		nNode;
-	_t_subnodeiter	nSubPos;
+	bool				retval = false;
+	node_iter_type		nNode;
+	sub_node_iter_type	nSubPos;
 
 	// if data layer is present ...
 	if (this->m_pData != NULL)
@@ -1007,79 +1038,79 @@ The method returns true if it was successful, otherwise false.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get (const _t_key &rKey, _t_sizetype nInstance, _t_data *pObj) const
-{
-	bool					retval = false;
-	_t_nodeiter				nNode = this->m_nRootNode, nodeSeen;
-	_t_subnodeiter			subPos, subPosSeen;
-	bool					bBounce;
-	_t_sizetype				u64;
-
-	// if data layer not present ...
-	if (this->m_pData == NULL)
-	{
-		// ... then return failure
-		return (retval);
-	}
-
-	// if no entry with that is preset ...
-	if (!find_oneKey (rKey, nNode, subPos))
-	{
-		// ... then return failure
-		return (retval);
-	}
-
-	// find the first entry of sharing the same key and make it the "seen" position
-	find_firstKey (nNode, subPos, nodeSeen, subPosSeen);
-
-	// walk through key streak until the instance in question has been found
-	for (u64 = 0ULL; u64 < nInstance; u64++)
-	{
-		// determine next position
-		this->move_next (nodeSeen, subPosSeen, nNode, subPos, bBounce);
-
-		// if next position doesn't exist ...
-		if (bBounce)
-		{
-			// ... then abort procedure
-			break;
-		}
-
-		// extract key of next position
-		extract_key (m_pGetNewKey, nNode, subPos);
-
-		// if key of next postion is not equal with current key ...
-		if (this->comp (*m_pGetNewKey, rKey) != 0)
-		{
-			// ... then abort procedure
-			break;
-		}
-
-		// assume next position as current position
-		nodeSeen = nNode;
-		subPosSeen = subPos;
-	}
-
-	// if procedure had been aborted ...
-	if (u64 < nInstance)
-	{
-		// ... then return failure
-		return (retval);
-	}
-
-	retval = true;
-
-	// obtain data instance
-	*pObj = *(this->get_data (nodeSeen, subPosSeen));
-
-#if defined (_DEBUG)
-	BTREE_ASSERT (nInstance == get_instancePos (nodeSeen, subPosSeen), "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get (_t_data, uint64_t, _t_data *): comparison of external and internal instance position mismatch!");
-#endif
-
-	// return success
-	return (retval);
-}
+//template<class _t_data, class _t_key, class _t_datalayerproperties>
+//bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get (const _t_key &rKey, typename _t_datalayerproperties::size_type nInstance, _t_data *pObj) const
+//{
+//	bool						retval = false;
+//	node_iter_type				nNode = this->m_nRootNode, nodeSeen;
+//	sub_node_iter_type			subPos, subPosSeen;
+//	bool						bBounce;
+//	size_type					u64;
+//
+//	// if data layer not present ...
+//	if (this->m_pData == NULL)
+//	{
+//		// ... then return failure
+//		return (retval);
+//	}
+//
+//	// if no entry with that is preset ...
+//	if (!find_oneKey (rKey, nNode, subPos))
+//	{
+//		// ... then return failure
+//		return (retval);
+//	}
+//
+//	// find the first entry of sharing the same key and make it the "seen" position
+//	find_firstKey (nNode, subPos, nodeSeen, subPosSeen);
+//
+//	// walk through key streak until the instance in question has been found
+//	for (u64 = 0ULL; u64 < nInstance; u64++)
+//	{
+//		// determine next position
+//		this->move_next (nodeSeen, subPosSeen, nNode, subPos, bBounce);
+//
+//		// if next position doesn't exist ...
+//		if (bBounce)
+//		{
+//			// ... then abort procedure
+//			break;
+//		}
+//
+//		// extract key of next position
+//		extract_key (m_pGetNewKey, nNode, subPos);
+//
+//		// if key of next postion is not equal with current key ...
+//		if (this->comp (*m_pGetNewKey, rKey) != 0)
+//		{
+//			// ... then abort procedure
+//			break;
+//		}
+//
+//		// assume next position as current position
+//		nodeSeen = nNode;
+//		subPosSeen = subPos;
+//	}
+//
+//	// if procedure had been aborted ...
+//	if (u64 < nInstance)
+//	{
+//		// ... then return failure
+//		return (retval);
+//	}
+//
+//	retval = true;
+//
+//	// obtain data instance
+//	*pObj = *(this->get_data (nodeSeen, subPosSeen));
+//
+//#if defined (_DEBUG)
+//	BTREE_ASSERT (nInstance == get_instancePos (nodeSeen, subPosSeen), "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get (_t_data, uint64_t, _t_data *): comparison of external and internal instance position mismatch!");
+//#endif
+//
+//	// return success
+//	return (retval);
+//}
 
 /*
 
@@ -1092,16 +1123,16 @@ position of those entries. However, the key must exists, otherwise the result is
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_init_pos_of_key (const _t_key &rKey) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_init_pos_of_key (const _t_key &rKey) const
 {
-	_t_sizetype					retval = (_t_sizetype) ~0;
-	_t_nodeiter					nNode, fstNode;
-	_t_nodeiter					*pnNode;
-	_t_subnodeiter				sub, fstSub;
-	uint32_t					comp = 0;
-	bool						bContinue;
-	node_t						*psNodeDesc;
+	size_type						retval = (size_type) ~0;
+	node_iter_type					nNode, fstNode;
+	node_iter_type					*pnNode;
+	sub_node_iter_type				sub, fstSub;
+	uint32_t						comp = 0;
+	bool							bContinue;
+	node_t							*psNodeDesc;
 
 	// if data layer not present ...
 	if (this->m_pData == NULL)
@@ -1119,7 +1150,7 @@ _t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subn
 		nNode = fstNode;
 		sub = fstSub;
 
-		retval = (_t_sizetype) 0;
+		retval = (size_type) 0;
 
 		// move from parent node to parent node until the root node has been found and therewith the linear position
 		do
@@ -1130,13 +1161,13 @@ _t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subn
 			bContinue = (nNode != this->m_nRootNode);
 
 			// combine the number of entries in the current node with the result so far
-			retval += (_t_subnodeiter) (sub + comp);
+			retval += (sub_node_iter_type) (sub + comp);
 
 			// if this is an inner node ...
 			if (!this->is_leaf (nNode))
 			{
 				// ... then add the number of all entries of previous or left sub nodes
-				for (; sub != ((_t_subnodeiter) ~0); sub--)
+				for (; sub != ((sub_node_iter_type) ~0); sub--)
 				{
 					pnNode = this->get_sub_node (nNode, sub);
 
@@ -1183,10 +1214,10 @@ determine_position, otherwise it return sPos again.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::determine_position (CBTreeKeySortPos<_t_sizetype, _t_key> sPos, _t_nodeiter nNode, _t_subnodeiter &nSubPos, _t_subnodeiter &nSubData, bool &bFound) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::determine_position (typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t sPos, typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type &nSubPos, typename _t_datalayerproperties::sub_node_iter_type &nSubData, bool &bFound) const
 {
-	_t_sizetype		nInstancePos;
+	size_type		nInstancePos;
 	int				triCmpRslt;
 	node_t			*psNodeDesc;
 
@@ -1196,7 +1227,7 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeAssociative<_t_data, _t_key, _t_size
 	if (this->is_leaf (nNode))
 	{
 		// ... then convert sPos to a linear within this node
-		_t_subnodeiter		uBase, ui32;
+		sub_node_iter_type		uBase, ui32;
 
 		nSubData = 0UL;
 
@@ -1333,20 +1364,20 @@ Note:	The parameter triMod is usually set 1 or -1 if one entry is inserted or re
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rebuild_node (const _t_nodeiter nNode, const int32_t triMod, _t_subnodeiter nSubStart)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::rebuild_node (const typename _t_datalayerproperties::node_iter_type nNode, const int32_t triMod, typename _t_datalayerproperties::sub_node_iter_type nSubStart)
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rebuild_node: requested node exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::rebuild_node: requested node exceeds tree size");
 #endif
 
-	_t_nodeiter									*pnSubNode;
-	node_t										*psNodeDesc;
-	_t_sizetype									nIdx = (_t_sizetype) 0;
-	_t_subnodeiter								ui32;
-	_t_subnodeiter								nSubPosOffset;
-	_t_sizetype									*pnSerVector;
-	int											nLocalTriMod = triMod;
+	node_iter_type					*pnSubNode;
+	node_t							*psNodeDesc;
+	size_type						nIdx = (size_type) 0;
+	sub_node_iter_type				ui32;
+	sub_node_iter_type				nSubPosOffset;
+	size_type						*pnSerVector;
+	int								nLocalTriMod = triMod;
 
 	psNodeDesc = this->get_node (nNode);
 
@@ -1354,14 +1385,14 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 	if (this->is_leaf (nNode))
 	{
 		// ... then use the arithmetic negative size value of this node to determine nMaxIdx
-		nIdx = ((_t_subnodeiter) (0 - psNodeDesc->nNumData));
+		nIdx = ((sub_node_iter_type) (0 - psNodeDesc->nNumData));
 
 		// Note:	If a node is a leaf node, then the size is displayed as a negative
 		//			value, which appears as a 2's complement value, since the size actually is unsigned.
 	}
 	else
 	{
-		const _t_subnodeiter						nNumData = this->get_data_count (*psNodeDesc);
+		const sub_node_iter_type						nNumData = this->get_data_count (*psNodeDesc);
 
 		pnSerVector = this->get_serVector (nNode);
 
@@ -1412,12 +1443,12 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 			{
 				pnSubNode = this->get_sub_node (nNode, nNumData);
 
-				const _t_sizetype	nLastIdx = this->get_max_index (*pnSubNode);
+				const size_type	nLastIdx = this->get_max_index (*pnSubNode);
 
 				pnSubNode = this->get_sub_node (nNode, nNumData - 1);
 
-				const _t_sizetype	nSecondLastIdx = this->get_max_index (*pnSubNode);
-				_t_sizetype			nTrialingIdx = nLastIdx;
+				const size_type	nSecondLastIdx = this->get_max_index (*pnSubNode);
+				size_type			nTrialingIdx = nLastIdx;
 
 				nTrialingIdx += nSecondLastIdx;
 
@@ -1476,7 +1507,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 generate_prev_position - generate previous position
 
-This method returns the previous position (CBTreeBaseDefaults::_ti_pos = CBTreeKeySortPos<_t_sizetype, _t_key>)
+This method returns the previous position (CBTreeBaseDefaults::_ti_pos = CBTreeKeySortPos<size_type, _t_key>)
 based on the parameter sPos and the node / sub-node tuple associated with sPos.
 
 nNode		- specifies the node of the node / sub-position tuple of which the previous position will be generated from
@@ -1491,20 +1522,20 @@ return_value = (*this)[sPos (this, nNode, nSub) - 1];
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_prev_position (const _t_nodeiter nNode, const _t_subnodeiter nSub, CBTreeKeySortPos<_t_sizetype, _t_key> sPos)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_prev_position (const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSub, typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t sPos)
 {
-	_t_nodeiter		nPrevNode;
-	_t_subnodeiter	nPrevSubPos;
-	bool			bBounce;
-	_t_data			*psData;
+	node_iter_type		nPrevNode;
+	sub_node_iter_type	nPrevSubPos;
+	bool				bBounce;
+	value_type			*psData;
 
 	// get previous position within tree
 	this->move_prev (nNode, nSub, nPrevNode, nPrevSubPos, bBounce);
 
 #if defined (_DEBUG)
-	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_prev_position: This method cannot be used on leaf nodes!");
-	BTREE_ASSERT (!bBounce, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_prev_position: unexpected bounce!");
+	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_prev_position: This method cannot be used on leaf nodes!");
+	BTREE_ASSERT (!bBounce, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_prev_position: unexpected bounce!");
 #endif
 
 	psData = this->get_data (nPrevNode, nPrevSubPos);
@@ -1522,7 +1553,7 @@ CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeAssociative<_t_data, _t_key, _t_size
 
 generate_next_position - generate next position
 
-This method returns the next position (CBTreeBaseDefaults::_ti_pos = CBTreeKeySortPos<_t_sizetype, _t_key>)
+This method returns the next position (CBTreeBaseDefaults::_ti_pos = CBTreeKeySortPos<size_type, _t_key>)
 based on the parameter sPos and the node / sub-node tuple associated with sPos.
 
 nNode		- specifies the node of the node / sub-position tuple of which the next position will be generated from
@@ -1537,20 +1568,20 @@ return_value = (*this)[sPos (this, nNode, nSub) + 1];
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeKeySortPos<_t_sizetype, _t_key> CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_next_position (_t_nodeiter nNode, _t_subnodeiter nSub, CBTreeKeySortPos<_t_sizetype, _t_key> sPos)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_next_position (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t sPos)
 {
-	_t_nodeiter		nNextNode;
-	_t_subnodeiter	nNextSubPos;
-	bool			bBounce;
-	_t_data			*psData;
+	node_iter_type		nNextNode;
+	sub_node_iter_type	nNextSubPos;
+	bool				bBounce;
+	value_type			*psData;
 
 	// get previous position within tree
 	this->move_next (nNode, nSub, nNextNode, nNextSubPos, bBounce);
 
 #if defined (_DEBUG)
-	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_next_position: This method cannot be used on leaf nodes!");
-	BTREE_ASSERT (!bBounce, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_next_position: unexpected bounce!");
+	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_next_position: This method cannot be used on leaf nodes!");
+	BTREE_ASSERT (!bBounce, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_next_position: unexpected bounce!");
 #endif
 
 	psData = this->get_data (nNextNode, nNextSubPos);
@@ -1582,8 +1613,8 @@ Note:	This method is application specific. By default the entire data set is dee
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-int CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::comp (const _t_key &rKey0, const _t_key &rKey1) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+int CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::comp (const _t_key &rKey0, const _t_key &rKey1) const
 {
 	return (memcmp ((void *) &rKey0, (void *) &rKey1, sizeof (_t_key)));
 }
@@ -1606,13 +1637,13 @@ Note:	This method is application specific. By default the entire data set is dee
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key *CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *pKey, const _t_nodeiter nNode, const _t_subnodeiter nEntry) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+_t_key *CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_key (_t_key *pKey, const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nEntry) const
 {
-	_t_data				*psData;
+	value_type			*psData;
 
 #if defined (_DEBUG)
-	BTREE_ASSERT (nEntry < this->get_data_count (nNode), "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *, const _t_nodeiter, const _t_subnodeiter): requested entry exceeds nodes data size");
+	BTREE_ASSERT (nEntry < this->get_data_count (nNode), "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_key (_t_key *, const node_iter_type, const sub_node_iter_type): requested entry exceeds nodes data size");
 #endif
 
 	// obtain dataset
@@ -1622,40 +1653,54 @@ _t_key *CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodei
 	return (extract_key (pKey, *psData));
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key *CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *pKey, const _t_data &rData) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+_t_key *CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_key (_t_key *pKey, const _t_data &rData) const
 {
 	typename ::std::is_convertible<_t_data, _t_key>::type	sExtractSelect;
 
 	return (CBTreeAssociative_t::extract_key (pKey, rData, sExtractSelect));
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key *CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_dataset_as_key (_t_key *pKey, const _t_data &rData, typename ::std::true_type) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+_t_key *CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_dataset_as_key (_t_key *pKey, const _t_data &rData, typename ::std::true_type) const
 {
 	pKey;
 
 	return (&rData);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key *CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_dataset_as_key (_t_key *pKey, const _t_data &rData, typename ::std::false_type) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+_t_key *CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_dataset_as_key (_t_key *pKey, const _t_data &rData, typename ::std::false_type) const
 {
 	typename ::std::is_convertible<_t_data, _t_key *>::type	sExtractSelect;	// extract by reference or conversion
 	
 	return (CBTreeAssociative_t::extract_key_directly (pKey, rData, sExtractSelect));
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key *CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key_directly (_t_key *pKey, const _t_data &rData, typename ::std::true_type) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::compare_entry (const value_type &rLhs, const value_type &rRhs, typename ::std::true_type) const
+{
+	return (rLhs == rRhs);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::compare_entry (const value_type &rLhs, const value_type &rRhs, typename ::std::false_type) const
+{
+	int		triRslt = memcmp ((void *) &rLhs, (void *) &rRhs, sizeof (rLhs));
+
+	return (triRslt == 0);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+_t_key *CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_key_directly (_t_key *pKey, const _t_data &rData, typename ::std::true_type) const
 {
 	pKey;
 
 	return ((_t_key *) rData);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key *CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key_directly (_t_key *pKey, const _t_data &rData, typename ::std::false_type) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+_t_key *CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_key_directly (_t_key *pKey, const _t_data &rData, typename ::std::false_type) const
 {
 	typename ::std::is_convertible<_t_data, _t_key>::type	sExtractSelect;
 
@@ -1679,31 +1724,31 @@ Note:	This method is application specific. By default the entire data set is dee
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key *CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *pKey, const _t_data &rData, typename ::std::true_type) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+_t_key *CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_key (_t_key *pKey, const _t_data &rData, typename ::std::true_type) const
 {
-	_t_data		sData = rData;
+	value_type	sData = rData;
 
 	*pKey = (_t_key) sData;
 
 	return (pKey);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_key *CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *pKey, const _t_data &rData, typename ::std::false_type) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+_t_key *CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_key (_t_key *pKey, const _t_data &rData, typename ::std::false_type) const
 {
 #if defined (_DEBUG)
 
 	static int	nCallDepth = 0;
 
 	// if this assertion is hit, then _t_data cannot be cast to _t_key and this or the deriving class has not provided its version of extract_key ()
-	BTREE_ASSERT (nCallDepth == 0, "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::extract_key (_t_key *, const _t_data &, typename ::std::false_type): Call depth not zero");
+	BTREE_ASSERT (nCallDepth == 0, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::extract_key (_t_key *, const _t_data &, typename ::std::false_type): Call depth not zero");
 
 	nCallDepth++;
 
 #endif
 
-	_t_key		*pRslt;
+	key_type	*pRslt;
 
 	pRslt = this->extract_key (pKey, rData);
 
@@ -1732,14 +1777,14 @@ sharing the same key is returned.
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_instancePos (_t_nodeiter nNode, _t_subnodeiter nSub) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_instancePos (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub) const
 {
-	_t_sizetype				nRetval = (_t_sizetype) 0;
-	bool					bBounce;
-	_t_nodeiter				nFromNode = nNode;
-	_t_subnodeiter			nFromSub = nSub;
-	_t_nodeiter				*pnNode;
+	size_type					nRetval = (size_type) 0;
+	bool						bBounce;
+	node_iter_type				nFromNode = nNode;
+	sub_node_iter_type			nFromSub = nSub;
+	node_iter_type				*pnNode;
 
 	// determine one key of the key raw in question
 	*m_ppTempFindFirstKeyKey = extract_key (*m_ppTempFindFirstKeyKey, nFromNode, nFromSub);
@@ -1806,13 +1851,13 @@ The value returned is the sub-position, which has the nearest greater or equal k
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_subnodeiter CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_firstSubPos (_t_nodeiter nNode, _t_key const &rKey, bool bReverse) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_firstSubPos (typename _t_datalayerproperties::node_iter_type nNode, _t_key const &rKey, bool bReverse) const
 {
-	node_t					*psNodeDesc;
-	_t_subnodeiter			ui32;
-	_t_subnodeiter			nMinPos, nMaxPos;
-	int						triCmpRslt = ~0x0;
+	node_t						*psNodeDesc;
+	sub_node_iter_type			ui32;
+	sub_node_iter_type			nMinPos, nMaxPos;
+	int							triCmpRslt = ~0x0;
 
 	// load node descriptor
 	psNodeDesc = this->get_node (nNode);
@@ -1904,12 +1949,12 @@ The value returned is the sub-position, which has the nearest greater key compar
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_subnodeiter CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find_next_sub_pos (const _t_nodeiter nNode, CBTreeKeySortPos<_t_sizetype, _t_key> &sPos) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find_next_sub_pos (const typename _t_datalayerproperties::node_iter_type nNode, typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t &sPos) const
 {
 	node_t					*psNodeDesc;
-	_t_subnodeiter			ui32;
-	_t_subnodeiter			nMinPos, nMaxPos;
+	sub_node_iter_type			ui32;
+	sub_node_iter_type			nMinPos, nMaxPos;
 
 	// load node descriptor
 	psNodeDesc = this->get_node (nNode);
@@ -1963,8 +2008,8 @@ If it was possible to find any matching key, then true is returned, otherwise fa
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find_oneKey (const _t_key &rKey, _t_nodeiter &nNode, _t_subnodeiter &nSub, _t_sizetype *pnPos) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find_oneKey (const _t_key &rKey, typename _t_datalayerproperties::node_iter_type &nNode, typename _t_datalayerproperties::sub_node_iter_type &nSub, typename _t_datalayerproperties::size_type *pnPos) const
 {
 	uint32_t	bFound;
 
@@ -2010,13 +2055,13 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 		if (pnPos != NULL)
 		{
-			_t_subnodeiter	i;
+			sub_node_iter_type	i;
 
 			if (!this->is_leaf (nNode))
 			{
 				for (i = 0; i < (nSub + bFound); i++)
 				{
-					_t_nodeiter		*pnSubNode = this->get_sub_node (nNode, i);
+					node_iter_type		*pnSubNode = this->get_sub_node (nNode, i);
 
 					(*pnPos) += this->get_max_index (*pnSubNode);
 				}
@@ -2058,13 +2103,13 @@ nSub		- returns the sub-position within nNode where the first key has been found
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find_firstKey (_t_nodeiter nFromNode, _t_subnodeiter nFromSub, _t_nodeiter &nNode, _t_subnodeiter &nSub) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find_firstKey (typename _t_datalayerproperties::node_iter_type nFromNode, typename _t_datalayerproperties::sub_node_iter_type nFromSub, typename _t_datalayerproperties::node_iter_type &nNode, typename _t_datalayerproperties::sub_node_iter_type &nSub) const
 {
-	_t_sizetype		nRetval = 0;
-	_t_sizetype		nStepSize = 0;
-	_t_nodeiter		*pnSubNode;
-	bool			bBounce;
+	size_type			nRetval = 0;
+	size_type			nStepSize = 0;
+	node_iter_type		*pnSubNode;
+	bool				bBounce;
 	
 	// determine one key of the key raw in question
 	*m_ppTempFindFirstKeyKey = extract_key (*m_ppTempFindFirstKeyKey, nFromNode, nFromSub);
@@ -2118,10 +2163,10 @@ _t_sizetype CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subn
 	return (nRetval);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase_via_reference
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::erase_via_reference
 	(
-		typename CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator &rCIterPos, 
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator &rCIterPos, 
 		bool bReEvaluate
 	)
 {
@@ -2142,7 +2187,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 				if (this->get_data_count (psIterState->nNode) > (this->get_node_max_data_size () / 2))
 				{
 					// ... then an additional entry can be added fast
-					_t_nodeiter			nNode;
+					node_iter_type			nNode;
 
 					bFallBack = false;
 
@@ -2177,10 +2222,10 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 	// if fast erase was not possible ...
 	if (bFallBack)
 	{
-		CBTreeKeySortPos<_t_sizetype, _t_key>	sPos;
-		_t_sizetype								nPos = rCIterPos.get_pos ();
-		_t_nodeiter								nNode;
-		_t_subnodeiter							nSubPos;
+		position_t				sPos;
+		size_type				nPos = rCIterPos.get_pos ();
+		node_iter_type			nNode;
+		sub_node_iter_type		nSubPos;
 
 		this->convert_pos_to_container_pos (this->m_nRootNode, nPos, nNode, nSubPos);
 
@@ -2200,17 +2245,17 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 	}
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_find (const _t_key &rKey, _t_nodeiter &rnNode, _t_subnodeiter &rnSub, _t_sizetype &rnPos) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_find (const _t_key &rKey, typename _t_datalayerproperties::node_iter_type &rnNode, typename _t_datalayerproperties::sub_node_iter_type &rnSub, typename _t_datalayerproperties::size_type &rnPos) const
 {
 	return (this->find_oneKey (rKey, rnNode, rnSub, &rnPos));
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_lower_bound (const _t_key &rKey, _t_nodeiter &rnNode, _t_subnodeiter &rnSub, _t_sizetype &rnPos) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_lower_bound (const _t_key &rKey, typename _t_datalayerproperties::node_iter_type &rnNode, typename _t_datalayerproperties::sub_node_iter_type &rnSub, typename _t_datalayerproperties::size_type &rnPos) const
 {
-	_t_nodeiter			nRsltNode;
-	_t_subnodeiter		nRsltSub;
+	node_iter_type			nRsltNode;
+	sub_node_iter_type		nRsltSub;
 
 	if (this->find_oneKey (rKey, rnNode, rnSub, &rnPos))
 	{
@@ -2221,10 +2266,10 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 	}
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_upper_bound (const _t_key &rKey, _t_nodeiter &rnNode, _t_subnodeiter &rnSub, _t_sizetype &rnPos) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_upper_bound (const _t_key &rKey, typename _t_datalayerproperties::node_iter_type &rnNode, typename _t_datalayerproperties::sub_node_iter_type &rnSub, typename _t_datalayerproperties::size_type &rnPos) const
 {
-	_t_key				sKey;
+	key_type			sKey;
 	bool				bBounce;
 
 	this->get_next_key (rKey, sKey, bBounce);
@@ -2254,8 +2299,8 @@ Note:	The intention is to be able to allocate and de-allocate temporary key buff
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::vbufferAllocate (_t_key **pp)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::vbufferAllocate (_t_key **pp)
 {
 	if (*pp != NULL)
 	{
@@ -2264,7 +2309,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 	*pp = new _t_key;
 
-	BTREE_ASSERT (*pp != NULL, "CBTreeAssociative<_t_data, _t_key, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer>::vbufferAllocate: insufficient memory");
+	BTREE_ASSERT (*pp != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::vbufferAllocate: insufficient memory");
 }
 
 /*
@@ -2279,8 +2324,8 @@ Note:	The intention is to be able to allocate and de-allocate temporary key buff
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::vbufferDeallocate (_t_key **pp)
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::vbufferDeallocate (_t_key **pp)
 {
 	if (*pp != NULL)
 	{
@@ -2304,11 +2349,11 @@ Note:	The intention is to make sure that m_pShortLiveKey is not used in one meth
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::allocateShortLiveKey () const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::allocateShortLiveKey () const
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (!(*m_pbShortLiveKeyInUse), "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer>::allocateShortLiveKey: DEBUG: short live key in use!");
+	BTREE_ASSERT (!(*m_pbShortLiveKeyInUse), "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::allocateShortLiveKey: DEBUG: short live key in use!");
 
 	*m_pbShortLiveKeyInUse = true;
 #endif
@@ -2328,39 +2373,39 @@ Note:	The intention is to make sure that m_pShortLiveKey is not used in one meth
 
 */
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::freeShortLiveKey () const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::freeShortLiveKey () const
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (*(m_pbShortLiveKeyInUse), "CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer>::freeShortLiveKey: DEBUG: short live key was already de-allocated!");
+	BTREE_ASSERT (*(m_pbShortLiveKeyInUse), "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::freeShortLiveKey: DEBUG: short live key was already de-allocated!");
 
 	*m_pbShortLiveKeyInUse = false;
 #endif
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSubPos) const
 {
 	return (true);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_node (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::show_node (std::ofstream &ofs, const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSubPos) const
 {
-	std::stringstream		buf;
-	_t_data					*psData;
-	_t_nodeiter				nNeightbourNode;
-	_t_subnodeiter			nNeightbourSub;
-	int						nErrCnt = 0;
-	std::stringstream		aszMsg;
-	char					*pColorInit = (char *) "";
-	char					*pColorExit = (char *) "";
-	_t_nodeiter				nPrevNode;
-	_t_subnodeiter			nPrevSub;
-	_t_nodeiter				nNextNode;
-	_t_subnodeiter			nNextSub;
-	bool					bBounce;
-	_t_key					sKey;
+	std::stringstream			buf;
+	value_type				*psData;
+	node_iter_type				nNeightbourNode;
+	sub_node_iter_type			nNeightbourSub;
+	int							nErrCnt = 0;
+	std::stringstream			aszMsg;
+	char						*pColorInit = (char *) "";
+	char						*pColorExit = (char *) "";
+	node_iter_type				nPrevNode;
+	sub_node_iter_type			nPrevSub;
+	node_iter_type				nNextNode;
+	sub_node_iter_type			nNextSub;
+	bool						bBounce;
+	key_type					sKey;
 
 	psData = this->get_data (nNode, nSubPos);
 
@@ -2382,9 +2427,9 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 			if (bBounce == false)
 			{
-				_t_data	*psPrevData = this->get_data (nPrevNode, nPrevSub);
-				_t_key	sPrevKey;
-				_t_key	sKey;
+				value_type		*psPrevData = this->get_data (nPrevNode, nPrevSub);
+				key_type		sPrevKey;
+				key_type		sKey;
 
 				this->extract_key (&sPrevKey, *psPrevData);
 				this->extract_key (&sKey, *psData);
@@ -2486,7 +2531,7 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 			}
 			this->freeShortLiveKey ();
 		}
-		catch (exception *pE)
+		catch (::std::exception *pE)
 		{
 			if (!ofs.is_open ())
 			{
@@ -2504,9 +2549,9 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 			if (bBounce == false)
 			{
-				_t_data	*psNextData = this->get_data (nNextNode, nNextSub);
-				_t_key	sNextKey;
-				_t_key	sKey;
+				value_type		*psNextData = this->get_data (nNextNode, nNextSub);
+				key_type		sNextKey;
+				key_type		sKey;
 
 				this->extract_key (&sNextKey, *psNextData);
 				this->extract_key (&sKey, *psData);
@@ -2552,7 +2597,7 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 				}
 			}
 		}
-		catch (exception *pE)
+		catch (::std::exception *pE)
 		{
 			if (!ofs.is_open ())
 			{
@@ -2594,17 +2639,17 @@ bool CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 		if (ofs.is_open ())
 		{
-			ofs << buf.str ().c_str () << endl;
+			ofs << buf.str ().c_str () << ::std::endl;
 		}
 	}
 
 	return (true);
 }
 
-template <class _t_data, class _t_key, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_swap
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_swap
 	(
-		CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rContainer
+		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rContainer
 	)
 {
 	fast_swap <_t_key **> (m_ppShortLiveKey, rContainer.m_ppShortLiveKey);
@@ -2622,9 +2667,9 @@ void CBTreeAssociative<_t_data, _t_key, _t_sizetype, _t_nodeiter, _t_subnodeiter
 
 #endif
 
-	CBTreeBase_t	&rKeySortBase = dynamic_cast <CBTreeBase_t &> (rContainer);
+	CBTreeBaseDefaults_t	&rKeySortBase = dynamic_cast <CBTreeBaseDefaults_t &> (rContainer);
 
-	CBTreeBase_t::_swap (rKeySortBase);
+	CBTreeBaseDefaults_t::_swap (rKeySortBase);
 }
 
 #endif // BTREEASSOCIATIVE_CPP
