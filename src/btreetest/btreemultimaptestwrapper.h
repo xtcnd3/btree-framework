@@ -28,7 +28,7 @@
 
 #include "btreemultimapprimitives.h"
 
-template <class _t_data, class _t_value, class _t_ref_container>
+template<class _t_data, class _t_value, class _t_ref_container>
 class CBTreeMultiMapTestWrapper	:	public CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
 {
 public:
@@ -46,19 +46,15 @@ public:
 	typedef typename reference_t::reverse_iterator				reverse_iterator;
 	typedef typename reference_t::const_reverse_iterator		const_reverse_iterator;
 
-	typedef _t_data												data_t;
-
-	typedef typename reference_t::key_type						key_t;
-	
 	typedef typename reference_t::value_type					value_type;
+	typedef typename reference_t::key_type						key_type;
+	typedef typename reference_t::size_type						size_type;
 
-	typedef typename reference_t::size_type						sizetype_ref_t;
+	typedef _t_data												value_test_type;
+	typedef uint32_t											key_test_type;
+	typedef uint64_t											size_test_type;
 
-	typedef sizetype_ref_t										size_type;
-
-	typedef uint64_t											sizetype_test_t;
-
-	typedef CBTreeAssociativeIf<_t_value, uint32_t, sizetype_test_t>
+	typedef CBTreeAssociativeIf<_t_value, key_test_type, size_test_type>
 																CBTreeAssociativeIf_t;
 
 	typedef typename CBTreeAssociativeIf_t::iterator			test_iterator;
@@ -86,8 +82,8 @@ public:
 	{
 		bool operator()(const _t_valuetype& rVal0, const _t_valuetype& rVal1) const
 		{	
-			const data_t	sValTestPair0 (rVal0);
-			const data_t	sValTestPair1 (rVal1);
+			const value_test_type	sValTestPair0 (rVal0);
+			const value_test_type	sValTestPair1 (rVal1);
 
 			return (m_pThis->run_value_compare (sValTestPair0, sValTestPair1));
 		}
@@ -95,7 +91,7 @@ public:
 		CBTreeMultiMapTestWrapper_t		*m_pThis;
 	};
 
-	typedef	struct key_compare_s<key_t>					key_compare;
+	typedef	struct key_compare_s<key_type>				key_compare;
 	typedef struct value_compare_s<value_type>			value_compare;
 
 							CBTreeMultiMapTestWrapper<_t_data, _t_value, _t_ref_container>
@@ -124,8 +120,8 @@ public:
 	key_compare				key_comp							() const;
 	value_compare			value_comp							() const;
 
-	bool					run_key_compare						(const key_t &rKey0, const key_t &rKey1) const;
-	bool					run_value_compare					(const data_t &rKey0, const data_t &rKey1) const;
+	bool					run_key_compare						(const key_type &rKey0, const key_type &rKey1) const;
+	bool					run_value_compare					(const value_type &rKey0, const value_type &rKey1) const;
 
 protected:
 
@@ -136,52 +132,52 @@ protected:
 	void					transfer_containers					();
 
 	template<class _t_ext_container, class _t_source_container, class _t_ext_sizetype, class _t_ext_iterator>
-	void					test_one_container_insert			(_t_ext_container *pExtOriginal, _t_ext_container *pExtReference, _t_ext_sizetype nPos, sizetype_test_t nFirst, sizetype_test_t nLast, _t_ext_iterator &rExtIter, bool bRefIterConst, bool bRefIterReverse, _t_source_container *pSrc) const;
+	void					test_one_container_insert			(_t_ext_container *pExtOriginal, _t_ext_container *pExtReference, _t_ext_sizetype nPos, size_test_type nFirst, size_test_type nLast, _t_ext_iterator &rExtIter, bool bRefIterConst, bool bRefIterReverse, _t_source_container *pSrc) const;
 
 	template<class _t_ext_container, class _t_source_container, class _t_ext_sizetype, class _t_ext_iterator, class _t_iterator>
-	void					test_one_container_insert			(_t_ext_container *pExtOriginal, _t_ext_container *pExtReference, _t_ext_sizetype nPos, sizetype_test_t nFirst, sizetype_test_t nLast, _t_ext_iterator &rExtIter, _t_iterator &rIter, _t_source_container *pSrc) const;
+	void					test_one_container_insert			(_t_ext_container *pExtOriginal, _t_ext_container *pExtReference, _t_ext_sizetype nPos, size_test_type nFirst, size_test_type nLast, _t_ext_iterator &rExtIter, _t_iterator &rIter, _t_source_container *pSrc) const;
 
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565min;
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555min;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555min;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554min;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454min;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565min;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555min;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555min;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554min;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454min;
 
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565default;
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555default;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555default;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554default;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454default;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565default;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555default;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555default;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554default;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454default;
 
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565large;
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555large;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555large;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554large;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesFile, CBTreeFileIO <uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454large;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565large;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555large;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555large;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554large;
+	CBTreeTestMultiMap<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454large;
 
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_n;
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_n;
-	CBTreeTestMultiMap<sizetype_test_t, uint16_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >			*m_pContainerRAM6565_n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >			*m_pContainerRAM6555_n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >			*m_pContainerRAM5555_n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >			*m_pContainerRAM5554_n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >			*m_pContainerRAM5454_n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint16_t, uint16_t> >			*m_pContainerRAM5444_n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint16_t, uint16_t, uint16_t, uint16_t> >			*m_pContainerRAM4444_n;
 
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_2n;
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_2n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_2n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_2n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_2n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_2n;
-	CBTreeTestMultiMap<sizetype_test_t, uint16_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_2n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >			*m_pContainerRAM6565_2n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >			*m_pContainerRAM6555_2n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >			*m_pContainerRAM5555_2n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >			*m_pContainerRAM5554_2n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >			*m_pContainerRAM5454_2n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint16_t, uint16_t> >			*m_pContainerRAM5444_2n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint16_t, uint16_t, uint16_t, uint16_t> >			*m_pContainerRAM4444_2n;
 
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_4n;
-	CBTreeTestMultiMap<sizetype_test_t, uint64_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_4n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_4n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint32_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_4n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_4n;
-	CBTreeTestMultiMap<sizetype_test_t, uint32_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_4n;
-	CBTreeTestMultiMap<sizetype_test_t, uint16_t, uint16_t, CBTreeIOpropertiesRAM, CBTreeRAMIO <uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_4n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint64_t, uint32_t> >			*m_pContainerRAM6565_4n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint64_t, uint32_t, uint32_t, uint32_t> >			*m_pContainerRAM6555_4n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint32_t> >			*m_pContainerRAM5555_4n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> >			*m_pContainerRAM5554_4n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> >			*m_pContainerRAM5454_4n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint32_t, uint16_t, uint16_t, uint16_t> >			*m_pContainerRAM5444_4n;
+	CBTreeTestMultiMap<CBTreeIOpropertiesRAM <size_test_type, uint16_t, uint16_t, uint16_t, uint16_t> >			*m_pContainerRAM4444_4n;
 
 	static const uint32_t											m_nNumContainersMM;
 };
