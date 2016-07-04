@@ -14,281 +14,68 @@
 
 #include "btreearrayitertestbench.h"
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype>
-void TestBTreeArrayConstIterBasic (_t_obj *pClArray, bool bDescend, uint32_t nNumEntries, uint32_t nStepSize, uint32_t nTurnArounds, bool bFillArray = true)
+template<class _t_iterator, class _t_container, class _t_reference>
+void TestBTreeArrayIterBasic (_t_container *pContainer, _t_reference *pReference, bool bDescend, typename _t_container::size_type nNumEntries, typename _t_container::size_type nStepSize, uint32_t nTurnArounds, bool bFillArray = true)
 {
-	typedef typename _t_obj::const_iterator				citer_t;
-	typedef typename _t_obj::const_reverse_iterator		criter_t;
+	typedef typename _t_container::value_type		data_t;
+	typedef typename _t_container::size_type		size_type;
+	typedef typename _t_reference::const_iterator	citer_ref_t;
 
-	_t_objprim				*pClArrayPrim;
-	citer_t					sCIter;
-	criter_t				sCRIter;
-	_t_data					sEntryViaIf;
-	_t_data					sEntryViaIter;
+	_t_iterator				sIter;
+	_t_iterator				sIterBegin;
+	_t_iterator				sIterEnd;
+	citer_ref_t				sCIterRef;
+	data_t					sEntryViaRef;
+	data_t					sEntryViaIter;
 	uint64_t				ui64;
 	uint32_t				nTurn;
-	uint32_t				nThisStepSize;
+	size_type				nThisStepSize;
 
-	cout << "basic read-only iterator test ";
+	::std::cout << "basic read-only iterator test ";
 
 	if (bDescend == false)
 	{
-		cout << "ascends ";
+		::std::cout << "ascends ";
 	}
 	else
 	{
-		cout << "descends ";
+		::std::cout << "descends ";
 	}
-	
-	cout << nNumEntries << " entries ";
-	cout << "with step size " << nStepSize;
-	cout << " and turns around " << nTurnArounds << " times." << endl;
 
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
+	::std::cout << nNumEntries << " entries ";
+	::std::cout << "with step size " << nStepSize;
+	::std::cout << " and turns around " << nTurnArounds << " times." << ::std::endl;
 
 	if (bFillArray)
 	{
-		arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+		arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 	}
+
+	get_begin (pContainer, sIterBegin);
+	get_end (pContainer, sIterEnd);
+
+	pReference->assign (sIterBegin, sIterEnd);
 
 	for (nTurn = 0; nTurn <= nTurnArounds; nTurn++)
 	{
-		cout << "turn: " << nTurn << endl;
+		::std::cout << "turn: " << nTurn << ::std::endl;
 
 		bool	bForward = (((nTurn & 0x1) == 0x0) != bDescend);
 
-		ui64 = bForward ? 0ULL : pClArray->size ();
+		ui64 = bForward ? 0ULL : pContainer->size ();
 
-		sCIter = bForward ? pClArray->cbegin () : pClArray->cend ();
-		sCRIter = bForward ? pClArray->crbegin () : pClArray->crend ();
-
-		while (bForward ? ui64 < pClArray->size () : ui64 > 0)
+		if (bForward)
 		{
-			if (!bForward)
-			{
-				if (ui64 >= nStepSize)
-				{
-					nThisStepSize = nStepSize;
-				}
-				else
-				{
-					nThisStepSize = (uint32_t) ui64;
-				}
-
-				ui64 -= nThisStepSize;
-
-				if (nStepSize == 1)
-				{
-					if ((ui64 & 0x1) == 0x0)
-					{
-						sCIter--;
-						sCRIter--;
-					}
-					else
-					{
-						--sCIter;
-						--sCRIter;
-					}
-				}
-				else
-				{
-					sCIter -= (_t_sizetype) nThisStepSize;
-					sCRIter -= (_t_sizetype) nThisStepSize;
-				}
-			}
-
-			cout << ui64 << " " << "\r" << flush;
-
-			sEntryViaIf = pClArray->at (ui64);
-
-			sEntryViaIter = *sCIter;
-
-			if (sEntryViaIf != sEntryViaIter)
-			{
-				cerr << endl;
-				cerr << "iterator mismatch!" << endl;
-				cerr << "turn around: " << nTurn << endl;
-				cerr << "position: " << ui64 << endl;
-				cerr << "data via interface" << endl;
-				cerr << "nData: " << sEntryViaIf.nData << endl;
-				cerr << "nDebug: " << sEntryViaIf.nDebug << endl;
-				cerr << "data via iterator" << endl;
-				cerr << "nData: " << sEntryViaIter.nData << endl;
-				cerr << "nDebug: " << sEntryViaIter.nDebug << endl;
-
-				exit (-1);
-			}
-
-			sEntryViaIf = pClArray->at (pClArray->size () - 1ULL - ui64);
-
-			sEntryViaIter = *sCRIter;
-
-			if (sEntryViaIf != sEntryViaIter)
-			{
-				cerr << endl;
-				cerr << "reverse iterator mismatch!" << endl;
-				cerr << "turn around: " << nTurn << endl;
-				cerr << "position: " << ui64 << endl;
-				cerr << "data via interface" << endl;
-				cerr << "nData: " << sEntryViaIf.nData << endl;
-				cerr << "nDebug: " << sEntryViaIf.nDebug << endl;
-				cerr << "data via iterator" << endl;
-				cerr << "nData: " << sEntryViaIter.nData << endl;
-				cerr << "nDebug: " << sEntryViaIter.nDebug << endl;
-
-				exit (-1);
-			}
-
-			if (bForward)
-			{
-				ui64 += nStepSize;
-
-				if (nStepSize == 1)
-				{
-					if ((ui64 & 0x1) == 0x0)
-					{
-						sCIter++;
-						sCRIter++;
-					}
-					else
-					{
-						++sCIter;
-						++sCRIter;
-					}
-				}
-				else
-				{
-					sCIter += (_t_sizetype) nStepSize;
-					sCRIter += (_t_sizetype) nStepSize;
-				}
-			}
+			get_begin (pContainer, sIter);
+			get_begin (pReference, sCIterRef);
+		}
+		else
+		{
+			get_end (pContainer, sIter);
+			get_end (pReference, sCIterRef);
 		}
 
-		cout << endl;
-	}
-}
-
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_subnodeiter, class _t_datalayerproperties>
-void TestBTreeArrayConstIterNodeSizeVsStepSize (bool bDescend, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, uint32_t nNumEntries, _t_subnodeiter nFromNodeSize, _t_subnodeiter nToNodeSize, uint32_t nFromStepSize, uint32_t nToStepSize)
-{
-	typedef ::std::vector<uint32_t>::iterator			vec_iter_t;
-	typedef ::std::vector<uint32_t>						vector_t;
-
-	typedef ::std::vector<arrayEntry_t>					vector_test_t;
-	typedef ::std::vector<arrayEntry_t>::iterator		vector_test_iter_t;
-
-	_t_subnodeiter		nNodeSize;
-	uint32_t			nStepSize;
-	_t_obj				*pClArray;
-	vector_t			sPrimeNodeSizeVector;
-	vec_iter_t			sVecIter;
-	vector_test_t		sTestVector;
-	uint32_t			i;
-	arrayEntry_t		sEntry;
-	uint32_t			nPrime;
-
-	for (nNodeSize = nFromNodeSize; nNodeSize < nToNodeSize; nNodeSize++)
-	{
-		sPrimeNodeSizeVector.push_back (nNodeSize);
-	}
-
-	for (i = 0; i < nNumEntries; i++)
-	{
-		sEntry.nDebug = g_nDebug;
-		sEntry.nData = generate_rand32 ();
-
-		sTestVector.push_back (sEntry);
-
-		g_nDebug++;
-	}
-
-	while (sPrimeNodeSizeVector.size () > 0)
-	{
-		nNodeSize = sPrimeNodeSizeVector.at (0);
-
-		pClArray = new _t_obj (rDataLayerProperties, &sCacheDesc, nNodeSize);
-
-		if (pClArray == NULL)
-		{
-			cerr << "TestBTreeArrayConstIterNodeSizeVsStepSize: ERROR: insufficient memory!" << endl;
-
-			exit (-1);
-		}
-
-		pClArray->template assign<vector_test_iter_t> (sTestVector.begin (), sTestVector.end ());
-
-		for (nStepSize = nFromStepSize; nStepSize < nToStepSize; nStepSize <<= 1)
-		{
-			TestBTreeArrayConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, bDescend, nNumEntries, nStepSize, 0, false);
-		}
-
-		nPrime = sPrimeNodeSizeVector.at (0);
-
-		for (sVecIter = sPrimeNodeSizeVector.end (); sVecIter != sPrimeNodeSizeVector.begin (); )
-		{
-			sVecIter--;
-
-			if (((*sVecIter) % nPrime) == 0)
-			{
-				sPrimeNodeSizeVector.erase (sVecIter);
-
-				sVecIter = sPrimeNodeSizeVector.end ();
-			}
-		}
-
-		delete pClArray;
-	}
-}
-
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype>
-void TestBTreeArrayIterBasic (_t_obj *pClArray, bool bDescend, uint32_t nNumEntries, uint32_t nStepSize, uint32_t nTurnArounds, bool bFillArray = true)
-{
-	typedef typename _t_obj::iterator					iter_t;
-	typedef typename _t_obj::reverse_iterator			riter_t;
-
-	_t_objprim				*pClArrayPrim;
-	iter_t					sIter;
-	riter_t					sRIter;
-	_t_data					sEntryViaIf;
-	_t_data					sEntryViaIter;
-	uint64_t				ui64;
-	uint32_t				nTurn;
-	uint32_t				nThisStepSize;
-	
-	cout << "basic read-write iterator test ";
-
-	if (bDescend == false)
-	{
-		cout << "ascends ";
-	}
-	else
-	{
-		cout << "descends ";
-	}
-	
-	cout << nNumEntries << " entries ";
-	cout << "with step size " << nStepSize;
-	cout << " and turns around " << nTurnArounds << " times." << endl;
-
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
-
-	if (bFillArray)
-	{
-		arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
-	}
-
-	for (nTurn = 0; nTurn <= nTurnArounds; nTurn++)
-	{
-		cout << "turn: " << nTurn << endl;
-
-		bool	bForward = (((nTurn & 0x1) == 0x0) != bDescend);
-
-		ui64 = bForward ? 0ULL : pClArray->size ();
-
-		sIter = bForward ? pClArray->begin () : pClArray->end ();
-		sRIter = bForward ? pClArray->rbegin () : pClArray->rend ();
-
-		while (bForward ? ui64 < pClArray->size () : ui64 > 0)
+		while (bForward ? ui64 < pContainer->size () : ui64 > 0)
 		{
 			if (!bForward)
 			{
@@ -308,226 +95,187 @@ void TestBTreeArrayIterBasic (_t_obj *pClArray, bool bDescend, uint32_t nNumEntr
 					if ((ui64 & 0x1) == 0x0)
 					{
 						sIter--;
-						sRIter--;
+						sCIterRef--;
 					}
 					else
 					{
 						--sIter;
-						--sRIter;
+						--sCIterRef;
 					}
 				}
 				else
 				{
-					sIter -= (_t_sizetype) nThisStepSize;
-					sRIter -= (_t_sizetype) nThisStepSize;
+					sIter -= (size_type) nThisStepSize;
+					::std::advance (sCIterRef, (typename ::std::make_signed<size_type>::type) (0 - nThisStepSize));
 				}
 			}
 
-			cout << ui64 << " " << "\r" << flush;
+			::std::cout << ui64 << " " << "\r" << ::std::flush;
 
-			sEntryViaIf = pClArray->at (ui64);
+			sEntryViaRef = *sCIterRef;
 
 			sEntryViaIter = *sIter;
 
-			if (sEntryViaIf != sEntryViaIter)
+			if (sEntryViaRef != sEntryViaIter)
 			{
-				cerr << endl;
-				cerr << "iterator mismatch!" << endl;
-				cerr << "turn around: " << nTurn << endl;
-				cerr << "position: " << ui64 << endl;
-				cerr << "data via interface" << endl;
-				cerr << "nData: " << sEntryViaIf.nData << endl;
-				cerr << "nDebug: " << sEntryViaIf.nDebug << endl;
-				cerr << "data via iterator" << endl;
-				cerr << "nData: " << sEntryViaIter.nData << endl;
-				cerr << "nDebug: " << sEntryViaIter.nDebug << endl;
-
-				exit (-1);
-			}
-
-			sEntryViaIf = pClArray->at (pClArray->size () - 1ULL - ui64);
-
-			sEntryViaIter = *sRIter;
-
-			if (sEntryViaIf != sEntryViaIter)
-			{
-				cerr << endl;
-				cerr << "reverse iterator mismatch!" << endl;
-				cerr << "turn around: " << nTurn << endl;
-				cerr << "position: " << ui64 << endl;
-				cerr << "data via interface" << endl;
-				cerr << "nData: " << sEntryViaIf.nData << endl;
-				cerr << "nDebug: " << sEntryViaIf.nDebug << endl;
-				cerr << "data via iterator" << endl;
-				cerr << "nData: " << sEntryViaIter.nData << endl;
-				cerr << "nDebug: " << sEntryViaIter.nDebug << endl;
+				::std::cerr << ::std::endl;
+				::std::cerr << "iterator mismatch!" << ::std::endl;
+				::std::cerr << "turn around: " << nTurn << ::std::endl;
+				::std::cerr << "position: " << ui64 << ::std::endl;
+				::std::cerr << "data via interface" << ::std::endl;
+				::std::cerr << "nData: " << sEntryViaRef.nData << ::std::endl;
+				::std::cerr << "nDebug: " << sEntryViaRef.nDebug << ::std::endl;
+				::std::cerr << "data via iterator" << ::std::endl;
+				::std::cerr << "nData: " << sEntryViaIter.nData << ::std::endl;
+				::std::cerr << "nDebug: " << sEntryViaIter.nDebug << ::std::endl;
 
 				exit (-1);
 			}
 
 			if (bForward)
 			{
-				ui64 += nStepSize;
+				if ((ui64 + nStepSize) >= pContainer->size ())
+				{
+					nThisStepSize = pContainer->size () - ui64;
+				}
+				else
+				{
+					nThisStepSize = nStepSize;
+				}
 
-				if (nStepSize == 1)
+				ui64 += nThisStepSize;
+
+				if (nThisStepSize == 1)
 				{
 					if ((ui64 & 0x1) == 0x0)
 					{
 						sIter++;
-						sRIter++;
+						sCIterRef++;
 					}
 					else
 					{
 						++sIter;
-						++sRIter;
+						++sCIterRef;
 					}
 				}
 				else
 				{
-					sIter += (_t_sizetype) nStepSize;
-					sRIter += (_t_sizetype) nStepSize;
+					sIter += (size_type) nThisStepSize;
+					::std::advance (sCIterRef, nThisStepSize);
 				}
 			}
 		}
 
-		cout << endl;
+		::std::cout << ::std::endl;
 	}
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_subnodeiter, class _t_datalayerproperties>
-void TestBTreeArrayIterNodeSizeVsStepSize (bool bDescend, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, uint32_t nNumEntries, _t_subnodeiter nFromNodeSize, _t_subnodeiter nToNodeSize, uint32_t nFromStepSize, uint32_t nToStepSize)
+template<class _t_container, class _t_reference>
+void TestBTreeArrayIterNodeSizeVsStepSize (_t_container *pContainer, _t_reference *pReference, bool bDescend, typename _t_container::size_type nNumEntries, typename _t_container::size_type nFromNodeSize, typename _t_container::size_type nToNodeSize, typename _t_container::size_type nFromStepSize, typename _t_container::size_type nToStepSize)
 {
-	typedef ::std::vector<uint32_t>::iterator			vec_iter_t;
-	typedef ::std::vector<uint32_t>						vector_t;
-
-	typedef ::std::vector<arrayEntry_t>					vector_test_t;
-	typedef ::std::vector<arrayEntry_t>::iterator		vector_test_iter_t;
-
-	_t_subnodeiter		nNodeSize;
-	uint32_t			nStepSize;
-	_t_obj				*pClArray;
-	vector_t			sPrimeNodeSizeVector;
-	vec_iter_t			sVecIter;
-	vector_test_t		sTestVector;
-	uint32_t			i;
-	arrayEntry_t		sEntry;
-	uint32_t			nPrime;
-
-	for (nNodeSize = nFromNodeSize; nNodeSize < nToNodeSize; nNodeSize++)
-	{
-		sPrimeNodeSizeVector.push_back (nNodeSize);
-	}
+	typename _t_container::size_type		nStepSize;
+	uint32_t								i;
+	arrayEntry_t							sEntry;
 
 	for (i = 0; i < nNumEntries; i++)
 	{
 		sEntry.nDebug = g_nDebug;
 		sEntry.nData = generate_rand32 ();
 
-		sTestVector.push_back (sEntry);
+		pContainer->push_back (sEntry);
 
 		g_nDebug++;
 	}
 
-	while (sPrimeNodeSizeVector.size () > 0)
+	for (nStepSize = nFromStepSize; nStepSize < nToStepSize; nStepSize <<= 1)
 	{
-		nNodeSize = sPrimeNodeSizeVector.at (0);
+		TestBTreeArrayIterBasic<typename _t_container::iterator> (pContainer, pReference, bDescend, nNumEntries, nStepSize, 0, false);
+		TestBTreeArrayIterBasic<typename _t_container::const_iterator> (pContainer, pReference, bDescend, nNumEntries, nStepSize, 0, false);
+		TestBTreeArrayIterBasic<typename _t_container::reverse_iterator> (pContainer, pReference, bDescend, nNumEntries, nStepSize, 0, false);
+		TestBTreeArrayIterBasic<typename _t_container::const_reverse_iterator> (pContainer, pReference, bDescend, nNumEntries, nStepSize, 0, false);
+	}
 
-		pClArray = new _t_obj (rDataLayerProperties, &sCacheDesc, nNodeSize);
+	pContainer->clear ();
+}
 
-		if (pClArray == NULL)
+template<class _t_iterator, class _t_container, class _t_reference>
+void TestBTreeArrayIterBiDirectionalDereference (_t_container *pContainer, _t_reference *pReference, typename _t_container::size_type nNumEntries)
+{
+	typedef typename _t_container::value_type				value_type;
+	typedef typename _t_container::size_type				size_type;
+	typedef typename _t_reference::iterator					iter_ref_t;
+
+	_t_iterator				sIter;
+	_t_iterator				sIterBegin;
+	_t_iterator				sIterEnd;
+	value_type				sEntry;
+	size_type				i;
+	iter_ref_t				sIterRef;
+
+	::std::cout << "basic array iterator bi-directional dereference test" << ::std::endl;
+
+	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+
+	get_begin (pContainer, sIter);
+
+	get_begin (pContainer, sIterBegin);
+	get_end (pContainer, sIterEnd);
+
+	pReference->assign (sIterBegin, sIterEnd);
+
+	get_begin (pReference, sIterRef);
+
+	for (i = 0; i < pContainer->size (); i++)
+	{
+		sEntry = *sIter;
+		sEntry.nData = ~sEntry.nData;
+		*sIter = sEntry;
+
+		sEntry = *sIterRef;
+		sEntry.nData = ~sEntry.nData;
+		*sIterRef = sEntry;
+
+		sIter++;
+		sIterRef++;
+	}
+
+	get_begin (pContainer, sIter);
+
+	get_begin (pReference, sIterRef);
+
+	for (i = 0; i < pContainer->size (); i++)
+	{
+		if (((value_type) *sIter) != ((value_type) *sIterRef))
 		{
-			cerr << "TestBTreeArrayConstIterNodeSizeVsStepSize: ERROR: insufficient memory!" << endl;
+			::std::cerr << ::std::endl;
+			::std::cerr << "array mismatch!" << ::std::endl;
 
 			exit (-1);
 		}
 
-		pClArray->template assign<vector_test_iter_t> (sTestVector.begin (), sTestVector.end ());
-
-		for (nStepSize = nFromStepSize; nStepSize < nToStepSize; nStepSize <<= 1)
-		{
-			TestBTreeArrayIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, bDescend, nNumEntries, nStepSize, 0, false);
-		}
-
-		nPrime = sPrimeNodeSizeVector.at (0);
-
-		for (sVecIter = sPrimeNodeSizeVector.end (); sVecIter != sPrimeNodeSizeVector.begin (); )
-		{
-			sVecIter--;
-
-			if (((*sVecIter) % nPrime) == 0)
-			{
-				sPrimeNodeSizeVector.erase (sVecIter);
-
-				sVecIter = sPrimeNodeSizeVector.end ();
-			}
-		}
-
-		delete pClArray;
+		sIter++;
+		sIterRef++;
 	}
+
+	pContainer->clear ();
+	pReference->clear ();
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayIterBiDirectionalDereference (_t_obj *pClArray, uint32_t nNumEntries)
+template<class _t_subscripttype, class _t_iterator, class _t_container, class _t_reference>
+void TestBTreeArrayIterBiDirectionalSubScriptor (_t_container *pContainer, _t_reference *pReference, typename _t_container::size_type nNumEntries)
 {
-	typedef typename _t_obj::iterator					iter_t;
-	typedef typename _t_obj::reverse_iterator			riter_t;
+	typedef typename _t_container::value_type				value_type;
+	typedef typename _t_reference::iterator					iter_ref_t;
 
-	_t_objprim				*pClArrayPrim;
-	iter_t					sWriteIter;
-	riter_t					sWriteRIter;
-	_t_data					sEntryViaIter;
-	uint64_t				ui64;
-	_t_obj					sClRefArray (*pClArray);
-
-	cout << "basic array iterator bi-directional dereference test" << endl;
-
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
-
-	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
-	
-	sWriteIter = pClArray->begin ();
-	sWriteRIter = pClArray->rbegin ();
-
-	sClRefArray = *pClArray;
-
-	for (ui64 = 0; ui64 < pClArray->size (); ui64++)
-	{
-		sEntryViaIter = *sWriteIter;
-		sEntryViaIter.nData = ~sEntryViaIter.nData;
-		*sWriteIter = sEntryViaIter;
-
-		sEntryViaIter = *sWriteRIter;
-		sEntryViaIter.nData = ~sEntryViaIter.nData;
-		*sWriteRIter = sEntryViaIter;
-
-		sWriteIter++;
-		sWriteRIter++;
-	}
-
-	if (sClRefArray != *pClArray)
-	{
-		cerr << endl;
-		cerr << "array mismatch!" << endl;
-		
-		exit (-1);
-	}
-}
-
-template <class _t_obj, class _t_objprim, class _t_subscripttype, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayIterBiDirectionalSubScriptor (_t_obj *pClArray, uint32_t nNumEntries)
-{
-	typedef typename _t_obj::iterator					iter_t;
-	typedef typename _t_obj::reverse_iterator			riter_t;
-
-	_t_objprim				*pClArrayPrim;
-	iter_t					sWriteIter;
-	riter_t					sWriteRIter;
-	_t_data					sEntryViaIter;
+	_t_iterator				sIter;
+	_t_iterator				sIterBegin;
+	_t_iterator				sIterEnd;
+	value_type				sEntry;
 	_t_subscripttype		i;
-	_t_obj					sClRefArray (*pClArray);
-	
-	cout << "basic array iterator bi-directional sub-scription test" << endl;
-	
+	iter_ref_t				sIterRef;
+
+	::std::cout << "basic array iterator bi-directional sub-scription test" << ::std::endl;
+
 #if defined(__GNUC__) || defined(__GNUG__)
 
 	int		nStatus;
@@ -535,93 +283,82 @@ void TestBTreeArrayIterBiDirectionalSubScriptor (_t_obj *pClArray, uint32_t nNum
 
 	if (pszTypeid != NULL)
 	{
-		cout << "_t_sizetype is set to: " << pszTypeid << endl;
-		
+		::std::cout << "_t_sizetype is set to: " << pszTypeid << ::std::endl;
+
 		free ((void *) pszTypeid);
 	}
 	else
 	{
-		cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << endl;
+		::std::cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << ::std::endl;
 	}
-	
+
 #else
 
-	cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << endl;
-	
+	::std::cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << ::std::endl;
+
 #endif
 
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
+	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
-	
-	sWriteIter = pClArray->begin ();
-	sWriteRIter = pClArray->rbegin ();
+	get_begin (pContainer, sIter);
 
-	sClRefArray = *pClArray;
+	get_begin (pContainer, sIterBegin);
+	get_end (pContainer, sIterEnd);
 
-	for (i = 0; i < (_t_subscripttype) pClArray->size (); i++)
+	pReference->assign (sIterBegin, sIterEnd);
+
+	get_begin (pReference, sIterRef);
+
+	for (i = 0; i < (_t_subscripttype) pContainer->size (); i++)
 	{
-		sEntryViaIter = sWriteIter[i];
-		sEntryViaIter.nData = ~sEntryViaIter.nData;
-		sWriteIter[i] = sEntryViaIter;
+		sEntry = sIter[i];
+		sEntry.nData = ~sEntry.nData;
+		sIter[i] = sEntry;
 
-		sEntryViaIter = sWriteRIter[i];
-		sEntryViaIter.nData = ~sEntryViaIter.nData;
-		sWriteRIter[i] = sEntryViaIter;
+		sEntry = *sIterRef;
+		sEntry.nData = ~sEntry.nData;
+		*sIterRef = sEntry;
+
+		sIterRef++;
 	}
 
-	if (sClRefArray != *pClArray)
+	get_begin (pContainer, sIter);
+
+	get_begin (pReference, sIterRef);
+
+	for (i = 0; i < pContainer->size (); i++)
 	{
-		cerr << endl;
-		cerr << "array mismatch (positiv sub-scription)!" << endl;
-		
-		exit (-1);
-	}
-
-	sWriteIter = pClArray->end ();
-	sWriteRIter = pClArray->rend ();
-
-	for (i = (_t_subscripttype) pClArray->size (); i > 0; )
-	{
-		i--;
-
-		i -= (_t_subscripttype) pClArray->size ();
+		if (((value_type) *sIter) != ((value_type) *sIterRef))
 		{
-			sEntryViaIter = sWriteIter[i];
-			sEntryViaIter.nData = ~sEntryViaIter.nData;
-			sWriteIter[i] = sEntryViaIter;
+			::std::cerr << ::std::endl;
+			::std::cerr << "array mismatch!" << ::std::endl;
 
-			sEntryViaIter = sWriteRIter[i];
-			sEntryViaIter.nData = ~sEntryViaIter.nData;
-			sWriteRIter[i] = sEntryViaIter;
+			exit (-1);
 		}
-		i += (_t_subscripttype) pClArray->size ();
+
+		sIter++;
+		sIterRef++;
 	}
 
-	if (sClRefArray != *pClArray)
-	{
-		cerr << endl;
-		cerr << "array mismatch (negativ sub-scription)!" << endl;
-		
-		exit (-1);
-	}
+	pContainer->clear ();
+	pReference->clear ();
 }
 
-template <class _t_obj, class _t_objprim, class _t_offsettype, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayIterCompound (_t_obj *pClArray, uint32_t nNumEntries)
+template<class _t_offsettype, class _t_iterator, class _t_container, class _t_reference>
+void TestBTreeArrayIterCompound (_t_container *pContainer, _t_reference *pReference, typename _t_container::size_type nNumEntries)
 {
-	typedef typename _t_obj::iterator					iter_t;
-	typedef typename _t_obj::reverse_iterator			riter_t;
+	typedef typename _t_container::value_type				value_type;
+	typedef typename _t_reference::iterator					iter_ref_t;
 
-	_t_objprim				*pClArrayPrim;
-	iter_t					sWriteIter;
-	riter_t					sWriteRIter;
-	_t_data					sEntryViaIter;
+	_t_iterator				sIter;
+	_t_iterator				sIterBegin;
+	_t_iterator				sIterEnd;
+	value_type				sEntry;
 	_t_offsettype			i;
-	_t_obj					sClRefArray (*pClArray);
-	
-	cout << "basic array iterator compound operator test" << endl;
-	
+	iter_ref_t				sIterRef;
+
+	::std::cout << "basic array iterator compound operator test" << ::std::endl;
+
 #if defined(__GNUC__) || defined(__GNUG__)
 
 	int		nStatus;
@@ -629,607 +366,375 @@ void TestBTreeArrayIterCompound (_t_obj *pClArray, uint32_t nNumEntries)
 
 	if (pszTypeid != NULL)
 	{
-		cout << "_t_sizetype is set to: " << pszTypeid << endl;
-		
+		::std::cout << "_t_sizetype is set to: " << pszTypeid << ::std::endl;
+
 		free ((void *) pszTypeid);
 	}
 	else
 	{
-		cout << "_t_sizetype is set to: " << typeid (_t_offsettype).name () << endl;
+		::std::cout << "_t_sizetype is set to: " << typeid (_t_offsettype).name () << ::std::endl;
 	}
-	
+
 #else
 
-	cout << "_t_sizetype is set to: " << typeid (_t_offsettype).name () << endl;
-	
+	::std::cout << "_t_sizetype is set to: " << typeid (_t_offsettype).name () << ::std::endl;
+
 #endif
 
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
+	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
-	
-	sWriteIter = pClArray->begin ();
-	sWriteRIter = pClArray->rbegin ();
+	get_begin (pContainer, sIter);
 
-	sClRefArray = *pClArray;
+	get_begin (pContainer, sIterBegin);
+	get_end (pContainer, sIterEnd);
 
-	for (i = 0; i < (_t_offsettype) pClArray->size (); i++)
+	pReference->assign (sIterBegin, sIterEnd);
+
+	get_begin (pReference, sIterRef);
+
+	for (i = 0; i < (_t_offsettype) pContainer->size (); i++)
 	{
-		sWriteIter += i;
+		sIter += i;
 		{
-			sEntryViaIter = *sWriteIter;
-			sEntryViaIter.nData = ~sEntryViaIter.nData;
-			*sWriteIter = sEntryViaIter;
+			sEntry = *sIter;
+			sEntry.nData = ~sEntry.nData;
+			*sIter = sEntry;
 		}
-		sWriteIter -= i;
+		sIter -= i;
 
-		sWriteRIter += i;
+		sEntry = *sIterRef;
+		sEntry.nData = ~sEntry.nData;
+		*sIterRef = sEntry;
+
+		sIterRef++;
+	}
+
+	get_begin (pContainer, sIter);
+
+	get_begin (pReference, sIterRef);
+
+	for (i = 0; i < (_t_offsettype) pContainer->size (); i++)
+	{
+		if (((value_type) *sIter) != ((value_type) *sIterRef))
 		{
-			sEntryViaIter = *sWriteRIter;
-			sEntryViaIter.nData = ~sEntryViaIter.nData;
-			*sWriteRIter = sEntryViaIter;
+			::std::cerr << ::std::endl;
+			::std::cerr << "array mismatch!" << ::std::endl;
+
+			exit (-1);
 		}
-		sWriteRIter -= i;
+
+		sIter++;
+		sIterRef++;
 	}
 
-	if (sClRefArray != *pClArray)
+	for (i = 0; i < (_t_offsettype) pContainer->size (); i++)
 	{
-		cerr << endl;
-		cerr << "array mismatch (positiv iteration)!" << endl;
-		
-		exit (-1);
-	}
-
-	sWriteIter = pClArray->end ();
-	sWriteRIter = pClArray->rend ();
-
-	for (i = (_t_offsettype) pClArray->size (); i > 0; )
-	{
-		i--;
-
-		i -= (_t_offsettype) pClArray->size ();
+		sIter -= (i + (_t_offsettype) 1);
 		{
-			sWriteIter += i;
-			{
-				sEntryViaIter = *sWriteIter;
-				sEntryViaIter.nData = ~sEntryViaIter.nData;
-				*sWriteIter = sEntryViaIter;
-			}
-			sWriteIter -= i;
-
-			sWriteRIter += i;
-			{
-				sEntryViaIter = *sWriteRIter;
-				sEntryViaIter.nData = ~sEntryViaIter.nData;
-				*sWriteRIter = sEntryViaIter;
-			}
-			sWriteRIter -= i;
+			sEntry = *sIter;
+			sEntry.nData = ~sEntry.nData;
+			*sIter = sEntry;
 		}
-		i += (_t_offsettype) pClArray->size ();
+		sIter += (i + (_t_offsettype) 1);
+
+		sIterRef--;
+
+		sEntry = *sIterRef;
+		sEntry.nData = ~sEntry.nData;
+		*sIterRef = sEntry;
 	}
 
-	if (sClRefArray != *pClArray)
+	get_begin (pContainer, sIter);
+
+	get_begin (pReference, sIterRef);
+
+	for (i = 0; i < (_t_offsettype) pContainer->size (); i++)
 	{
-		cerr << endl;
-		cerr << "array mismatch (negativ iteration)!" << endl;
-		
-		exit (-1);
+		if (((value_type) *sIter) != ((value_type) *sIterRef))
+		{
+			::std::cerr << ::std::endl;
+			::std::cerr << "array mismatch!" << ::std::endl;
+
+			exit (-1);
+		}
+
+		sIter++;
+		sIterRef++;
 	}
+
+	pContainer->clear ();
+	pReference->clear ();
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayIterCompoundIter (_t_obj *pClArray, uint32_t nNumEntries)
+template<class _t_iterator, class _t_container, class _t_reference>
+void TestBTreeArrayIterCompoundIter (_t_container *pContainer, _t_reference *pReference, typename _t_container::size_type nNumEntries)
 {
-	typedef typename _t_obj::iterator					iter_t;
-	typedef typename _t_obj::reverse_iterator			riter_t;
+	typedef typename _t_container::value_type				value_type;
 
-	_t_objprim				*pClArrayPrim;
-	iter_t					sWriteIter;
-	_t_data					sEntryViaIter;
-	iter_t					sI;
-	_t_obj					sClRefArray (*pClArray);
-	
-	cout << "basic array iterator compound operator (iterator) test" << endl;
-	
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
+	typedef typename _t_reference::iterator					iter_ref_t;
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
-	
-	sWriteIter = pClArray->begin ();
-	
-	sClRefArray = *pClArray;
+	_t_iterator				sIter;
+	_t_iterator				sIterBegin;
+	_t_iterator				sIterEnd;
+	value_type				sEntry;
+	_t_iterator				sI;
+	iter_ref_t				sIterRef;
 
-	for (sI = pClArray->begin (); sI != pClArray->end (); sI++)
+	::std::cout << "basic array iterator compound operator (iterator) test" << ::std::endl;
+
+	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+
+	get_begin (pContainer, sIter);
+
+	get_begin (pContainer, sIterBegin);
+	get_end (pContainer, sIterEnd);
+
+	pReference->assign (sIterBegin, sIterEnd);
+
+	get_begin (pReference, sIterRef);
+
+	for (sI = sIterBegin; sI != sIterEnd; sI++)
 	{
-		sWriteIter += sI;
+		sIter += sI;
 		{
-			sEntryViaIter = *sWriteIter;
-			sEntryViaIter.nData = ~sEntryViaIter.nData;
-			*sWriteIter = sEntryViaIter;
+			sEntry = *sIter;
+			sEntry.nData = ~sEntry.nData;
+			*sIter = sEntry;
 		}
-		sWriteIter -= sI;
+		sIter -= sI;
 	}
 
-	sWriteIter = pClArray->end ();
-	
-	for (sI = pClArray->end (); sI != pClArray->begin (); )
+	get_end (pContainer, sIter);
+
+	for (sI = sIterEnd; sI != sIterBegin; )
 	{
 		sI--;
 
-		sI -= pClArray->size ();
+		sI -= pContainer->size ();
 		{
-			sWriteIter += sI;
+			sIter += sI;
 			{
-				sEntryViaIter = *sWriteIter;
-				sEntryViaIter.nData = ~sEntryViaIter.nData;
-				*sWriteIter = sEntryViaIter;
+				sEntry = *sIter;
+				sEntry.nData = ~sEntry.nData;
+				*sIter = sEntry;
 			}
-			sWriteIter -= sI;
+			sIter -= sI;
 		}
-		sI += pClArray->size ();
+		sI += pContainer->size ();
 	}
 
-	if (sClRefArray != *pClArray)
+	get_begin (pContainer, sIter);
+	get_begin (pReference, sIterRef);
+
+	while (sIter != sIterEnd)
 	{
-		cerr << endl;
-		cerr << "array mismatch (negativ sub-scription)!" << endl;
-		
-		exit (-1);
+		if (((value_type) *sIter) != ((value_type) *sIterRef))
+		{
+			::std::cerr << ::std::endl;
+			::std::cerr << "array mismatch! (reverse)" << ::std::endl;
+
+			exit (-1);
+		}
+
+		sIter++;
+		sIterRef++;
 	}
+
+	pContainer->clear ();
+	pReference->clear ();
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayIterArithmeticOperators (_t_obj *pClArray, uint32_t nNumEntries)
+template<class _t_sizetype, class _t_iterator, class _t_container, class _t_reference>
+void TestBTreeArrayIterArithmeticOperators (_t_container *pContainer, _t_reference *pReference, typename _t_container::size_type nNumEntries)
 {
-	typedef typename _t_obj::iterator					iter_t;
-	typedef typename _t_obj::reverse_iterator			riter_t;
-	typedef typename _t_obj::const_iterator				citer_t;
-	typedef typename _t_obj::const_reverse_iterator		criter_t;
+	typedef typename _t_container::value_type				value_type;
 
-	_t_objprim				*pClArrayPrim;
-	iter_t					sIter;
-	riter_t					sRIter;
-	citer_t					sCIter;
-	criter_t				sCRIter;
-	_t_data					sEntryViaIter;
-	_t_data					sEntryViaIf;
+	typedef typename _t_reference::const_iterator			citer_ref_t;
+
+	_t_iterator				sIter;
+	_t_iterator				sIterBegin;
+	_t_iterator				sIterEnd;
+	value_type				sEntryViaIter;
+	value_type				sEntryViaRef;
 	_t_sizetype				nOffset = 0;
-	
-	cout << "basic array iterator arithmetic operators test" << endl;
+	citer_ref_t				sCIterRef;
 
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
+	::std::cout << "basic array iterator arithmetic operators test" << ::std::endl;
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
-	
-	sIter = pClArray->begin ();
-	sRIter = pClArray->rbegin ();
-	sCIter = pClArray->cbegin ();
-	sCRIter = pClArray->crbegin ();
+	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	cout << "const_iterator = const_iterator + _t_sizetype" << endl;
+	get_begin (pContainer, sIterBegin);
+	get_end (pContainer, sIterEnd);
+
+	pReference->assign (sIterBegin, sIterEnd);
+
+	get_begin (pReference, sCIterRef);
+
+	::std::cout << "_t_iterator = _t_iterator + _t_sizetype" << ::std::endl;
 
 	nOffset++;
 
-	sCIter = pClArray->cbegin () + (_t_sizetype) nOffset;
+	sIter = sIterBegin + (_t_sizetype) nOffset;
 
-	sEntryViaIf = pClArray->at (nOffset);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
+	::std::advance (sCIterRef, nOffset);
 	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
+		sEntryViaRef = *sCIterRef;
 	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_iterator = const_iterator + int" << endl;
-	
-	nOffset++;
-
-	sCIter = pClArray->cbegin () + (int) nOffset;
-
-	sEntryViaIf = pClArray->at (nOffset);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_iterator = _t_sizetype + const_iterator" << endl;
-	
-	nOffset++;
-
-	sCIter = ((_t_sizetype) nOffset) + pClArray->cbegin ();
-
-	sEntryViaIf = pClArray->at (nOffset);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_iterator = int + const_iterator" << endl;
-	
-	nOffset++;
-
-	sCIter = ((int) nOffset) + pClArray->cbegin ();
-
-	sEntryViaIf = pClArray->at (nOffset);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_iterator = const_iterator - _t_sizetype" << endl;
-	
-	nOffset++;
-
-	sCIter = pClArray->cend () - (_t_sizetype) nOffset;
-
-	sEntryViaIf = pClArray->at (pClArray->size () - nOffset);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-	
-	cout << "const_iterator = const_iterator - int" << endl;
-	
-	nOffset++;
-
-	sCIter = pClArray->cend () - (int) nOffset;
-
-	sEntryViaIf = pClArray->at (pClArray->size () - nOffset);
-
-	sEntryViaIter = *sCIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-	
-	cout << "_t_sizetype = const_iterator - const_iterator" << endl;
-
-	_t_sizetype		nSize = pClArray->cend () - pClArray->cbegin ();
-
-	if (nSize != pClArray->size ())
-	{
-		cout << "failed!" << endl;
-	}
-
-	cout << "iterator = iterator + _t_sizetype" << endl;
-	
-	nOffset++;
-
-	sIter = pClArray->begin () + (_t_sizetype) nOffset;
-
-	sEntryViaIf = pClArray->at (nOffset);
+	get_begin (pReference, sCIterRef);
 
 	sEntryViaIter = *sIter;
 
-	if (sEntryViaIf != sEntryViaIter)
+	if (sEntryViaRef != sEntryViaIter)
 	{
-		cerr << "failed!" << endl;
+		::std::cerr << "failed!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sEntryViaIf.nData = 0xCCCCCCCC;
+	sEntryViaRef.nData = 0xCCCCCCCC;
 	sEntryViaIter.nData = 0xDDDDDDDD;
 
-	cout << "iterator = iterator + int" << endl;
-	
+	::std::cout << "_t_iterator = _t_iterator + int" << ::std::endl;
+
 	nOffset++;
 
-	sIter = pClArray->begin () + (int) nOffset;
+	sIter = sIterBegin + (int) nOffset;
 
-	sEntryViaIf = pClArray->at (nOffset);
+	::std::advance (sCIterRef, nOffset);
+	{
+		sEntryViaRef = *sCIterRef;
+	}
+	get_begin (pReference, sCIterRef);
 
 	sEntryViaIter = *sIter;
 
-	if (sEntryViaIf != sEntryViaIter)
+	if (sEntryViaRef != sEntryViaIter)
 	{
-		cerr << "failed!" << endl;
+		::std::cerr << "failed!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sEntryViaIf.nData = 0xCCCCCCCC;
+	sEntryViaRef.nData = 0xCCCCCCCC;
 	sEntryViaIter.nData = 0xDDDDDDDD;
 
-	cout << "iterator = _t_sizetype + iterator" << endl;
-	
+	::std::cout << "_t_iterator = _t_sizetype + _t_iterator" << ::std::endl;
+
 	nOffset++;
 
-	sIter = (_t_sizetype) nOffset + pClArray->begin ();
+	sIter = ((_t_sizetype) nOffset) + sIterBegin;
 
-	sEntryViaIf = pClArray->at (nOffset);
+	::std::advance (sCIterRef, nOffset);
+	{
+		sEntryViaRef = *sCIterRef;
+	}
+	get_begin (pReference, sCIterRef);
 
 	sEntryViaIter = *sIter;
 
-	if (sEntryViaIf != sEntryViaIter)
+	if (sEntryViaRef != sEntryViaIter)
 	{
-		cerr << "failed!" << endl;
+		::std::cerr << "failed!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sEntryViaIf.nData = 0xCCCCCCCC;
+	sEntryViaRef.nData = 0xCCCCCCCC;
 	sEntryViaIter.nData = 0xDDDDDDDD;
 
-	cout << "iterator = int + iterator" << endl;
-	
+	::std::cout << "_t_iterator = int + _t_iterator" << ::std::endl;
+
 	nOffset++;
 
-	sIter = (int) nOffset + pClArray->begin ();
+	sIter = ((int) nOffset) + sIterBegin;
 
-	sEntryViaIf = pClArray->at (nOffset);
+	::std::advance (sCIterRef, nOffset);
+	{
+		sEntryViaRef = *sCIterRef;
+	}
+	get_begin (pReference, sCIterRef);
 
 	sEntryViaIter = *sIter;
 
-	if (sEntryViaIf != sEntryViaIter)
+	if (sEntryViaRef != sEntryViaIter)
 	{
-		cerr << "failed!" << endl;
+		::std::cerr << "failed!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sEntryViaIf.nData = 0xCCCCCCCC;
+	sEntryViaRef.nData = 0xCCCCCCCC;
 	sEntryViaIter.nData = 0xDDDDDDDD;
 
-	cout << "iterator = iterator - _t_sizetype" << endl;
-	
+	::std::cout << "_t_iterator = _t_iterator - _t_sizetype" << ::std::endl;
+
 	nOffset++;
 
-	sIter = pClArray->end () - (_t_sizetype) nOffset;
+	sIter = sIterEnd - (_t_sizetype) nOffset;
 
-	sEntryViaIf = pClArray->at (pClArray->size () - nOffset);
+	::std::advance (sCIterRef, pReference->size () - nOffset);
+	{
+		sEntryViaRef = *sCIterRef;
+	}
+	get_begin (pReference, sCIterRef);
 
 	sEntryViaIter = *sIter;
 
-	if (sEntryViaIf != sEntryViaIter)
+	if (sEntryViaRef != sEntryViaIter)
 	{
-		cerr << "failed!" << endl;
+		::std::cerr << "failed!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sEntryViaIf.nData = 0xCCCCCCCC;
+	sEntryViaRef.nData = 0xCCCCCCCC;
 	sEntryViaIter.nData = 0xDDDDDDDD;
-	
-	cout << "iterator = iterator - int" << endl;
-	
+
+	::std::cout << "const_iterator = const_iterator - int" << ::std::endl;
+
 	nOffset++;
 
-	sIter = pClArray->end () - (int) nOffset;
+	sIter = sIterEnd - (int) nOffset;
 
-	sEntryViaIf = pClArray->at (pClArray->size () - nOffset);
+	::std::advance (sCIterRef, pReference->size () - nOffset);
+	{
+		sEntryViaRef = *sCIterRef;
+	}
+	get_begin (pReference, sCIterRef);
 
 	sEntryViaIter = *sIter;
 
-	if (sEntryViaIf != sEntryViaIter)
+	if (sEntryViaRef != sEntryViaIter)
 	{
-		cerr << "failed!" << endl;
+		::std::cerr << "failed!" << ::std::endl;
 
 		exit (-1);
 	}
 
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-	
-	cout << "_t_sizetype = iterator - iterator" << endl;
-
-	nSize = pClArray->end () - pClArray->begin ();
-
-	if (nSize != pClArray->size ())
-	{
-		cout << "failed!" << endl;
-	}
-
-	cout << "const_reverse_iterator = const_reverse_iterator + _t_sizetype" << endl;
-	
-	nOffset++;
-
-	sCRIter = pClArray->crbegin () + (_t_sizetype) nOffset;
-
-	sEntryViaIf = pClArray->at (pClArray->size () - (nOffset + 1));
-
-	sEntryViaIter = *sCRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
+	sEntryViaRef.nData = 0xCCCCCCCC;
 	sEntryViaIter.nData = 0xDDDDDDDD;
 
-	cout << "const_reverse_iterator = const_reverse_iterator + int" << endl;
-	
-	nOffset++;
+	::std::cout << "_t_sizetype = _t_iterator - _t_iterator" << ::std::endl;
 
-	sCRIter = pClArray->crbegin () + (int) nOffset;
+	_t_sizetype		nSize = (_t_sizetype) (sIterEnd - sIterBegin);
 
-	sEntryViaIf = pClArray->at (pClArray->size () - (nOffset + 1));
-
-	sEntryViaIter = *sCRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
+	if (nSize != pContainer->size ())
 	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
+		::std::cout << "failed!" << ::std::endl;
 	}
 
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_reverse_iterator = const_reverse_iterator - _t_sizetype" << endl;
-	
-	nOffset++;
-
-	sCRIter = pClArray->crend () - (_t_sizetype) nOffset;
-
-	sEntryViaIf = pClArray->at (nOffset - 1);
-
-	sEntryViaIter = *sCRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "const_reverse_iterator = const_reverse_iterator - int" << endl;
-	
-	nOffset++;
-
-	sCRIter = pClArray->crend () - (int) nOffset;
-
-	sEntryViaIf = pClArray->at (nOffset - 1);
-
-	sEntryViaIter = *sCRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "reverse_iterator = reverse_iterator + _t_sizetype" << endl;
-	
-	nOffset++;
-
-	sRIter = pClArray->rbegin () + (_t_sizetype) nOffset;
-
-	sEntryViaIf = pClArray->at (pClArray->size () - (nOffset + 1));
-
-	sEntryViaIter = *sRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "reverse_iterator = reverse_iterator + int" << endl;
-	
-	nOffset++;
-
-	sRIter = pClArray->rbegin () + (int) nOffset;
-
-	sEntryViaIf = pClArray->at (pClArray->size () - (nOffset + 1));
-
-	sEntryViaIter = *sRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-
-	cout << "reverse_iterator = reverse_iterator - _t_sizetype" << endl;
-	
-	nOffset++;
-
-	sRIter = pClArray->rend () - (_t_sizetype) nOffset;
-
-	sEntryViaIf = pClArray->at (nOffset - 1);
-
-	sEntryViaIter = *sRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
-
-	sEntryViaIf.nData = 0xCCCCCCCC;
-	sEntryViaIter.nData = 0xDDDDDDDD;
-	
-	cout << "reverse_iterator = reverse_iterator - int" << endl;
-
-	nOffset++;
-
-	sRIter = pClArray->rend () - (int) nOffset;
-
-	sEntryViaIf = pClArray->at (nOffset - 1);
-
-	sEntryViaIter = *sRIter;
-
-	if (sEntryViaIf != sEntryViaIter)
-	{
-		cerr << "failed!" << endl;
-
-		exit (-1);
-	}
+	pContainer->clear ();
+	pReference->clear ();
 }
 
-template <class _t_obj, class _t_lhiter, class _t_rhiter>
-void TestBTreeArrayIterCompareOperators (_t_obj *pClArray, uint32_t nNumEntries, _t_lhiter sLHIterBegin, _t_lhiter sLHIterEnd, _t_rhiter sRHIterBegin, _t_rhiter sRHIterEnd)
+template<class _t_container, class _t_lhiter, class _t_rhiter>
+void TestBTreeArrayIterCompareOperators (_t_container *pContainer, typename _t_container::size_type nNumEntries, _t_lhiter sLHIterBegin, _t_lhiter sLHIterEnd, _t_rhiter sRHIterBegin, _t_rhiter sRHIterEnd)
 {
 	_t_lhiter		sLhs;
 	_t_rhiter		sRhs;
 
 	{
-		cout << " <";
+		::std::cout << " <";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -1262,7 +767,7 @@ void TestBTreeArrayIterCompareOperators (_t_obj *pClArray, uint32_t nNumEntries,
 	}
 
 	{
-		cout << " <=";
+		::std::cout << " <=";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -1295,7 +800,7 @@ void TestBTreeArrayIterCompareOperators (_t_obj *pClArray, uint32_t nNumEntries,
 	}
 
 	{
-		cout << " >";
+		::std::cout << " >";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -1328,7 +833,7 @@ void TestBTreeArrayIterCompareOperators (_t_obj *pClArray, uint32_t nNumEntries,
 	}
 
 	{
-		cout << " >=";
+		::std::cout << " >=";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -1361,7 +866,7 @@ void TestBTreeArrayIterCompareOperators (_t_obj *pClArray, uint32_t nNumEntries,
 	}
 
 	{
-		cout << " ==";
+		::std::cout << " ==";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -1394,7 +899,7 @@ void TestBTreeArrayIterCompareOperators (_t_obj *pClArray, uint32_t nNumEntries,
 	}
 
 	{
-		cout << " !=";
+		::std::cout << " !=";
 
 		sLhs = sLHIterBegin;
 		sRhs = sRHIterBegin;
@@ -1426,443 +931,893 @@ void TestBTreeArrayIterCompareOperators (_t_obj *pClArray, uint32_t nNumEntries,
 		}
 	}
 
-	cout << endl;
+	::std::cout << ::std::endl;
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayIterCompareOperators (_t_obj *pClArray, uint32_t nNumEntries)
+template<class _t_container>
+void TestBTreeArrayIterCompareOperators (_t_container *pContainer, typename _t_container::size_type nNumEntries)
 {
-	typedef typename _t_obj::iterator					iter_t;
-	typedef typename _t_obj::reverse_iterator			riter_t;
-	typedef typename _t_obj::const_iterator				citer_t;
-	typedef typename _t_obj::const_reverse_iterator		criter_t;
+	typedef typename _t_container::iterator					iter_t;
+	typedef typename _t_container::reverse_iterator			riter_t;
+	typedef typename _t_container::const_iterator			citer_t;
+	typedef typename _t_container::const_reverse_iterator	criter_t;
 
-	_t_objprim				*pClArrayPrim;
-	cout << "basic array iterator compare operators test" << endl;
+	::std::cout << "basic array iterator compare operators test" << ::std::endl;
 
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
+	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
-	
-	cout << "iterator versus iterator";
+	::std::cout << "iterator versus iterator";
 
-	TestBTreeArrayIterCompareOperators<_t_obj, iter_t, iter_t> (pClArray, nNumEntries, pClArray->begin (), pClArray->end (), pClArray->begin (), pClArray->end ());
+	TestBTreeArrayIterCompareOperators<_t_container, iter_t, iter_t> (pContainer, nNumEntries, pContainer->begin (), pContainer->end (), pContainer->begin (), pContainer->end ());
 
-	cout << "const_iterator versus const_iterator";
-	
-	TestBTreeArrayIterCompareOperators<_t_obj, citer_t, citer_t> (pClArray, nNumEntries, pClArray->cbegin (), pClArray->cend (), pClArray->cbegin (), pClArray->cend ());
+	::std::cout << "const_iterator versus const_iterator";
 
-	cout << "const_iterator versus iterator";
-	
-	//TestBTreeArrayIterCompareOperators<_t_obj, citer_t, iter_t> (pClArray, nNumEntries, pClArray->cbegin (), pClArray->cend (), pClArray->begin (), pClArray->end ());
-	cout << endl;
+	TestBTreeArrayIterCompareOperators<_t_container, citer_t, citer_t> (pContainer, nNumEntries, pContainer->cbegin (), pContainer->cend (), pContainer->cbegin (), pContainer->cend ());
 
-	cout << "iterator versus const_iterator";
+	::std::cout << "const_iterator versus iterator";
 
-	cout << endl;
+	TestBTreeArrayIterCompareOperators<_t_container, citer_t, iter_t> (pContainer, nNumEntries, pContainer->cbegin (), pContainer->cend (), pContainer->begin (), pContainer->end ());
 
-	cout << "reverse_iterator versus reverse_iterator";
-	
-	TestBTreeArrayIterCompareOperators<_t_obj, riter_t, riter_t> (pClArray, nNumEntries, pClArray->rbegin (), pClArray->rend (), pClArray->rbegin (), pClArray->rend ());
+	::std::cout << "iterator versus const_iterator";
 
-	cout << "const_reverse_iterator versus const_reverse_iterator";
+	TestBTreeArrayIterCompareOperators<_t_container, iter_t, citer_t> (pContainer, nNumEntries, pContainer->begin (), pContainer->end (), pContainer->cbegin (), pContainer->cend ());
 
-	TestBTreeArrayIterCompareOperators<_t_obj, criter_t, criter_t> (pClArray, nNumEntries, pClArray->crbegin (), pClArray->crend (), pClArray->crbegin (), pClArray->crend ());
+	::std::cout << "reverse_iterator versus reverse_iterator";
 
-	cout << "const_reverse_iterator versus reverse_iterator";
+	TestBTreeArrayIterCompareOperators<_t_container, riter_t, riter_t> (pContainer, nNumEntries, pContainer->rbegin (), pContainer->rend (), pContainer->rbegin (), pContainer->rend ());
 
-	cout << endl;
+	::std::cout << "const_reverse_iterator versus const_reverse_iterator";
 
-	cout << "reverse_iterator versus const_reverse_iterator";
+	TestBTreeArrayIterCompareOperators<_t_container, criter_t, criter_t> (pContainer, nNumEntries, pContainer->crbegin (), pContainer->crend (), pContainer->crbegin (), pContainer->crend ());
 
-	cout << endl;
+	::std::cout << "const_reverse_iterator versus reverse_iterator";
+
+//	TestBTreeArrayIterCompareOperators<_t_container, criter_t, riter_t> (pContainer, nNumEntries, pContainer->crbegin (), pContainer->crend (), pContainer->rbegin (), pContainer->rend ());
+	::std::cout << ::std::endl;
+
+	::std::cout << "reverse_iterator versus const_reverse_iterator";
+
+//	TestBTreeArrayIterCompareOperators<_t_container, riter_t, criter_t> (pContainer, nNumEntries, pContainer->rbegin (), pContainer->rend (), pContainer->crbegin (), pContainer->crend ());
+	::std::cout << ::std::endl;
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayIterSwap (_t_obj *pClArray, uint32_t nNumEntries)
+template<class _t_iterator, class _t_container>
+void TestBTreeArrayIterSwap (_t_container *pContainer, _t_container *pCntContainer, typename _t_container::size_type nNumEntries)
 {
-	typedef typename _t_obj::iterator					iter_t;
-	typedef typename _t_obj::reverse_iterator			riter_t;
+	typedef typename _t_container::value_type				value_type;
 
-	_t_objprim				*pClArrayPrim;
-	iter_t					sWriteIter;
-	iter_t					sWriteIter2;
-	riter_t					sRWriteIter;
-	riter_t					sRWriteIter2;
-	_t_data					sEntryViaIter;
+	_t_iterator				sIter;
+	_t_iterator				sIter2;
+	value_type				sEntry;
 	uint64_t				ui64;
-	_t_obj					sClRefArray (*pClArray);
-	
-	cout << "basic array iterator swap test" << endl;
 
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
+	::std::cout << "basic array iterator swap test" << ::std::endl;
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
-	
-	sWriteIter = pClArray->begin ();
-	sWriteIter2 = pClArray->begin ();
+	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
-	sRWriteIter = pClArray->rbegin ();
-	sRWriteIter2 = pClArray->rbegin ();
+	get_begin (pContainer, sIter);
+	get_begin (pContainer, sIter2);
 
-	sClRefArray = *pClArray;
+	*pCntContainer = *pContainer;
 
-	for (ui64 = 0; ui64 < pClArray->size (); ui64++)
+	for (ui64 = 0; ui64 < pContainer->size (); ui64++)
 	{
-		sEntryViaIter = *sWriteIter;
-		sEntryViaIter.nData = ~sEntryViaIter.nData;
-		*sWriteIter = sEntryViaIter;
+		sEntry = *sIter;
+		sEntry.nData = ~sEntry.nData;
+		*sIter = sEntry;
 
-		sWriteIter++;
-
-		sEntryViaIter = *sRWriteIter;
-		sEntryViaIter.nData = ~sEntryViaIter.nData;
-		*sRWriteIter = sEntryViaIter;
-
-		sRWriteIter++;
+		sIter++;
 	}
 
-	sWriteIter.swap (sWriteIter2);
-	sRWriteIter.swap (sRWriteIter2);
+	sIter.swap (sIter2);
 
-	for (ui64 = 0; ui64 < pClArray->size (); ui64++)
+	for (ui64 = 0; ui64 < pContainer->size (); ui64++)
 	{
-		sWriteIter2--;
+		sIter2--;
 
-		sEntryViaIter = *sWriteIter2;
-		sEntryViaIter.nData = ~sEntryViaIter.nData;
-		*sWriteIter2 = sEntryViaIter;
-
-		sRWriteIter2--;
-
-		sEntryViaIter = *sRWriteIter2;
-		sEntryViaIter.nData = ~sEntryViaIter.nData;
-		*sRWriteIter2 = sEntryViaIter;
+		sEntry = *sIter2;
+		sEntry.nData = ~sEntry.nData;
+		*sIter2 = sEntry;
 	}
 
-	if (sClRefArray != *pClArray)
+	if (*pCntContainer != *pContainer)
 	{
-		cerr << endl;
-		cerr << "array mismatch!" << endl;
-		
+		::std::cerr << ::std::endl;
+		::std::cerr << "array mismatch!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	pContainer->clear ();
+	pCntContainer->clear ();
+}
+
+template<class _t_iterator, class _t_container>
+void TestBTreeArrayIterConstSwap (_t_container *pContainer, typename _t_container::size_type nNumEntries)
+{
+	_t_iterator				sIter;
+	_t_iterator				sIter2;
+
+	::std::cout << "basic array const iterator swap test" << ::std::endl;
+
+	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+
+	get_begin (pContainer, sIter);
+	get_end (pContainer, sIter2);
+
+	if (sIter >= sIter2)
+	{
+		exit (-1);
+	}
+
+	::std::cout << "swap ";
+
+	sIter.swap (sIter2);
+
+	if (sIter <= sIter2)
+	{
+		exit (-1);
+	}
+
+	::std::cout << "swap ";
+
+	sIter2.swap (sIter);
+
+	if (sIter >= sIter2)
+	{
+		exit (-1);
+	}
+
+	::std::cout << ::std::endl;
+
+	pContainer->clear ();
+}
+
+template<class _t_iterator, class _t_container>
+void TestBTreeArrayIterCCsameInstanceCompare (_t_container *pContainer)
+{
+	_t_iterator		sIter;
+	_t_iterator		sIterDummy;
+	_t_iterator		*(asIter0[]) = {&sIter, &sIterDummy};
+	_t_iterator		*(asIter1[]) = {&sIterDummy, &sIter, &sIter};
+
+	if (*(asIter0[0]) != *(asIter1[2]))
+	{
+		::std::cerr << "ERROR: uninitialised self instance compare failed!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if ( ! (*(asIter0[0]) == *(asIter1[2])))
+	{
+		::std::cerr << "ERROR: uninitialised self instance compare failed! (reversed)" << ::std::endl;
+
+		exit (-1);
+	}
+
+	get_end (pContainer, sIter);
+
+	if (*(asIter0[0]) != *(asIter1[2]))
+	{
+		::std::cerr << "ERROR: empty / invalid self instance compare failed!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if ( ! (*(asIter0[0]) == *(asIter1[2])))
+	{
+		::std::cerr << "ERROR: empty / invalid self instance compare failed! (reversed)" << ::std::endl;
+
+		exit (-1);
+	}
+
+	arrayPrim_add (pContainer, 1, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+
+	get_begin (pContainer, sIter);
+
+	if (*(asIter0[0]) != *(asIter1[2]))
+	{
+		::std::cerr << "ERROR: valid self instance compare failed!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if ( ! (*(asIter0[0]) == *(asIter1[2])))
+	{
+		::std::cerr << "ERROR: valid self instance compare failed! (reverse)" << ::std::endl;
+
+		exit (-1);
+	}
+
+	pContainer->clear ();
+}
+
+template<class _t_iterator, class _t_container>
+void TestBTreeArrayIterCCisTimeStampUpToDateAfterReAssignment (_t_container *pContainer, _t_container *pCntContainer)
+{
+	typedef typename _t_container::value_type		value_type;
+
+	_t_iterator		sIter;
+	_t_iterator		sCntIter;
+	value_type		sData;
+	value_type		sCntData;
+
+	arrayPrim_add (pContainer, 1, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+
+	*pCntContainer = *pContainer;
+
+	get_begin (pContainer, sIter);
+
+	sData = *sIter;
+
+	get_begin (pCntContainer, sCntIter);
+
+	sCntData = *sCntIter;
+
+	sIter.swap (sCntIter);
+
+	sIter = sCntIter;
+
+	if (sData != *sIter)
+	{
+		::std::cerr << "ERROR: TestBTreeArrayIterCCisTimeStampUpToDateAfterReAssignment: Unexpected result!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	pContainer->clear ();
+	pCntContainer->clear ();
+}
+
+template<class _t_iterator, class _t_container>
+void TestBTreeArrayIterCCupdateTimeStampReRegister (_t_container *pContainer, _t_container *pCntContainer)
+{
+	typedef typename _t_container::value_type		value_type;
+
+	_t_iterator		sIter;
+	value_type		sData0;
+	value_type		sData1;
+	value_type		sData2;
+
+	arrayPrim_add (pContainer, 2, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+
+	*pCntContainer = *pContainer;
+
+	get_begin (pContainer, sIter);
+
+	sData0 = *sIter;
+
+	get_begin (pCntContainer, sIter);
+
+	sData1 = *sIter;
+
+	::std::advance (sIter, 1);
+
+	sData2 = *sIter;
+
+	if ((sData0 != sData1) || (sData0 == sData2))
+	{
+		::std::cerr << "ERROR: TestBTreeArrayIterCCupdateTimeStampReRegister: Unexpected result!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	pContainer->clear ();
+	pCntContainer->clear ();
+}
+
+template<class _t_iterator, class _t_container>
+void TestBTreeArrayIterCCassignUninitializedInstance (_t_container *pContainer)
+{
+	typedef typename _t_container::value_type		value_type;
+
+	_t_iterator		sIter;
+	_t_iterator		sCntIter;
+
+	sIter = sCntIter;
+
+	sCntIter = sIter;
+
+	arrayPrim_add (pContainer, 1, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+
+	get_begin (pContainer, sIter);
+
+	sIter = sCntIter;
+
+	sCntIter = sIter;
+
+	sIter.swap (sCntIter);
+
+	get_begin (pContainer, sIter);
+
+	sIter.swap (sCntIter);
+}
+
+template<class _t_container>
+void TestBTreeArrayIterCCallBeginEndMethods (_t_container *pContainer)
+{
+	typedef typename _t_container::iterator					iterator;
+	typedef typename _t_container::const_iterator			const_iterator;
+	typedef typename _t_container::reverse_iterator			reverse_iterator;
+	typedef typename _t_container::const_reverse_iterator	const_reverse_iterator;
+
+	typedef typename _t_container::value_type				value_type;
+
+	iterator						sIterBegin;
+	const_iterator					sCIterBegin;
+	const_iterator					sCIterBeginAlt;
+	reverse_iterator				sRIterBegin;
+	const_reverse_iterator			sCRIterBegin;
+	const_reverse_iterator			sCRIterBeginAlt;
+
+	iterator						sIterEnd;
+	const_iterator					sCIterEnd;
+	const_iterator					sCIterEndAlt;
+	reverse_iterator				sRIterEnd;
+	const_reverse_iterator			sCRIterEnd;
+	const_reverse_iterator			sCRIterEndAlt;
+
+	arrayPrim_add (pContainer, 2, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
+
+	sIterBegin = pContainer->begin ();
+	sCIterBegin = pContainer->cbegin ();
+	sCIterBeginAlt = ((const _t_container *) pContainer)->begin ();
+	sRIterBegin = pContainer->rbegin ();
+	sCRIterBegin = pContainer->crbegin ();
+	sCRIterBeginAlt = ((const _t_container *) pContainer)->rbegin ();
+	
+	sIterEnd = pContainer->end ();
+	sCIterEnd = pContainer->cend ();
+	sCIterEndAlt = ((const _t_container *) pContainer)->end ();
+	sRIterEnd = pContainer->rend ();
+	sCRIterEnd = pContainer->crend ();
+	sCRIterEndAlt = ((const _t_container *) pContainer)->rend ();
+
+	if (sCIterBegin != sCIterBeginAlt)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCIterBegin and sCIterBeginAlt mismatch!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (sCRIterBegin != sCRIterBeginAlt)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCRIterBegin and sCRIterBeginAlt mismatch!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (sCIterEnd != sCIterEndAlt)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCIterEnd and sCIterEndAlt mismatch!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (sCRIterEnd != sCRIterEndAlt)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCRIterEnd and sCRIterEndAlt mismatch!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	sIterEnd--;
+	sCIterEnd--;
+	sCIterEndAlt--;
+	sRIterEnd--;
+	sCRIterEnd--;
+	sCRIterEndAlt--;
+
+	if (sCIterEnd != sCIterEndAlt)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCIterEnd and sCIterEndAlt mismatch after decrementation!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (sCRIterEnd != sCRIterEndAlt)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCRIterEnd and sCRIterEndAlt mismatch after decrementation!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (((value_type) *sIterBegin) != *sCRIterEndAlt)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sIterBegin and sCRIterEndAlt refer to different content!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (*sCIterBegin != *sCRIterEnd)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCIterBegin and sCRIterEnd refer to different content!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (*sCIterBeginAlt != *sRIterEnd)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCIterBeginAlt and sRIterEnd refer to different content!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (((value_type) *sRIterBegin) != *sCIterEndAlt)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sRIterBegin and sCIterEndAlt refer to different content!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (*sCRIterBegin != *sCIterEnd)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCRIterBegin and sCIterEnd refer to different content!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	if (*sCRIterBeginAlt != *sIterEnd)
+	{
+		::std::cerr << "TestBTreeArrayIterCCallBeginEndMethods: ERROR: sCRIterBeginAlt and sIterEnd refer to different content!" << ::std::endl;
+
 		exit (-1);
 	}
 }
 
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayIterConstSwap (_t_obj *pClArray, uint32_t nNumEntries)
+template<class _t_sizetype>
+void TestBTreeArrayIter (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize)
 {
-	typedef typename _t_obj::const_iterator					citer_t;
-	typedef typename _t_obj::const_reverse_iterator			criter_t;
+	typedef	arrayEntry_t													data_t;
 
-	_t_objprim				*pClArrayPrim;
-	citer_t					sCIter;
-	citer_t					sCIter2;
-	criter_t				sCRIter;
-	criter_t				sCRIter2;
-	
-	cout << "basic array const iterator swap test" << endl;
+	typedef typename ::std::list<data_t>									reference_t;
+	typedef CBTreeArrayIf<data_t, _t_sizetype>								container_t;
+	typedef typename ::std::vector<container_t *>							test_vector_t;
 
-	pClArrayPrim = dynamic_cast <_t_objprim *> (pClArray);
+	test_vector_t																	asContainers;
+	reference_t																		sRefList;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t>		sRAMprop6565;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t>		sRAMprop6555;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t>		sRAMprop5555;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t>		sRAMprop5554;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t>		sRAMprop5454;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t>		sRAMprop5444;
+	CBTreeIOpropertiesRAM<_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t>		sRAMprop4444;
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t>		sFilePropertiesMin6565 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesMin6555 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesMin5555 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t>		sFilePropertiesMin5554 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t>		sFilePropertiesMin5454 ("./", 1);
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t>		sFilePropertiesDefault6565 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesDefault6555 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesDefault5555 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t>		sFilePropertiesDefault5554 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t>		sFilePropertiesDefault5454 ("./");
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t>		sFilePropertiesLarge6565 ("./", 16777216);
+	CBTreeIOpropertiesFile<_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t>		sFilePropertiesLarge6555 ("./", 16777216);
+	bayerTreeCacheDescription_t														sCacheDescPageSize = {nPageSize};
+	bayerTreeCacheDescription_t														sCacheDescMin = {1};
+	bayerTreeCacheDescription_t														sCacheDescNearestBigger = {nPageSize * 2 / 3};
+	bayerTreeCacheDescription_t														sCacheDescLarge = {nPageSize * 16};
+	uint32_t																		i = 0;
+	container_t																		*pContainer;
 
-	arrayPrim_add (pClArrayPrim, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
-	
-	sCIter = pClArray->cbegin ();
-	sCIter2 = pClArray->cend ();
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_n;
 
-	sCRIter = pClArray->crbegin ();
-	sCRIter2 = pClArray->crend ();
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_2n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_2n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_2n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_2n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_2n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_2n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_2n;
 
-	cout << "const_iterator ";
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerRAM6565_4n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM6555_4n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerRAM5555_4n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerRAM5554_4n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerRAM5454_4n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM5444_4n;
+	CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> >		*m_pContainerRAM4444_4n;
 
-	if (sCIter >= sCIter2)
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565min;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555min;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555min;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554min;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454min;
+
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565default;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555default;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555default;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554default;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454default;
+
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> >		*m_pContainerFile6565large;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile6555large;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> >		*m_pContainerFile5555large;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> >		*m_pContainerFile5554large;
+	CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> >		*m_pContainerFile5454large;
+
+	::std::cout << "b-tree array iterator test bench selected" << ::std::endl;
+
+	m_pContainerRAM6565_n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sRAMprop6565, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM6555_n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sRAMprop6555, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM5555_n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sRAMprop5555, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM5554_n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sRAMprop5554, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM5454_n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sRAMprop5454, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM5444_n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> > (sRAMprop5444, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM4444_n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> > (sRAMprop4444, &sCacheDescPageSize, nNodeSize);
+	m_pContainerRAM6565_2n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sRAMprop6565, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM6555_2n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sRAMprop6555, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM5555_2n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sRAMprop5555, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM5554_2n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sRAMprop5554, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM5454_2n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sRAMprop5454, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM5444_2n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> > (sRAMprop5444, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM4444_2n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> > (sRAMprop4444, &sCacheDescPageSize, nNodeSize * 2);
+	m_pContainerRAM6565_4n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sRAMprop6565, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM6555_4n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sRAMprop6555, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM5555_4n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sRAMprop5555, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM5554_4n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sRAMprop5554, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM5454_4n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sRAMprop5454, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM5444_4n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint32_t, uint16_t, uint16_t, uint16_t> > (sRAMprop5444, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerRAM4444_4n = new CBTreeArray<data_t, CBTreeIOpropertiesRAM <_t_sizetype, uint16_t, uint16_t, uint16_t, uint16_t> > (sRAMprop4444, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerFile6565min = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sFilePropertiesMin6565, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerFile6555min = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesMin6555, &sCacheDescPageSize, nNodeSize * 8);
+	m_pContainerFile5555min = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesMin5555, &sCacheDescMin, nNodeSize * 7);
+	m_pContainerFile5554min = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sFilePropertiesMin5554, &sCacheDescNearestBigger, nNodeSize * 6);
+	m_pContainerFile5454min = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sFilePropertiesMin5454, &sCacheDescLarge, nNodeSize * 5);
+
+	m_pContainerFile6565default = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sFilePropertiesDefault6565, &sCacheDescNearestBigger, nNodeSize * 3);
+	m_pContainerFile6555default = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesDefault6555, &sCacheDescNearestBigger, nNodeSize * 2);
+	m_pContainerFile5555default = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesDefault5555, &sCacheDescLarge, nNodeSize);
+	m_pContainerFile5554default = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sFilePropertiesDefault5554, &sCacheDescPageSize, nNodeSize * 8);
+	m_pContainerFile5454default = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sFilePropertiesDefault5454, &sCacheDescMin, nNodeSize * 7);
+
+	m_pContainerFile6565large = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint64_t, uint32_t> > (sFilePropertiesLarge6565, &sCacheDescPageSize, nNodeSize * 5);
+	m_pContainerFile6555large = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint64_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesLarge6555, &sCacheDescPageSize, nNodeSize * 4);
+	m_pContainerFile5555large = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint32_t> > (sFilePropertiesDefault5555, &sCacheDescMin, nNodeSize * 3);
+	m_pContainerFile5554large = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint32_t, uint32_t, uint16_t> > (sFilePropertiesDefault5554, &sCacheDescNearestBigger, nNodeSize * 2);
+	m_pContainerFile5454large = new CBTreeArray<data_t, CBTreeIOpropertiesFile <_t_sizetype, uint32_t, uint16_t, uint32_t, uint16_t> > (sFilePropertiesDefault5454, &sCacheDescLarge, nNodeSize);
+
+	if (NULL == m_pContainerRAM6565_n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6565_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6555_n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6555_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5555_n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5555_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5554_n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5554_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5454_n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5454_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5444_n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5444_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM4444_n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM4444_n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6565_2n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6565_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6555_2n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6555_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5555_2n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5555_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5554_2n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5554_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5454_2n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5454_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5444_2n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5444_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM4444_2n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM4444_2n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6565_4n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6565_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM6555_4n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM6555_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5555_4n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5555_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5554_4n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5554_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5454_4n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5454_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM5444_4n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM5444_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerRAM4444_4n) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerRAM4444_4n)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile6565min) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6565min)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile6555min) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6555min)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5555min) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5555min)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5554min) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5554min)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5454min) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5454min)" << ::std::endl; exit (-1);}
+
+	if (NULL == m_pContainerFile6565default) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6565default)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile6555default) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6555default)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5555default) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5555default)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5554default) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5554default)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5454default) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5454default)" << ::std::endl; exit (-1);}
+
+	if (NULL == m_pContainerFile6565large) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6565large)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile6555large) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile6555large)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5555large) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5555large)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5554large) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5554large)" << ::std::endl; exit (-1);}
+	if (NULL == m_pContainerFile5454large) {::std::cerr << "TestBTreeArrayIter<_t_sizetype> (uint32_t, uint32_t, uint32_t): ERROR: insufficient memory! (m_pContainerFile5454large)" << ::std::endl; exit (-1);}
+
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6565_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6555_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5555_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5554_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5454_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5444_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM4444_n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6565_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6555_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5555_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5554_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5454_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5444_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM4444_2n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6565_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM6555_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5555_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5554_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5454_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM5444_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerRAM4444_4n); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6565min); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6555min); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5555min); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5554min); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5454min); asContainers.push_back (pContainer);
+
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6565default); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6555default); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5555default); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5554default); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5454default); asContainers.push_back (pContainer);
+
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6565large); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile6555large); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5555large); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5554large); asContainers.push_back (pContainer);
+	pContainer = dynamic_cast<container_t *> (m_pContainerFile5454large); asContainers.push_back (pContainer);
+
+	for (i = 0; i < asContainers.size (); i++)
 	{
-		exit (-1);
+		pContainer = asContainers[i];
+
+		switch (nTest)
+		{
+		case BTREETEST_ARRAY_ITER_ASCEND	:
+			{
+				TestBTreeArrayIterBasic<typename container_t::iterator> (pContainer, &sRefList, false, 128, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::const_iterator> (pContainer, &sRefList, false, 128, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::reverse_iterator> (pContainer, &sRefList, false, 128, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::const_reverse_iterator> (pContainer, &sRefList, false, 128, 1, 0);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_ASCEND_SMALL	:
+			{
+				TestBTreeArrayIterBasic<typename container_t::iterator> (pContainer, &sRefList, false, 16, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::const_iterator> (pContainer, &sRefList, false, 16, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::reverse_iterator> (pContainer, &sRefList, false, 16, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::const_reverse_iterator> (pContainer, &sRefList, false, 16, 1, 0);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_DESCEND	:
+			{
+				TestBTreeArrayIterBasic<typename container_t::iterator> (pContainer, &sRefList, true, 128, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::const_iterator> (pContainer, &sRefList, true, 128, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::reverse_iterator> (pContainer, &sRefList, true, 128, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::const_reverse_iterator> (pContainer, &sRefList, true, 128, 1, 0);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_DESCEND_SMALL	:
+			{
+				TestBTreeArrayIterBasic<typename container_t::iterator> (pContainer, &sRefList, true, 16, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::const_iterator> (pContainer, &sRefList, true, 16, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::reverse_iterator> (pContainer, &sRefList, true, 16, 1, 0);
+				TestBTreeArrayIterBasic<typename container_t::const_reverse_iterator> (pContainer, &sRefList, true, 16, 1, 0);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CMPLX_ASCEND	:
+			{
+				TestBTreeArrayIterBasic<typename container_t::iterator> (pContainer, &sRefList, false, 128, 5, 3);
+				TestBTreeArrayIterBasic<typename container_t::const_iterator> (pContainer, &sRefList, false, 128, 5, 3);
+				TestBTreeArrayIterBasic<typename container_t::reverse_iterator> (pContainer, &sRefList, false, 128, 5, 3);
+				TestBTreeArrayIterBasic<typename container_t::const_reverse_iterator> (pContainer, &sRefList, false, 128, 5, 3);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CMPLX_ASCEND_SMALL	:
+			{
+				TestBTreeArrayIterBasic<typename container_t::iterator> (pContainer, &sRefList, false, 16, 2, 3);
+				TestBTreeArrayIterBasic<typename container_t::const_iterator> (pContainer, &sRefList, false, 16, 2, 3);
+				TestBTreeArrayIterBasic<typename container_t::reverse_iterator> (pContainer, &sRefList, false, 16, 2, 3);
+				TestBTreeArrayIterBasic<typename container_t::const_reverse_iterator> (pContainer, &sRefList, false, 16, 2, 3);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CMPLX_DESCEND	:
+			{
+				TestBTreeArrayIterBasic<typename container_t::iterator> (pContainer, &sRefList, true, 128, 4, 3);
+				TestBTreeArrayIterBasic<typename container_t::const_iterator> (pContainer, &sRefList, true, 128, 4, 3);
+				TestBTreeArrayIterBasic<typename container_t::reverse_iterator> (pContainer, &sRefList, true, 128, 4, 3);
+				TestBTreeArrayIterBasic<typename container_t::const_reverse_iterator> (pContainer, &sRefList, true, 128, 4, 3);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CMPLX_DESCEND_SMALL	:
+			{
+				TestBTreeArrayIterBasic<typename container_t::iterator> (pContainer, &sRefList, true, 16, 2, 3);
+				TestBTreeArrayIterBasic<typename container_t::const_iterator> (pContainer, &sRefList, true, 16, 2, 3);
+				TestBTreeArrayIterBasic<typename container_t::reverse_iterator> (pContainer, &sRefList, true, 16, 2, 3);
+				TestBTreeArrayIterBasic<typename container_t::const_reverse_iterator> (pContainer, &sRefList, true, 16, 2, 3);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_NODESIZE_VS_STEPSIZE_ASCEND		:
+			{
+				TestBTreeArrayIterNodeSizeVsStepSize (pContainer, &sRefList, false, 512, 3, 257, 1, 513);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_NODESIZE_VS_STEPSIZE_DESCEND	:
+			{
+				TestBTreeArrayIterNodeSizeVsStepSize (pContainer, &sRefList, true, 512, 3, 257, 1, 513);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_BI_DIRECTIONAL_DEREFERENCE	:
+			{
+				TestBTreeArrayIterBiDirectionalDereference<typename container_t::iterator> (pContainer, &sRefList, 128);
+				TestBTreeArrayIterBiDirectionalDereference<typename container_t::reverse_iterator> (pContainer, &sRefList, 128);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_BI_DIRECTIONAL_SUBSCRIPTOR	:
+			{
+				TestBTreeArrayIterBiDirectionalSubScriptor<_t_sizetype, typename container_t::iterator> (pContainer, &sRefList, 128);
+				TestBTreeArrayIterBiDirectionalSubScriptor<_t_sizetype, typename container_t::reverse_iterator> (pContainer, &sRefList, 128);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_BI_DIRECTIONAL_SUBSCRIPTOR_INT	:
+			{
+				TestBTreeArrayIterBiDirectionalSubScriptor<int, typename container_t::iterator> (pContainer, &sRefList, 128);
+				TestBTreeArrayIterBiDirectionalSubScriptor<int, typename container_t::reverse_iterator> (pContainer, &sRefList, 128);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_COMPOUND	:
+			{
+				TestBTreeArrayIterCompound<_t_sizetype, typename container_t::iterator> (pContainer, &sRefList, 128);
+				TestBTreeArrayIterCompound<_t_sizetype, typename container_t::reverse_iterator> (pContainer, &sRefList, 128);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_COMPOUND_INT	:
+			{
+				TestBTreeArrayIterCompound<int, typename container_t::iterator> (pContainer, &sRefList, 128);
+				TestBTreeArrayIterCompound<int, typename container_t::reverse_iterator> (pContainer, &sRefList, 128);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_COMPOUND_ITER	:
+			{
+				TestBTreeArrayIterCompoundIter<typename container_t::iterator> (pContainer, &sRefList, 128);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_ARITHMETIC_OPERATORS	:
+			{
+				TestBTreeArrayIterArithmeticOperators<_t_sizetype, typename container_t::iterator> (pContainer, &sRefList, 40);
+				TestBTreeArrayIterArithmeticOperators<_t_sizetype, typename container_t::const_iterator> (pContainer, &sRefList, 40);
+				TestBTreeArrayIterArithmeticOperators<_t_sizetype, typename container_t::reverse_iterator> (pContainer, &sRefList, 40);
+				TestBTreeArrayIterArithmeticOperators<_t_sizetype, typename container_t::const_reverse_iterator> (pContainer, &sRefList, 40);
+
+				TestBTreeArrayIterArithmeticOperators<int, typename container_t::iterator> (pContainer, &sRefList, 40);
+				TestBTreeArrayIterArithmeticOperators<int, typename container_t::const_iterator> (pContainer, &sRefList, 40);
+				TestBTreeArrayIterArithmeticOperators<int, typename container_t::reverse_iterator> (pContainer, &sRefList, 40);
+				TestBTreeArrayIterArithmeticOperators<int, typename container_t::const_reverse_iterator> (pContainer, &sRefList, 40);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_COMPARE_OPERATORS	:
+			{
+				TestBTreeArrayIterCompareOperators (pContainer, 16);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_SWAP	:
+			{
+				container_t		*pCntContainer = asContainers[(i + 1) % asContainers.size ()];
+
+				TestBTreeArrayIterSwap<typename container_t::iterator> (pContainer, pCntContainer, 128);
+				TestBTreeArrayIterSwap<typename container_t::reverse_iterator> (pContainer, pCntContainer, 128);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CONST_SWAP	:
+			{
+				TestBTreeArrayIterConstSwap<typename container_t::iterator> (pContainer, 16);
+				TestBTreeArrayIterConstSwap<typename container_t::const_iterator> (pContainer, 16);
+				TestBTreeArrayIterConstSwap<typename container_t::reverse_iterator> (pContainer, 16);
+				TestBTreeArrayIterConstSwap<typename container_t::const_reverse_iterator> (pContainer, 16);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CC_SAME_INSTANCE_COMPARE	:
+			{
+				TestBTreeArrayIterCCsameInstanceCompare<typename container_t::iterator> (pContainer);
+				TestBTreeArrayIterCCsameInstanceCompare<typename container_t::const_iterator> (pContainer);
+				TestBTreeArrayIterCCsameInstanceCompare<typename container_t::reverse_iterator> (pContainer);
+				TestBTreeArrayIterCCsameInstanceCompare<typename container_t::const_reverse_iterator> (pContainer);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CC_IS_TIME_STAMP_UP_TO_DATE_AFTER_RE_ASSIGNMENT:
+			{
+				container_t		*pCntContainer = asContainers[(i + 1) % asContainers.size ()];
+
+				TestBTreeArrayIterCCisTimeStampUpToDateAfterReAssignment<typename container_t::iterator> (pContainer, pCntContainer);
+				TestBTreeArrayIterCCisTimeStampUpToDateAfterReAssignment<typename container_t::const_iterator> (pContainer, pCntContainer);
+				TestBTreeArrayIterCCisTimeStampUpToDateAfterReAssignment<typename container_t::reverse_iterator> (pContainer, pCntContainer);
+				TestBTreeArrayIterCCisTimeStampUpToDateAfterReAssignment<typename container_t::const_reverse_iterator> (pContainer, pCntContainer);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CC_UPDATE_TIME_STAMP_RE_REGISTER:
+			{
+				container_t		*pCntContainer = asContainers[(i + 1) % asContainers.size ()];
+
+				TestBTreeArrayIterCCupdateTimeStampReRegister<typename container_t::iterator> (pContainer, pCntContainer);
+				TestBTreeArrayIterCCupdateTimeStampReRegister<typename container_t::const_iterator> (pContainer, pCntContainer);
+				TestBTreeArrayIterCCupdateTimeStampReRegister<typename container_t::reverse_iterator> (pContainer, pCntContainer);
+				TestBTreeArrayIterCCupdateTimeStampReRegister<typename container_t::const_reverse_iterator> (pContainer, pCntContainer);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CC_ASSIGN_UNINITIALIZED_INSTANCE:
+			{
+				TestBTreeArrayIterCCassignUninitializedInstance<typename container_t::iterator> (pContainer);
+				TestBTreeArrayIterCCassignUninitializedInstance<typename container_t::const_iterator> (pContainer);
+				TestBTreeArrayIterCCassignUninitializedInstance<typename container_t::reverse_iterator> (pContainer);
+				TestBTreeArrayIterCCassignUninitializedInstance<typename container_t::const_reverse_iterator> (pContainer);
+
+				break;
+			}
+
+		case BTREETEST_ARRAY_ITER_CC_ALL_BEGIN_END_METHODS:
+			{
+				TestBTreeArrayIterCCallBeginEndMethods (pContainer);
+				
+				break;
+			}
+
+		default									:
+			{
+				::std::cerr << "ERROR: TestBTreeArrayIter: Unknown test or test not specified!" << ::std::endl;
+
+				exit (-1);
+
+				break;
+			}
+		}
 	}
 
-	cout << "swap ";
-
-	sCIter.swap (sCIter2);
-
-	if (sCIter <= sCIter2)
+	for (i = 0; i < asContainers.size (); i++)
 	{
-		exit (-1);
+		pContainer = asContainers[i];
+
+		delete pContainer;
 	}
-
-	cout << "swap ";
-
-	sCIter2.swap (sCIter);
-	
-	if (sCIter >= sCIter2)
-	{
-		exit (-1);
-	}
-
-	cout << endl;
-
-	cout << "const_reverse_iterator ";
-
-	if (sCRIter >= sCRIter2)
-	{
-		exit (-1);
-	}
-
-	cout << "swap ";
-
-	sCRIter.swap (sCRIter2);
-
-	if (sCRIter <= sCRIter2)
-	{
-		exit (-1);
-	}
-
-	cout << "swap ";
-
-	sCRIter2.swap (sCRIter);
-	
-	if (sCRIter >= sCRIter2)
-	{
-		exit (-1);
-	}
-
-	cout << endl;
-}
-
-template <class _t_obj, class _t_objprim, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeArrayIter (uint32_t nTest, _t_subnodeiter nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, int argc, char **argv)
-{
-	_t_obj												*pClArray;
-
-	cout << "b-tree array iterator test bench selected" << endl;
-
-	pClArray = new _t_obj (rDataLayerProperties, &sCacheDesc, nNodeSize);
-
-	if (pClArray == NULL)
-	{
-		cerr << "ERROR: Insufficient memory!" << endl;
-
-		exit (-1);
-	}
-
-	switch (nTest)
-	{
-	case BTREETEST_ARRAY_ITER_CONST_ASCEND	:
-		{
-			TestBTreeArrayConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, false, 128, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_ASCEND_SMALL	:
-		{
-			TestBTreeArrayConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, false, 16, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_DESCEND	:
-		{
-			TestBTreeArrayConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, true, 128, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_DESCEND_SMALL	:
-		{
-			TestBTreeArrayConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, true, 16, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_CMPLX_ASCEND	:
-		{
-			TestBTreeArrayConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, false, 128, 5, 3);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_CMPLX_ASCEND_SMALL	:
-		{
-			TestBTreeArrayConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, false, 16, 2, 3);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_CMPLX_DESCEND	:
-		{
-			TestBTreeArrayConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, true, 128, 4, 3);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_CMPLX_DESCEND_SMALL	:
-		{
-			TestBTreeArrayConstIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, true, 16, 2, 3);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_NODESIZE_VS_STEPSIZE_ASCEND		:
-		{
-			TestBTreeArrayConstIterNodeSizeVsStepSize<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_subnodeiter, _t_datalayerproperties> (false, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
-			
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_NODESIZE_VS_STEPSIZE_DESCEND	:
-		{
-			TestBTreeArrayConstIterNodeSizeVsStepSize<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_subnodeiter, _t_datalayerproperties> (true, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_ASCEND	:
-		{
-			TestBTreeArrayIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, false, 128, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_ASCEND_SMALL	:
-		{
-			TestBTreeArrayIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, false, 16, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_DESCEND	:
-		{
-			TestBTreeArrayIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, true, 128, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_DESCEND_SMALL	:
-		{
-			TestBTreeArrayIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, true, 16, 1, 0);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CMPLX_ASCEND	:
-		{
-			TestBTreeArrayIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, false, 128, 5, 3);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CMPLX_ASCEND_SMALL	:
-		{
-			TestBTreeArrayIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, false, 16, 2, 3);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CMPLX_DESCEND	:
-		{
-			TestBTreeArrayIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, true, 128, 4, 3);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CMPLX_DESCEND_SMALL	:
-		{
-			TestBTreeArrayIterBasic<_t_obj, _t_objprim, _t_data, _t_sizetype> (pClArray, true, 16, 2, 3);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_NODESIZE_VS_STEPSIZE_ASCEND		:
-		{
-			TestBTreeArrayIterNodeSizeVsStepSize<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_subnodeiter, _t_datalayerproperties> (false, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
-			
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_NODESIZE_VS_STEPSIZE_DESCEND	:
-		{
-			TestBTreeArrayIterNodeSizeVsStepSize<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_subnodeiter, _t_datalayerproperties> (true, rDataLayerProperties, sCacheDesc, 512, 3, 257, 1, 513);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_BI_DIRECTIONAL_DEREFERENCE	:
-		{
-			TestBTreeArrayIterBiDirectionalDereference<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 128);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_BI_DIRECTIONAL_SUBSCRIPTOR	:
-		{
-			TestBTreeArrayIterBiDirectionalSubScriptor<_t_obj, _t_objprim, _t_sizetype, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 128);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_BI_DIRECTIONAL_SUBSCRIPTOR_INT	:
-		{
-			TestBTreeArrayIterBiDirectionalSubScriptor<_t_obj, _t_objprim, int, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 128);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_COMPOUND	:
-		{
-			TestBTreeArrayIterCompound<_t_obj, _t_objprim, _t_sizetype, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 128);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_COMPOUND_INT	:
-		{
-			TestBTreeArrayIterCompound<_t_obj, _t_objprim, int, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 128);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_COMPOUND_ITER	:
-		{
-			TestBTreeArrayIterCompoundIter<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 128);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_ARITHMETIC_OPERATORS	:
-		{
-			TestBTreeArrayIterArithmeticOperators<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 40);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_COMPARE_OPERATORS	:
-		{
-			TestBTreeArrayIterCompareOperators<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 16);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_SWAP	:
-		{
-			TestBTreeArrayIterSwap<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 128);
-
-			break;
-		}
-
-	case BTREETEST_ARRAY_ITER_CONST_SWAP	:
-		{
-			TestBTreeArrayIterConstSwap<_t_obj, _t_objprim, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> (pClArray, 16);
-
-			break;
-		}
-
-	default									:
-		{
-			cerr << "ERROR: TestBTreeArrayIter: Unknown test or test not specified!" << endl;
-
-			break;
-		}
-	}
-
-	delete pClArray;
 }
