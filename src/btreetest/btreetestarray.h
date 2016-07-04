@@ -25,7 +25,7 @@
 
 #include <btreearray.h>
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template<class _t_datalayerproperties>
 class CBTreeArrayTestSubscriptAccessWrapper;
 
 typedef struct arrayEntry_s
@@ -33,72 +33,99 @@ typedef struct arrayEntry_s
 	uint32_t		nData;
 	uint32_t		nDebug;
 
+	bool			operator== (const struct arrayEntry_s sOperand) const
+	{
+		return ((nData == sOperand.nData) && (nDebug == sOperand.nDebug));
+	}
+
 	bool			operator!= (const struct arrayEntry_s sOperand) const
 	{
 		return ((nData != sOperand.nData) || (nDebug != sOperand.nDebug));
 	}
 } arrayEntry_t;
 
-template <class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_datalayerproperties = CBTreeIOpropertiesRAM, class _t_datalayer = CBTreeRAMIO <_t_nodeiter, _t_subnodeiter, uint64_t, uint32_t> >
-class CBTreeArrayTest
-	:	public CBTreeArray <arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_datalayerproperties = CBTreeIOpropertiesRAM <> >
+class CBTreeTestArray
+	:	public CBTreeArray <arrayEntry_t, _t_datalayerproperties>
 {
 public:
 
-	typedef CBTreeArray<arrayEntry_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-																			CBTreeArray_t;
-
-	typedef typename CBTreeArray_t::CBTreeBase_t							CBTreeBase_t;
-
-	typedef typename CBTreeArray_t::iterator								iterator;
-	typedef typename CBTreeArray_t::const_iterator							const_iterator;
+	typedef arrayEntry_t											value_type;
+	typedef typename _t_datalayerproperties::size_type				size_type;
+	typedef typename _t_datalayerproperties::node_iter_type			node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type		sub_node_iter_type;
+	typedef _t_datalayerproperties									data_layer_properties_type;
+	typedef typename _t_datalayerproperties::data_layer_type		data_layer_type;
 	
-						CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+	typedef value_type&												reference;
+	typedef const value_type&										const_reference;
+	typedef value_type*												pointer;
+	typedef const value_type*										const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type			difference_type;
 
-						CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
+	typedef CBTreeArray<value_type, _t_datalayerproperties>			CBTreeArray_t;
 
-						~CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	typedef typename CBTreeArray_t::CBTreeBaseDefaults_t			CBTreeBaseDefaults_t;
+
+	typedef typename CBTreeArray_t::iterator						iterator;
+	typedef typename CBTreeArray_t::const_iterator					const_iterator;
+	typedef typename CBTreeArray_t::reverse_iterator				reverse_iterator;
+	typedef typename CBTreeArray_t::const_reverse_iterator			const_reverse_iterator;
+
+	typedef std::list<value_type>									reference_t;
+	
+						CBTreeTestArray<_t_datalayerproperties>
+													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize, reference_t *pClRef);
+
+						CBTreeTestArray<_t_datalayerproperties>
+													(CBTreeTestArray<_t_datalayerproperties> &rBT, bool bAssign);
+
+						~CBTreeTestArray<_t_datalayerproperties>
 													();
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	void				assign						(_t_iterator sItFirst, _t_iterator sItLast);
-	void				assign						(_t_sizetype nNewSize, const arrayEntry_t& rVal);
+	void				assign						(size_type nNewSize, const value_type& rVal);
 
-	void				push_back					(const arrayEntry_t& rData);
+	void				push_back					(const value_type& rData);
 
 	void				pop_back					();
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	iterator			insert						(const_iterator sCIterPos, _t_iterator sItFirst, _t_iterator sItLast);
 
-	iterator			insert						(const_iterator sCIterPos, const arrayEntry_t& rData);
-	iterator			insert						(const_iterator sCIterPos, const _t_sizetype nLen, const arrayEntry_t& rData);
+	iterator			insert						(const_iterator sCIterPos, const value_type& rData);
+	iterator			insert						(const_iterator sCIterPos, const size_type nLen, const value_type& rData);
 
 	iterator			erase						(const_iterator sCIterPos);
 	iterator			erase						(const_iterator sCIterFirst, const_iterator sCIterLast);
 
-	void				swap						(CBTreeArrayTest &rArray);
+	void				swap						(CBTreeTestArray &rArray);
 
 	void				clear						();
 
-	bool				operator==					(const CBTreeArrayTest &rArray) const;
-	bool				operator!=					(const CBTreeArrayTest &rArray) const;
+	bool				operator==					(const CBTreeTestArray &rArray) const;
+	bool				operator!=					(const CBTreeTestArray &rArray) const;
 
 	void				test						() const;
 
-	bool				show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const;
+	void				set_reference				(reference_t *pReference);
 
-	CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-						&operator=					(const CBTreeArrayTest<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
+	void				set_atomic_testing			(bool bEnable);
+
+	CBTreeTestArray<_t_datalayerproperties>
+						&operator=					(const CBTreeTestArray<_t_datalayerproperties> &rBT);
 
 protected:
 
-	bool				set_at						(const _t_sizetype nPos, const arrayEntry_t &rData);
-	bool				get_at						(const _t_sizetype nPos, arrayEntry_t &rData) const;
+	bool				show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const node_iter_type nNode, const sub_node_iter_type nSubPos) const;
 
-	std::list<arrayEntry_t>							*m_pClRef;
+	bool				set_at						(const size_type nPos, const value_type &rData);
+	bool				get_at						(const size_type nPos, value_type &rData) const;
+
+	reference_t			*m_pClRef;
+
+	bool				m_bAtomicTesting;
 };
 
 #endif // BTREETESTARRAY_H
