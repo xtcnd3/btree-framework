@@ -25,19 +25,13 @@
 #include <memory.h>
 #include <stddef.h>
 
-#if defined (WIN32)
+#if defined (_MSC_VER)
 
- #if defined (_HAS_MFC)
-  #include <afxtempl.h>
- #endif
-
- #if !defined (_HAS_MFC)
-  #include <windows.h>
- #endif
+ #include <windows.h>
 
  #include <io.h>
 
-#elif defined (LINUX)
+#elif defined(__GNUC__) || defined(__GNUG__)
 
  #include <string.h>
  #include <stdlib.h>
@@ -51,26 +45,32 @@
 #include "btreeio.h"
 #include "btreeaux.h"
 
-template <class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_addresstype = uint64_t, class _t_offsettype = uint32_t>
-class CBTreeLinearIO : public CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+template<class _t_datalayerproperties>
+class CBTreeLinearIO : public CBTreeIO<_t_datalayerproperties>
 {
 public:
 
+	typedef typename _t_datalayerproperties::size_type				size_type;
+	typedef typename _t_datalayerproperties::node_iter_type			node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type		sub_node_iter_type;
+	typedef typename _t_datalayerproperties::address_type			address_type;
+	typedef typename _t_datalayerproperties::offset_type			offset_type;
+
 	// construction
-							CBTreeLinearIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+							CBTreeLinearIO<_t_datalayerproperties>
 												(
-													_t_addresstype nBlockSize, 
+													address_type nBlockSize, 
 													uint32_t nNumDataPools, 
 													CBTreeIOperBlockPoolDesc_t *psDataPools
 												);
 
-							~CBTreeLinearIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+							~CBTreeLinearIO<_t_datalayerproperties>
 												();
 
 protected:
 
 	// address generation
-	inline const uint8_t	*get_node_base			(uint32_t nPool, _t_nodeiter nNode);
+	inline const uint8_t	*get_node_base			(uint32_t nPool, node_iter_type nNode);
 	
 	uint8_t											**m_ppsPools;
 };
