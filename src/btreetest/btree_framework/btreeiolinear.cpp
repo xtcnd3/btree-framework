@@ -16,14 +16,14 @@
 
 #include "btreeiolinear.h"
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-CBTreeLinearIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeLinearIO
+template<class _t_datalayerproperties>
+CBTreeLinearIO<_t_datalayerproperties>::CBTreeLinearIO
 (
-	_t_addresstype nBlockSize, 
+	typename CBTreeLinearIO<_t_datalayerproperties>::address_type nBlockSize, 
 	uint32_t nNumDataPools, 
 	CBTreeIOperBlockPoolDesc_t *psDataPools
 )
-	:	CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype> (nBlockSize, nNumDataPools, psDataPools)
+	:	CBTreeIO<_t_datalayerproperties> (nBlockSize, nNumDataPools, psDataPools)
 	,	m_ppsPools (NULL)
 {
 	m_ppsPools = new uint8_t * [this->m_nNumDataPools];
@@ -38,8 +38,8 @@ CBTreeLinearIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTr
 	}
 }
 
-template <class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-CBTreeLinearIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::~CBTreeLinearIO ()
+template<class _t_datalayerproperties>
+CBTreeLinearIO<_t_datalayerproperties>::~CBTreeLinearIO ()
 {
 	if (m_ppsPools != NULL)
 	{
@@ -57,8 +57,8 @@ CBTreeLinearIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::~CBT
 	}
 }
 
-template<class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
-const uint8_t* CBTreeLinearIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_node_base (uint32_t nPool, _t_nodeiter nNode)
+template<class _t_datalayerproperties>
+const uint8_t* CBTreeLinearIO<_t_datalayerproperties>::get_node_base (uint32_t nPool, typename _t_datalayerproperties::node_iter_type nNode)
 {
 #if defined (_DEBUG)
 
