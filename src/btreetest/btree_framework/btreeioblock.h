@@ -25,19 +25,13 @@
 #include <memory.h>
 #include <stddef.h>
 
-#if defined (WIN32)
+#if defined (_MSC_VER)
 
- #if defined (_HAS_MFC)
-  #include <afxtempl.h>
- #endif
-
- #if !defined (_HAS_MFC)
-  #include <windows.h>
- #endif
+ #include <windows.h>
 
  #include <io.h>
 
-#elif defined (LINUX)
+#elif defined(__GNUC__) || defined(__GNUG__)
 
  #include <string.h>
  #include <stdlib.h>
@@ -50,8 +44,8 @@
 
 #include "btreeio.h"
 
-template <class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_addresstype = uint64_t, class _t_offsettype = uint32_t>
-class CBTreeBlockIO : public CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+template<class _t_datalayerproperties>
+class CBTreeBlockIO : public CBTreeIO<_t_datalayerproperties>
 {
 	typedef struct btree_block_io_descriptor_s
 	{
@@ -62,62 +56,68 @@ class CBTreeBlockIO : public CBTreeIO<_t_nodeiter, _t_subnodeiter, _t_addresstyp
 
 public:
 
+	typedef typename _t_datalayerproperties::size_type				size_type;
+	typedef typename _t_datalayerproperties::node_iter_type			node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type		sub_node_iter_type;
+	typedef typename _t_datalayerproperties::address_type			address_type;
+	typedef typename _t_datalayerproperties::offset_type			offset_type;
+
 	// construction
-							CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+							CBTreeBlockIO<_t_datalayerproperties>
 														(
-															_t_addresstype nBlockSize, 
-															_t_subnodeiter nNodeSize,
+															address_type nBlockSize, 
+															sub_node_iter_type nNodeSize,
 															uint32_t nNumDataPools, 
 															CBTreeIOperBlockPoolDesc_t *psDataPools
 														);
 
-							~CBTreeBlockIO<_t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
+							~CBTreeBlockIO<_t_datalayerproperties>
 														();
 
 	// properties
-	_t_nodeiter				get_maxNodes				();
+	node_iter_type			get_maxNodes				();
 	
-	_t_offsettype			get_dataAlignment			();
-	_t_offsettype			get_alignedOffset			(_t_offsettype nOffset);
+	offset_type				get_dataAlignment			();
+	offset_type				get_alignedOffset			(offset_type nOffset);
 
 	// resource management
-	void					set_root_node				(_t_nodeiter nRootNode);
+	void					set_root_node				(node_iter_type nRootNode);
 
 protected:
 
 	// address generation
-	inline _t_addresstype	get_blockAddr				(_t_nodeiter nNode);
-	virtual _t_offsettype	get_poolOffset				();
-	inline _t_addresstype	get_node_offset				(_t_nodeiter nNode);
-	inline _t_addresstype	get_nodeAddr				(_t_nodeiter nNode);
+	inline address_type		get_blockAddr				(node_iter_type nNode);
+	virtual offset_type		get_poolOffset				();
+	inline address_type		get_node_offset				(node_iter_type nNode);
+	inline address_type		get_nodeAddr				(node_iter_type nNode);
 	
-	inline _t_offsettype	get_per_node_pool_offset	(uint32_t nPool);
-	inline _t_addresstype	get_pool_address			(uint32_t nPool, _t_nodeiter nNode);
+	inline offset_type		get_per_node_pool_offset	(uint32_t nPool);
+	inline address_type		get_pool_address			(uint32_t nPool, node_iter_type nNode);
 
-	_t_offsettype			generate_pool_offsets		();
+	offset_type				generate_pool_offsets		();
 
-	void					realloc_descriptor_vector	(_t_nodeiter nMaxNodes);
+	void					realloc_descriptor_vector	(node_iter_type nMaxNodes);
 
-	uint32_t				convert_node_to_descriptor	(_t_nodeiter nNode, bool bRoundUp = false);
+	uint32_t				convert_node_to_descriptor	(node_iter_type nNode, bool bRoundUp = false);
 
 	// initialisation
-	void					setup						(_t_addresstype nBlockSize);
+	void					setup						(address_type nBlockSize);
 
 	void					increment_access_counter	(uint32_t nDescriptor);
 
-	_t_addresstype										m_nBlockSize;				// optimal block size
-	_t_subnodeiter										m_nNodeSize;				// node size parameter a.k.a. t
+	address_type										m_nBlockSize;				// optimal block size
+	sub_node_iter_type									m_nNodeSize;				// node size parameter a.k.a. t
 	uint32_t											m_nNodesPerBlock;			// number of nodes that fit into one block
 	uint32_t											m_nNodesPerBlockVectorSize;	// number of nodes that fit into one block (vector size)
 
-	_t_offsettype										m_nAlignedNodeSize;			// size of one node in a block plus alignment
+	offset_type											m_nAlignedNodeSize;			// size of one node in a block plus alignment
 	
-	_t_offsettype										*m_pnPerNodePoolOffset;
+	offset_type											*m_pnPerNodePoolOffset;
 
 	btree_block_io_descriptor_t							*m_psDescriptorVector;
 	uint32_t											m_nDescriptorVectorSize;
 
-	_t_nodeiter											m_nPrevRootNode;
+	node_iter_type										m_nPrevRootNode;
 
 	uint32_t											m_nMaxAccessCtr;			// number of accesses before degrading statistics
 };
