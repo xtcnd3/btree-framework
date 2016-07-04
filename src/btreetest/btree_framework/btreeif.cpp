@@ -16,19 +16,19 @@
 
 #include "btreeif.h"
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeIf<_t_data, _t_sizetype>::CBTreeIf ()
 	:	CBTreeSuper ()
 {
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeIf<_t_data, _t_sizetype>::CBTreeIf (const CBTreeIf<_t_data, _t_sizetype> &rContainer)
 	:	CBTreeSuper ()
 {
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeIf<_t_data, _t_sizetype>::~CBTreeIf ()
 {
 }
@@ -43,7 +43,7 @@ The result is a reference to this instance.
 
 */
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeIf<_t_data, _t_sizetype> &
 	CBTreeIf<_t_data, _t_sizetype>::operator=
 	(const CBTreeIf<_t_data, _t_sizetype> &rContainer)
