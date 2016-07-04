@@ -22,11 +22,12 @@
 #include "btreetestcommon.h"
 
 template<class _t_container>
-void associative_container_add_primitive (_t_container *pContainer, uint32_t nEntries, uint32_t &nFromWhereOrSeed, btreetest_key_generation_e eGenerator)
+void associative_container_add_primitive (_t_container *pContainer, typename _t_container::size_type nEntries, uint32_t &nFromWhereOrSeed, btreetest_key_generation_e eGenerator)
 {
 	typedef typename _t_container::value_type		data_t;
+	typedef typename _t_container::size_type		size_type;
 
-	uint32_t		ui32;
+	size_type		i;
 	data_t			sData;
 
 	container_data_reset (sData);
@@ -36,9 +37,9 @@ void associative_container_add_primitive (_t_container *pContainer, uint32_t nEn
 		srand (nFromWhereOrSeed);
 	}
 
-	for (ui32 = 0; ui32 < nEntries; ui32++)
+	for (i = 0; i < nEntries; i++)
 	{
-		::std::cout << "insert: " << ui32 << " / " << nEntries << "\r" << ::std::flush;
+		::std::cout << "insert: " << i << " / " << nEntries << "\r" << ::std::flush;
 
 		container_data_set (sData, g_nDebug, nFromWhereOrSeed, eGenerator);
 
@@ -47,19 +48,21 @@ void associative_container_add_primitive (_t_container *pContainer, uint32_t nEn
 		pContainer->insert (sData);
 	}
 
-	::std::cout << "insert: " << ui32 << " / " << nEntries << ::std::endl;
+	::std::cout << "insert: " << i << " / " << nEntries << ::std::endl;
 }
 
 template<class _t_container>
-void associative_container_remove_primitive (_t_container *pContainer, uint32_t nEntries, uint32_t nInstance, uint32_t &nFromWhereOrSeed, btreetest_key_generation_e eGenerator)
+void associative_container_remove_primitive (_t_container *pContainer, typename _t_container::size_type nEntries, uint32_t nInstance, uint32_t &nFromWhereOrSeed, btreetest_key_generation_e eGenerator)
 {
 	typedef typename _t_container::const_iterator		citer_t;
 	typedef typename _t_container::value_type			data_t;
 	typedef typename _t_container::size_type			size_type;
+	typedef typename _t_container::key_type				key_type;
 
-	uint32_t		ui32;
+	size_type		i;
 	data_t			sData;
 	uint32_t		nDebug = 0;
+	key_type		nKey;
 
 	container_data_reset (sData);
 	
@@ -68,25 +71,29 @@ void associative_container_remove_primitive (_t_container *pContainer, uint32_t 
 		srand (nFromWhereOrSeed);
 	}
 
-	for (ui32 = 0; ui32 < nEntries; ui32++)
+	for (i = 0; i < nEntries; i++)
 	{
-		::std::cout << "remove: " << ui32 << " / " << nEntries << "\r" << ::std::flush;
+		::std::cout << "remove: " << i << " / " << nEntries << "\r" << ::std::flush;
 
 		container_data_set (sData, nDebug, nFromWhereOrSeed, eGenerator);		
 
 		if (nInstance == ~0x0)
 		{
-			pContainer->erase (get_entry_key (sData));
+			nKey = get_entry_key (sData);
+
+			pContainer->erase (nKey);
 		}
 		else
 		{
 			citer_t		sCIter;
 
-			sCIter = pContainer->lower_bound (get_entry_key (sData));
+			nKey = get_entry_key (sData);
 
-			::std::advance<citer_t, size_type> (sCIter, (size_type) nInstance);
+			sCIter = pContainer->lower_bound (nKey);
 
-			if (nInstance < pContainer->count (get_entry_key (sData)))
+			::std::advance (sCIter, (size_type) nInstance);
+
+			if (nInstance < pContainer->count (nKey))
 			{
 				pContainer->erase (sCIter);
 			}
@@ -99,7 +106,7 @@ void associative_container_remove_primitive (_t_container *pContainer, uint32_t 
 		}
 	}
 
-	::std::cout << "remove: " << ui32 << " / " << nEntries << ::std::endl;
+	::std::cout << "remove: " << i << " / " << nEntries << ::std::endl;
 }
 
 template<class _t_container>
