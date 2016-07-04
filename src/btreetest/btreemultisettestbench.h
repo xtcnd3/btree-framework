@@ -17,9 +17,14 @@
 
 #include <stdint.h>
 
-#include <map>
+#include <set>
 #include <list>
 #include <vector>
+
+template<class _t_key>
+class CBTreeTestBenchMultiSet;
+
+#include "btreesettestbench.h"
 
 #include "btreetestmultiset.h"
 
@@ -27,6 +32,56 @@
 
 #include "btreetestcommon.h"
 #include "./associative/btreemultiset.h"
+
+template<class _t_key>
+class CBTreeTestBenchMultiSet	:	public ::std::multiset<_t_key>
+{
+public:
+
+				CBTreeTestBenchMultiSet<_t_key> ()	
+					:	::std::multiset<_t_key> () 
+				{};
+
+				CBTreeTestBenchMultiSet<_t_key> (const CBTreeTestBenchMultiSet &rSet)	
+					:	::std::multiset<_t_key> (rSet)
+				{};
+
+	explicit	CBTreeTestBenchMultiSet<_t_key> (const ::std::set<_t_key> &rSet)
+					:	::std::multiset<_t_key> (rSet)
+				{};
+
+				~CBTreeTestBenchMultiSet<_t_key> ()	
+				{};
+/*
+	template<class _t_iterator>
+	void insert (const typename ::std::multiset<_t_key>::iterator &rDummyIter, _t_iterator &rIterFirst, _t_iterator &rIterLast)
+	{
+		rDummyIter;
+
+		::std::multiset<_t_key>::insert (rIterFirst, rIterLast);
+	};
+*/
+	template<class _t_iterator>
+	void insert (const typename ::std::multiset<_t_key>::const_iterator &rDummyIter, _t_iterator &rIterFirst, _t_iterator &rIterLast)
+	{
+		rDummyIter;
+
+		::std::multiset<_t_key>::insert (rIterFirst, rIterLast);
+	};
+
+	template<class _t_iterator>
+	void insert (_t_iterator &rIterFirst, _t_iterator &rIterLast)
+	{
+		::std::multiset<_t_key>::insert (rIterFirst, rIterLast);
+	};
+
+	typename ::std::multiset<_t_key>::iterator insert (const typename ::std::multiset<_t_key>::value_type &rVal)
+	{
+		return (::std::multiset<_t_key>::insert (rVal));
+	};
+};
+
+typedef CBTreeTestBenchMultiSet<uint32_t>			multiset_reference_t;
 
 typedef enum
 {
@@ -43,7 +98,7 @@ typedef enum
 	BTREETEST_MULTISET_STL_IF_LOWER_BOUND_UPPER_BOUND
 } btreetest_multiset_t;
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeSTLmultiSet (uint32_t nTestNum, _t_subnodeiter nNodeSize, _t_datalayerproperties sDataProperties, bayerTreeCacheDescription_t &sCacheDesc, int argc, char **argv);
+template<class _t_container>
+void TestBTreeSTLmultiSet (uint32_t nTestNum, _t_container *pContainerpMSetWrapper);
 
 #endif // !BTREEMULTISETTESTBENCH_H
