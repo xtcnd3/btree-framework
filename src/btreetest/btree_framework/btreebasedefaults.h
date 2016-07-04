@@ -19,7 +19,7 @@
 /*
 
 g++ requires the definition of CBTreeIOpropertiesRAM and CBTreeRAMIO, since they are used as default
-template parameters, although not being instantiated here.
+templateparameters, although not being instantiated here.
 
 */
 
@@ -27,40 +27,81 @@ template parameters, although not being instantiated here.
 
 #endif
 
-template <class _ti_pos, class _t_data, class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_datalayerproperties = CBTreeIOpropertiesRAM, class _t_datalayer = CBTreeRAMIO <_t_nodeiter, _t_subnodeiter> >
+template<class _ti_pos, class _t_data, class _t_datalayerproperties = CBTreeIOpropertiesRAM <> >
 class CBTreeBaseDefaults
-	:	public CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>
+	:	public CBTreeBaseIf	<
+								_ti_pos, 
+								_t_data, 
+								typename _t_datalayerproperties::size_type, 
+								typename _t_datalayerproperties::node_iter_type, 
+								typename _t_datalayerproperties::sub_node_iter_type
+							>
 {
 public:
 
-	typedef CBTreeBaseDefaults																	CBTreeBase_t;
+	typedef CBTreeBaseDefaults																	CBTreeBaseDefaults_t;
 
-	typedef CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>			CBTreeBaseIf_t;
+	typedef _t_data																				value_type;
+	typedef typename _t_datalayerproperties::size_type											size_type;
+	typedef typename _t_datalayerproperties::node_iter_type										node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type									sub_node_iter_type;
+	typedef _t_datalayerproperties																data_layer_properties_type;
+	typedef typename _t_datalayerproperties::data_layer_type									data_layer_type;
 
-//	typedef _ti_pos																				position_t;
-	typedef _t_data																				data_t;
-	typedef _t_sizetype																			size_type;
-	typedef _t_nodeiter																			nodeiter_t;
-	typedef _t_subnodeiter																		subnodeiter_t;
-	typedef _t_datalayerproperties																datalayerproperties_t;
-	typedef _t_datalayer																		datalayer_t;
+	typedef value_type&																			reference;
+	typedef const value_type&																	const_reference;
+	typedef value_type*																			pointer;
+	typedef const value_type*																	const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type										difference_type;
 
-	typedef	typename CBTreeBaseIf_t::node_t														node_t;
-	typedef	typename CBTreeBaseIf_t::node_maintainence_t										node_maintainence_t;
+	typedef CBTreeBaseIf<_ti_pos, value_type, size_type, node_iter_type, sub_node_iter_type>	CBTreeBaseIf_t;
+
+	typedef	typename CBTreeBaseIf_t::CBTreeDefaults_t											CBTreeDefaults_t;
+
+#define	BAYERTREE_NODE_MAINTAINANCE_ALLOCATION			0x00000001ULL
+
+protected:
+
+	// typedefs
+#pragma pack (1)
+
+	typedef struct node_s
+	{
+		node_iter_type								nParent;		// index of parent node
+		size_type									nMaxIdx;		// maximum linear index for this node
+		sub_node_iter_type							nNumData;		// data sets in this node - if negative or zero then leaf node
+	} node_t;
+	
+	typedef struct node_maintainence_s
+	{
+		uint32_t									uVector;
+	} node_maintainence_t;
+
+#pragma pack ()
+
+	typedef struct iterator_state_s
+	{
+		size_type									nAssociatedPos;
+		node_iter_type								nNode;
+		sub_node_iter_type							nSubPos;
+	} iterator_state_t;
+
+public:
 
 	// construction
-						CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+						CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>
+													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
 
-						CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-													(const CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
+						CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>
+													(const CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &rBT);
 
 	// destruction
-	virtual				~CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> ();
+	virtual				~CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>
+													();
 
 	// attributes
 	bool				empty						() const;
-	_t_sizetype			size						() const;
+	size_type			size						() const;
 
 	// removal
 	void				clear						();
@@ -81,7 +122,7 @@ public:
 
 #endif
 
-	CBTreeBaseDefaults &		operator=					(const CBTreeBaseDefaults &rBT);
+	CBTreeBaseDefaults &	operator=				(const CBTreeBaseDefaults &rBT);
 
 protected:
  
@@ -89,77 +130,149 @@ protected:
 	void				create_root					();
 
 	// complex primitives
-	_t_nodeiter			create_node					(_t_nodeiter nParent);
-	_t_sizetype			add_to_node					(_ti_pos sPos, const _t_data &rData, _t_nodeiter nNode, uint32_t nDepth, _t_nodeiter &rnRsltNode, _t_subnodeiter &rnRsltSub, _t_sizetype *pnPos = NULL);
-	_t_nodeiter			split_node					(_t_nodeiter nNode);
-	_t_sizetype			remove_from_node			(_ti_pos sPos, _t_nodeiter nNode, uint32_t nDepth);
-	_t_nodeiter			merge_node					(_t_nodeiter nNode, _t_subnodeiter nSub);
-	void				rotate						(_t_nodeiter nNode, _t_subnodeiter nSub, _t_subnodeiter &newSub, bool bLeftToRight);
-	void				replace_with_adjacent_entry	(_t_nodeiter nNode, _t_subnodeiter nSub, bool bFromLeft);
+	node_iter_type		create_node					(node_iter_type nParent);
+	size_type			add_to_node					(_ti_pos sPos, const value_type &rData, node_iter_type nNode, uint32_t nDepth, node_iter_type &rnRsltNode, sub_node_iter_type &rnRsltSub, size_type *pnPos = NULL);
+	node_iter_type		split_node					(node_iter_type nNode);
+	size_type			remove_from_node			(_ti_pos sPos, node_iter_type nNode, uint32_t nDepth);
+	node_iter_type		merge_node					(node_iter_type nNode, sub_node_iter_type nSub);
+	void				rotate						(node_iter_type nNode, sub_node_iter_type nSub, sub_node_iter_type &newSub, bool bLeftToRight);
+	void				replace_with_adjacent_entry	(node_iter_type nNode, sub_node_iter_type nSub, bool bFromLeft);
 
-	_t_sizetype			serialize					(const _ti_pos nFrom, const _t_sizetype nLen, _t_data *pData, const bool bReadOpr = true) const;
+	size_type			serialize					(const _ti_pos nFrom, const size_type nLen, value_type *pData, const bool bReadOpr = true) const;
 
 	// primitives
-	_t_subnodeiter		insert_data_into_node		(_t_nodeiter nNode, _t_subnodeiter nSubPos, const _t_data &rData, _t_nodeiter nSubNode = (_t_nodeiter) ~0x0, int triMod = -1);
+	sub_node_iter_type	insert_data_into_node		(node_iter_type nNode, sub_node_iter_type nSubPos, const value_type &rData, node_iter_type nSubNode = (node_iter_type) ~0x0, int triMod = -1);
 
-	void				remove_data_from_leaf		(_t_nodeiter nNode, _t_subnodeiter nSub);
-	void				remove_data_from_node		(_t_nodeiter nNode, _t_subnodeiter nSub, _t_subnodeiter nSubNode);
+	void				remove_data_from_leaf		(node_iter_type nNode, sub_node_iter_type nSub);
+	void				remove_data_from_node		(node_iter_type nNode, sub_node_iter_type nSub, sub_node_iter_type nSubNode);
 
-	void				replace_data				(_t_nodeiter nNode, _t_subnodeiter nSub, const _t_data &rData);
+	void				replace_data				(node_iter_type nNode, sub_node_iter_type nSub, const value_type &rData);
 
 	// manuvering
-	_t_subnodeiter		find_sub_node_offset		(_t_nodeiter nNode, _t_nodeiter nSubNode) const;
+	sub_node_iter_type	find_sub_node_offset		(node_iter_type nNode, node_iter_type nSubNode) const;
 	
-	void				move_prev					(_t_nodeiter nNode, _t_subnodeiter nSub, _t_nodeiter &nPrevNode, _t_subnodeiter &nPrevSubPos, bool &bBounce) const;
-	void				move_next					(_t_nodeiter nNode, _t_subnodeiter nSub, _t_nodeiter &nNextNode, _t_subnodeiter &nNextSubPos, bool &bBounce) const;
+	void				move_prev					(node_iter_type nNode, sub_node_iter_type nSub, node_iter_type &nPrevNode, sub_node_iter_type &nPrevSubPos, bool &bBounce) const;
+	void				move_next					(node_iter_type nNode, sub_node_iter_type nSub, node_iter_type &nNextNode, sub_node_iter_type &nNextSubPos, bool &bBounce) const;
+
+	// position coversion
+	void				convert_pos_to_container_pos	(node_iter_type nNode, size_type nPos, node_iter_type &rRsltNode, sub_node_iter_type &rRsltSubPos) const;
 
 	// maintanence (allocation)
-	void				set_reservation				(_t_nodeiter nNode);
-	bool				get_reservation				(_t_nodeiter nNode) const;
-	void				unset_reservation			(_t_nodeiter nNode);
-	void				reset_reservation			(_t_nodeiter nNode);
+	void				set_reservation				(node_iter_type nNode);
+	bool				get_reservation				(node_iter_type nNode) const;
+	void				unset_reservation			(node_iter_type nNode);
+	void				reset_reservation			(node_iter_type nNode);
 
 	// node property access methods
-	_t_subnodeiter		get_data_count				(const _t_nodeiter nNode) const;
-	_t_subnodeiter		get_data_count				(const node_t &sNodeDesc) const;
-	_t_subnodeiter		get_sub_node_count			(const _t_nodeiter nNode) const;
-	_t_subnodeiter		get_sub_node_count			(const node_t &sNodeDesc) const;
-	_t_sizetype			get_max_index				(const _t_nodeiter nNode) const;
-	_t_sizetype			get_max_index				(const node_t &sNodeDesc) const;
-	_t_nodeiter			get_parent					(const _t_nodeiter nNode) const;
-	_t_nodeiter			get_parent					(const node_t &sNodeDesc) const;
+	sub_node_iter_type	get_data_count				(const node_iter_type nNode) const;
+	sub_node_iter_type	get_data_count				(const node_t &sNodeDesc) const;
+	sub_node_iter_type	get_sub_node_count			(const node_iter_type nNode) const;
+	sub_node_iter_type	get_sub_node_count			(const node_t &sNodeDesc) const;
+	size_type			get_max_index				(const node_iter_type nNode) const;
+	size_type			get_max_index				(const node_t &sNodeDesc) const;
+	node_iter_type		get_parent					(const node_iter_type nNode) const;
+	node_iter_type		get_parent					(const node_t &sNodeDesc) const;
 
-	bool				is_root						(const _t_nodeiter nNode) const;
+	bool				is_root						(const node_iter_type nNode) const;
 
-	inline bool			is_leaf						(const _t_nodeiter nNode) const;
+	inline bool			is_leaf						(const node_iter_type nNode) const;
 	inline bool			is_leaf						(const node_t &nodeDesc) const;
 
-	node_t *			get_node					(const _t_nodeiter nNode) const;
+	node_t *			get_node					(const node_iter_type nNode) const;
 
-	_t_nodeiter *		get_sub_node				(const _t_nodeiter nNode, const _t_subnodeiter nEntry) const;
+	node_iter_type *	get_sub_node				(const node_iter_type nNode, const sub_node_iter_type nEntry) const;
 
-	_t_nodeiter *		get_sub_node_buffer			(const _t_nodeiter nNode) const;
+	node_iter_type *	get_sub_node_buffer			(const node_iter_type nNode) const;
 
-	_t_data *			get_data					(const _t_nodeiter nNode, const _t_subnodeiter nEntry) const;
-	void				set_data					(const _t_nodeiter nNode, const _t_subnodeiter nEntry, _t_data sData);
+	value_type *		get_data					(const node_iter_type nNode, const sub_node_iter_type nEntry) const;
+	void				set_data					(const node_iter_type nNode, const sub_node_iter_type nEntry, value_type sData);
 
-	_t_data *			get_data_buffer				(const _t_nodeiter nNode) const;
+	value_type *		get_data_buffer				(const node_iter_type nNode) const;
 
-	_t_sizetype *		get_serVector				(const _t_nodeiter nNode) const;
+	size_type *			get_serVector				(const node_iter_type nNode) const;
 
 	void				auto_shrink_inc				();
 	void				auto_shrink_dec				();
 	void				auto_shrink					();
 
-	virtual bool		show_data					(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const = 0;
-	virtual bool		show_node					(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const = 0;
-	bool				show_tree					(std::ofstream &ofs, _t_nodeiter nNode, _t_nodeiter nParent, char *pAlloc) const;
+	// run time quantification
+	sub_node_iter_type	get_node_max_sub_nodes		() const;
+	sub_node_iter_type	get_node_min_data_size		() const;
+	sub_node_iter_type	get_node_max_data_size		() const;
+
+	// rebuild FIFO
+	void				rebuild_FIFO_put			(node_iter_type nNode);
+	node_iter_type		rebuild_FIFO_peek			();
+	node_iter_type		rebuild_FIFO_get			();
+	uint32_t			rebuild_FIFO_fillstate		();
+
+	// debug
+	void				attache_traced_node			(node_iter_type nNode);
+	void				detache_traced_node			();
+
+	float				get_average_access_depth	();
+
+	// iterator interface
+	uint32_t			get_iter_state_size			() const;
+	void				reset_iter_state			(void *pState) const;
+	void				evaluate_iter				(void *pState, size_type nOffsetPos) const;
+	void				evaluate_iter_by_seek		(void *pState, size_type nNewPos) const;
+	bool				is_iter_pos_evaluated		(void *pState, size_type nPos) const;
+
+	value_type			*get_iter_data				(void *pState) const;
+	void				set_iter_data				(void *pState, const value_type &rData);
+
+	bool				show_tree					(std::ofstream &ofs, node_iter_type nNode, node_iter_type nParent, char *pAlloc) const;
 	void				shownodelist				(std::ofstream &ofs, char *pAlloc) const;
 
 	void				_swap						(CBTreeBaseDefaults &rBT);
 
-	_t_datalayer									*m_pData;
-	_t_datalayerproperties							*m_pClDataLayerProperties;
+	// properties
+	node_iter_type									m_nRootNode;
+	
+	node_iter_type									m_nTreeSize;			// number of tree nodes incl. all reservation leaks - is s
+
+	sub_node_iter_type								m_nNodeSize;			// is t
+
+	uint32_t										m_nGrowBy;
+
+	// data pool IDs
+	uint32_t										m_nPoolIDnodeDesc;
+	uint32_t										m_nPoolIDnodeMaintenance;
+	uint32_t										m_nPoolIDdata;
+	uint32_t										m_nPoolIDsubNodes;
+	uint32_t										m_nPoolIDserialVector;
+
+	// rebuild FIFO
+	node_iter_type									*m_pRebuildFIFO;
+	uint32_t										m_nRebuildFIFOSize;
+	uint32_t										m_nRebuildFIFOreadPos;
+	uint32_t										m_nRebuildFIFOwritePos;
+
+	// auto shrink
+	uint32_t										m_nAutoShrinkThreshold;
+	uint32_t										m_nAutoShrinkCounter;
+
+#if defined (_DEBUG)
+
+	// path trace
+	node_iter_type									*m_pNodeTrace;
+	uint32_t										m_nNodeTraceDepth;
+	uint32_t										m_nNodeTraceDepthMax;
+
+#endif
+
+	// reservation
+	node_iter_type									m_nNextAlloc;
+
+	// data layer
+	data_layer_type									*m_pData;
+	data_layer_properties_type						*m_pClDataLayerProperties;
+
+private:
+
+	void				setup_pools					();
+
 };
 
 #endif // BTREEBASEDEFAULTS_H
