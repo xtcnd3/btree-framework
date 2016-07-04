@@ -16,6 +16,8 @@
 
 #include "btreekeysorttestprimitive.h"
 
+/*** keySortEntry_t ************************/
+
 void container_data_reset (keySortEntry_t &rData)
 {
 	rData.nKey = 0;
@@ -63,7 +65,7 @@ void container_data_set (keySortEntry_t &rData, uint32_t nDebug, uint32_t &nFrom
 
 		default									:
 		{
-			cerr << "ERROR: container_data_set<keySortEntry_>: eGenerator corrupted or not set!" << endl;
+			::std::cerr << "ERROR: container_data_set<keySortEntry_>: eGenerator corrupted or not set!" << ::std::endl;
 
 			exit (-1);
 
@@ -104,4 +106,94 @@ void set_entry_debug (keySortEntry_t &rEntry, uint32_t nDebug)
 	rEntry.nDebug = nDebug;
 }
 
+/*** uint32_t **************************/
+
+void container_data_reset (uint32_t &rEntry)
+{
+	rEntry = 0;
+}
+
+void container_data_set (uint32_t &rData, uint32_t nDebug, uint32_t &nFromWhereOrSeed, btreetest_key_generation_e eGenerator)
+{
+	switch (eGenerator)
+	{
+		case BTREETEST_KEY_GENERATION_DESCEND	:
+		{
+			rData = nFromWhereOrSeed;
+
+			nFromWhereOrSeed--;
+			
+			break;
+		}
+
+		case BTREETEST_KEY_GENERATION_ASCEND	:
+		{
+			rData = nFromWhereOrSeed;
+
+			nFromWhereOrSeed++;
+			
+			break;
+		}
+
+		case BTREETEST_KEY_GENERATION_RANDOM	:
+		{
+			rData = generate_rand32 ();
+
+			break;
+		}
+
+		case BTREETEST_KEY_GENERATION_CONST		:
+		{
+			rData = nFromWhereOrSeed;
+
+			break;
+		}
+
+		default									:
+		{
+			::std::cerr << "ERROR: container_data_set<keySortEntry_>: eGenerator corrupted or not set!" << ::std::endl;
+
+			exit (-1);
+
+			break;
+		}
+	}
+}
+
+uint32_t get_entry_key (const uint32_t &rEntry)
+{
+	return (rEntry);
+}
+
+uint32_t get_entry_data (const uint32_t &rEntry)
+{
+	return (0);
+}
+
+uint32_t get_entry_debug (const uint32_t &rEntry)
+{
+	return (0);
+}
+
+void set_entry_key (uint32_t &rEntry, uint32_t nKey)
+{
+	rEntry = nKey;
+}
+
+void set_entry_data (uint32_t &rEntry, uint32_t nData)
+{
+	rEntry;
+	nData;
+}
+
+void set_entry_debug (uint32_t &rEntry, uint32_t nDebug)
+{
+	rEntry;
+	nDebug;
+}
+
+bool is_entry_not_equal_to_entry (const uint32_t &rLhsEntry, const uint32_t &rRhsEntry)
+{
+	return (get_entry_key (rLhsEntry) != get_entry_key (rRhsEntry));
+}
 #endif // BTREEKEYSORTTESTPRIMITIVE_CPP
