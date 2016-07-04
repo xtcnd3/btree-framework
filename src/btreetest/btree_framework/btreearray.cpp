@@ -15,53 +15,53 @@
 
 #include "btreearray.h"
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArray
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
 		const bayerTreeCacheDescription_t *psCacheDescription, 
-		_t_subnodeiter nNodeSize
+		typename _t_datalayerproperties::sub_node_iter_type nNodeSize
 	)
-	:	CBTreeBaseDefaults <CBTreeArrayPos<_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	CBTreeBaseDefaults <CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>
 	(
 		rDataLayerProperties, 
 		psCacheDescription, 
 		nNodeSize
 	)
-	,	CBTreeArrayIf <_t_data, _t_sizetype> ()
+	,	CBTreeArrayIf <_t_data, typename _t_datalayerproperties::size_type> ()
 	,	m_pClAccessWrapper (NULL)
 	,	m_psReturnData (NULL)
 {
-	CBTreeArrayIf<_t_data, _t_sizetype>	&rBtrArray = dynamic_cast <CBTreeArrayIf<_t_data, _t_sizetype> &> (*this);
+	CBTreeArrayIf_t	&rBtrArray = dynamic_cast <CBTreeArrayIf_t &> (*this);
 
-	m_pClAccessWrapper = new CBTreeArrayAccessWrapper<_t_data, _t_sizetype> (rBtrArray);
+	m_pClAccessWrapper = new CBTreeArrayAccessWrapper<value_type, typename _t_datalayerproperties::size_type> (rBtrArray);
 
-	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArray (_t_datalayerproperties &, bayerTreeCacheDescription_t *, _t_subnodeiter): insufficient memory!");
+	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type): insufficient memory!");
 
-	m_psReturnData = new _t_data ();
+	m_psReturnData = new value_type ();
 
-	BTREE_ASSERT (m_psReturnData != NULL, "CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArray (_t_datalayerproperties &, bayerTreeCacheDescription_t *, _t_subnodeiter): insufficient memory!");
+	BTREE_ASSERT (m_psReturnData != NULL, "CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type): insufficient memory!");
 }
 						
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArray (const CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
-	:	CBTreeBaseDefaults<CBTreeArrayPos<_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (const CBTreeArray<_t_data, _t_datalayerproperties> &rBT, bool bAssign)
+	:	CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>
 	(
-		dynamic_cast <const CBTreeBaseDefaults<CBTreeArrayPos<_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT)
+		dynamic_cast <const CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties> &> (rBT)
 	)
-	,	CBTreeArrayIf <_t_data, _t_sizetype> ()
+	,	CBTreeArrayIf <_t_data, typename _t_datalayerproperties::size_type> ()
 	,	m_pClAccessWrapper (NULL)
 	,	m_psReturnData (NULL)
 {
-	CBTreeArrayIf<_t_data, _t_sizetype>	&rBtrArray = dynamic_cast <CBTreeArrayIf<_t_data, _t_sizetype> &> (*this);
+	CBTreeArrayIf_t	&rBtrArray = dynamic_cast <CBTreeArrayIf_t &> (*this);
 
-	m_pClAccessWrapper = new CBTreeArrayAccessWrapper<_t_data, _t_sizetype> (rBtrArray);
+	m_pClAccessWrapper = new CBTreeArrayAccessWrapper<value_type, typename _t_datalayerproperties::size_type> (rBtrArray);
 
-	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArray (CBTreeArray<> &, bool): insufficient memory!");
+	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (CBTreeArray<> &, bool): insufficient memory!");
 
-	m_psReturnData = new _t_data ();
+	m_psReturnData = new value_type ();
 
-	BTREE_ASSERT (m_psReturnData != NULL, "CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArray (CBTreeArray<> &, bool): insufficient memory!");
+	BTREE_ASSERT (m_psReturnData != NULL, "CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (CBTreeArray<> &, bool): insufficient memory!");
 	
 	if (bAssign)
 	{
@@ -69,22 +69,22 @@ CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerprope
 	}
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeArray
-	(CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &&rRhBT)
-	:	CBTreeBaseDefaults<CBTreeArrayPos<_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray
+	(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhBT)
+	:	CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>
 	(
-		dynamic_cast <CBTreeBaseDefaults<CBTreeArrayPos<_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &&> (rRhBT)
+		dynamic_cast <CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties> &&> (rRhBT)
 	)
-	,	CBTreeArrayIf <_t_data, _t_sizetype> ()
+	,	CBTreeArrayIf <_t_data, typename _t_datalayerproperties::size_type> ()
 	,	m_pClAccessWrapper (NULL)
 	,	m_psReturnData (NULL)
 {
 	CBTreeArray_t::swap (&rRhBT);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeArray ()
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArray<_t_data, _t_datalayerproperties>::~CBTreeArray ()
 {
 	if (m_psReturnData != NULL)
 	{
@@ -97,115 +97,26 @@ CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerprope
 	}
 }
 
-/*
-
-at
-
-nPos		- specifies position of data item to retrieved or modified
-
-This method returns the refernce of one data item associated with the linear position of nPos.
-
-If the method was successful, then a reference to a data item is returned, otherwise
-this method throws an exception of type ::std::out_of_range.
-
-*/
-
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::at (const _t_sizetype nPos)
-{
-	BTREE_ASSERT_EXCEPT (nPos < this->size (), ::std::out_of_range, "CBTreeArray<>::at (const _t_sizetype): nPos exceeds range!");
-
-	m_pClAccessWrapper->set (nPos);
-
-	return (*(m_pClAccessWrapper));
-}
-
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-const _t_data& CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::at (const _t_sizetype nPos) const
-{
-	BTREE_ASSERT_EXCEPT (nPos < this->size (), ::std::out_of_range, "CBTreeArray<>::at (const _t_sizetype) const: nPos exceeds range!");
-
-	bool	bRslt = CBTreeArray_t::get_at (nPos, *m_psReturnData);
-
-#if defined (_DEBUG)
-
-	BTREE_ASSERT (bRslt, "CBTreeArray<>::at (const _t_sizetype) const: get_at failed!");
-
-#endif
-
-	return (*m_psReturnData);
-}
-
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::front ()
-{
-	BTREE_ASSERT_EXCEPT (!this->empty (), ::std::out_of_range, "CBTreeArray<>::front (): array is empty!");
-
-	m_pClAccessWrapper->set (0);
-
-	return (*(m_pClAccessWrapper));
-}
-
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-const _t_data& CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::front () const
-{
-	BTREE_ASSERT_EXCEPT (!this->empty (), ::std::out_of_range, "CBTreeArray<>::front (): array is empty!");
-
-	bool	bRslt = CBTreeArray_t::get_at (0, *m_psReturnData);
-
-#if defined (_DEBUG)
-
-	BTREE_ASSERT (bRslt, "CBTreeArray<>::front () const: get_at failed!");
-
-#endif
-
-	return (*m_psReturnData);
-}
-
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::back ()
-{
-	BTREE_ASSERT_EXCEPT (!this->empty (), ::std::out_of_range, "CBTreeArray<>::back (): array is empty!");
-
-	m_pClAccessWrapper->set (this->size () - 1);
-
-	return (*(m_pClAccessWrapper));
-}
-
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-const _t_data& CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::back () const
-{
-	BTREE_ASSERT_EXCEPT (!this->empty (), ::std::out_of_range, "CBTreeArray<>::back (): array is empty!");
-
-	bool	bRslt = CBTreeArray_t::get_at (this->size () - 1, *m_psReturnData);
-
-#if defined (_DEBUG)
-
-	BTREE_ASSERT (bRslt, "CBTreeArray<>::back () const: get_at failed!");
-
-#endif
-
-	return (*m_psReturnData);
-}
-
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::assign (_t_iterator sItFirst, _t_iterator sItLast)
+template<class _t_data, class _t_datalayerproperties>
+template<class _t_iterator>
+void CBTreeArray<_t_data, _t_datalayerproperties>::assign (_t_iterator sItFirst, _t_iterator sItLast)
 {
 	this->create_root ();
 
-	_t_sizetype	nDiff;
-	_t_sizetype	nAppendix;
+	size_type	nDiff;
+	size_type	nAppendix;
 	bool		bSelfReverse;
-	bool		bSelfReference = test_self_reference_of_iterator_to_this<_t_iterator> (sItFirst, sItLast, nDiff, nAppendix, bSelfReverse);
+	bool		bSelfReference = test_self_reference_of_iterator_to_this (sItFirst, sItLast, nDiff, nAppendix, bSelfReverse);
 
 	if (bSelfReference)
 	{
-		_t_sizetype		i;
-		_t_sizetype		nPos = this->size () - nAppendix;
+		if (bSelfReverse)
+		{
+			nAppendix = this->size () - nAppendix - nDiff;
+		}
+
+		size_type		i;
+		size_type		nPos = this->size () - nAppendix;
 		const_iterator	sCIterStart;
 		const_iterator	sCIterEnd;
 
@@ -215,12 +126,12 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 
 			sCIterStart = sCIterEnd;
 
-			::std::advance<const_iterator, _t_sizetype> (sCIterStart, 0 - nAppendix);
+			::std::advance (sCIterStart, 0 - nAppendix);
 
 			CBTreeArray_t::erase (sCIterStart, sCIterEnd);
 		}
 
-		nPos = nDiff;
+		nPos -= nDiff;
 
 		if (this->size () > nPos)
 		{
@@ -228,7 +139,7 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 
 			sCIterEnd = sCIterStart;
 
-			::std::advance<const_iterator, _t_sizetype> (sCIterEnd, nAppendix);
+			::std::advance (sCIterEnd, nPos);
 
 			CBTreeArray_t::erase (sCIterStart, sCIterEnd);
 		}
@@ -238,13 +149,13 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 			iterator			sIter = this->begin ();
 			reverse_iterator	sRIter = this->rbegin ();
 
-			_t_data				sEntry;
+			value_type			sEntry;
 
 			for (i = 0; i < (nDiff / 2); i++)
 			{
 				sEntry = *sIter;
 
-				*sIter = (_t_data)(*sRIter);
+				*sIter = (value_type)(*sRIter);
 
 				*sRIter = sEntry;
 
@@ -262,8 +173,8 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	CBTreeArray_t::insert<_t_iterator> (this->cbegin (), sItFirst, sItLast);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::assign (_t_sizetype nNewSize, const _t_data& rVal)
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::assign (typename _t_datalayerproperties::size_type nNewSize, const _t_data& rVal)
 {
 	// remove all data in this list
 	CBTreeArray_t::clear ();
@@ -280,12 +191,12 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	*/
 	
 	// determine initial part of skew width
-	_t_sizetype			nSkewWidth = this->get_node_max_sub_nodes ();
-	_t_sizetype			nEntries = 1;
-	_t_sizetype			i;
-	_t_sizetype			j;
-	_t_sizetype			nOffset;
-	_t_subnodeiter		nAverageNodeSize = this->get_node_max_sub_nodes ();
+	size_type			nSkewWidth = this->get_node_max_sub_nodes ();
+	size_type			nEntries = 1;
+	size_type			i;
+	size_type			j;
+	size_type			nOffset;
+	size_type			nAverageNodeSize = this->get_node_max_sub_nodes ();
 	const_iterator		sCIter;
 
 	nAverageNodeSize *= 3;
@@ -295,7 +206,7 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	for (nSkewWidth--; nEntries <= nNewSize; nSkewWidth++)
 	{
 		// on average every new layer allows for t times current tree size more entries
-		nEntries *= (_t_sizetype) nAverageNodeSize;
+		nEntries *= nAverageNodeSize;
 	}
 
 	// copy data using skew width
@@ -303,22 +214,20 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	{
 		sCIter = this->cbegin ();
 
-		::std::advance<const_iterator, _t_sizetype> (sCIter, i);
+		::std::advance (sCIter, i);
 
 		for (j = i, nOffset = 0; j < nNewSize; j += nSkewWidth, nOffset++)
 		{
 			CBTreeArray_t::insert (sCIter, rVal);
 
-			::std::advance<const_iterator, _t_sizetype> (sCIter, i + 1);
-
-//			CBTreeArray_t::insert_at (i + (nOffset * (i + 1)), rVal);
+			::std::advance (sCIter, i + 1);
 		}
 	}
 }
 
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::push_back (const _t_data &rData)
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::push_back (const _t_data &rData)
 {
 	const_iterator			sCIter = this->cend ();
 	const_iterator			sCIterRslt;
@@ -327,13 +236,13 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 
 #if defined (_DEBUG)
 
-	BTREE_ASSERT (sCIter == sCIterRslt, "CBTreeArray<>::push_back (const _t_data &): insert_at failed to add new entry!");
+	BTREE_ASSERT (sCIter == sCIterRslt, "CBTreeArray<>::push_back (const value_type &): insert_at failed to add new entry!");
 
 #endif
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::pop_back ()
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::pop_back ()
 {
 	BTREE_ASSERT ((!this->empty ()) , "CBTreeArray<>::pop_back (): method tried to remove one entry on an empty container!");
 
@@ -351,11 +260,11 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 #endif
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
+template<class _t_data, class _t_datalayerproperties>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::insert
 	(
-		typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos, 
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterPos, 
 		const _t_data& rData
 	)
 {
@@ -372,18 +281,18 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	return (sRetval);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
+template<class _t_data, class _t_datalayerproperties>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::insert
 	(
-		typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos, 
-		const _t_sizetype nLen, 
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterPos, 
+		const typename _t_datalayerproperties::size_type nLen, 
 		const _t_data& rData
 	)
 {
 	this->create_root ();
 
-	_t_sizetype		i;
+	size_type		i;
 	iterator		sRetval (this, sCIterPos.get_pos (), false);
 
 	for (i = 0; i < nLen; i++)
@@ -394,18 +303,18 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	return (sRetval);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator>
-typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
+template<class _t_data, class _t_datalayerproperties>
+template<class _t_iterator>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::insert
 	(
-		typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos, 
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterPos, 
 		_t_iterator sItFirst, 
 		_t_iterator sItLast
 	)
 {
-	typedef typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	citer_t;
-	typedef typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
+	typedef typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator	citer_t;
+	typedef typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator			iter_t;
 
 	this->create_root ();
 
@@ -420,24 +329,24 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 		return (sRetval);
 	}
 
-	_t_sizetype	nDiff;
-	_t_sizetype	nAppendix;
+	size_type	nDiff;
+	size_type	nAppendix;
 	bool		bSelfReverse;
-	bool		bSelfReference = test_self_reference_of_iterator_to_this<_t_iterator> (sItFirst, sItLast, nDiff, nAppendix, bSelfReverse);
+	bool		bSelfReference = test_self_reference_of_iterator_to_this (sItFirst, sItLast, nDiff, nAppendix, bSelfReverse);
 
 	if (bSelfReference)
 	{
-		_t_sizetype		nBlockSize = ::std::min<_t_sizetype> (8192, nDiff);
-		_t_sizetype		nAllocSize = nBlockSize;
-		_t_data			*pBlock;
-		_t_sizetype		i;
-		_t_sizetype		j;
-		_t_sizetype		nStart;
-		_t_sizetype		nEnd;
-		_t_sizetype		nPos = sCIterPos.get_pos ();
-		_t_sizetype		nLenPriorToInsert;
-		_t_sizetype		nLenPastInsert;
-		_t_sizetype		nChunkSize;
+		size_type		nBlockSize = ::std::min<size_type> (8192, nDiff);
+		size_type		nAllocSize = nBlockSize;
+		value_type		*pBlock;
+		size_type		i;
+		size_type		j;
+		size_type		nStart;
+		size_type		nEnd;
+		size_type		nPos = sCIterPos.get_pos ();
+		size_type		nLenPriorToInsert;
+		size_type		nLenPastInsert;
+		size_type		nChunkSize;
 		citer_t			sCIterTarget = sCIterPos;
 
 		nStart = this->size () - nDiff - nAppendix;
@@ -473,7 +382,7 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 		{
 			nBlockSize = nAllocSize;
 
-			pBlock = (_t_data *) calloc ((size_t) nAllocSize, sizeof (_t_data));
+			pBlock = (value_type *) calloc ((size_t) nAllocSize, sizeof (value_type));
 
 			nAllocSize /= 2;
 
@@ -484,7 +393,7 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 		{
 			for (i = 0; i < nLenPriorToInsert; i += nChunkSize)
 			{
-				nChunkSize = ::std::min<_t_sizetype> (nBlockSize, nLenPriorToInsert - i);
+				nChunkSize = ::std::min<size_type> (nBlockSize, nLenPriorToInsert - i);
 
 				this->serialize (nStart + i, nChunkSize, pBlock);
 
@@ -502,7 +411,7 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 
 			for (i = 0; i < nLenPastInsert; i += nChunkSize)
 			{
-				nChunkSize = ::std::min<_t_sizetype> (nBlockSize, nLenPastInsert - i);
+				nChunkSize = ::std::min<size_type> (nBlockSize, nLenPastInsert - i);
 
 				this->serialize (nLenPriorToInsert + nStart + i, nChunkSize, pBlock);
 
@@ -521,7 +430,7 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 		{
 			for (i = 0; i < nLenPriorToInsert; i += nChunkSize)
 			{
-				nChunkSize = ::std::min<_t_sizetype> (nBlockSize, nLenPriorToInsert - i);
+				nChunkSize = ::std::min<size_type> (nBlockSize, nLenPriorToInsert - i);
 
 				this->serialize (nStart + i, nChunkSize, pBlock);
 
@@ -535,7 +444,7 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 
 			for (i = 0; i < nLenPastInsert; i += nChunkSize)
 			{
-				nChunkSize = ::std::min<_t_sizetype> (nBlockSize, nLenPastInsert - i);
+				nChunkSize = ::std::min<size_type> (nBlockSize, nLenPastInsert - i);
 
 				this->serialize (nLenPriorToInsert + nStart + i, nChunkSize, pBlock);
 
@@ -566,14 +475,14 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	}
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
+template<class _t_data, class _t_datalayerproperties>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::erase
 	(
-		typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterPos
 	)
 {
-	typedef typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
+	typedef typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator			iter_t;
 
 	this->erase_via_reference (sCIterPos, false);
 
@@ -586,15 +495,15 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	return (sRetval);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
+template<class _t_data, class _t_datalayerproperties>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::erase
 	(
-		typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterFirst,
-		typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterLast
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterFirst,
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterLast
 	)
 {
-	typedef typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
+	typedef typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator			iter_t;
 
 	iter_t		sRetval (this, false);
 
@@ -607,8 +516,8 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 		return (sRetval);
 	}
 
-	_t_sizetype		nDiff = sCIterLast - sCIterFirst;
-	_t_sizetype		i;
+	size_type		nDiff = sCIterLast - sCIterFirst;
+	size_type		i;
 
 	for (i = 0; i < nDiff; i++)
 	{
@@ -618,16 +527,16 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	return (sRetval);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (CBTreeArrayIf<_t_data, _t_sizetype> &rArrayIf)
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::swap (CBTreeArrayIf<_t_data, typename _t_datalayerproperties::size_type> &rArrayIf)
 {
 	CBTreeArray_t		&rArray = dynamic_cast <CBTreeArray_t &> (rArrayIf);
 
 	this->swap (rArray);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rArray)
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::swap (CBTreeArray<_t_data, _t_datalayerproperties> &rArray)
 {
 	if (this != &rArray)
 	{
@@ -644,10 +553,10 @@ This method removes all data by dstroying the data layer.
 If successfully this method returns true, otherwise false.
 
 */
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ()
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::clear ()
 {
-	CBTreeBase_t::clear ();
+	CBTreeBaseDefaults_t::clear ();
 }
 
 /*
@@ -667,20 +576,20 @@ This method returns the number of items that have been written to the array pDat
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::serialize (const _t_sizetype nStart, const _t_sizetype nLen, _t_data *pData) const
+template<class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeArray<_t_data, _t_datalayerproperties>::serialize (const typename _t_datalayerproperties::size_type nStart, const typename _t_datalayerproperties::size_type nLen, _t_data *pData) const
 {
-	CBTreeArrayPos <_t_sizetype>	sPos;
+	position_t		sPos;
 
 	/*
 	**	The actual serialize process is done by CBTreeBaseDefaults::serialize.
-	**	All this method does is to convert nFrom and nTo into the template parameter _ti_pos (CBTreeArrayPos <_t_sizetype>)
-	**	and nLen. This has to be done, since CBTreeBaseDefaults::serialize has no concept of what an _t_sizetype in terms of a position is.
+	**	All this method does is to convert nFrom and nTo into the templateparameter _ti_pos (CBTreeArrayPos <size_type>)
+	**	and nLen. This has to be done, since CBTreeBaseDefaults::serialize has no concept of what an size_type in terms of a position is.
 	*/
 
 	sPos.nIndex = nStart;
 
-	return (CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::serialize (sPos, nLen, pData));
+	return (CBTreeBaseDefaults_t::serialize (sPos, nLen, pData));
 }
 
 /*
@@ -693,9 +602,9 @@ The result is a reference to this instance.
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
-	(const CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArray<_t_data, _t_datalayerproperties> &CBTreeArray<_t_data, _t_datalayerproperties>::operator=
+	(const CBTreeArray<_t_data, _t_datalayerproperties> &rBT)
 {
 	// if this is not the same instance as the referenced b-tree (rBT) ...
 	if (this != &rBT)
@@ -710,9 +619,9 @@ CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerprope
 	return (*this);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
-	(CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &&rRhBT)
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArray<_t_data, _t_datalayerproperties> &CBTreeArray<_t_data, _t_datalayerproperties>::operator=
+	(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhBT)
 {
 	// if this is not the same instance as the referenced b-tree (rBT) ...
 	if (this != &&rRhBT)
@@ -736,41 +645,87 @@ nPos	- specifies the linear position of the entry to be written to
 The result is an instance to CBTreeArrayAccessWrapper, which will manage the write.
 
 Note:	The class CBTreeArrayAccessWrapper has a cast operator, which cast CBTreeArrayAccessWrapper
-		to _t_data. This way the compiler can distinguish between read and write
+		to value_type. This way the compiler can distinguish between read and write
 		accesses, when subscriptions are employed.
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator[] (const _t_sizetype nPos)
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArrayAccessWrapper<_t_data, typename _t_datalayerproperties::size_type>
+	CBTreeArray<_t_data, _t_datalayerproperties>::operator[] (const typename _t_datalayerproperties::size_type nPos)
 {
-	BTREE_ASSERT_EXCEPT (nPos < this->size (), ::std::out_of_range, "CBTreeArray<>::operator[] (const _t_sizetype): nPos exceeds range!");
+	BTREE_ASSERT_EXCEPT (nPos < this->size (), ::std::out_of_range, "CBTreeArray<>::operator[] (const size_type): nPos exceeds range!");
 
 	m_pClAccessWrapper->set (nPos);
 
 	return (*m_pClAccessWrapper);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-const _t_data& CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator[] (const _t_sizetype nPos) const
+template<class _t_data, class _t_datalayerproperties>
+const _t_data& CBTreeArray<_t_data, _t_datalayerproperties>::operator[] (const typename _t_datalayerproperties::size_type nPos) const
 {
-	BTREE_ASSERT_EXCEPT (nPos < this->size (), ::std::out_of_range, "CBTreeArray<>::operator[] (const _t_sizetype) const: nPos exceeds range!");
+	BTREE_ASSERT_EXCEPT (nPos < this->size (), ::std::out_of_range, "CBTreeArray<>::operator[] (const size_type) const: nPos exceeds range!");
 
 	bool	bRslt = CBTreeArray_t::get_at (nPos, *m_psReturnData);
 
 #if defined (_DEBUG)
 
-	BTREE_ASSERT (bRslt, "CBTreeArray<>::operator[] (const _t_sizetype) const: get_at failed!");
+	BTREE_ASSERT (bRslt, "CBTreeArray<>::operator[] (const size_type) const: get_at failed!");
 
 #endif
 
 	return (*m_psReturnData);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_assign
-	(const CBTreeIf<_t_data, _t_sizetype> &rContainer)
+template<class _t_data, class _t_datalayerproperties>
+bool CBTreeArray<_t_data, _t_datalayerproperties>::operator==
+	(
+		const CBTreeArrayIf<_t_data, typename _t_datalayerproperties::size_type> &rRhs
+	) const
+{
+	if (this == &rRhs)
+	{
+		return (true);
+	}
+
+	if (this->size () != rRhs.size ())
+	{
+		return (false);
+	}
+
+	const_iterator		sCIterBegin;
+	const_iterator		sCIterEnd;
+	const_iterator		sCIterLhs;
+	const_iterator		sCIterRhs;
+
+	sCIterBegin = this->cbegin ();
+	sCIterEnd = this->cend ();
+
+	sCIterRhs = rRhs.cbegin ();
+
+	for (sCIterLhs = sCIterBegin; sCIterLhs < sCIterEnd; sCIterLhs++, sCIterRhs++)
+	{
+		if ((value_type) *sCIterLhs != (value_type) *sCIterRhs)
+		{
+			return (false);
+		}
+	}
+
+	return (true);
+}
+
+template<class _t_data, class _t_datalayerproperties>
+bool CBTreeArray<_t_data, _t_datalayerproperties>::operator!=
+	(
+		const CBTreeArrayIf<_t_data, typename _t_datalayerproperties::size_type> &rRhs
+	) const
+{
+	return (! (*this == rRhs) );
+}
+
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::_assign
+	(const CBTreeIf<_t_data, typename _t_datalayerproperties::size_type> &rContainer)
 {
 	// remove all data from container
 	this->clear ();
@@ -785,42 +740,43 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	*/
 	
 	// determine initial part of skew width
-	const CBTreeArray_t&	rArray = dynamic_cast<const CBTreeArray_t &> (rContainer);
-	_t_sizetype				nSkewWidth = this->get_node_max_sub_nodes ();
-	_t_sizetype				nEntries = 1;
-	_t_sizetype				i;
-	_t_sizetype				j;
-	_t_sizetype				nOffset;
-	_t_data					sData;
-	_t_subnodeiter			nAverageNodeSize = this->get_node_max_sub_nodes ();
+	size_type				nSkewWidth = this->get_node_max_sub_nodes ();
+	size_type				nEntries = 1;
+	size_type				i;
+	value_type				sData;
+	size_type				nAverageNodeSize = this->get_node_max_sub_nodes ();
 	const_iterator			sCIter;
+	const_iterator			sCIterSrc;
+	const_iterator			sCIterSrcEnd;
 
 	nAverageNodeSize *= 3;
 	nAverageNodeSize /= 4;
 
 	// combine skew width with eventual target tree depth (log t of n, while t is node size and n is tree size)
-	for (nSkewWidth--; nEntries <= rArray.size (); nSkewWidth++)
+	for (nSkewWidth--; nEntries <= rContainer.size (); nSkewWidth++)
 	{
 		// on average every new layer allows for t times current tree size more entries
-		nEntries *= (_t_sizetype) nAverageNodeSize;
+		nEntries *= nAverageNodeSize;
 	}
+
+	sCIterSrcEnd = rContainer.cend ();
 
 	// copy data using skew width
 	for (i = 0; i < nSkewWidth; i++)
 	{
 		sCIter = this->cbegin ();
 
-		::std::advance<const_iterator, _t_sizetype> (sCIter, i);
+		::std::advance (sCIter, i);
 
-		for (j = i, nOffset = 0; j < rArray.size (); j += nSkewWidth, nOffset++)
+		sCIterSrc = rContainer.cbegin ();
+
+		for (::std::advance (sCIterSrc, i); sCIterSrc < sCIterSrcEnd; ::std::advance (sCIterSrc, nSkewWidth))
 		{
-			rArray.get_at (j, sData);
+			sData = *sCIterSrc;
 
 			this->insert (sCIter, sData);
 
-			::std::advance<const_iterator, _t_sizetype> (sCIter, i + 1);
-
-//			insert_at (i + (nOffset * (i + 1)), sData);
+			::std::advance (sCIter, i + 1);
 		}
 	}
 }
@@ -838,13 +794,13 @@ If successful true is returned, otherwise false.
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_at (const _t_sizetype nPos, const _t_data &rData)
+template<class _t_data, class _t_datalayerproperties>
+bool CBTreeArray<_t_data, _t_datalayerproperties>::set_at (const typename _t_datalayerproperties::size_type nPos, const _t_data &rData)
 {
 	bool				retval = false;
-	_t_nodeiter			nNode;
-	_t_subnodeiter		nSubPos;
-	_t_data				*psData;
+	node_iter_type		nNode;
+	sub_node_iter_type	nSubPos;
+	value_type			*psData;
 	
 	this->create_root ();
 
@@ -874,12 +830,12 @@ If successful true is returned, otherwise false.
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_at (const _t_sizetype nPos, _t_data &rData) const
+template<class _t_data, class _t_datalayerproperties>
+bool CBTreeArray<_t_data, _t_datalayerproperties>::get_at (const typename _t_datalayerproperties::size_type nPos, _t_data &rData) const
 {
-	bool			retval = false;
-	_t_nodeiter		nNode;
-	_t_subnodeiter	nSubPos;
+	bool				retval = false;
+	node_iter_type		nNode;
+	sub_node_iter_type	nSubPos;
 
 	if (this->m_pData != NULL)
 	{
@@ -920,16 +876,16 @@ determine_position, otherwise it return sPos again.
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayPos<_t_sizetype> CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::determine_position (CBTreeArrayPos<_t_sizetype> sPos, _t_nodeiter nNode, _t_subnodeiter &nSubPos, _t_subnodeiter &nSubData, bool &bFound) const
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArrayPos<typename _t_datalayerproperties::size_type> CBTreeArray<_t_data, _t_datalayerproperties>::determine_position (CBTreeArrayPos<typename _t_datalayerproperties::size_type> sPos, typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type &nSubPos, typename _t_datalayerproperties::sub_node_iter_type &nSubData, bool &bFound) const
 {
-	_t_sizetype			nMaxIdx;
-	_t_nodeiter			*pnNode;
+	size_type			nMaxIdx;
+	node_iter_type		*pnNode;
 	node_t				*psNodeDesc;
 
 	if (this->is_leaf (nNode))
 	{
-		nSubData = (_t_subnodeiter) sPos.nIndex;
+		nSubData = (sub_node_iter_type) sPos.nIndex;
 
 		bFound = true;
 	}
@@ -990,25 +946,25 @@ Note:	The parameter triMod is usually set 1 or -1 if one entry is inserted or re
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rebuild_node (const _t_nodeiter nNode, const int32_t triMod, _t_subnodeiter nSubStart)
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::rebuild_node (const typename _t_datalayerproperties::node_iter_type nNode, const int32_t triMod, typename _t_datalayerproperties::sub_node_iter_type nSubStart)
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer>::rebuild_node: requested node exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeArray<_t_data, _t_datalayerproperties>::rebuild_node: requested node exceeds tree size");
 #endif
 
-	_t_nodeiter									*pnSubNode;
-	node_t										*psNodeDesc;
-	_t_sizetype									nIdx = (_t_sizetype) 0;
-	_t_subnodeiter								ui32;
-	_t_subnodeiter								nSubPosOffset;
-	_t_sizetype									*pnSerVector;
+	node_iter_type				*pnSubNode;
+	node_t						*psNodeDesc;
+	size_type					nIdx = (size_type) 0;
+	sub_node_iter_type			ui32;
+	sub_node_iter_type			nSubPosOffset;
+	size_type					*pnSerVector;
 
 	psNodeDesc = this->get_node (nNode);
 
 	if (this->is_leaf (nNode))
 	{
-		nIdx = ((_t_subnodeiter) (0 - psNodeDesc->nNumData));
+		nIdx = ((sub_node_iter_type) (0 - psNodeDesc->nNumData));
 	}
 	else
 	{
@@ -1051,7 +1007,7 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 
 generate_prev_position - generate previous position
 
-This method returns the previous position (CBTreeBaseDefaults::_ti_pos = CBTreeArrayPos<_t_sizetype>)
+This method returns the previous position (CBTreeBaseDefaults::_ti_pos = CBTreeArrayPos<size_type>)
 based on the parameter sPos and the node / sub-node tuple associated with sPos.
 
 nNode		- specifies the node of the node / sub-position tuple of which the previous position will be generated from
@@ -1066,12 +1022,12 @@ return_value = (*this)[sPos (this, nNode, nSub) - 1];
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayPos<_t_sizetype> CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_prev_position (const _t_nodeiter nNode, const _t_subnodeiter nSub, CBTreeArrayPos<_t_sizetype> sPos)
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArrayPos<typename _t_datalayerproperties::size_type> CBTreeArray<_t_data, _t_datalayerproperties>::generate_prev_position (const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSub, CBTreeArrayPos<typename _t_datalayerproperties::size_type> sPos)
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_prev_position: This method cannot be used on leaf nodes!");
-	BTREE_ASSERT (sPos.nIndex > 0, "CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_prev_position: Cannot generate previous position from position 0!");
+	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeArray<_t_data, _t_datalayerproperties>::generate_prev_position: This method cannot be used on leaf nodes!");
+	BTREE_ASSERT (sPos.nIndex > 0, "CBTreeArray<_t_data, _t_datalayerproperties>::generate_prev_position: Cannot generate previous position from position 0!");
 #endif
 
 	sPos.nIndex--;
@@ -1083,7 +1039,7 @@ CBTreeArrayPos<_t_sizetype> CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_su
 
 generate_next_position - generate next position
 
-This method returns the next position (CBTreeBaseDefaults::_ti_pos = CBTreeArrayPos<_t_sizetype>)
+This method returns the next position (CBTreeBaseDefaults::_ti_pos = CBTreeArrayPos<size_type>)
 based on the parameter sPos and the node / sub-node tuple associated with sPos.
 
 nNode		- specifies the node of the node / sub-position tuple of which the next position will be generated from
@@ -1098,11 +1054,11 @@ return_value = (*this)[sPos (this, nNode, nSub) + 1];
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeArrayPos<_t_sizetype> CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_next_position (_t_nodeiter nNode, _t_subnodeiter nSub, CBTreeArrayPos<_t_sizetype> sPos)
+template<class _t_data, class _t_datalayerproperties>
+CBTreeArrayPos<typename _t_datalayerproperties::size_type> CBTreeArray<_t_data, _t_datalayerproperties>::generate_next_position (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, CBTreeArrayPos<typename _t_datalayerproperties::size_type> sPos)
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::generate_next_position: This method cannot be used on leaf nodes!");
+	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeArray<_t_data, _t_datalayerproperties>::generate_next_position: This method cannot be used on leaf nodes!");
 #endif
 
 	sPos.nIndex++;
@@ -1124,28 +1080,36 @@ The value returned is the sub-position, which has the nearest greater offset dis
 
 */
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_subnodeiter CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find_next_sub_pos (const _t_nodeiter nNode, CBTreeArrayPos<_t_sizetype> &sPos) const
+template<class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeArray<_t_data, _t_datalayerproperties>::find_next_sub_pos (const typename _t_datalayerproperties::node_iter_type nNode, CBTreeArrayPos<typename _t_datalayerproperties::size_type> &sPos) const
 {
 	// sPos is an input output parameter
 	// input	- absolute index within this node
 	// output	- if sub node was found then index of sub node, otherwise zero
 
 	node_t					*psNodeDesc;
-	_t_subnodeiter			nRetval;
-	_t_sizetype				nDiff;
-	_t_sizetype				*pnSerVector;
-#if defined (WIN32)
-	uint32_t				*pDiff = (uint32_t *) &nDiff;
-#endif
+	sub_node_iter_type		nRetval;
+	size_type				nDiff;
+	size_type				*pnSerVector;
+	uint8_t					*pDiff = (uint8_t *) &nDiff;
+
+	pDiff += sizeof (nDiff) - 1;
 
 	// node is a leave node ...
 	if (this->is_leaf (nNode))
 	{
-		// ... then return immediately with input index
-		nRetval = (_t_subnodeiter) sPos.nIndex;
+#if defined (_DEBUG)
 
-		sPos.nIndex = (_t_sizetype) 0;
+		psNodeDesc = this->get_node (nNode);
+
+		BTREE_ASSERT (sPos.nIndex <= this->get_data_count (*psNodeDesc), "CBTreeArray<_t_data, _t_datalayerproperties>::find_next_sub_pos (): linear position exceeds node's data size! (root node)");
+
+#endif
+
+		// ... then return immediately with input index
+		nRetval = (sub_node_iter_type) sPos.nIndex;
+
+		sPos.nIndex = (size_type) 0;
 	}
 	else
 	{
@@ -1154,10 +1118,10 @@ _t_subnodeiter CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 		// load node's serial vector
 		pnSerVector = this->get_serVector (nNode);
 
-		uint32_t	ui32, nMinPos, nMaxPos;
+		sub_node_iter_type	ui32, nMinPos, nMaxPos;
 
 		// set range up
-		nMinPos = 0UL;
+		nMinPos = 0;
 
 		nMaxPos = this->get_data_count (*psNodeDesc);
 
@@ -1171,11 +1135,7 @@ _t_subnodeiter CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 			nDiff = pnSerVector[ui32] - sPos.nIndex;
 
 			// if current middle position's index is beyond input index ...
-#if defined (WIN32)
-			if (pDiff[1] & 0x80000000)
-#elif defined (LINUX)
-			if (nDiff & 0x8000000000000000ULL)
-#endif
+			if ((*pDiff) & 0x80)
 			{
 				// ... then range minimum assumes next position after middle position
 				nMinPos = ui32 + 1;
@@ -1202,14 +1162,14 @@ _t_subnodeiter CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t
 	return (nRetval);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
+template<class _t_data, class _t_datalayerproperties>
+bool CBTreeArray<_t_data, _t_datalayerproperties>::show_data (std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSubPos) const
 {
 	return (true);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_node (std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const
+template<class _t_data, class _t_datalayerproperties>
+bool CBTreeArray<_t_data, _t_datalayerproperties>::show_node (std::ofstream &ofs, const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSubPos) const
 {
 	std::stringstream		buf;
 	std::stringstream		aszMsg;
@@ -1230,23 +1190,23 @@ bool CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	return (true);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator>
-typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_via_iterator_tag
+template<class _t_data, class _t_datalayerproperties>
+template<class _t_iterator>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::insert_via_iterator_tag
 	(
-		typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos, 
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterPos, 
 		_t_iterator sItFirst, 
 		_t_iterator sItLast, 
 		::std::forward_iterator_tag
 	)
 {
-	typedef typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	citer_t;
-	typedef typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
+	typedef typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator	citer_t;
+	typedef typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator			iter_t;
 
 	iter_t				sRetval (this, false);
 	citer_t				sCIterTarget (this, false);
-	_t_data				sData;
+	value_type			sData;
 	
 	_t_iterator			sIt;
 
@@ -1268,19 +1228,19 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	return (sRetval);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator>
-typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_via_iterator_tag
+template<class _t_data, class _t_datalayerproperties>
+template<class _t_iterator>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::insert_via_iterator_tag
 	(
-		typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos, 
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterPos, 
 		_t_iterator sItFirst, 
 		_t_iterator sItLast, 
 		::std::random_access_iterator_tag
 	)
 {
-	typedef typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator	citer_t;
-	typedef typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator			iter_t;
+	typedef typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator	citer_t;
+	typedef typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator			iter_t;
 
 	/*
 	**	Although a b-tree guarantees that data is stored balanced; this happens under the assumption that 
@@ -1295,17 +1255,17 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	iter_t									sRetval (this, false);
 	_t_iterator								sIt;
 	citer_t									sCIterTarget (this, false);
-	_t_sizetype								nNewSize = (_t_sizetype) ::std::distance <_t_iterator> (sItFirst, sItLast);
+	size_type								nNewSize = (size_type) ::std::distance <_t_iterator> (sItFirst, sItLast);
 	typename _t_iterator::difference_type	nNewSizeCounterChk = ::std::distance <_t_iterator> (sItFirst, sItLast);
-	_t_sizetype								nSkewWidth = this->get_node_max_sub_nodes ();
-	_t_sizetype								nEntries = 1;
-	_t_sizetype								i;
-	_t_sizetype								j;
-	_t_sizetype								nOffset;
-	_t_data									sData;
-	_t_subnodeiter							nAverageNodeSize = this->get_node_max_sub_nodes ();
+	size_type								nSkewWidth = this->get_node_max_sub_nodes ();
+	size_type								nEntries = 1;
+	size_type								i;
+	size_type								j;
+	size_type								nOffset;
+	value_type								sData;
+	size_type								nAverageNodeSize = this->get_node_max_sub_nodes ();
 
-	BTREE_ASSERT (nNewSize == (_t_sizetype) nNewSizeCounterChk, "CBTreeArray<>::insert_via_iterator_tag (::std::random_access_iterator_tag): Insertion distance cannot be displayed by local size type!");
+	BTREE_ASSERT (nNewSize == (size_type) nNewSizeCounterChk, "CBTreeArray<>::insert_via_iterator_tag (::std::random_access_iterator_tag): Insertion distance cannot be displayed by local size type!");
 	BTREE_ASSERT ((typename _t_iterator::difference_type) nNewSize == nNewSizeCounterChk, "CBTreeArray<>::insert_via_iterator_tag (::std::random_access_iterator_tag): Insertion distance cannot be displayed by local size type!");
 
 	nAverageNodeSize *= 3;
@@ -1315,7 +1275,20 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	for (nSkewWidth--; nEntries <= nNewSize; nSkewWidth++)
 	{
 		// on average every new layer allows for t times current tree size more entries
-		nEntries *= (_t_sizetype) nAverageNodeSize;
+		nEntries *= nAverageNodeSize;
+	}
+
+	// in extreme cases the skew width may exceed the number of entries to be
+	// inserted, which is problematic if the source is an MS ::std::vector<_t_data>
+	// 
+	// said vector container cannot handle situations in which an iterator exceeds
+	// the container's total size
+	// 
+	// if the skew width is greater than the number of data entries to be inserted ...
+	if (nSkewWidth > nNewSize)
+	{
+		// ... then restrict the skew width
+		nSkewWidth = nNewSize;
 	}
 
 	// copy data using skew width
@@ -1323,7 +1296,7 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	{
 		sIt = sItFirst;
 
-		::std::advance<_t_iterator> (sIt, (typename ::std::iterator_traits<_t_iterator>::difference_type) i);
+		::std::advance (sIt, (typename _t_iterator::difference_type) i);
 
 		for (j = i, nOffset = 0; j < nNewSize; nOffset++)
 		{
@@ -1340,7 +1313,7 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 			if (j < nNewSize)
 			{
 				// some containers (like ::std::vector) cannot operate outside their range
-				::std::advance<_t_iterator> (sIt, (typename ::std::iterator_traits<_t_iterator>::difference_type) nSkewWidth);
+				::std::advance (sIt, (typename _t_iterator::difference_type) nSkewWidth);
 			}
 		}
 	}
@@ -1352,8 +1325,8 @@ typename CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datal
 	return (sRetval);
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_via_reference (const_iterator &rCIterPos, const _t_data& rData, bool bReEvaluate)
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::insert_via_reference (const_iterator &rCIterPos, const _t_data& rData, bool bReEvaluate)
 {
 	bool				bFallBack = true;
 	iterator_state_t	*psIterState = (iterator_state_t *) rCIterPos.get_iterator_state ();
@@ -1374,19 +1347,19 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 					if (this->get_data_count (psIterState->nNode) < this->get_node_max_data_size ())
 					{
 						// ... then an additional entry can be added fast
-						_t_nodeiter			nNode;
-						_t_subnodeiter		nSubPos;
+						node_iter_type			nNode;
+						sub_node_iter_type		nSubPos;
 
 						bFallBack = false;
 
 #if defined (_DEBUG)
 
-						BTREE_ASSERT (psIterState->nSubPos <= this->get_data_count (psIterState->nNode), "CBTreeArray<>::insert_via_reference (const_iterator &, const _t_data&): iterator not up-to-date!");
+						BTREE_ASSERT (psIterState->nSubPos <= this->get_data_count (psIterState->nNode), "CBTreeArray<>::insert_via_reference (const_iterator &, const value_type&): iterator not up-to-date!");
 
 #endif
 
 						// insert entry into leaf node
-						nSubPos = this->insert_data_into_node (psIterState->nNode, psIterState->nSubPos, rData, (_t_nodeiter) ~0x0, -1);
+						nSubPos = this->insert_data_into_node (psIterState->nNode, psIterState->nSubPos, rData, (node_iter_type) ~0x0, -1);
 
 						// rebuild node integrity of all parent nodes by back-tracing to the root node
 						nNode = psIterState->nNode;
@@ -1413,9 +1386,9 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	if (bFallBack)
 	{
 		// ... then perform actual insert
-		CBTreeArrayPos<_t_sizetype>		sPos;
-		_t_nodeiter						nNode;
-		_t_subnodeiter					nSubPos;
+		position_t						sPos;
+		node_iter_type					nNode;
+		sub_node_iter_type				nSubPos;
 	
 		this->create_root ();
 
@@ -1435,8 +1408,8 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	}
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase_via_reference (const_iterator &rCIterPos, bool bReEvaluate)
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::erase_via_reference (const_iterator &rCIterPos, bool bReEvaluate)
 {
 	bool			bFallBack = true;
 	
@@ -1455,7 +1428,7 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 				if (this->get_data_count (psIterState->nNode) > (this->get_node_max_data_size () / 2))
 				{
 					// ... then an additional entry can be added fast
-					_t_nodeiter			nNode;
+					node_iter_type			nNode;
 
 					bFallBack = false;
 
@@ -1486,9 +1459,7 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	if (bFallBack)
 	{
 		// ... then perform actual erase
-//		CBTreeArray_t::erase (rCIterPos);
-
-		CBTreeArrayPos<_t_sizetype>		sPos;
+		position_t			sPos;
 
 		if (this->m_pData != NULL)
 		{
@@ -1496,8 +1467,8 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	
 #if defined (_DEBUG)
 
-			BTREE_ASSERT (this->empty () == false, "CBTreeBaseDefaults<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase_via_reference: cannot remove entry from empty list");
-			BTREE_ASSERT (sPos.nIndex < this->size (), "CBTreeBaseDefaults<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase_via_reference: position exceeds maximum entries");
+			BTREE_ASSERT (this->empty () == false, "CBTreeArray<_t_data, _t_datalayerproperties>::erase_via_reference: cannot remove entry from empty list");
+			BTREE_ASSERT (sPos.nIndex < this->size (), "CBTreeArray<_t_data, _t_datalayerproperties>::erase_via_reference: position exceeds maximum entries");
 
 #endif
 
@@ -1513,12 +1484,12 @@ void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayer
 	}
 }
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_swap (CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rArray)
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::_swap (CBTreeArray<_t_data, _t_datalayerproperties> &rArray)
 {
-	CBTreeBase_t	&rArrayBase = dynamic_cast <CBTreeBase_t &> (rArray);
+	CBTreeBaseDefaults_t	&rArrayBase = dynamic_cast <CBTreeBaseDefaults_t &> (rArray);
 
-	CBTreeBase_t::_swap (rArrayBase);
+	CBTreeBaseDefaults_t::_swap (rArrayBase);
 }
 
 /**********************************************************************************************/
@@ -1535,19 +1506,19 @@ reloading the actual data in question. On a higher level this is managed by get_
 and set_at, thus the two different routes.
 
 To clearify, this is how reads work:
-(const _t_data &) = ((*this)[(const _t_sizetype) nOffset]) (_t_data sData; get_at (nOffset, sData); return (sData))
+(const value_type &) = ((*this)[(const _t_sizetype) nOffset]) (value_type sData; get_at (nOffset, sData); return (sData))
 
 This is how writes work:
 1) (CBTreeArrayAccessWrapper) = CBTreeArray::operator[const _t_sizetype nOffset] creates an instance of CBTreeArrayAccessWrapper
 	The constructor of CBTreeArrayAccessWrapper takes *this as a reference (m_rInstance)
 	and the parameter nOffset becoming (m_nPos).
-2) CBTreeArrayAccessWrapper::operator= (const _t_data &rData) takes the reference to the data to be written
+2) CBTreeArrayAccessWrapper::operator= (const value_type &rData) takes the reference to the data to be written
 	and uses the instance of CBTreeArray and the copy of nOffset, which have been taken by the
 	constructor before, to call set_at (m_rInstance.set_at (m_nPos, rData))
 
 */
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>::CBTreeArrayConstAccessWrapper
 	(
 		CBTreeArrayIf<_t_data, _t_sizetype>	&rInstance
@@ -1557,18 +1528,18 @@ CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>::CBTreeArrayConstAccessWrapp
 {
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>::~CBTreeArrayConstAccessWrapper ()
 {
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 void CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>::set (const _t_sizetype nPos)
 {
 	this->m_nPos = nPos;
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 _t_data & CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>::operator* ()
 {
 	bool		bRslt;
@@ -1580,13 +1551,13 @@ _t_data & CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>::operator* ()
 	return (this->m_sData);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 _t_data & CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>::operator-> ()
 {
 	return (*this);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>::operator const _t_data& ()
 {
 	bool		bRslt;
@@ -1600,7 +1571,7 @@ CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>::operator const _t_data& ()
 
 /************************************************************/
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeArrayAccessWrapper<_t_data, _t_sizetype>::CBTreeArrayAccessWrapper
 	(
 		CBTreeArrayIf<_t_data, _t_sizetype>	&rInstance
@@ -1609,12 +1580,12 @@ CBTreeArrayAccessWrapper<_t_data, _t_sizetype>::CBTreeArrayAccessWrapper
 {
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeArrayAccessWrapper<_t_data, _t_sizetype>::~CBTreeArrayAccessWrapper ()
 {
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeArrayAccessWrapper<_t_data, _t_sizetype> &CBTreeArrayAccessWrapper<_t_data, _t_sizetype>::operator=
 	(const _t_data &rData)
 {
@@ -1627,7 +1598,7 @@ CBTreeArrayAccessWrapper<_t_data, _t_sizetype> &CBTreeArrayAccessWrapper<_t_data
 	return (*this);
 }
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 CBTreeArrayAccessWrapper<_t_data, _t_sizetype> &CBTreeArrayAccessWrapper<_t_data, _t_sizetype>::operator=
 	(const CBTreeArrayAccessWrapper<_t_data, _t_sizetype> &rData)
 {
