@@ -11,19 +11,27 @@
 **
 ************************************************************/
 
+#ifndef BTREEIORAMPROP_CPP
+#define BTREEIORAMPROP_CPP
+
 #include "btreeramioprop.h"
 
-CBTreeIOpropertiesRAM::CBTreeIOpropertiesRAM ()
-	:	CBTreeIOproperties ()
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+CBTreeIOpropertiesRAM<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeIOpropertiesRAM ()
+	:	CBTreeIOproperties<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype> ()
 {
 }
 
-CBTreeIOpropertiesRAM::CBTreeIOpropertiesRAM (CBTreeIOpropertiesRAM &rBT)
-	:	CBTreeIOproperties ()
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+CBTreeIOpropertiesRAM<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeIOpropertiesRAM (CBTreeIOpropertiesRAM &rBT)
+	:	CBTreeIOproperties<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype> ()
 {
 	rBT;
 }
 
-CBTreeIOpropertiesRAM::~CBTreeIOpropertiesRAM ()
+template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
+CBTreeIOpropertiesRAM<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::~CBTreeIOpropertiesRAM ()
 {
 }
+
+#endif // BTREEIORAMPROP_CPP
