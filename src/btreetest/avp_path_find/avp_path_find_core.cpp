@@ -567,7 +567,7 @@ void remove_agents (uint32_t nAgent, set_type_intrinsic_t *psAgentList, multiset
 
 #endif
 
-	sAgentStepListsTmp.template insert <citer_steps_t> (sItStepsLower, sItStepsUpper);
+	sAgentStepListsTmp.insert (sItStepsLower, sItStepsUpper);
 
 	psAgentStepLists->swap (sAgentStepListsTmp);
 }
@@ -759,7 +759,7 @@ void find_path (objective_t *psObjectiveList, uint32_t nNumObjectives, vector_po
 			VERBOSE_OUTPUT_PRINT (ui64);
 
 			{
-				uint64_t	nTmp = ::std::template distance<citer_agent_t>(psAgentList->cbegin(), sItAgent);
+				set_type_intrinsic_t::difference_type	nTmp = ::std::distance (psAgentList->cbegin(), sItAgent);
 
 				VERBOSE_OUTPUT_PRINT (nTmp);
 
@@ -803,7 +803,7 @@ void find_path (objective_t *psObjectiveList, uint32_t nNumObjectives, vector_po
 #endif
 
 /*			{
-				uint64_t	nTmp = ::std::template distance<citer_agent_t>(psAgentList->cbegin(), sItAgent);
+				uint64_t	nTmp = ::std::templatedistance<citer_agent_t>(psAgentList->cbegin(), sItAgent);
 
 				VERBOSE_OUTPUT_PRINT (nTmp);
 			}*/
@@ -1344,10 +1344,11 @@ void output_path (const char *pFileName, vector_pos_t *psStepList)
 		return;
 	}
 
-	pos_t			sPos;
-	uint64_t		ui64 = 0;
-	field_t			*psField;
-	uint32_t		u;
+	pos_t							sPos;
+	uint64_t						ui64 = 0;
+	field_t							*psField;
+	uint32_t						u;
+	vector_pos_t::const_iterator	sCIter;
 
 	const char			*ppLevelName[] = {
 											"sublevel 1", 
@@ -1367,12 +1368,13 @@ void output_path (const char *pFileName, vector_pos_t *psStepList)
 											"airduct 5C", 
 										};
 
+	sCIter = psStepList->cbegin ();
 
-	for (ui64 = 0; ui64 < psStepList->size (); ui64++)
+	for (ui64 = 0; ui64 < psStepList->size (); ui64++, sCIter++)
 	{
 		try
 		{
-			sPos = psStepList->at (ui64);
+			sPos = *sCIter;
 		}
 		catch (::std::out_of_range *e)
 		{
@@ -1437,7 +1439,7 @@ void output_path (const char *pFileName, vector_pos_t *psStepList)
 	fclose (pf);
 }
 
-int avp_path_find_core (int nTestNum, bool bStoreInRAM, const uint32_t nNodeSize, bool bPrintStatistics)
+int avp_path_find_core (int nTestNum, const uint32_t nNodeSize, bool bPrintStatistics)
 {
 	objective_t		asObjectiveList0[] =	{
 											{ITEM_SHOTGUN,				OBJECTIVE_PARAMETER_IN_ORDER,		INSTRUCTION_DESTROY_AGENTS_ON_COMPLETION}, 
@@ -1510,7 +1512,7 @@ int avp_path_find_core (int nTestNum, bool bStoreInRAM, const uint32_t nNodeSize
 #if defined (USE_STL)
 #else
 
-	CBTreeIOpropertiesRAM				clBTreeRAMIOproperties;
+	CBTreeIOpropertiesRAM <>			clBTreeRAMIOproperties;
 	bayerTreeCacheDescription_t			sCacheDesc;
 	
 #endif
@@ -1520,17 +1522,13 @@ int avp_path_find_core (int nTestNum, bool bStoreInRAM, const uint32_t nNodeSize
 	multiset_agent_step_t				*psAgentStepLists;
 	vector_pos_t						*psStepList;
 
-	field_t									*psField;
+	field_t								*psField;
 
 #if defined (USE_STL)
 #else
 
 	sCacheDesc.nMinNumberOfBytesPerSuperBlock = 4096;
-//	sCacheDesc.nDataCacheNumOfLog2Lines = 12;
-//	sCacheDesc.nSubNodeCacheNumOfLog2Lines = 12;
-//	sCacheDesc.nSerVectorCacheNumOfLog2Lines = 12;
-//	sCacheDesc.nNodeDescriptorNumOfLog2Lines = 12;
-	
+
 #endif
 
 	g_bPrintStatistics = bPrintStatistics;
@@ -1629,3 +1627,4 @@ int avp_path_find_core (int nTestNum, bool bStoreInRAM, const uint32_t nNodeSize
 
 	return (0);
 }
+
