@@ -46,7 +46,7 @@ void multiSetPrim_add (_t_container *pClMS, uint32_t nEntries, uint32_t &nFromWh
 
 	for (ui32 = 0; ui32 < nEntries; ui32++)
 	{
-		cout << "insert: " << ui32 << " / " << nEntries << "\r" << flush;
+		::std::cout << "insert: " << ui32 << " / " << nEntries << "\r" << ::std::flush;
 
 		switch (eWhere)
 		{
@@ -84,7 +84,7 @@ void multiSetPrim_add (_t_container *pClMS, uint32_t nEntries, uint32_t &nFromWh
 
 		default									:
 			{
-				cerr << "ERROR: multiSetPrim_add: eWhere corrupted or not set!" << endl;
+				::std::cerr << "ERROR: multiSetPrim_add: eWhere corrupted or not set!" << ::std::endl;
 
 				exit (-1);
 
@@ -95,7 +95,7 @@ void multiSetPrim_add (_t_container *pClMS, uint32_t nEntries, uint32_t &nFromWh
 		pClMS->insert (sSet);
 	}
 
-	cout << "insert: " << ui32 << " / " << nEntries << endl;
+	::std::cout << "insert: " << ui32 << " / " << nEntries << ::std::endl;
 }
 
 #endif // !BTREEMULTIMAPPRIMITIVES_H
