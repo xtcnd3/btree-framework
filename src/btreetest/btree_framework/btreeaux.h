@@ -16,7 +16,7 @@
 
 #include <stdint.h>
 
-#include <ctime>
+#include <chrono>
 
 #include "btreecommon.h"
 #include "btreeio.h"
