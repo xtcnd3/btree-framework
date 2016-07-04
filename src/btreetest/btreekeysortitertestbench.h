@@ -24,6 +24,8 @@
 #include "btreetestkeysort.h"
 #include "btreekeysorttestprimitive.h"
 
+#include "btreeiofile.h"
+
 typedef enum
 {
 	BTREETEST_KEY_SORT_ITER_CONST_ASCEND, 
@@ -46,7 +48,7 @@ typedef enum
 	BTREETEST_KEY_SORT_ITER_CONST_SWAP
 } btreetest_keysort_iter_e;
 
-template <class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void TestBTreeKeySortIter (uint32_t nTest, _t_subnodeiter nNodeSize, _t_datalayerproperties &rDataLayerProperties, bayerTreeCacheDescription_t &sCacheDesc, int argc, char **argv);
+template<class _t_sizetype>
+void TestBTreeKeySortIter (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize);
 
 #endif // BTREEKEYSORTITERTESTBENCH_H
