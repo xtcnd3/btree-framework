@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <type_traits>
+#include <set>
 #include <list>
 #include <vector>
 
@@ -83,6 +85,16 @@ public:
 
 					return (*this);
 				};
+
+	bool		operator== (const CBTreePairTest &rRhs) const
+				{
+					return ((this->first == rRhs.first) && (this->second.nData == rRhs.second.nData));
+				};
+
+	bool		operator!= (const CBTreePairTest &rRhs) const
+				{
+					return ((this->first != rRhs.first) || (this->second.nData != rRhs.second.nData));
+				};
 };
 
 uint32_t generate_rand32 ();
@@ -93,7 +105,7 @@ uint64_t generate_rand64 ();
 ************************************************/
 
 template<class _t_container>
-void get_begin (_t_container *pContainer, typename _t_container::iterator &rIter)
+void get_begin (_t_container *pContainer, typename ::std::enable_if< !::std::is_same <typename _t_container::iterator, typename _t_container::const_iterator>::value, typename _t_container::iterator>::type &rIter)
 {
 	rIter = pContainer->begin ();
 }
@@ -105,7 +117,7 @@ void get_begin (_t_container *pContainer, typename _t_container::const_iterator 
 }
 
 template<class _t_container>
-void get_begin (_t_container *pContainer, typename _t_container::reverse_iterator &rIter)
+void get_begin (_t_container *pContainer, typename ::std::enable_if< !::std::is_same <typename _t_container::reverse_iterator, typename _t_container::const_reverse_iterator>::value, typename _t_container::reverse_iterator>::type &rIter)
 {
 	rIter = pContainer->rbegin ();
 }
@@ -121,7 +133,7 @@ void get_begin (_t_container *pContainer, typename _t_container::const_reverse_i
 ************************************************/
 
 template<class _t_container>
-void get_end (_t_container *pContainer, typename _t_container::iterator &rIter)
+void get_end (_t_container *pContainer, typename ::std::enable_if< !::std::is_same <typename _t_container::iterator, typename _t_container::const_iterator>::value, typename _t_container::iterator>::type &rIter)
 {
 	rIter = pContainer->end ();
 }
@@ -133,7 +145,7 @@ void get_end (_t_container *pContainer, typename _t_container::const_iterator &r
 }
 
 template<class _t_container>
-void get_end (_t_container *pContainer, typename _t_container::reverse_iterator &rIter)
+void get_end (_t_container *pContainer, typename ::std::enable_if< !::std::is_same <typename _t_container::reverse_iterator, typename _t_container::const_reverse_iterator>::value, typename _t_container::reverse_iterator>::type &rIter)
 {
 	rIter = pContainer->rend ();
 }
@@ -154,7 +166,7 @@ void container_assign (_t_container *pContainer, _t_iterator &rItBegin, _t_itera
 	pContainer->assign (rItBegin, rItEnd);
 }
 
-#if defined (LINUX)
+#if defined(__GNUC__) || defined(__GNUG__)
 
 template<class _t_iterator>
 void container_assign (::std::list<typename _t_iterator::value_type> *pContainer, _t_iterator &rItBegin, _t_iterator &rItEnd)
@@ -190,7 +202,7 @@ void container_insert (_t_container *pContainer, _t_container_iterator &rItPos, 
 	pContainer->insert (rItPos, rItBegin, rItEnd);
 }
 
-#if defined (LINUX)
+#if defined(__GNUC__) || defined(__GNUG__)
 
 template<class _t_iterator, class _t_container_iterator>
 void container_insert (::std::vector<::std::pair<typename ::std::add_const<typename _t_iterator::value_type::first_type>::type, typename _t_iterator::value_type::second_type>> *pContainer, _t_container_iterator &rItPos, _t_iterator &rItBegin, _t_iterator &rItEnd)
@@ -313,7 +325,7 @@ void container_insert (::std::vector<typename _t_iterator::value_type> *pContain
 ************************************************/
 
 template<class _t_container>
-bool is_const_iterator (_t_container *pContainer, typename _t_container::iterator &)
+bool is_const_iterator (_t_container *pContainer, typename ::std::enable_if< !::std::is_same <typename _t_container::iterator, typename _t_container::const_iterator>::value, typename _t_container::iterator>::type &)
 {
 	return (false);
 }
@@ -325,7 +337,7 @@ bool is_const_iterator (_t_container *pContainer, typename _t_container::const_i
 }
 
 template<class _t_container>
-bool is_const_iterator (_t_container *pContainer, typename _t_container::reverse_iterator &)
+bool is_const_iterator (_t_container *pContainer, typename ::std::enable_if< !::std::is_same <typename _t_container::reverse_iterator, typename _t_container::const_reverse_iterator>::value, typename _t_container::reverse_iterator>::type &)
 {
 	return (false);
 }
@@ -341,7 +353,7 @@ bool is_const_iterator (_t_container *pContainer, typename _t_container::const_r
 ************************************************/
 
 template<class _t_container>
-bool is_reverse_iterator (_t_container *pContainer, typename _t_container::iterator &)
+bool is_reverse_iterator (_t_container *pContainer, typename ::std::enable_if< !::std::is_same <typename _t_container::iterator, typename _t_container::const_iterator>::value, typename _t_container::iterator>::type &)
 {
 	return (false);
 }
@@ -353,7 +365,7 @@ bool is_reverse_iterator (_t_container *pContainer, typename _t_container::const
 }
 
 template<class _t_container>
-bool is_reverse_iterator (_t_container *pContainer, typename _t_container::reverse_iterator &)
+bool is_reverse_iterator (_t_container *pContainer, typename ::std::enable_if< !::std::is_same <typename _t_container::reverse_iterator, typename _t_container::const_reverse_iterator>::value, typename _t_container::reverse_iterator>::type &)
 {
 	return (true);
 }
