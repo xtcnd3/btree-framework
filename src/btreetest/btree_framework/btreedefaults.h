@@ -16,24 +16,29 @@
 
 #include "btreeif.h"
 
-template <class _t_data, class _t_sizetype = uint64_t>
+template<class _t_data, class _t_sizetype = uint64_t>
 class CBTreeDefaults
 	:	public virtual CBTreeIf<_t_data, _t_sizetype>
 {
 public:
 
-	typedef CBTreeDefaults<_t_data, _t_sizetype>		CBTreeDefaults_t;
+	typedef _t_data											value_type;
+	typedef _t_sizetype										size_type;
 
-	typedef CBTreeIf<_t_data, _t_sizetype>				CBTreeIf_t;
+	typedef value_type&										reference;
+	typedef const value_type&								const_reference;
+	typedef value_type*										pointer;
+	typedef const value_type*								const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type	difference_type;
 
-	typedef typename CBTreeIf_t::iterator				iterator;
-	typedef typename CBTreeIf_t::const_iterator			const_iterator;
-	typedef typename CBTreeIf_t::reverse_iterator		reverse_iterator;
-	typedef typename CBTreeIf_t::const_reverse_iterator	const_reverse_iterator;
+	typedef CBTreeDefaults<value_type, size_type>			CBTreeDefaults_t;
 
-//	typedef _ti_pos										position_t;
-	typedef _t_data										data_t;
-	typedef _t_sizetype									size_type;
+	typedef CBTreeIf<value_type, size_type>					CBTreeIf_t;
+
+	typedef typename CBTreeIf_t::iterator					iterator;
+	typedef typename CBTreeIf_t::const_iterator				const_iterator;
+	typedef typename CBTreeIf_t::reverse_iterator			reverse_iterator;
+	typedef typename CBTreeIf_t::const_reverse_iterator		const_reverse_iterator;
 
 	// construction
 									CBTreeDefaults<_t_data, _t_sizetype>
@@ -68,8 +73,15 @@ public:
 
 protected:
  
-	void							register_iterator		(const_iterator *pIter);
-	void							unregister_iterator		(const_iterator *pIter);
+	void							register_iterator		(iterator *pIter);
+	void							register_iterator		(const_iterator *pCIter);
+//	void							register_iterator		(reverse_iterator *pRIter);
+//	void							register_iterator		(const_reverse_iterator *pCRIter);
+
+	void							unregister_iterator		(iterator *pIter);
+	void							unregister_iterator		(const_iterator *pCIter);
+//	void							unregister_iterator		(reverse_iterator *pRIter);
+//	void							unregister_iterator		(const_reverse_iterator *pCRIter);
 
 	void							_swap					(CBTreeDefaults &rBT);
 
@@ -85,14 +97,17 @@ protected:
 
 #if defined (BTREE_ITERATOR_REGISTRATION)
 
-	typename ::std::set<const_iterator *>					*m_psIterRegister;
+	typename ::std::set<iterator *>							*m_psIterRegister;
+	typename ::std::set<const_iterator *>					*m_psCIterRegister;
+//	typename ::std::set<reverse_iterator *>					*m_psRIterRegister;
+//	typename ::std::set<const_reverse_iterator *>			*m_psCRIterRegister;
 
 #endif
 
 public:
 
-	friend class CBTreeIterator<CBTreeIf<_t_data, _t_sizetype> >;
-	friend class CBTreeConstIterator<CBTreeIf<_t_data, _t_sizetype> >;
+	friend class CBTreeIterator<CBTreeIf_t>;
+	friend class CBTreeConstIterator<CBTreeIf_t>;
 	friend class CBTreeReverseIterator<iterator>;
 	friend class CBTreeConstReverseIterator<const_iterator>;
 };
