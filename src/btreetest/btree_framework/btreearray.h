@@ -13,8 +13,10 @@
 #ifndef	BTREEARRAY_H
 #define	BTREEARRAY_H
 
-#if defined (LINUX)
+#if defined(__GNUC__) || defined(__GNUG__)
+
 #define	_FILE_OFFSET_BITS	64
+
 #endif
 
 #include <stdio.h>
@@ -31,34 +33,34 @@
 #include "btreeaux.h"
 #include "btreeiter.h"
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 class CBTreeArrayConstAccessWrapper;
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 class CBTreeArrayAccessWrapper;
 
-template <class _t_sizetype>
+template<class _t_sizetype>
 class CBTreeArrayPos
 {
 public:
 	_t_sizetype			nIndex;
 };
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
+template<class _t_data, class _t_datalayerproperties>
 class CBTreeArray;
 
 /***********************************************************************/
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer, class _t_iterator>
+template<class _t_data, class _t_datalayerproperties, class _t_iterator>
 struct btree_array_self_reference_of_iterator_to_this_arbiter
 {
 	static bool	test_self_reference_of_iterator_to_this
 	(
-		CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *pClArray, 
-		_t_iterator &sItFirst, 
-		_t_iterator &sItLast, 
-		_t_sizetype &nDist, 
-		_t_sizetype &nAppendix, 
+		CBTreeIf<_t_data, typename _t_datalayerproperties::size_type> *pClArray,
+		_t_iterator &sItFirst,
+		_t_iterator &sItLast,
+		typename _t_datalayerproperties::size_type &nDist,
+		typename _t_datalayerproperties::size_type &nAppendix,
 		bool &bSelfReverse
 	)
 	{
@@ -75,20 +77,20 @@ struct btree_array_self_reference_of_iterator_to_this_arbiter
 	}
 };
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator>
+template<class _t_data, class _t_datalayerproperties>
+struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator>
 {
     static bool	test_self_reference_of_iterator_to_this
     (
-    	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *pClArray, 
-		typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator &sItFirst, 
-    	typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator &sItLast, 
-    	_t_sizetype &nDist, 
-    	_t_sizetype &nAppendix, 
+    	CBTreeIf<_t_data, typename _t_datalayerproperties::size_type> *pClArray,
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator &sItFirst,
+    	typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator &sItLast,
+    	typename _t_datalayerproperties::size_type &nDist,
+    	typename _t_datalayerproperties::size_type &nAppendix,
 		bool &bSelfReverse
     )
 	{
-		typedef CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		container_t;
+		typedef CBTreeBaseDefaults<CBTreeArrayPos <typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>		container_t;
 
 		container_t		&rIter = dynamic_cast<container_t &> (*(sItLast.get_container ()));
 
@@ -101,16 +103,16 @@ struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_sizety
 	}
 };
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator>
+template<class _t_data, class _t_datalayerproperties>
+struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator>
 {
     static bool	test_self_reference_of_iterator_to_this
     (
-    	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *pClArray, 
-		typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator &sItFirst, 
-    	typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator &sItLast, 
-    	_t_sizetype &nDist, 
-    	_t_sizetype &nAppendix, 
+    	CBTreeIf<_t_data, typename _t_datalayerproperties::size_type> *pClArray,
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator &sItFirst,
+    	typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator &sItLast,
+    	typename _t_datalayerproperties::size_type &nDist,
+    	typename _t_datalayerproperties::size_type &nAppendix,
 		bool &bSelfReverse
     )
 	{
@@ -123,116 +125,104 @@ struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_sizety
 	}
 };
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reverse_iterator>
+template<class _t_data, class _t_datalayerproperties>
+struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator>
 {
     static bool	test_self_reference_of_iterator_to_this
     (
-    	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *pClArray, 
-		typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reverse_iterator &sItFirst, 
-    	typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reverse_iterator &sItLast, 
-    	_t_sizetype &nDist, 
-    	_t_sizetype &nAppendix, 
+    	CBTreeIf<_t_data, typename _t_datalayerproperties::size_type> *pClArray,
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator &sItFirst,
+    	typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator &sItLast,
+    	typename _t_datalayerproperties::size_type &nDist,
+    	typename _t_datalayerproperties::size_type &nAppendix,
 		bool &bSelfReverse
     )
 	{
-		typedef CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>		container_t;
+		typedef CBTreeBaseDefaults<CBTreeArrayPos <typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>		container_t;
 
-		bool		bSelfReverence = ((pClArray == sItFirst.base ().get_container ()) || (pClArray == sItLast.base ().get_container ()));
+		bool		bSelfReference = ((pClArray == sItFirst.base ().get_container ()) || (pClArray == sItLast.base ().get_container ()));
 
 		container_t		&rIter = dynamic_cast<container_t &> (*(sItLast.base ().get_container ()));
 
 		nDist = sItLast - sItFirst;
 		nAppendix = rIter.rend () - sItLast;
 
-		bSelfReverse = bSelfReverence;
+		bSelfReverse = bSelfReference;
 
-		return (bSelfReverence);
+		return (bSelfReference);
 	}
 };
 
-template <class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_reverse_iterator>
+template<class _t_data, class _t_datalayerproperties>
+struct btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator>
 {
     static bool	test_self_reference_of_iterator_to_this
     (
-    	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> *pClArray, 
-		typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_reverse_iterator &sItFirst, 
-    	typename CBTreeBaseDefaults<CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_reverse_iterator &sItLast, 
-    	_t_sizetype &nDist, 
-    	_t_sizetype &nAppendix, 
+    	CBTreeIf<_t_data, typename _t_datalayerproperties::size_type> *pClArray,
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator &sItFirst,
+    	typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator &sItLast,
+    	typename _t_datalayerproperties::size_type &nDist,
+    	typename _t_datalayerproperties::size_type &nAppendix,
 		bool &bSelfReverse
     )
 	{
-		bool		bSelfReverence = ((pClArray == sItFirst.base ().get_container ()) || (pClArray == sItLast.base ().get_container ()));
+		bool		bSelfReference = ((pClArray == sItFirst.base ().get_container ()) || (pClArray == sItLast.base ().get_container ()));
 
 		nDist = sItLast - sItFirst;
 		nAppendix = sItLast.base ().get_container ()->crend () - sItLast;
 
-		bSelfReverse = bSelfReverence;
+		bSelfReverse = bSelfReference;
 
-		return (bSelfReverence);
+		return (bSelfReference);
 	}
 };
 
 /***********************************************************************/
 
-template <class _t_data, class _t_sizetype = uint64_t>
+template<class _t_data, class _t_sizetype = uint64_t>
 class CBTreeArrayIf
 	:	public virtual CBTreeIf<_t_data, _t_sizetype>
 {
 public:
 
-	typedef CBTreeArrayPos <_t_sizetype>						position_t;
+	typedef _t_data												value_type;
+	typedef _t_sizetype											size_type;
 
-	typedef CBTreeIf<_t_data, _t_sizetype>						CBTreeIf_t;
+	typedef value_type&											reference;
+	typedef const value_type&									const_reference;
+	typedef value_type*											pointer;
+	typedef const value_type*									const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type		difference_type;
+
+	typedef CBTreeArrayPos <size_type>							position_t;
+
+	typedef CBTreeIf<value_type, size_type>						CBTreeIf_t;
 
 	typedef typename CBTreeIf_t::iterator						iterator;
 	typedef typename CBTreeIf_t::const_iterator					const_iterator;
 	typedef typename CBTreeIf_t::reverse_iterator				reverse_iterator;
 	typedef typename CBTreeIf_t::const_reverse_iterator			const_reverse_iterator;
 
-	typedef _t_data												data_t;
-	typedef _t_sizetype											size_type;
-	
 	// construction
-						CBTreeArrayIf<_t_data, _t_sizetype>
+						CBTreeArrayIf<value_type, size_type>
 													()
 						{
 						};
-						
+
 	// destruction
-	virtual				~CBTreeArrayIf<_t_data, _t_sizetype>
+	virtual				~CBTreeArrayIf<value_type, size_type>
 													()
 						{
 						};
 
-	virtual CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-						at							(const _t_sizetype nPos) = 0;
+	virtual void		assign						(size_type nNewSize, const value_type& rVal) = 0;
 
-	virtual const _t_data &
-						at							(const _t_sizetype nPos) const = 0;
-
-	virtual CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-						front						() = 0;
-
-	virtual const _t_data &
-						front						() const = 0;
-
-	virtual CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-						back						() = 0;
-
-	virtual const _t_data &
-						back						() const = 0;
-
-	virtual void		assign						(_t_sizetype nNewSize, const _t_data& rVal) = 0;
-
-	virtual	void		push_back					(const _t_data &rData) = 0;
+	virtual	void		push_back					(const value_type &rData) = 0;
 	virtual	void		pop_back					() = 0;
 
-	virtual iterator	insert						(const_iterator sCIterPos, const _t_data& rData) = 0;
-	virtual iterator	insert						(const_iterator sCIterPos, const _t_sizetype nLen, const _t_data& rData) = 0;
-	
+	virtual iterator	insert						(const_iterator sCIterPos, const value_type& rData) = 0;
+	virtual iterator	insert						(const_iterator sCIterPos, const _t_sizetype nLen, const value_type& rData) = 0;
+
 	virtual iterator	erase						(const_iterator sCIterPos) = 0;
 	virtual iterator	erase						(const_iterator sCIterFirst, const_iterator sCIterLast) = 0;
 
@@ -240,107 +230,97 @@ public:
 
 	virtual void		clear						() = 0;
 
-	virtual _t_sizetype	serialize					(const _t_sizetype nStart, const _t_sizetype nLen, _t_data *pData) const = 0;
+	virtual _t_sizetype	serialize					(const _t_sizetype nStart, const _t_sizetype nLen, value_type *pData) const = 0;
 
-	virtual CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
+	virtual CBTreeArrayAccessWrapper<value_type, _t_sizetype>
 						operator[]					(const _t_sizetype nPos) = 0;
 
-	virtual const _t_data &
+	virtual const value_type &
 						operator[]					(const _t_sizetype nPos) const = 0;
+
+	virtual bool		operator==					(const CBTreeArrayIf &rRhs) const = 0;
+	virtual bool		operator!=					(const CBTreeArrayIf &rRhs) const = 0;
 
 protected:
 
-	virtual bool		set_at						(const _t_sizetype nPos, const _t_data &rData) = 0;
-	virtual bool		get_at						(const _t_sizetype nPos, _t_data &rData) const = 0;
+	virtual bool		set_at						(const _t_sizetype nPos, const value_type &rData) = 0;
+	virtual bool		get_at						(const _t_sizetype nPos, value_type &rData) const = 0;
 
 public:
 
-	friend class CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>;
-	friend class CBTreeArrayAccessWrapper<_t_data, _t_sizetype>;
+	friend class CBTreeArrayConstAccessWrapper<value_type, size_type>;
+	friend class CBTreeArrayAccessWrapper<value_type, size_type>;
 
-	friend class CBTreeIterator<CBTreeIf<_t_data, _t_sizetype> >;
-	friend class CBTreeConstIterator<CBTreeIf<_t_data, _t_sizetype> >;
+	friend class CBTreeIterator<CBTreeIf_t>;
+	friend class CBTreeConstIterator<CBTreeIf_t>;
 };
 
-template <class _t_data, class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_datalayerproperties = CBTreeIOpropertiesRAM, class _t_datalayer = CBTreeRAMIO <_t_nodeiter, _t_subnodeiter> >
+template<class _t_data, class _t_datalayerproperties = CBTreeIOpropertiesRAM <> >
 class CBTreeArray
-	:	public virtual CBTreeArrayIf <_t_data, _t_sizetype>
-	,	public CBTreeBaseDefaults <CBTreeArrayPos <_t_sizetype>, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	public virtual CBTreeArrayIf <_t_data, typename _t_datalayerproperties::size_type>
+	,	public CBTreeBaseDefaults <CBTreeArrayPos <typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>
 {
 public:
 
-	typedef CBTreeArrayPos<_t_sizetype>								position_t;
+	typedef _t_data													value_type;
+	typedef typename _t_datalayerproperties::size_type				size_type;
+	typedef typename _t_datalayerproperties::node_iter_type			node_iter_type;
+	typedef typename _t_datalayerproperties::sub_node_iter_type		sub_node_iter_type;
+	typedef _t_datalayerproperties									data_layer_properties_type;
+	typedef typename _t_datalayerproperties::data_layer_type		data_layer_type;
+
+	typedef value_type&												reference;
+	typedef const value_type&										const_reference;
+	typedef value_type*												pointer;
+	typedef const value_type*										const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type			difference_type;
+
+	typedef CBTreeArrayPos<size_type>								position_t;
 
 	typedef CBTreeArray												CBTreeArray_t;
 
-	typedef CBTreeArrayIf<_t_data, _t_sizetype>			CBTreeArrayIf_t;
+	typedef CBTreeArrayIf<value_type, size_type>					CBTreeArrayIf_t;
 
-	typedef CBTreeBaseDefaults<position_t, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-														CBTreeBase_t;
+	typedef CBTreeBaseDefaults<position_t, value_type, _t_datalayerproperties>
+																	CBTreeBaseDefaults_t;
 
-	typedef typename CBTreeBase_t::CBTreeBaseIf_t		CBTreeBaseIf_t;
+	typedef CBTreeIf<value_type, size_type>							CBTreeIf_t;
 
-	typedef typename CBTreeBaseIf_t::CBTreeDefaults_t	CBTreeDefaults_t;
+	typedef typename CBTreeIf_t::iterator							iterator;
+	typedef typename CBTreeIf_t::const_iterator						const_iterator;
+	typedef typename CBTreeIf_t::reverse_iterator					reverse_iterator;
+	typedef typename CBTreeIf_t::const_reverse_iterator				const_reverse_iterator;
 
-	typedef CBTreeIf<_t_data, _t_sizetype>	CBTreeIf_t;
+	typedef	typename CBTreeBaseDefaults_t::node_t					node_t;
 
-	typedef typename CBTreeIf_t::iterator				iterator;
-	typedef typename CBTreeIf_t::const_iterator			const_iterator;
-	typedef typename CBTreeIf_t::reverse_iterator		reverse_iterator;
-	typedef typename CBTreeIf_t::const_reverse_iterator	const_reverse_iterator;
-
-	typedef	typename CBTreeBase_t::node_t				node_t;
-
-	typedef _t_data										data_t;
-	typedef _t_sizetype									size_type;
-	typedef _t_nodeiter									nodeiter_t;
-	typedef _t_subnodeiter								subnodeiter_t;
-	typedef _t_datalayerproperties						datalayerproperties_t;
-	typedef _t_datalayer								datalayer_t;
-
-	typedef	typename CBTreeBaseIf_t::iterator_state_t	iterator_state_t;
+	typedef	typename CBTreeBaseDefaults_t::iterator_state_t			iterator_state_t;
 
 	// construction
-								CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-														(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+								CBTreeArray<_t_data, _t_datalayerproperties>
+														(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
 
-								CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-														(const CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign = true);
-						
-								CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
-														(CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &&rRhBT);
+								CBTreeArray<_t_data, _t_datalayerproperties>
+														(const CBTreeArray<_t_data, _t_datalayerproperties> &rBT, bool bAssign = true);
+
+								CBTreeArray<_t_data, _t_datalayerproperties>
+														(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhBT);
 
 	// destruction
-	virtual						~CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	virtual						~CBTreeArray<_t_data, _t_datalayerproperties>
 														();
 
-	CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-								at						(const _t_sizetype nPos);
-
-	const _t_data &				at						(const _t_sizetype nPos) const;
-
-	CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-								front					();
-
-	const _t_data &				front					() const;
-
-	CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-								back					();
-
-	const _t_data &				back					() const;
-
-	template <class _t_iterator>
+	template<class _t_iterator>
 	void						assign					(_t_iterator sItFirst, _t_iterator sItLast);
-	void						assign					(_t_sizetype nNewSize, const _t_data& rVal);
+	void						assign					(size_type nNewSize, const value_type& rVal);
 
-	void						push_back				(const _t_data &rData);
+	void						push_back				(const value_type &rData);
 
 	void						pop_back				();
 
-	iterator					insert					(const_iterator sCIterPos, const _t_data& rData);
-	iterator					insert					(const_iterator sCIterPos, const _t_sizetype nLen, const _t_data& rData);
+	iterator					insert					(const_iterator sCIterPos, const value_type& rData);
+	iterator					insert					(const_iterator sCIterPos, const size_type nLen, const value_type& rData);
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	iterator					insert					(const_iterator sCIterPos, _t_iterator sItFirst, _t_iterator sItLast);
 
 	iterator					erase					(const_iterator sCIterPos);
@@ -351,76 +331,79 @@ public:
 
 	void						clear					();
 
-	_t_sizetype					serialize				(const _t_sizetype nStart, const _t_sizetype nLen, _t_data *pData) const;
+	size_type					serialize				(const size_type nStart, const size_type nLen, value_type *pData) const;
 
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &
-								operator=				(const CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT);
+	CBTreeArray<_t_data, _t_datalayerproperties> &
+								operator=				(const CBTreeArray<_t_data, _t_datalayerproperties> &rBT);
 
-	CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &
-								operator=				(CBTreeArray<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &&rRhBT);
+	CBTreeArray<_t_data, _t_datalayerproperties> &
+								operator=				(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhBT);
 
-	CBTreeArrayAccessWrapper<_t_data, _t_sizetype>
-								operator[]				(const _t_sizetype nPos);
+	CBTreeArrayAccessWrapper<value_type, size_type>
+								operator[]				(const size_type nPos);
 
-	const _t_data&				operator[]				(const _t_sizetype nPos) const;
+	const value_type&			operator[]				(const size_type nPos) const;
+
+	bool						operator==				(const CBTreeArrayIf_t &rRhs) const;
+	bool						operator!=				(const CBTreeArrayIf_t &rRhs) const;
 
 protected:
 
 	virtual void				_assign					(const CBTreeIf_t &rContainer);
 
-	bool						set_at					(const _t_sizetype nPos, const _t_data &rData);
-	bool						get_at					(const _t_sizetype nPos, _t_data &rData) const;
+	bool						set_at					(const size_type nPos, const value_type &rData);
+	bool						get_at					(const size_type nPos, value_type &rData) const;
 
 	// node operations
-	virtual CBTreeArrayPos<_t_sizetype>	determine_position	(CBTreeArrayPos<_t_sizetype> sPos, _t_nodeiter nNode, _t_subnodeiter &nSubPos, _t_subnodeiter &nSubData, bool &bFound) const;
+	virtual position_t			determine_position		(position_t sPos, node_iter_type nNode, sub_node_iter_type &nSubPos, sub_node_iter_type &nSubData, bool &bFound) const;
 
-	void						rebuild_node			(const _t_nodeiter nNode, const int32_t triMod = 0, _t_subnodeiter nSubStart = 0);
+	void						rebuild_node			(const node_iter_type nNode, const int32_t triMod = 0, sub_node_iter_type nSubStart = 0);
 
-	virtual CBTreeArrayPos<_t_sizetype> generate_prev_position	(const _t_nodeiter nNode, const _t_subnodeiter nSub, CBTreeArrayPos<_t_sizetype> sPos);
-	virtual CBTreeArrayPos<_t_sizetype> generate_next_position	(const _t_nodeiter nNode, const _t_subnodeiter nSub, CBTreeArrayPos<_t_sizetype> sPos);
+	virtual position_t			generate_prev_position	(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos);
+	virtual position_t			generate_next_position	(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos);
 
 	// manuvering
-	virtual _t_subnodeiter		find_next_sub_pos		(const _t_nodeiter nNode, CBTreeArrayPos<_t_sizetype> &sPos) const;
+	virtual sub_node_iter_type		find_next_sub_pos	(const node_iter_type nNode, position_t &sPos) const;
 
-	virtual bool				show_data				(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const;
-	virtual bool				show_node				(std::ofstream &ofs, const _t_nodeiter nNode, const _t_subnodeiter nSubPos) const;
+	virtual bool				show_data				(std::ofstream &ofs, std::stringstream &rstrData, std::stringstream &rszMsg, const node_iter_type nNode, const sub_node_iter_type nSubPos) const;
+	virtual bool				show_node				(std::ofstream &ofs, const node_iter_type nNode, const sub_node_iter_type nSubPos) const;
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	iterator					insert_via_iterator_tag (const_iterator sCIterPos, _t_iterator sItFirst, _t_iterator sItLast, ::std::forward_iterator_tag);
 
-	template <class _t_iterator>
+	template<class _t_iterator>
 	iterator					insert_via_iterator_tag (const_iterator sCIterPos, _t_iterator sItFirst, _t_iterator sItLast, ::std::random_access_iterator_tag);
 
-	void						insert_via_reference	(const_iterator &rCIterPos, const _t_data& rData, bool bReEvaluate = true);
+	void						insert_via_reference	(const_iterator &rCIterPos, const value_type& rData, bool bReEvaluate = true);
 
 	void						erase_via_reference		(const_iterator &rCIterPos, bool bReEvaluate = true);
 
 	template<class _t_iterator>
-	bool						test_self_reference_of_iterator_to_this (_t_iterator &sItFirst, _t_iterator &sItLast, _t_sizetype &nDist, _t_sizetype &nAppendix, bool &bSelfReverse)
+	bool						test_self_reference_of_iterator_to_this (_t_iterator &sItFirst, _t_iterator &sItLast, size_type &nDist, size_type &nAppendix, bool &bSelfReverse)
 	{
-		return (btree_array_self_reference_of_iterator_to_this_arbiter<_t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer, _t_iterator>::test_self_reference_of_iterator_to_this (this, sItFirst, sItLast, nDist, nAppendix, bSelfReverse));
+		return (btree_array_self_reference_of_iterator_to_this_arbiter<value_type, _t_datalayerproperties, _t_iterator>::test_self_reference_of_iterator_to_this (this, sItFirst, sItLast, nDist, nAppendix, bSelfReverse));
 	}
 
 	void						_swap					(CBTreeArray &rArray);
 
-	CBTreeArrayAccessWrapper<_t_data, _t_sizetype>		*m_pClAccessWrapper;
+	CBTreeArrayAccessWrapper<value_type, size_type>		*m_pClAccessWrapper;
 
-	_t_data												*m_psReturnData;
+	value_type											*m_psReturnData;
 
 public:
 
-	friend class CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>;
-	friend class CBTreeArrayAccessWrapper<_t_data, _t_sizetype>;
+	friend class CBTreeArrayConstAccessWrapper<value_type, size_type>;
+	friend class CBTreeArrayAccessWrapper<value_type, size_type>;
 
-	friend class CBTreeIterator<CBTreeIf<_t_data, _t_sizetype> >;
-	friend class CBTreeConstIterator<CBTreeIf<_t_data, _t_sizetype> >;
+	friend class CBTreeIterator<CBTreeIf_t>;
+	friend class CBTreeConstIterator<CBTreeIf_t>;
 };
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 class CBTreeArrayConstAccessWrapper
 {
 public:
-	
+
 						CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>
 						(
 							CBTreeArrayIf<_t_data, _t_sizetype>	&rInstance
@@ -437,12 +420,12 @@ public:
 
 protected:
 
-	CBTreeArrayIf<_t_data, _t_sizetype>		&m_rInstance;
+	CBTreeArrayIf<_t_data, _t_sizetype>			&m_rInstance;
 	_t_sizetype									m_nPos;
 	_t_data										m_sData;
 };
 
-template <class _t_data, class _t_sizetype>
+template<class _t_data, class _t_sizetype>
 class CBTreeArrayAccessWrapper
 	:	public CBTreeArrayConstAccessWrapper<_t_data, _t_sizetype>
 {
@@ -457,7 +440,7 @@ public:
 
 	CBTreeArrayAccessWrapper<_t_data, _t_sizetype> &
 						operator=					(const _t_data &rData);
-						
+
 	CBTreeArrayAccessWrapper<_t_data, _t_sizetype> &
 						operator=					(const CBTreeArrayAccessWrapper<_t_data, _t_sizetype> &rData);
 
@@ -466,3 +449,4 @@ public:
 #endif // BTREEARRAY_H
 
 #include "btreearray.cpp"
+
