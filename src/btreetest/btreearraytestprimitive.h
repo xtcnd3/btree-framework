@@ -28,9 +28,15 @@ typedef enum
 	BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM
 } btreetest_array_primitive_seek_e;
 
-void arrayPrim_add (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere);
-void arrayPrim_remove (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere);
-void arrayPrim_replace (CBTreeArrayIf<arrayEntry_t> *pClArray, uint32_t nEntries, btreetest_array_primitive_seek_e eWhere);
-bool arrayPrim_compare (CBTreeArrayIf<arrayEntry_t> *pClArray0, CBTreeArrayIf<arrayEntry_t> *pClArray1);
+template<class _t_container>
+void arrayPrim_add (_t_container *pContainer, typename _t_container::size_type nEntries, btreetest_array_primitive_seek_e eWhere);
+
+template<class _t_container>
+void arrayPrim_remove (_t_container *pContainer, typename _t_container::size_type nEntries, btreetest_array_primitive_seek_e eWhere);
+
+template<class _t_container>
+void arrayPrim_replace (_t_container *pContainer, typename _t_container::size_type nEntries, btreetest_array_primitive_seek_e eWhere);
+
+#include "btreearraytestprimitive.cpp"
 
 #endif // BTREEARRAYTESTPRIMITIVE_H
