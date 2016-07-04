@@ -18,15 +18,15 @@
 
 #include "btreetestmultimap.h"
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeTestMultiMap
+template<class _t_datalayerproperties>
+CBTreeTestMultiMap<_t_datalayerproperties>::CBTreeTestMultiMap
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
 		const bayerTreeCacheDescription_t *psCacheDescription, 
-		_t_subnodeiter nNodeSize, 
-		typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reference_t *pClRefData
+		typename _t_datalayerproperties::sub_node_iter_type nNodeSize, 
+		typename CBTreeTestMultiMap<_t_datalayerproperties>::reference_t *pClRefData
 	)
-	:	CBTreeMultiMap<uint32_t, multiMapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+	:	CBTreeMultiMap<uint32_t, multiMapMap_t, _t_datalayerproperties>
 	(
 		rDataLayerProperties, 
 		psCacheDescription, 
@@ -37,12 +37,12 @@ CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 {
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeTestMultiMap
-	(const CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT, bool bAssign)
-	:	CBTreeMultiMap<uint32_t, multiMapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>
+template<class _t_datalayerproperties>
+CBTreeTestMultiMap<_t_datalayerproperties>::CBTreeTestMultiMap
+	(const CBTreeTestMultiMap<_t_datalayerproperties> &rBT, bool bAssign)
+	:	CBTreeMultiMap<uint32_t, multiMapMap_t, _t_datalayerproperties>
 	(
-		dynamic_cast<const CBTreeMultiMap<uint32_t, multiMapMap_t, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &> (rBT), 
+		dynamic_cast<const CBTreeMultiMap<uint32_t, multiMapMap_t, _t_datalayerproperties> &> (rBT), 
 		false
 	)
 	,	m_pClRef (NULL)
@@ -56,16 +56,16 @@ CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 	this->set_atomic_testing (true);
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeTestMultiMap ()
+template<class _t_datalayerproperties>
+CBTreeTestMultiMap<_t_datalayerproperties>::~CBTreeTestMultiMap ()
 {
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>&
-	CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
+template<class _t_datalayerproperties>
+CBTreeTestMultiMap<_t_datalayerproperties>&
+	CBTreeTestMultiMap<_t_datalayerproperties>::operator=
 	(
-		const CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT
+		const CBTreeTestMultiMap<_t_datalayerproperties> &rBT
 	)
 {
 	if (this != &rBT)
@@ -83,36 +83,36 @@ CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpropert
 	return (*this);
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator>
-void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (_t_iterator sItFirst, _t_iterator sItLast)
+template<class _t_datalayerproperties>
+template<class _t_iterator>
+void CBTreeTestMultiMap<_t_datalayerproperties>::insert (_t_iterator sItFirst, _t_iterator sItLast)
 {
-	CBTreeMultiMap_t::template insert<_t_iterator> (sItFirst, sItLast);
+	CBTreeMultiMap_t::insert (sItFirst, sItLast);
 
 	test ();
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-template <class _t_iterator, class _t_ref_iterator>
-void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert (_t_iterator sItFirst, _t_iterator sItLast)
+template<class _t_datalayerproperties>
+template<class _t_iterator, class _t_ref_iterator>
+void CBTreeTestMultiMap<_t_datalayerproperties>::insert (_t_iterator sItFirst, _t_iterator sItLast)
 {
 	_t_ref_iterator		sCItFirst (sItFirst);
 	_t_ref_iterator		sCItLast (sItLast);
 
-	CBTreeMultiMap_t::template insert<_t_iterator> (sItFirst, sItLast);
+	CBTreeMultiMap_t::insert (sItFirst, sItLast);
 
 	test ();
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert
+template<class _t_datalayerproperties>
+typename CBTreeTestMultiMap<_t_datalayerproperties>::iterator
+	CBTreeTestMultiMap<_t_datalayerproperties>::insert
 	(
-		const value_t &rData
+		const typename CBTreeTestMultiMap<_t_datalayerproperties>::value_type &rData
 	)
 {
-	iterator	sIter;
-	value_t		sData = rData;
+	iterator		sIter;
+	value_type		sData = rData;
 
 	sIter = CBTreeMultiMap_t::insert (sData);
 
@@ -120,22 +120,22 @@ typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalay
 	{
 		if (CBTreeMultiMap_t::count (sData.first) != m_pClRef->count (sData.first))
 		{
-			cerr << endl;
-			cerr << "CBTreeTestMap<>::insert: ERROR: multi key size mismatch!" << endl;
-			cerr << "key: ";
-			cerr << std::setfill ('0') << std::hex << std::setw (8);
+			::std::cerr << ::std::endl;
+			::std::cerr << "CBTreeTestMultiMap<>::insert: ERROR: multi key size mismatch!" << ::std::endl;
+			::std::cerr << "key: ";
+			::std::cerr << std::setfill ('0') << std::hex << std::setw (8);
 			{
-				cerr << sData.first;
+				::std::cerr << sData.first;
 			}
-			cerr << std::setfill (' ') << std::dec << std::setw (0);
-			cerr << "reference: " << m_pClRef->count (sData.first) << endl;
-			cerr << "container: " << CBTreeMultiMap_t::count (sData.first) << endl;
+			::std::cerr << std::setfill (' ') << std::dec << std::setw (0);
+			::std::cerr << "reference: " << m_pClRef->count (sData.first) << ::std::endl;
+			::std::cerr << "container: " << CBTreeMultiMap_t::count (sData.first) << ::std::endl;
 			
-			cerr << "creating count.html... ";
+			::std::cerr << "creating count.html... ";
 
 			this->show_integrity ("count.html");
 
-			cerr << "finished" << endl;
+			::std::cerr << "finished" << ::std::endl;
 
 			exit (-1);
 		}
@@ -146,11 +146,11 @@ typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalay
 	return (sIter);
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
+template<class _t_datalayerproperties>
+typename CBTreeTestMultiMap<_t_datalayerproperties>::iterator
+	CBTreeTestMultiMap<_t_datalayerproperties>::erase
 	(
-		typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterPos
+		typename CBTreeTestMultiMap<_t_datalayerproperties>::const_iterator sCIterPos
 	)
 {
 	iterator		sRslt;
@@ -162,10 +162,10 @@ typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalay
 	return (sRslt);
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase (const uint32_t &rKey)
+template<class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeTestMultiMap<_t_datalayerproperties>::erase (const uint32_t &rKey)
 {
-	_t_sizetype		nRslt;
+	size_type		nRslt;
 
 	nRslt = CBTreeMultiMap_t::erase (rKey);
 
@@ -174,12 +174,12 @@ _t_sizetype CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_data
 	return (nRslt);
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::iterator
-	CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::erase
+template<class _t_datalayerproperties>
+typename CBTreeTestMultiMap<_t_datalayerproperties>::iterator
+	CBTreeTestMultiMap<_t_datalayerproperties>::erase
 	(
-		typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterFirst, 
-		typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::const_iterator sCIterLast
+		typename CBTreeTestMultiMap<_t_datalayerproperties>::const_iterator sCIterFirst, 
+		typename CBTreeTestMultiMap<_t_datalayerproperties>::const_iterator sCIterLast
 	)
 {
 	iterator	sRslt = CBTreeMultiMap_t::erase (sCIterFirst, sCIterLast);
@@ -189,8 +189,8 @@ typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalay
 	return (sRslt);
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::swap (CBTreeTestMultiMap_t &rTMM)
+template<class _t_datalayerproperties>
+void CBTreeTestMultiMap<_t_datalayerproperties>::swap (CBTreeTestMultiMap_t &rTMM)
 {
 	if (this != &rTMM)
 	{
@@ -203,17 +203,17 @@ void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 	test ();
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ()
+template<class _t_datalayerproperties>
+void CBTreeTestMultiMap<_t_datalayerproperties>::clear ()
 {
 	CBTreeMultiMap_t::clear ();
 
 	test ();
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_compare
-	CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::key_comp () const
+template<class _t_datalayerproperties>
+typename CBTreeTestMultiMap<_t_datalayerproperties>::key_compare
+	CBTreeTestMultiMap<_t_datalayerproperties>::key_comp () const
 {
 	key_compare		sRslt;
 
@@ -222,9 +222,9 @@ typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalay
 	return (sRslt);
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::value_compare
-	CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::value_comp () const
+template<class _t_datalayerproperties>
+typename CBTreeTestMultiMap<_t_datalayerproperties>::value_compare
+	CBTreeTestMultiMap<_t_datalayerproperties>::value_comp () const
 {
 	value_compare	sRslt;
 
@@ -233,8 +233,8 @@ typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalay
 	return (sRslt);
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator== (const CBTreeTestMultiMap_t &rTMM) const
+template<class _t_datalayerproperties>
+bool CBTreeTestMultiMap<_t_datalayerproperties>::operator== (const CBTreeTestMultiMap_t &rTMM) const
 {
 	if (this == &rTMM)
 	{
@@ -251,8 +251,8 @@ bool CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 	const_iterator		sCIterThisEnd;
 	const_iterator		sCIterRTMM;
 	const_iterator		sCIterRTMMbegin;
-	value_t				sThisVal;
-	value_t				sTMMval;
+	value_type			sThisVal;
+	value_type			sTMMval;
 
 	sCIterThisBegin = this->cbegin ();
 	sCIterThisEnd = this->cend ();
@@ -275,29 +275,29 @@ bool CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 	return (true);
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator!= (const CBTreeTestMultiMap_t &rTMM) const
+template<class _t_datalayerproperties>
+bool CBTreeTestMultiMap<_t_datalayerproperties>::operator!= (const CBTreeTestMultiMap_t &rTMM) const
 {
 	return (! ((*this) == rTMM));
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test () const
+template<class _t_datalayerproperties>
+void CBTreeTestMultiMap<_t_datalayerproperties>::test () const
 {
 	if (!m_bAtomicTesting)
 	{
 		return;
 	}
 
-	typedef ::std::multimap<uint32_t, multiMapMap_t>::const_iterator		citer_mmap_t;
+	typedef typename reference_t::const_iterator		citer_mmap_t;
 
-	::std::multimap<uint32_t, multiMapMap_t>	sMMap;
-	uint32_t									nKey;
-	uint32_t									nNextKey;
+	reference_t									sMMap;
+	key_type									nKey;
+	key_type									nNextKey;
 	bool										bBounce;
-	_t_sizetype									nTotalCount = 0;
-	value_t										sEntry;
-	value_t										sValue;
+	size_type									nTotalCount = 0;
+	value_type									sEntry;
+	value_type									sValue;
 	citer_mmap_t								sItMMapLower;
 	citer_mmap_t								sItMMapUpper;
 	citer_mmap_t								sItMMap;
@@ -310,14 +310,14 @@ void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 	
 	if (!this->test_integrity ())
 	{
-		cerr << endl;
-		cerr << "integrity test failed" << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "integrity test failed" << ::std::endl;
 
-		cerr << "creating integrity.html..." << endl;
+		::std::cerr << "creating integrity.html..." << ::std::endl;
 
 		this->show_integrity ("integrity.html");
 
-		cerr << "finished!" << endl;
+		::std::cerr << "finished!" << ::std::endl;
 
 		exit (-1);
 	}
@@ -329,26 +329,26 @@ void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 
 	if (this->size () > 0)
 	{
-		this->extract_key (&nKey, ((data_t) (*sCIter)));
+		this->extract_key (&nKey, ((value_type) (*sCIter)));
 	}
 
 	while (sCIter != sCIterEnd)
 	{
 		if (m_pClRef->count (nKey) != this->count (nKey))
 		{
-			cerr << endl;
-			cerr << "number of instances mismatches" << endl;
-			cerr << "key: " << std::setfill ('0') << std::hex << std::setw (8) << nKey << endl;
-			cerr << std::setfill (' ') << std::dec << std::setw (0);
+			::std::cerr << ::std::endl;
+			::std::cerr << "number of instances mismatches" << ::std::endl;
+			::std::cerr << "key: " << std::setfill ('0') << std::hex << std::setw (8) << nKey << ::std::endl;
+			::std::cerr << std::setfill (' ') << std::dec << std::setw (0);
 
-			cerr << "count: " << this->count (nKey) << endl;
-			cerr << "reference: " << m_pClRef->count (nKey) << endl;
+			::std::cerr << "count: " << this->count (nKey) << ::std::endl;
+			::std::cerr << "reference: " << m_pClRef->count (nKey) << ::std::endl;
 			
-			cerr << "creating count.html..." << endl;
+			::std::cerr << "creating count.html..." << ::std::endl;
 
 			this->show_integrity ("count.html");
 
-			cerr << "finished!" << endl;
+			::std::cerr << "finished!" << ::std::endl;
 
 			exit (-1);
 		}
@@ -361,31 +361,31 @@ void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 
 			sValue = *sItMMapLower;
 
-			sEntry = ((data_t) (*sCIterLower));
+			sEntry = ((value_type) (*sCIterLower));
 
 			if ((sEntry.second.nData != sValue.second.nData) || (sEntry.second.nDebug != sValue.second.nDebug))
 			{
-				cerr << endl;
-				cerr << "data mismatches" << endl;
-				cerr << "key: " << std::setfill ('0') << std::hex << std::setw (8) << sEntry.first << endl;
-				cerr << "data: " << sEntry.second.nData << endl;
+				::std::cerr << ::std::endl;
+				::std::cerr << "data mismatches" << ::std::endl;
+				::std::cerr << "key: " << std::setfill ('0') << std::hex << std::setw (8) << sEntry.first << ::std::endl;
+				::std::cerr << "data: " << sEntry.second.nData << ::std::endl;
 
-				cerr << std::setfill (' ') << std::dec << std::setw (0);
+				::std::cerr << std::setfill (' ') << std::dec << std::setw (0);
 
-				cerr << "debug: " << sEntry.second.nDebug << endl;
-				cerr << "reference" << endl;
+				::std::cerr << "debug: " << sEntry.second.nDebug << ::std::endl;
+				::std::cerr << "reference" << ::std::endl;
 
-				cerr << "data: " << std::setfill ('0') << std::hex << std::setw (8) << sValue.second.nData << endl;
+				::std::cerr << "data: " << std::setfill ('0') << std::hex << std::setw (8) << sValue.second.nData << ::std::endl;
 
-				cerr << std::setfill (' ') << std::dec << std::setw (0);
+				::std::cerr << std::setfill (' ') << std::dec << std::setw (0);
 
-				cerr << "debug: " << sValue.second.nDebug << endl;
+				::std::cerr << "debug: " << sValue.second.nDebug << ::std::endl;
 				
-				cerr << "creating data.html..." << endl;
+				::std::cerr << "creating data.html..." << ::std::endl;
 
 				this->show_integrity ("data.html");
 
-				cerr << "finished!" << endl;
+				::std::cerr << "finished!" << ::std::endl;
 
 				exit (-1);
 			}
@@ -402,7 +402,7 @@ void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 
 			for (sCIter = sCIterLower; sCIter != sCIterUpper; sCIter++)
 			{
-				sEntry = ((data_t) (*sCIter));
+				sEntry = ((value_type) (*sCIter));
 
 				bDeleted = false;
 
@@ -425,21 +425,21 @@ void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 
 				if (!bDeleted)
 				{
-					cerr << endl;
-					cerr << "number of instances mismatches" << endl;
-					cerr << "key: " << std::setfill ('0') << std::hex << std::setw (8) << sEntry.first << endl;
-					cerr << "data: " << sEntry.second.nData << endl;
+					::std::cerr << ::std::endl;
+					::std::cerr << "number of instances mismatches" << ::std::endl;
+					::std::cerr << "key: " << std::setfill ('0') << std::hex << std::setw (8) << sEntry.first << ::std::endl;
+					::std::cerr << "data: " << sEntry.second.nData << ::std::endl;
 
-					cerr << std::setfill (' ') << std::dec << std::setw (0);
+					::std::cerr << std::setfill (' ') << std::dec << std::setw (0);
 
-					cerr << "debug: " << sEntry.second.nDebug << endl;
-					cerr << "Instance not found in reference!" << endl;
+					::std::cerr << "debug: " << sEntry.second.nDebug << ::std::endl;
+					::std::cerr << "Instance not found in reference!" << ::std::endl;
 
-					cerr << "creating error.html..." << endl;
+					::std::cerr << "creating error.html..." << ::std::endl;
 
 					this->show_integrity ("error.html");
 
-					cerr << "finished!" << endl;
+					::std::cerr << "finished!" << ::std::endl;
 
 					exit (-1);
 				}
@@ -447,32 +447,32 @@ void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 
 			if (sMMap.size () != 0)
 			{
-				cerr << endl;
-				cerr << "number of instances mismatches" << endl;
-				cerr << "the following entries are still present in reference:" << endl;
+				::std::cerr << ::std::endl;
+				::std::cerr << "number of instances mismatches" << ::std::endl;
+				::std::cerr << "the following entries are still present in reference:" << ::std::endl;
 
 				for (sItMMap = sMMap.cbegin (); sItMMap != sMMap.cend (); sItMMap++)
 				{
 					sValue = *sItMMap;
 
-					cerr << "key: ";
+					::std::cerr << "key: ";
 
-					cerr << std::setfill ('0') << std::hex << std::setw (8);
+					::std::cerr << std::setfill ('0') << std::hex << std::setw (8);
 					{
-						cerr << sValue.first << " ";
-						cerr << "data: " << flush;
-						cerr << sValue.second.nData << " ";
+						::std::cerr << sValue.first << " ";
+						::std::cerr << "data: " << ::std::flush;
+						::std::cerr << sValue.second.nData << " ";
 					}
-					cerr << std::setfill (' ') << std::dec << std::setw (0);
+					::std::cerr << std::setfill (' ') << std::dec << std::setw (0);
 
-					cerr << "debug: " << sValue.second.nDebug << endl;
+					::std::cerr << "debug: " << sValue.second.nDebug << ::std::endl;
 				}
 
-				cerr << "creating error.html..." << endl;
+				::std::cerr << "creating error.html..." << ::std::endl;
 
 				this->show_integrity ("error.html");
 
-				cerr << "finished!" << endl;
+				::std::cerr << "finished!" << ::std::endl;
 
 				exit (-1);
 			}
@@ -490,40 +490,41 @@ void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerpr
 	
 	if ((m_pClRef == NULL) && (!this->empty ()))
 	{
-		cerr << endl;
-		cerr << "reference not set while data container not empty" << endl;
-		cerr << "size: " << this->size () << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "reference not set while data container not empty" << ::std::endl;
+		::std::cerr << "size: " << this->size () << ::std::endl;
 
 		exit (-1);
 	}
 	
 	if ((m_pClRef != NULL) && (m_pClRef->size () != this->size ()))
 	{
-		cerr << endl;
-		cerr << "size mismatches" << endl;
-		cerr << "size: " << this->size () << endl;
-		cerr << "reference size: " << m_pClRef->size () << endl;
+		::std::cerr << ::std::endl;
+		::std::cerr << "size mismatches" << ::std::endl;
+		::std::cerr << "size: " << this->size () << ::std::endl;
+		::std::cerr << "reference size: " << m_pClRef->size () << ::std::endl;
 
-		cerr << "creating size.html..." << endl;
+		::std::cerr << "creating size.html..." << ::std::endl;
 
 		this->show_integrity ("size.html");
 
-		cerr << "finished!" << endl;
+		::std::cerr << "finished!" << ::std::endl;
 
 		exit (-1);
 	}
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_reference (typename CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reference_t *pReference)
+template<class _t_datalayerproperties>
+void CBTreeTestMultiMap<_t_datalayerproperties>::set_reference (typename CBTreeTestMultiMap<_t_datalayerproperties>::reference_t *pReference)
 {
 	m_pClRef = pReference;
 }
 
-template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeTestMultiMap<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_atomic_testing (bool bEnable)
+template<class _t_datalayerproperties>
+void CBTreeTestMultiMap<_t_datalayerproperties>::set_atomic_testing (bool bEnable)
 {
 	m_bAtomicTesting = bEnable;
 }
 
 #endif // !BTREETESTMULTIMAP_CPP
+
