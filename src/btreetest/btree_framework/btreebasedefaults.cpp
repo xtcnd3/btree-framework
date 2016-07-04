@@ -15,14 +15,41 @@
 
 #include "btreebasedefaults.h"
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeBaseDefaults (_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize)
-	:	CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> (psCacheDescription, nNodeSize)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::CBTreeBaseDefaults (_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
+	:	CBTreeBaseIf	<
+							_ti_pos, 
+							_t_data, 
+							typename _t_datalayerproperties::size_type, 
+							typename _t_datalayerproperties::node_iter_type, 
+							typename _t_datalayerproperties::sub_node_iter_type
+						> (psCacheDescription, nNodeSize)
+	,	m_nRootNode (0ULL)
+	,	m_nTreeSize (0ULL)
+	,	m_nNodeSize (nNodeSize)
+	,	m_nGrowBy (64UL)
+	,	m_nAutoShrinkThreshold (nNodeSize * 2)
+	,	m_nAutoShrinkCounter (0)
 	,	m_pData (NULL)
 {
 	m_pClDataLayerProperties = new _t_datalayerproperties (rDataLayerProperties);
 
-	BTREE_ASSERT (m_pClDataLayerProperties != NULL, "CBTreeBaseDefaults<>::CBTreeBaseDefaults (_t_datalayerproperties &, bayerTreeCacheDescription_t *, _t_subnodeiter): insufficient memory!");
+	BTREE_ASSERT (m_pClDataLayerProperties != NULL, "CBTreeBaseDefaults<>::CBTreeBaseDefaults (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type): insufficient memory!");
+
+	m_nRebuildFIFOSize = 0UL;
+	m_pRebuildFIFO = NULL;
+	m_nRebuildFIFOreadPos = 0ULL;
+	m_nRebuildFIFOwritePos = 0ULL;
+
+	m_nNextAlloc = 0ULL;
+
+#if defined (_DEBUG)
+	m_pNodeTrace = NULL;
+	m_nNodeTraceDepth = 0UL;
+	m_nNodeTraceDepthMax = 0UL;
+#endif
+
+	setup_pools ();
 }
 
 /*
@@ -33,14 +60,50 @@ rBT		-	reference to CBTreeBaseDefaults instance to be copied
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::CBTreeBaseDefaults (const CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
-	:	CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> (dynamic_cast <const CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &> (rBT))
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::CBTreeBaseDefaults(const CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &rBT)
+	:	CBTreeBaseIf	<
+							_ti_pos, 
+							_t_data, 
+							typename _t_datalayerproperties::size_type, 
+							typename _t_datalayerproperties::node_iter_type, 
+							typename _t_datalayerproperties::sub_node_iter_type
+						> (dynamic_cast <const CBTreeBaseIf	<
+																_ti_pos, 
+																_t_data, 
+																typename _t_datalayerproperties::size_type, 
+																typename _t_datalayerproperties::node_iter_type, 
+																typename _t_datalayerproperties::sub_node_iter_type
+															> &> (rBT))
+	,	m_nAutoShrinkThreshold (rBT.m_nAutoShrinkThreshold)
+	,	m_nAutoShrinkCounter (0)
 	,	m_pData (NULL)
 {
 	m_pClDataLayerProperties = new _t_datalayerproperties (*(rBT.m_pClDataLayerProperties));
 
 	BTREE_ASSERT (m_pClDataLayerProperties != NULL, "CBTreeBaseDefaults<>::CBTreeBaseDefaults (CBTreeBaseDefaults<> &): insufficient memory!");
+
+	m_nRootNode = 0ULL;
+	m_nTreeSize = 0ULL;
+
+	m_nNodeSize = rBT.m_nNodeSize;
+
+	m_nGrowBy = rBT.m_nGrowBy;
+
+	m_nRebuildFIFOSize = 0UL;
+	m_pRebuildFIFO = NULL;
+	m_nRebuildFIFOreadPos = 0ULL;
+	m_nRebuildFIFOwritePos = 0ULL;
+
+	m_nNextAlloc = 0ULL;
+
+#if defined (_DEBUG)
+	m_pNodeTrace = NULL;
+	m_nNodeTraceDepth = 0UL;
+	m_nNodeTraceDepthMax = 0UL;
+#endif
+
+	setup_pools ();
 }
 
 /*
@@ -49,11 +112,9 @@ Destructor
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::~CBTreeBaseDefaults ()
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::~CBTreeBaseDefaults ()
 {
-	clear ();
-
 	if (m_pData != NULL)
 	{
 		delete m_pData;
@@ -67,6 +128,20 @@ CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _
 
 		m_pClDataLayerProperties = NULL;
 	}
+
+	if (m_pRebuildFIFO != NULL)
+	{
+		delete [] m_pRebuildFIFO;
+	}
+
+#if defined (_DEBUG)
+
+	if (m_pNodeTrace != NULL)
+	{
+		delete [] m_pNodeTrace;
+	}
+
+#endif
 }
 
 /*
@@ -77,10 +152,10 @@ This method returns true if this b-tree instance contains no data, otherwise fal
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::empty () const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::empty () const
 {
-	bool	bRetval = CBTreeBase_t::size () == 0ULL;
+	bool	bRetval = CBTreeBaseDefaults_t::size () == 0ULL;
 
 	return (bRetval);
 }
@@ -93,8 +168,8 @@ This method returns the number of data entries stored by this b-tree instance.
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::size () const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::size () const
 {
 	if (m_pData == NULL)
 	{
@@ -114,8 +189,8 @@ If successful the method returns true, otherwise false.
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::clear ()
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::clear ()
 {
 	if (m_pData != NULL)
 	{
@@ -144,8 +219,8 @@ performance drops.
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::unload ()
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::unload ()
 {
 	// unload data container
 	if (m_pData != NULL)
@@ -178,8 +253,8 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 #endif
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test_integrity () const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::test_integrity () const
 {
 	if (m_pData == NULL)
 	{
@@ -189,49 +264,42 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	char				*pAlloc = new char[(size_t) this->m_nTreeSize];
 	bool				retval = false;
 	std::ofstream		ofs;
+
+	BTREE_ASSERT (pAlloc != NULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::test_integrity: insufficient memory!");
 	
-	if (pAlloc != NULL)
+	memset ((void *) pAlloc, 0, sizeof (*pAlloc) * (size_t) this->m_nTreeSize);
+
+	try
 	{
-		memset ((void *) pAlloc, 0, sizeof (*pAlloc) * (size_t) this->m_nTreeSize);
-
-		try
-		{
-			retval = show_tree (ofs, this->m_nRootNode, this->m_nRootNode, pAlloc);
-		}
-		catch (exception *pE)
-		{
-			cerr << endl << "CRITICAL ERROR!" << endl;
-			cerr << "exception has not been caught during integrity test" << endl;
-			cerr << "message: " << pE->what () << endl;
-
-			retval = false;
-		}
-
-		delete [] pAlloc;
+		retval = show_tree (ofs, this->m_nRootNode, this->m_nRootNode, pAlloc);
 	}
-	else
+	catch (::std::exception *pE)
 	{
-		cerr << "ERROR: CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test_integrity: insufficient memory!" << endl;
+		::std::cerr << ::std::endl << "CRITICAL ERROR!" << ::std::endl;
+		::std::cerr << "exception has not been caught during integrity test" << ::std::endl;
+		::std::cerr << "message: " << pE->what () << ::std::endl;
 
 		retval = false;
 	}
 
+	delete [] pAlloc;
+
 	return (retval);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_integrity (const char *pFilename) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::show_integrity (const char *pFilename) const
 {
 	char				*pAlloc = new char[(size_t) this->m_nTreeSize];
 	std::ofstream		ofs ((const char *) pFilename, std::ofstream::out | std::ofstream::trunc);
 
-	BTREE_ASSERT (pAlloc != NULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_integrity: insufficient memory to generate integrty page");
+	BTREE_ASSERT (pAlloc != NULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::show_integrity: insufficient memory to generate integrty page");
 
-#if defined (WIN32)
+#if defined (_MSC_VER)
 
 	DWORD	nErrCode = GetLastError ();
 
-	BTREE_ASSERT ((nErrCode == ERROR_SUCCESS) || (nErrCode == ERROR_ALREADY_EXISTS), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_integrity: unexpected error code");
+	BTREE_ASSERT ((nErrCode == ERROR_SUCCESS) || (nErrCode == ERROR_ALREADY_EXISTS), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::show_integrity: unexpected error code");
 
 	// under windows the std::ofstream constructor flags that a file already exists by setting the error code
 	// returned by GetLastError (), to ERROR_ALREADY_EXISTS (0xb7), which is not an error per se.
@@ -245,13 +313,13 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 	memset ((void *) pAlloc, 0, sizeof (*pAlloc) * (size_t) this->m_nTreeSize);
 
-	ofs << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" << endl;
-	ofs << "<HTML>" << endl;
-	ofs << "<head>" << endl;
-	ofs << "<title>bayer tree integrity</title>" << endl;
-	ofs << "<h1>bayer tree integrity</h1>" << endl;
-	ofs << "</head>" << endl;
-	ofs << "<body>" << endl;
+	ofs << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" << ::std::endl;
+	ofs << "<HTML>" << ::std::endl;
+	ofs << "<head>" << ::std::endl;
+	ofs << "<title>bayer tree integrity</title>" << ::std::endl;
+	ofs << "<h1>bayer tree integrity</h1>" << ::std::endl;
+	ofs << "</head>" << ::std::endl;
+	ofs << "<body>" << ::std::endl;
 
 	if (m_pData != NULL)
 	{
@@ -261,22 +329,22 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 			{
 				show_tree (ofs, this->m_nRootNode, this->m_nRootNode, pAlloc);
 			}
-			catch (exception *pE)
+			catch (::std::exception *pE)
 			{
-				cerr << endl << "CRITICAL ERROR!" << endl;
-				cerr << "exception has not been caught during integrity display" << endl;
-				cerr << "message: " << pE->what () << endl;
+				::std::cerr << ::std::endl << "CRITICAL ERROR!" << ::std::endl;
+				::std::cerr << "exception has not been caught during integrity display" << ::std::endl;
+				::std::cerr << "message: " << pE->what () << ::std::endl;
 			}
 
 			try
 			{
 				shownodelist (ofs, pAlloc);
 			}
-			catch (exception *pE)
+			catch (::std::exception *pE)
 			{
-				cerr << endl << "CRITICAL ERROR!" << endl;
-				cerr << "exception has not been caught during node list display" << endl;
-				cerr << "message: " << pE->what () << endl;
+				::std::cerr << ::std::endl << "CRITICAL ERROR!" << ::std::endl;
+				::std::cerr << "exception has not been caught during node list display" << ::std::endl;
+				::std::cerr << "message: " << pE->what () << ::std::endl;
 			}
 		}
 		m_pData->set_cacheFreeze (false);
@@ -285,20 +353,20 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 		{
 			m_pData->showdump (ofs, this->m_nTreeSize, pAlloc);
 		}
-		catch (exception *pE)
+		catch (::std::exception *pE)
 		{
-			cerr << endl << "CRITICAL ERROR!" << endl;
-			cerr << "exception has not been caught during data dump display" << endl;
-			cerr << "message: " << pE->what () << endl;
+			::std::cerr << ::std::endl << "CRITICAL ERROR!" << ::std::endl;
+			::std::cerr << "exception has not been caught during data dump display" << ::std::endl;
+			::std::cerr << "message: " << pE->what () << ::std::endl;
 		}
 	}
 	else
 	{
-		ofs << "data layer not initialised!" << endl;
+		ofs << "data layer not initialised!" << ::std::endl;
 	}
 
-	ofs << "</body>" << endl;
-	ofs << "</HTML>" << endl;
+	ofs << "</body>" << ::std::endl;
+	ofs << "</HTML>" << ::std::endl;
 
 	ofs.close ();
 
@@ -307,14 +375,14 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 #if defined (BTREEFRAMEWORK_TEST_BENCH_ENABLED)
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::test () const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::test () const
 {
 
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_atomic_testing (bool bEnable)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::set_atomic_testing (bool bEnable)
 {
 	bEnable;
 }
@@ -331,9 +399,9 @@ The result is a reference to this instance.
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::operator=
-	(const CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::operator=
+	(const CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &rBT)
 {
 	// if this is not the same instance as the referenced b-tree (rBT) ...
 	if (this != &rBT)
@@ -355,15 +423,15 @@ create_root
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::create_root ()
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::create_root ()
 {
 	// if the tree structure has not been generated ...
 	if (m_pData == NULL)
 	{
 		// ... then create the data layer
 		
-		m_pData = new _t_datalayer
+		m_pData = new data_layer_type
 								(
 									*m_pClDataLayerProperties,
 									this->m_sCacheDescription.nMinNumberOfBytesPerSuperBlock, 
@@ -373,10 +441,10 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 								);
 
 		// test if bring up was successful
-		BTREE_ASSERT (m_pData != NULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::create_root: data object not created");
+		BTREE_ASSERT (m_pData != NULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::create_root: data object not created");
 
 		// allocate root node
-		this->m_nRootNode = create_node ((_t_nodeiter) ~0x0);
+		this->m_nRootNode = create_node ((node_iter_type) ~0x0);
 
 		m_pData->set_root_node (this->m_nRootNode);
 	}
@@ -391,21 +459,18 @@ create_node
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::create_node (_t_nodeiter nParent)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::create_node (typename _t_datalayerproperties::node_iter_type nParent)
 {
 	node_t					*psNodeDesc;
-	_t_nodeiter				ui64, retval;
-	_t_nodeiter				uj64;
+	node_iter_type			ui64, retval;
+	node_iter_type			uj64;
 
-	// if tree structure has not been generated ...
-	if (m_pData == NULL)
-	{
-		// ... then create root node
-		create_root ();
+#if defined (_DEBUG)
 
-		return (this->m_nRootNode);
-	}
+	BTREE_ASSERT (m_pData != NULL, "CBTreeBaseDefaults<>::create_node: data layer not initialized!");
+
+#endif
 
 	do
 	{
@@ -413,13 +478,13 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 		if (this->m_nNextAlloc >= this->m_nTreeSize)
 		{
 			// ... then extend available number of nodes
-			this->m_nTreeSize += (_t_nodeiter) this->m_nGrowBy;
+			this->m_nTreeSize += (node_iter_type) this->m_nGrowBy;
 
 			// determine and set new data layer size size
 			m_pData->set_size (this->m_nTreeSize);
 
 			// unset allocation vector in newly created space
-			for (uj64 = this->m_nTreeSize - (_t_nodeiter) this->m_nGrowBy; uj64 < this->m_nTreeSize; uj64++)
+			for (uj64 = this->m_nTreeSize - (node_iter_type) this->m_nGrowBy; uj64 < this->m_nTreeSize; uj64++)
 			{
 				reset_reservation (uj64);
 			}
@@ -435,7 +500,7 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 				set_reservation (ui64);
 
 				// if parent node has not been determined (ie. root node is being created) ...
-				if (nParent == (_t_nodeiter) ~0x0)
+				if (nParent == (node_iter_type) ~0x0)
 				{
 					// update parent parameter to new root
 					nParent = ui64;
@@ -480,13 +545,13 @@ add_to_node
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::add_to_node (_ti_pos sPos, const _t_data &rData, _t_nodeiter nNode, uint32_t nDepth, _t_nodeiter &rnRsltNode, _t_subnodeiter &rnRsltSub, _t_sizetype *pnPos)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::add_to_node (_ti_pos sPos, const _t_data &rData, typename _t_datalayerproperties::node_iter_type nNode, uint32_t nDepth, typename _t_datalayerproperties::node_iter_type &rnRsltNode, typename _t_datalayerproperties::sub_node_iter_type &rnRsltSub, typename _t_datalayerproperties::size_type *pnPos)
 {
-	_t_sizetype				retval = 0ULL;
-	_t_nodeiter				*pnSubNode;
-	_t_subnodeiter			nSubPos;
-	_t_sizetype				*pnSerVector;
+	size_type				retval = 0ULL;
+	node_iter_type			*pnSubNode;
+	sub_node_iter_type		nSubPos;
+	size_type				*pnSerVector;
 
 	// store node identifier on rebuild stack
 	this->attache_traced_node (nNode);
@@ -544,7 +609,7 @@ _t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 
 		if (pnPos != NULL)
 		{
-			(*pnPos) += (_t_sizetype) nSubPos;
+			(*pnPos) += (size_type) nSubPos;
 		}
 	}
 
@@ -560,7 +625,7 @@ _t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	if ((nDepth == 0) && (nNode != this->m_nRootNode))
 	{
 #if defined (_DEBUG)
-		BTREE_ASSERT (this->rebuild_FIFO_fillstate () == 1ULL, "CBTreeBaseDefaults<_t_data, _t_datalayerproperties, _t_datalayer, _t_sizetype, _t_nodeiter, _t_subnodeiter>::add_to_node: FIFO corruption");
+		BTREE_ASSERT (this->rebuild_FIFO_fillstate () == 1ULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::add_to_node: FIFO corruption");
 #endif
 
 		// ... then update new root node
@@ -571,10 +636,10 @@ _t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	
 	if (nDepth == 0)
 	{
-		BTREE_ASSERT (this->rebuild_FIFO_fillstate () == 0UL, "CBTreeBaseDefaults<_t_data, _t_datalayerproperties, _t_datalayer, _t_sizetype, _t_nodeiter, _t_subnodeiter>::add_to_node: FIFO corruption");
+		BTREE_ASSERT (this->rebuild_FIFO_fillstate () == 0UL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::add_to_node: FIFO corruption");
 	}
 
-	BTREE_ASSERT (get_data_count (nNode) <= this->get_node_max_data_size (), "CBTreeBaseDefaults<_t_data, _t_datalayerproperties, _t_datalayer, _t_sizetype, _t_nodeiter, _t_subnodeiter>::add_to_node: node size exceeded 2 * t - 1 --> tree invalid");
+	BTREE_ASSERT (get_data_count (nNode) <= this->get_node_max_data_size (), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::add_to_node: node size exceeded 2 * t - 1 --> tree invalid");
 
 #endif
 
@@ -600,20 +665,20 @@ split_node
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::split_node (_t_nodeiter nNode)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::split_node (typename _t_datalayerproperties::node_iter_type nNode)
 {
-	_t_nodeiter					nRetval, nParent;
+	node_iter_type				nRetval, nParent;
 	_t_data						sData;
 	bool						bNewRoot;
-	_t_subnodeiter				nSubPos;
+	sub_node_iter_type			nSubPos;
 	node_t						*psNodeDesc;
 	uint32_t					i;
 
 	psNodeDesc = get_node (nNode);
 
 #if defined (_DEBUG)
-	BTREE_ASSERT (get_data_count (*psNodeDesc) == this->get_node_max_data_size (), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::split_node: split node called with inconsistent node");
+	BTREE_ASSERT (get_data_count (*psNodeDesc) == this->get_node_max_data_size (), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::split_node: split node called with inconsistent node");
 #endif
 
 	bNewRoot = psNodeDesc->nParent == nNode;
@@ -624,7 +689,7 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 		// ... then prepare a new root node
 
 		// allocate new node
-		nParent = create_node ((_t_nodeiter) ~0);
+		nParent = create_node ((node_iter_type) ~0);
 
 		// create_node has potential to re-allocate locations and thus to modify base pointers
 		// all pointers to data layer need to be re-initialised
@@ -675,8 +740,8 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	}
 
 	{
-		node_t		*psTempNewNode;
-		_t_nodeiter	*pSubNodeBase, *pNewSubNodeBase;
+		node_t			*psTempNewNode;
+		node_iter_type	*pSubNodeBase, *pNewSubNodeBase;
 
 		// load newly created node
 		psTempNewNode = get_node (nRetval);
@@ -738,7 +803,7 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 		// ... then the first data set written is always at the initial position
 		nSubPos = 0;
 
-		_t_nodeiter		*psSubNodes = get_sub_node (nParent, 0);
+		node_iter_type		*psSubNodes = get_sub_node (nParent, 0);
 
 		psSubNodes[0] = nNode;
 	}
@@ -748,7 +813,7 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 		nSubPos = find_sub_node_offset (nParent, nNode);
 
 #if defined (_DEBUG)
-		BTREE_ASSERT (nSubPos >= 0, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::split_node: subPos not found in parent node");
+		BTREE_ASSERT (nSubPos >= 0, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::split_node: subPos not found in parent node");
 #endif
 	}
 
@@ -767,12 +832,12 @@ remove_from_node
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::remove_from_node (_ti_pos sPos, _t_nodeiter nNode, uint32_t nDepth)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::remove_from_node (_ti_pos sPos, typename _t_datalayerproperties::node_iter_type nNode, uint32_t nDepth)
 {
-	_t_sizetype				nRetval = 0;
-	_t_subnodeiter			nSub;
-	_t_subnodeiter			nSubData;
+	size_type				nRetval = 0;
+	sub_node_iter_type		nSub;
+	sub_node_iter_type		nSubData;
 	_ti_pos					sNewPos;
 	bool					bFound;
 	
@@ -786,10 +851,10 @@ _t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	if (!is_leaf (nNode))
 	{
 		// ... then determine what to do in order to remove the data set in question
-		_t_sizetype			nLeftSize, nRightSize;
-		_t_nodeiter			*pnLeftNode, *pnRightNode;
-		_t_nodeiter			*pnNextNode;
-		_t_subnodeiter		nNewSub;
+		size_type			nLeftSize, nRightSize;
+		node_iter_type		*pnLeftNode, *pnRightNode;
+		node_iter_type		*pnNextNode;
+		sub_node_iter_type	nNewSub;
 		bool				bMergeNodes, bRotateNodes;
 	
 		do
@@ -935,21 +1000,21 @@ _t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	return (nRetval);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::merge_node (_t_nodeiter nNode, _t_subnodeiter nSub)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::merge_node (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub)
 {
 	node_t		*psNodeDesc;
 	
 	psNodeDesc = get_node (nNode);
 
 #if defined (_DEBUG)
-	BTREE_ASSERT (!is_leaf (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::merge_node: cannot merge from leaf node");
-	BTREE_ASSERT (nSub < get_data_count (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::merge_node: cannot merge sub nodes beyond parents data size");
+	BTREE_ASSERT (!is_leaf (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::merge_node: cannot merge from leaf node");
+	BTREE_ASSERT (nSub < get_data_count (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::merge_node: cannot merge sub nodes beyond parents data size");
 #endif
 
-	_t_nodeiter				nRetval;
-	_t_nodeiter				nLeftNode, nRightNode;
-	_t_subnodeiter			nLeftSize, nRightSize;
+	node_iter_type			nRetval;
+	node_iter_type			nLeftNode, nRightNode;
+	sub_node_iter_type		nLeftSize, nRightSize;
 	_t_data					*psData;
 
 	nLeftNode = *(get_sub_node (nNode, nSub));
@@ -967,7 +1032,7 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 		_t_data		*pRightBuffer;
 
 #if defined (_DEBUG)
-		BTREE_ASSERT (nNode == this->m_nRootNode, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::merge_node: special case merge applies for root node only");
+		BTREE_ASSERT (nNode == this->m_nRootNode, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::merge_node: special case merge applies for root node only");
 #endif
 
 		// the merge result will be root
@@ -990,10 +1055,10 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 		if (!is_leaf (nLeftNode))
 		{
 			// ... then transfer sub node data as well
-			_t_nodeiter			*pLeftSub;
-			_t_nodeiter			*pMergeSub;
-			_t_nodeiter			*pRightSub;
-			_t_subnodeiter		ui32;
+			node_iter_type		*pLeftSub;
+			node_iter_type		*pMergeSub;
+			node_iter_type		*pRightSub;
+			sub_node_iter_type	ui32;
 
 			// get sub node data left, merge and right node
 			pLeftSub = get_sub_node_buffer (nLeftNode);
@@ -1001,10 +1066,10 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 			pRightSub = get_sub_node_buffer (nRightNode);
 
 			// copy all left node sub node data to bottom half of merge node
-			memcpy ((void *) pMergeSub, (void *) pLeftSub, sizeof (_t_nodeiter) * (nLeftSize + 1));
+			memcpy ((void *) pMergeSub, (void *) pLeftSub, sizeof (node_iter_type) * (nLeftSize + 1));
 
 			// copy all right node sub node data to top half of merge node
-			memcpy ((void *) &(pMergeSub[nLeftSize + 1]), (void *) pRightSub, sizeof (_t_nodeiter) * (nRightSize + 1));
+			memcpy ((void *) &(pMergeSub[nLeftSize + 1]), (void *) pRightSub, sizeof (node_iter_type) * (nRightSize + 1));
 
 			// determine new size of merged node
 			psNodeDesc->nNumData = nLeftSize + nRightSize + 1;
@@ -1027,7 +1092,7 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 		else // if the nodes being merged from were leaf nodes ...
 		{
 			// ... then determine new size of merge node 
-			psNodeDesc->nNumData = 0 - (_t_subnodeiter) psNodeDesc->nMaxIdx;
+			psNodeDesc->nNumData = 0 - (sub_node_iter_type) psNodeDesc->nMaxIdx;
 		}
 
 		// remove left and right node from reservation list
@@ -1084,9 +1149,9 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	if (!is_leaf (nLeftNode))
 	{
 		// ... then merge sub node data as well
-		_t_nodeiter			*pLeftSub;
-		_t_nodeiter			*pRightSub;
-		_t_subnodeiter		ui32;
+		node_iter_type		*pLeftSub;
+		node_iter_type		*pRightSub;
+		sub_node_iter_type	ui32;
 
 		// load left and right sub node's data
 		pLeftSub = get_sub_node_buffer (nLeftNode);
@@ -1104,7 +1169,7 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 			psNodeDesc = get_node (pRightSub[ui32]);
 
 #if defined (_DEBUG)
-			BTREE_ASSERT (psNodeDesc->nParent == nRightNode, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::merge_node: unexpected parent node found while merging");
+			BTREE_ASSERT (psNodeDesc->nParent == nRightNode, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::merge_node: unexpected parent node found while merging");
 #endif
 
 			// update sub node to left node as its parent
@@ -1147,14 +1212,14 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	return (nRetval);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rotate (_t_nodeiter nNode, _t_subnodeiter nSub, _t_subnodeiter &newSub, bool bLeftToRight)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rotate (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, typename _t_datalayerproperties::sub_node_iter_type &newSub, bool bLeftToRight)
 {
-	_t_nodeiter				*pnLeftNode, *pnRightNode;
-	_t_nodeiter				*pnSubNode;
-	_t_nodeiter				nSrcNode, nDstNode;
-	_t_subnodeiter			nSrcSub, nDstSub;
-	_t_subnodeiter			nSrcData;
+	node_iter_type			*pnLeftNode, *pnRightNode;
+	node_iter_type			*pnSubNode;
+	node_iter_type			nSrcNode, nDstNode;
+	sub_node_iter_type		nSrcSub, nDstSub;
+	sub_node_iter_type		nSrcData;
 	_t_data					*psData;
 	node_t					*psDescLeft; // *psDescRight;
 	int						triMod;
@@ -1212,7 +1277,7 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	}
 	else
 	{
-		BTREE_ASSERT (false, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rotate: two nodes which have the same parent are not on the same level");
+		BTREE_ASSERT (false, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rotate: two nodes which have the same parent are not on the same level");
 	}
 
 	// get data from source position
@@ -1234,7 +1299,7 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	}
 	else
 	{
-		BTREE_ASSERT (false, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::rotate: two nodes which have the same parent are not on the same level");
+		BTREE_ASSERT (false, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rotate: two nodes which have the same parent are not on the same level");
 	}
 
 	// destination node and rotate over node need to have their indexing updated
@@ -1244,16 +1309,16 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	this->rebuild_node (nNode);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::replace_with_adjacent_entry (_t_nodeiter nNode, _t_subnodeiter nSub, bool bFromLeft)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::replace_with_adjacent_entry (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, bool bFromLeft)
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (!is_leaf (nNode), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::replace_with_adjacent_entry: method has been used on a leaf node!");
+	BTREE_ASSERT (!is_leaf (nNode), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::replace_with_adjacent_entry: method has been used on a leaf node!");
 #endif
 
 	_t_data				*psData;
-	_t_nodeiter			nAdjNode;
-	_t_subnodeiter		nAdjSub;
+	node_iter_type		nAdjNode;
+	sub_node_iter_type	nAdjSub;
 	bool				bBounce;
 
 	// if entry has to be copied from the nearest previous position ...
@@ -1269,9 +1334,9 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	}
 
 #if defined (_DEBUG)
-	BTREE_ASSERT (bBounce == false, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::replace_with_adjacent_entry: While looking for an adjacent entry, the method unexpectedly hit a termination!"); 
+	BTREE_ASSERT (bBounce == false, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::replace_with_adjacent_entry: While looking for an adjacent entry, the method unexpectedly hit a termination!"); 
 
-	BTREE_ASSERT (is_leaf (nAdjNode), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::replace_with_adjacent_entry: Adjacent node must be a leaf node!");
+	BTREE_ASSERT (is_leaf (nAdjNode), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::replace_with_adjacent_entry: Adjacent node must be a leaf node!");
 #endif
 	
 	// get data from previously determined nearest position
@@ -1281,24 +1346,24 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	replace_data (nNode, nSub, *psData);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::serialize (const _ti_pos nFrom, const _t_sizetype nLen, _t_data *pData, const bool bReadOpr) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::serialize (const _ti_pos nFrom, const typename _t_datalayerproperties::size_type nLen, _t_data *pData, const bool bReadOpr) const
 {
-	if (m_pData == NULL)
+	if (this->empty ())
 	{
 		return (0);
 	}
 
-	_t_sizetype						nRslt = 0;
-	bool							bFound;
-	bool							bBounce;
-	_t_nodeiter						nNode = this->m_nRootNode;
-	_t_subnodeiter					nSubPos, nSubData;
-	_t_nodeiter						nNextNode;
-	_t_subnodeiter					nNextSubPos;
-	_ti_pos							sPos;
-	_t_sizetype						i;
-	_t_data							*psData;
+	size_type				nRslt = 0;
+	bool					bFound;
+	bool					bBounce;
+	node_iter_type			nNode = this->m_nRootNode;
+	sub_node_iter_type		nSubPos, nSubData;
+	node_iter_type			nNextNode;
+	sub_node_iter_type		nNextSubPos;
+	_ti_pos					sPos;
+	size_type				i;
+	_t_data					*psData;
 
 	sPos = nFrom;
 
@@ -1318,9 +1383,9 @@ _t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	{
 		if (this->is_leaf (nNode))
 		{
-			_t_subnodeiter	nRem = (_t_subnodeiter) (nLen - i);
+			sub_node_iter_type	nRem = (sub_node_iter_type) (nLen - i);
 
-			if ((nSubData == 0) && (nRem >= (_t_sizetype) this->get_data_count (nNode)))
+			if ((nSubData == 0) && (nRem >= (size_type) this->get_data_count (nNode)))
 			{
 				nRem = this->get_data_count (nNode);
 
@@ -1358,8 +1423,8 @@ _t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 
 			this->move_next (nNode, nSubPos, nNextNode, nNextSubPos, bBounce);
 
-			i += (_t_sizetype) nRem;
-			nRslt += (_t_sizetype) nRem;
+			i += (size_type) nRem;
+			nRslt += (size_type) nRem;
 		}
 		else
 		{
@@ -1394,15 +1459,15 @@ _t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	return (nRslt);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_data_into_node (_t_nodeiter nNode, _t_subnodeiter nSubPos, const _t_data &rData, _t_nodeiter nSubNode, int triMod)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::insert_data_into_node (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSubPos, const _t_data &rData, typename _t_datalayerproperties::node_iter_type nSubNode, int triMod)
 {
 	node_t					*psNodeDesc;
-	_t_nodeiter				nNewNode;
-	_t_subnodeiter			nNumData;
+	node_iter_type			nNewNode;
+	sub_node_iter_type		nNumData;
 	
 #if defined (_DEBUG)
-	BTREE_ASSERT (get_data_count (nNode) <= this->get_node_max_data_size (), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_data_into_node: node exceeds possible data entries");
+	BTREE_ASSERT (get_data_count (nNode) <= this->get_node_max_data_size (), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::insert_data_into_node: node exceeds possible data entries");
 #endif
 
 	// load node descriptor
@@ -1445,7 +1510,7 @@ _t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t
 		nNumData = get_data_count (*psNodeDesc);
 	}
 
-	_t_nodeiter		*pSubNodes;
+	node_iter_type		*pSubNodes;
 
 	/*
 	** triMod - three state modifier
@@ -1467,7 +1532,7 @@ _t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t
 		psSubNodeDesc = get_node (nSubNode);
 
 		psSubNodeDesc->nParent = nNode;
-		
+
 		// insert node into sub node buffer
 		memmove ((void *) &(pSubNodes[nSubPos + triMod + 1]), (void *) &(pSubNodes[nSubPos + triMod]), sizeof (*pSubNodes) * ((nNumData + 1) - (nSubPos + triMod)));
 		pSubNodes[nSubPos + triMod] = nSubNode;
@@ -1475,7 +1540,7 @@ _t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t
 #if defined (_DEBUG)
 	else
 	{
-		BTREE_ASSERT (is_leaf (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::insert_data_into_node: insert_data_into_node expects either subNodeBeforeData or subNodeAfterData to contain a valid node index when processing an inner node");
+		BTREE_ASSERT (is_leaf (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::insert_data_into_node: insert_data_into_node expects either subNodeBeforeData or subNodeAfterData to contain a valid node index when processing an inner node");
 	}
 #endif
 
@@ -1509,27 +1574,27 @@ _t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t
 	return (nSubPos);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::remove_data_from_leaf (_t_nodeiter nNode, _t_subnodeiter nSub)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::remove_data_from_leaf (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub)
 {
 #if defined (_DEBUG)
 	node_t		*psNodeDesc;
 
 	psNodeDesc = get_node (nNode);
 
-	BTREE_ASSERT (is_leaf (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::remove_data_from_leaf: remove_data_from_leaf ought to be called on leaf nodes");
-	BTREE_ASSERT (get_data_count (*psNodeDesc) > 0, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::remove_data_from_leaf: remove_data_from_leaf ought not to be called on empty nodes");
+	BTREE_ASSERT (is_leaf (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::remove_data_from_leaf: remove_data_from_leaf ought to be called on leaf nodes");
+	BTREE_ASSERT (get_data_count (*psNodeDesc) > 0, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::remove_data_from_leaf: remove_data_from_leaf ought not to be called on empty nodes");
 #endif
 
 	// remove data entry from node
 	remove_data_from_node (nNode, nSub, ~0x0);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::remove_data_from_node (_t_nodeiter nNode, _t_subnodeiter nSubData, _t_subnodeiter nSubNode)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::remove_data_from_node (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSubData, typename _t_datalayerproperties::sub_node_iter_type nSubNode)
 {
 	node_t					*psNodeDesc;
-	_t_subnodeiter			nNumData;
+	sub_node_iter_type		nNumData;
 
 	psNodeDesc = get_node (nNode);
 
@@ -1537,8 +1602,8 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	nNumData = get_data_count (*psNodeDesc);
 
 #if defined (_DEBUG)
-	BTREE_ASSERT (nSubData < nNumData, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::remove_data_from_node: subData exceeds nodes data size");
-	BTREE_ASSERT (nNumData > 0, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::remove_data_from_node: cannot remove in an empty node");
+	BTREE_ASSERT (nSubData < nNumData, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::remove_data_from_node: subData exceeds nodes data size");
+	BTREE_ASSERT (nNumData > 0, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::remove_data_from_node: cannot remove in an empty node");
 #endif
 
 	_t_data		*pBase;
@@ -1554,10 +1619,10 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	{
 		// ... then remove sub-node entry
 #if defined (_DEBUG)
-		BTREE_ASSERT (nSubNode <= nNumData, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::remove_data_from_node: subNode exceeds nodes sub entry size");
+		BTREE_ASSERT (nSubNode <= nNumData, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::remove_data_from_node: subNode exceeds nodes sub entry size");
 #endif
 
-		_t_nodeiter		*pSubNodes;
+		node_iter_type		*pSubNodes;
 		
 		// load all sub-node data from current node
 		pSubNodes = get_sub_node_buffer (nNode);
@@ -1582,8 +1647,8 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	this->update_time_stamp ();
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::replace_data (_t_nodeiter nNode, _t_subnodeiter nSub, const _t_data &rData)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::replace_data (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, const _t_data &rData)
 {
 	// replace data by overwriting old data
 	_t_data		*psData = get_data (nNode, nSub);
@@ -1591,16 +1656,16 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	*psData = rData;
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find_sub_node_offset (_t_nodeiter nNode, _t_nodeiter nSubNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::find_sub_node_offset (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::node_iter_type nSubNode) const
 {
-	_t_subnodeiter		nRetval = ~0;
-	_t_subnodeiter		i;
-	_t_subnodeiter		nNumSub;
-	_t_nodeiter			*pSubNodes;
+	sub_node_iter_type	nRetval = ~0;
+	sub_node_iter_type	i;
+	sub_node_iter_type	nNumSub;
+	node_iter_type		*pSubNodes;
 
 #if defined (_DEBUG)
-	BTREE_ASSERT (!is_leaf (nNode), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::find_sub_node_offset: method was used on leaf node!");
+	BTREE_ASSERT (!is_leaf (nNode), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::find_sub_node_offset: method was used on leaf node!");
 #endif
 
 	// if node is not a leaf node ...
@@ -1630,11 +1695,11 @@ _t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t
 	return (nRetval);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::move_prev (_t_nodeiter nNode, _t_subnodeiter nSub, _t_nodeiter &nPrevNode, _t_subnodeiter &nPrevSubPos, bool &bBounce) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::move_prev (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, typename _t_datalayerproperties::node_iter_type &nPrevNode, typename _t_datalayerproperties::sub_node_iter_type &nPrevSubPos, bool &bBounce) const
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::move_prev: requested node exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::move_prev: requested node exceeds tree size");
 #endif
 
 	// search for nearest left or previous entry
@@ -1712,11 +1777,11 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	}
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::move_next (_t_nodeiter nNode, _t_subnodeiter nSub, _t_nodeiter &nNextNode, _t_subnodeiter &nNextSubPos, bool &bBounce) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::move_next (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, typename _t_datalayerproperties::node_iter_type &nNextNode, typename _t_datalayerproperties::sub_node_iter_type &nNextSubPos, bool &bBounce) const
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::move_next: requested node exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::move_next: requested node exceeds tree size");
 #endif
 
 	// search for nearest left or previous entry
@@ -1762,7 +1827,7 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 				psNodeDesc = get_node (nNode);
 
-				BTREE_ASSERT (nNextSubPos <= get_data_count (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::move_next: move_next went beyond nodes max data entries");
+				BTREE_ASSERT (nNextSubPos <= get_data_count (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::move_next: move_next went beyond nodes max data entries");
 
 			// continue until a parent node has been found, where the current node's position is not on the right
 			} while (nNextSubPos == get_data_count (*psNodeDesc));
@@ -1793,11 +1858,100 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	}
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_reservation (_t_nodeiter nNode)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::convert_pos_to_container_pos (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::size_type nPos, typename _t_datalayerproperties::node_iter_type &rRsltNode, typename _t_datalayerproperties::sub_node_iter_type &rRsltSubPos) const
+{
+	sub_node_iter_type	nMax;
+	sub_node_iter_type	nMin;
+	sub_node_iter_type	nMid;
+	bool				isLeaf = is_leaf (nNode);
+	size_type			nMaxIdx;
+	node_iter_type		*pnSubNode;
+	size_type			*pnSerVector;
+
+	// if nNode is inner node ...
+	if (!isLeaf)
+	{
+		// ... then search for the next sub node or find data in current node
+		
+		// if the linear position is smaller than the node size parameter ...
+		if (nPos < (node_iter_type) this->get_node_min_data_size () - 1)
+		{
+			// ... then the resulting location is guaranteed to be in the initial sub-node
+			nMax = 0;
+
+			// Hence, searching is skipped.
+		}
+		else
+		{
+			// ... otherwise prepare for searching
+			pnSerVector = this->get_serVector (nNode);
+
+			nMax = this->get_data_count (nNode);
+		}
+
+		nMin = 0;
+
+		while (nMax != nMin)
+		{
+			nMid = (nMax + nMin) / 2;
+
+			nMaxIdx = pnSerVector[nMid];
+			
+			if (nPos == nMaxIdx)
+			{ // if data is in current node, then return with result immediately
+
+				rRsltNode = nNode;
+				rRsltSubPos = nMid;
+				
+				return;
+			}
+
+			if (nPos < nMaxIdx)
+			{
+				nMax = nMid;
+			}
+			else
+			{
+				nMin = nMid + 1;
+			}
+		}
+
+		if (nMin > 0)
+		{
+			if (nMin >= this->get_data_count (nNode))
+			{
+				nPos -= pnSerVector[this->get_data_count (nNode) - 1] + 1;
+			}
+			else
+			{
+				nPos -= pnSerVector[nMin - 1] + 1;
+			}
+		}
+
+		pnSubNode = get_sub_node (nNode, nMin);
+
+		convert_pos_to_container_pos (*pnSubNode, nPos, rRsltNode, rRsltSubPos);
+	}
+	else
+	{
+#if defined (_DEBUG)
+
+		BTREE_ASSERT (nPos < 0x80000000ULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::convert_pos_to_container_pos: nodes sub element addressing exceeds possible node size");
+
+#endif
+		// ... otherwise return with result here
+
+		rRsltNode = nNode;
+		rRsltSubPos = (sub_node_iter_type) (nPos);
+	}
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::set_reservation (typename _t_datalayerproperties::node_iter_type nNode)
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_reservation: requested reservation exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::set_reservation: requested reservation exceeds tree size");
 #endif
 
 	node_maintainence_t		*psMaintenance;
@@ -1809,11 +1963,11 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	psMaintenance->uVector |= BAYERTREE_NODE_MAINTAINANCE_ALLOCATION;
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_reservation (_t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_reservation (typename _t_datalayerproperties::node_iter_type nNode) const
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_reservation: requested reservation information beyond tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_reservation: requested reservation information beyond tree size");
 #endif
 
 	node_maintainence_t		*psMaintenance;
@@ -1825,11 +1979,11 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	return ((psMaintenance->uVector & BAYERTREE_NODE_MAINTAINANCE_ALLOCATION) != 0 ? true : false);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::unset_reservation (_t_nodeiter nNode)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::unset_reservation (typename _t_datalayerproperties::node_iter_type nNode)
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::unset_reservation: requested reservation release exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::unset_reservation: requested reservation release exceeds tree size");
 #endif
 
 	node_maintainence_t		*psMaintenance;
@@ -1841,11 +1995,11 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	psMaintenance->uVector &= ~BAYERTREE_NODE_MAINTAINANCE_ALLOCATION;
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reset_reservation (_t_nodeiter nNode)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::reset_reservation (typename _t_datalayerproperties::node_iter_type nNode)
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::reset_reservation: requested reservation release exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::reset_reservation: requested reservation release exceeds tree size");
 #endif
 
 	node_maintainence_t		*psMaintenance;
@@ -1857,8 +2011,8 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	psMaintenance->uVector = 0;
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_count (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_data_count (const typename _t_datalayerproperties::node_iter_type nNode) const
 {// returns the present number of entries in a node
 	node_t		*psNodeDesc;
 
@@ -1867,28 +2021,28 @@ _t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t
 	return (get_data_count (*psNodeDesc));
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_count (const node_t &sNodeDesc) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_data_count (const node_t &sNodeDesc) const
 {// returns the present number of entries from a node descriptor
-	_t_subnodeiter		nRetval;
+	sub_node_iter_type		nRetval;
 
 	// if node descriptor is displaying a leaf node ...
 	if (is_leaf (sNodeDesc))
 	{
 		// ... then return the inverted number of data entries, since leaf nodes store the their fill state as a 2's complement
-		nRetval = (_t_subnodeiter) (0 - sNodeDesc.nNumData);
+		nRetval = (sub_node_iter_type) (0 - sNodeDesc.nNumData);
 	}
 	else
 	{
 		// ... otherwise return fill state
-		nRetval = (_t_subnodeiter) sNodeDesc.nNumData;
+		nRetval = (sub_node_iter_type) sNodeDesc.nNumData;
 	}
 
 	return (nRetval);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_sub_node_count (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_sub_node_count (const typename _t_datalayerproperties::node_iter_type nNode) const
 {// returns the present number of sub nodes
 	node_t		*psNodeDesc;
 
@@ -1897,28 +2051,25 @@ _t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t
 	return (get_sub_node_count (*psNodeDesc));
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_subnodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_sub_node_count (const node_t &sNodeDesc) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_sub_node_count (const node_t &sNodeDesc) const
 {
-	_t_subnodeiter		nRetval;
+	sub_node_iter_type		nRetval;
 
-	// if node descriptor is displaying a leaf node ...
-	if (is_leaf (sNodeDesc))
-	{
-		// ... then return zero sub nodes
-		nRetval = (_t_subnodeiter) 0;
-	}
-	else
-	{
-		// ... otherwise return number of sub nodes
-		nRetval = (_t_subnodeiter) (sNodeDesc.nNumData + 1);
-	}
+#if defined (_DEBUG)
+
+	BTREE_ASSERT (!is_leaf (sNodeDesc), "CBTreeBaseDefaults<>::get_sub_node_count: This method is not supposed to be called on a leaf node!");
+
+#endif
+	
+	// return number of sub nodes
+	nRetval = (sub_node_iter_type) (sNodeDesc.nNumData + 1);
 
 	return (nRetval);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_max_index (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_max_index (const typename _t_datalayerproperties::node_iter_type nNode) const
 {// returns number of data entries in sub tree contain node (nNode)
 	node_t		*psNodeDesc;
 
@@ -1927,14 +2078,14 @@ _t_sizetype CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 	return (get_max_index (*psNodeDesc));
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype  CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_max_index (const node_t &sNodeDesc) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type  CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_max_index (const node_t &sNodeDesc) const
 {// returns number of data entries in sub tree displayed by node descriptor
 	return (sNodeDesc.nMaxIdx);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_parent (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_parent (const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 	node_t		*psNodeDesc;
 
@@ -1944,20 +2095,20 @@ _t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_su
 
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_nodeiter CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_parent (const node_t &sNodeDesc) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_parent (const node_t &sNodeDesc) const
 {
 	return (sNodeDesc.nParent);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::is_root (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::is_root (const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 	return (nNode == this->m_nRootNode);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::is_leaf (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::is_leaf (const typename _t_datalayerproperties::node_iter_type nNode) const
 {// returns if node (nNode) is a leaf node or an inner node
 	node_t		*psNodeDesc;
 
@@ -1966,10 +2117,10 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	return (is_leaf (*psNodeDesc));
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::is_leaf (const node_t &nodeDesc) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::is_leaf (const node_t &nodeDesc) const
 {
-//	const _t_subnodeiter		nMask = ~(((_t_subnodeiter) ~0) >> 1);
+//	const sub_node_iter_type	nMask = ~(((sub_node_iter_type) ~0) >> 1);
 //	bool						bRslt = nodeDesc.nNumData == 0;
 //
 //	bRslt = bRslt || ((nMask & nodeDesc.nNumData) != 0x0);
@@ -1983,21 +2134,21 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	// return value = ((signed type) nodeDesc.nNumData) >= 0
 	//
 	// the code below rotates the input value nNumData from an unsinged space
-	// to that of a singed space and therefore allows for a single compare
+	// to that of a signed space and therefore allows for a single compare
 	// operation instead of two (see code above)
-	const _t_subnodeiter		nOffset = ~(((_t_subnodeiter) ~0) >> 1);
-	_t_subnodeiter				nRot = nodeDesc.nNumData + nOffset;
+	const sub_node_iter_type		nOffset = ~(((sub_node_iter_type) ~0) >> 1);
+	sub_node_iter_type				nRot = nodeDesc.nNumData + nOffset;
 
 	return (nRot <= nOffset);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-typename CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::node_t*
-	CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_node (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::node_t*
+	CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_node (const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 #if defined (_DEBUG)
 
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_node: requested node exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_node: requested node exceeds tree size");
 
 #endif
 
@@ -2005,8 +2156,8 @@ typename CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subno
 	return (m_pData->template get_pooledData <node_t> (this->m_nPoolIDnodeDesc, nNode));
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_nodeiter* CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_sub_node (const _t_nodeiter nNode, const _t_subnodeiter nEntry) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type* CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_sub_node (const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nEntry) const
 {
 #if defined (_DEBUG)
 	node_t	*psNodeDesc;
@@ -2015,50 +2166,50 @@ _t_nodeiter* CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_s
 
 	if (nNode != this->m_nRootNode)
 	{
-		BTREE_ASSERT (!is_leaf (nNode), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_sub_node: get_sub_node cannot be used with leaf nodes");
+		BTREE_ASSERT (!is_leaf (nNode), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_sub_node: get_sub_node cannot be used with leaf nodes");
 	}
 
-	BTREE_ASSERT (nEntry <= get_data_count (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_sub_node: requested sub position exceeds node size");
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_sub_node: requested node exceeds tree size");
+	BTREE_ASSERT (nEntry <= get_data_count (*psNodeDesc), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_sub_node: requested sub position exceeds node size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_sub_node: requested node exceeds tree size");
 #endif
 
 	// read sub node ID from IO layer
-	return (m_pData->template get_pooledData<_t_nodeiter> (this->m_nPoolIDsubNodes, nNode, nEntry));
+	return (m_pData->template get_pooledData<node_iter_type> (this->m_nPoolIDsubNodes, nNode, nEntry));
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_nodeiter* CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_sub_node_buffer (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type* CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_sub_node_buffer (const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_sub_node_buffer: requested node exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_sub_node_buffer: requested node exceeds tree size");
 #endif
 
 	// read sub node buffer from IO layer
-	return (m_pData->template get_pooledData<_t_nodeiter> (this->m_nPoolIDsubNodes, nNode));
+	return (m_pData->template get_pooledData<node_iter_type> (this->m_nPoolIDsubNodes, nNode));
 
 	// in the above call get_data_count is in use instead of get_sub_node_count
 	// In the event a new node is created it has size zero and would therefore be deemed
 	// as a leaf node. In that case get_sub_node_count would always return zero, which is incorrect here.
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_data* CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data (const _t_nodeiter nNode, const _t_subnodeiter nEntry) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+_t_data* CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_data (const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nEntry) const
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data: requested node exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_data: requested node exceeds tree size");
 
-	BTREE_ASSERT (nEntry < this->get_node_max_data_size (), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data: requested entry exceeds possible node size");
+	BTREE_ASSERT (nEntry < this->get_node_max_data_size (), "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_data: requested entry exceeds possible node size");
 #endif
 
 	// read data entry from IO layer
 	return (m_pData->template get_pooledData<_t_data> (this->m_nPoolIDdata, nNode, nEntry));
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_data (const _t_nodeiter nNode, const _t_subnodeiter nEntry, _t_data sData)
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::set_data (const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nEntry, _t_data sData)
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::set_data: requested node exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::set_data: requested node exceeds tree size");
 #endif
 
 	// write data entry to IO layer
@@ -2067,11 +2218,11 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	psData[nEntry] = sData;
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_data* CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_buffer (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+_t_data* CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_data_buffer (const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 #if defined (_DEBUG)
-	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_data_buffer: requested node exceeds tree size");
+	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_data_buffer: requested node exceeds tree size");
 #endif
 
 	// read all data entries of one node from IO layer
@@ -2093,18 +2244,18 @@ Note:	The method assumes that the location pVector is pointing is big enough to
 
 */
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-_t_sizetype* CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::get_serVector (const _t_nodeiter nNode) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::size_type* CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_serVector (const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 #if defined (_DEBUG)
 	BTREE_ASSERT (nNode < this->m_nTreeSize, "CBTreeBaseDefaults<>::get_serVector: requested node exceeds tree size");
 #endif
 
-	return (m_pData->template get_pooledData<_t_sizetype> (this->m_nPoolIDserialVector, nNode));
+	return (m_pData->template get_pooledData<size_type> (this->m_nPoolIDserialVector, nNode));
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::auto_shrink_inc ()
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::auto_shrink_inc ()
 {
 	// if auto shrink is due ...
 	if (this->m_nAutoShrinkCounter >= this->m_nAutoShrinkThreshold)
@@ -2121,8 +2272,8 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	}
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::auto_shrink_dec ()
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::auto_shrink_dec ()
 {
 	// if auto shrink counter won't wrap on next decrement ...
 	if (this->m_nAutoShrinkCounter > 0)
@@ -2132,11 +2283,11 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	}
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::auto_shrink ()
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::auto_shrink ()
 {
-	_t_nodeiter		i;
-	_t_nodeiter		nNewSize;
+	node_iter_type		i;
+	node_iter_type		nNewSize;
 
 	// find node with highest id
 	for (i = this->m_nTreeSize; i > 0; )
@@ -2168,16 +2319,536 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	this->m_nTreeSize = nNewSize + 1;
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::show_tree (std::ofstream &ofs, _t_nodeiter nNode, _t_nodeiter nParent, char *pAlloc) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_node_max_sub_nodes () const
+{// returns the maximum number of sub node entries per node
+	return (m_nNodeSize * 2);
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_node_min_data_size () const
+{// returns the minimum number of data entries per node
+
+#if defined (_DEBUG)
+
+	BTREE_ASSERT (!this->is_leaf (this->m_nRootNode), "ERROR: get_node_min_data_size (): This method does not apply if the root node is a leaf node!");
+
+#endif
+
+	return (m_nNodeSize);
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::sub_node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_node_max_data_size () const
+{// returns the maximum number of data entries per node
+	return ((m_nNodeSize * 2) - 1);
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rebuild_FIFO_put (typename _t_datalayerproperties::node_iter_type nNode)
+{
+#if defined (_DEBUG)
+	BTREE_ASSERT (rebuild_FIFO_fillstate () <= m_nRebuildFIFOSize, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rebuild_FIFO_put: FIFO overflow");
+#endif
+
+	// if rebuild FIFO is full ...
+	if (rebuild_FIFO_fillstate () == m_nRebuildFIFOSize)
+	{
+		// ... then allocate more space, copy current content to new space and destroy old space
+		uint32_t		u;
+		uint32_t		oldFillState = rebuild_FIFO_fillstate ();
+		uint32_t		newRebuildFIFOsize = (m_nRebuildFIFOSize == 0) ? 2 : m_nRebuildFIFOSize << 1;
+		node_iter_type	*pNew = new node_iter_type [newRebuildFIFOsize];
+
+		BTREE_ASSERT (pNew != NULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rebuild_FIFO_put: insufficient memory");
+
+		// copy rebuild FIFO content to new space
+		for (u = 0UL; rebuild_FIFO_fillstate () > 0UL; u++)
+		{
+			pNew[u] = rebuild_FIFO_get ();
+		}
+
+		// update FIFO state according to new space
+		m_nRebuildFIFOwritePos = oldFillState;
+		m_nRebuildFIFOreadPos = 0UL;
+
+		// if old space is valid ...
+		if (m_pRebuildFIFO != NULL)
+		{
+			// ... then delete old space
+			delete [] m_pRebuildFIFO;
+		}
+
+		// assign new space and maximum size to member variables
+		m_pRebuildFIFO = pNew;
+		m_nRebuildFIFOSize = newRebuildFIFOsize;
+	}
+
+	// put node into FIFO and increment write pointer
+	m_pRebuildFIFO[(m_nRebuildFIFOwritePos++ & (m_nRebuildFIFOSize - 1UL))] = nNode;
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rebuild_FIFO_peek ()
+{
+#if defined (_DEBUG)
+	BTREE_ASSERT (m_nRebuildFIFOreadPos < m_nRebuildFIFOwritePos, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rebuild_FIFO_peek: rebuild FIFO underrun");
+#endif
+	
+	// return current node
+	return (m_pRebuildFIFO[m_nRebuildFIFOreadPos & (m_nRebuildFIFOSize - 1UL)]);
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+typename _t_datalayerproperties::node_iter_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rebuild_FIFO_get ()
+{
+#if defined (_DEBUG)
+	BTREE_ASSERT (m_nRebuildFIFOreadPos < m_nRebuildFIFOwritePos, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rebuild_FIFO_get: rebuild FIFO underrun");
+#endif
+
+	// if both the read and write pointer are exceeding the FIFO space ...
+	while ((m_nRebuildFIFOreadPos > m_nRebuildFIFOSize) && (m_nRebuildFIFOwritePos > m_nRebuildFIFOSize))
+	{
+		// ... then rewind both until at least one is within FIFO space again
+		m_nRebuildFIFOreadPos -= m_nRebuildFIFOSize;
+		m_nRebuildFIFOwritePos -= m_nRebuildFIFOSize;
+	}
+
+	// return current node and increment read pointer
+	return (m_pRebuildFIFO[m_nRebuildFIFOreadPos++ & (m_nRebuildFIFOSize - 1UL)]);
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+uint32_t CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::rebuild_FIFO_fillstate ()
+{
+	// return number of items in rebuild FIFO
+	// for this to work the write position must always be bigger than the read position
+	return (m_nRebuildFIFOwritePos - m_nRebuildFIFOreadPos);
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::attache_traced_node (typename _t_datalayerproperties::node_iter_type nNode)
+{
+#if defined (_DEBUG)
+	// only valid in debug
+
+	// if node trace buffer not allocate ...
+	if (m_pNodeTrace == NULL)
+	{
+		// ... then set minimum size and allocate trace buffer space
+		m_nNodeTraceDepthMax = 1UL;
+
+		m_pNodeTrace = new node_iter_type [m_nNodeTraceDepthMax];
+
+		BTREE_ASSERT (m_pNodeTrace != NULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::attache_traced_node: insufficient memory!");
+	}
+
+	// if trace buffer is full ...
+	if (m_nNodeTraceDepth >= m_nNodeTraceDepthMax)
+	{
+		// ... then allocate more a larger space, copy current buffer to larger space and de-allocte current buffer
+		node_iter_type		*pNodeTraceTemp;
+		uint32_t			nNodeTraceDepthTemp = m_nNodeTraceDepthMax;
+		uint32_t			ui32;
+
+		// allocte space twice as large than current space
+		m_nNodeTraceDepthMax <<= 1UL;
+
+		pNodeTraceTemp = new node_iter_type [m_nNodeTraceDepthMax];
+
+		BTREE_ASSERT (m_pNodeTrace != NULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::attache_traced_node: insufficient memory!");
+
+		// copy content to new space
+		for (ui32 = 0; ui32 < nNodeTraceDepthTemp; ui32++)
+		{
+			pNodeTraceTemp[ui32] = m_pNodeTrace[ui32];
+		}
+
+		// de-allocate current trace buffer
+		delete [] m_pNodeTrace;
+
+		// assign new buffer as current buffer
+		m_pNodeTrace = pNodeTraceTemp;
+	}
+
+	// put node into trace buffer and update pointer
+	m_pNodeTrace[m_nNodeTraceDepth] = nNode;
+
+	m_nNodeTraceDepth++;
+#endif
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::detache_traced_node ()
+{
+#if defined (_DEBUG)
+	// if trace buffer present ...
+	if (m_pNodeTrace != NULL)
+	{
+		// ... then detach current node
+		m_nNodeTraceDepth--;
+	}
+#endif
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+float CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_average_access_depth ()
+{
+	if (this->empty ())
+	{
+		return (0.0f);
+	}
+
+	if (this->is_leaf (this->m_nRootNode))
+	{
+		return (1.0f);
+	}
+
+	float		fRetval = 1.0f;
+	float		fRangeIncPerDepth;
+	float		fSize = (float) this->size ();
+	float		fRange = 1.0;
+	float		fPrevRange;
+
+	fRangeIncPerDepth = (float) this->get_node_max_sub_nodes ();
+	fRangeIncPerDepth *= 0.75f;
+
+	do
+	{
+		fRetval += 1.0f;
+
+		fPrevRange = fRange;
+
+		fRange *= fRangeIncPerDepth;
+	} while (fRange < fSize);
+
+	fRetval -= (fRange - fSize) / (fRange - fPrevRange);
+
+	return (fRetval);
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+uint32_t CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_iter_state_size () const
+{
+	return ((uint32_t) sizeof (iterator_state_t));
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::reset_iter_state (void *pState) const
+{
+	iterator_state_t	*pIterState = (iterator_state_t *) pState;
+
+	pIterState->nAssociatedPos = ~0x0;
+	pIterState->nNode = ~0x0;
+	pIterState->nSubPos = ~0x0;
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::evaluate_iter (void *pState, typename _t_datalayerproperties::size_type nOffsetPos) const
+{
+	iterator_state_t	*pIterState = (iterator_state_t *) pState;
+
+	if (nOffsetPos >= this->size ())
+	{
+		return;
+	}
+
+	this->convert_pos_to_container_pos (this->m_nRootNode, nOffsetPos, pIterState->nNode, pIterState->nSubPos);
+
+	pIterState->nAssociatedPos = nOffsetPos;
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::evaluate_iter_by_seek (void *pState, typename _t_datalayerproperties::size_type nNewPos) const
+{
+	iterator_state_t	*pIterState = (iterator_state_t *) pState;
+
+	if (pIterState->nAssociatedPos == nNewPos)
+	{
+		return;
+	}
+
+#if defined (_DEBUG)
+
+	BTREE_ASSERT (nNewPos < this->size (), "CBTreeBaseDefaults<>::evaluate_iter_by_seek: Target position exceeds container size!");
+
+#endif
+
+	node_iter_type		nNode = pIterState->nNode;
+	sub_node_iter_type	nSub = pIterState->nSubPos;
+	sub_node_iter_type	i;
+	size_type			nSize;
+	bool				bBounce = false;
+	size_type			nOperand;
+
+	if (pIterState->nAssociatedPos < nNewPos)
+	{
+		nOperand = nNewPos - pIterState->nAssociatedPos;
+
+		pIterState->nAssociatedPos = nNewPos;
+
+		switch (nOperand)
+		{
+		case	2	:	
+			{
+				move_next (nNode, nSub, pIterState->nNode, pIterState->nSubPos, bBounce);
+
+				BTREE_ASSERT (!bBounce, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::evaluate_iter_by_seek (+2): Unexpected bounce!");
+
+				nNode = pIterState->nNode;
+				nSub = pIterState->nSubPos;
+			}
+
+		case	1	:
+			{
+				move_next (nNode, nSub, pIterState->nNode, pIterState->nSubPos, bBounce);
+
+				BTREE_ASSERT (!bBounce, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::evaluate_iter_by_seek (+1): Unexpected bounce!");
+
+				break;
+			}
+
+		default		:
+			{
+				if ((is_leaf (pIterState->nNode)) && (((size_type) (pIterState->nSubPos + nOperand)) < ((size_type) get_data_count (pIterState->nNode))))
+				{
+					pIterState->nSubPos += (sub_node_iter_type) nOperand;
+				}
+				else
+				{
+					if (is_leaf (nNode))
+					{
+						nOperand -= this->get_data_count (nNode) - pIterState->nSubPos;
+
+						nSub = this->get_data_count (nNode) - 1;
+
+						this->move_next (nNode, nSub, pIterState->nNode, pIterState->nSubPos, bBounce);
+
+						BTREE_ASSERT (!bBounce, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::evaluate_iter_by_seek (+): Unexpected bounce!");
+
+						nNode = pIterState->nNode;
+						nSub = pIterState->nSubPos;
+					}
+
+					while (1)
+					{
+						node_iter_type		nSubNode = nNode;
+
+						for (nSize = 0, i = nSub; i < this->get_data_count (nNode); i++)
+						{
+							if (nSize == nOperand)
+							{
+								pIterState->nSubPos = i;
+
+								return;
+							}
+
+							nSubNode = *(this->get_sub_node (nNode, i + 1));
+
+							size_type		nMaxIdx = this->get_max_index (nSubNode);
+
+							nSize++;
+							nSize += nMaxIdx;
+
+							if (nSize > nOperand)
+							{
+								nSize -= nMaxIdx;
+
+								nOperand -= nSize;
+
+								break;
+							}
+						}
+
+						if (i < this->get_data_count (nNode))
+						{
+							nNode = nSubNode;
+
+							break;
+						}
+						else
+						{
+							pIterState->nNode = this->get_parent (nNode);
+							pIterState->nSubPos = this->find_sub_node_offset (pIterState->nNode, nNode);
+
+							nOperand -= nSize;
+
+							nNode = pIterState->nNode;
+							nSub = pIterState->nSubPos;
+						}
+					}
+
+					this->convert_pos_to_container_pos (nNode, nOperand, pIterState->nNode, pIterState->nSubPos);
+				}
+
+				break;
+			}
+		}
+	}
+	else
+	{
+		nOperand = pIterState->nAssociatedPos - nNewPos;
+
+		pIterState->nAssociatedPos = nNewPos;
+
+		switch (nOperand)
+		{
+		case	2	:	
+			{
+				move_prev (nNode, nSub, pIterState->nNode, pIterState->nSubPos, bBounce);
+
+				BTREE_ASSERT (!bBounce, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::evaluate_iter_by_seek (-2): Unexpected bounce!");
+
+				nNode = pIterState->nNode;
+				nSub = pIterState->nSubPos;
+			}
+
+		case	1	:
+			{
+				move_prev (nNode, nSub, pIterState->nNode, pIterState->nSubPos, bBounce);
+
+				BTREE_ASSERT (!bBounce, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::evaluate_iter_by_seek (-1): Unexpected bounce!");
+
+				break;
+			}
+
+		default		:
+			{
+				if ((this->is_leaf (pIterState->nNode)) && ((((size_type) pIterState->nSubPos) >= nOperand)))
+				{
+					pIterState->nSubPos -= (sub_node_iter_type) nOperand;
+				}
+				else
+				{
+					if (this->is_leaf (nNode))
+					{
+						nOperand -= pIterState->nSubPos + 1;
+
+						nSub = 0;
+
+						this->move_prev (nNode, nSub, pIterState->nNode, pIterState->nSubPos, bBounce);
+
+						BTREE_ASSERT (!bBounce, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::evaluate_iter_by_seek (-): Unexpected bounce!");
+
+						nNode = pIterState->nNode;
+						nSub = pIterState->nSubPos;
+
+						if (nOperand == 0)
+						{
+							return;
+						}
+					}
+
+					while (1)
+					{
+						node_iter_type	nSubNode = nNode;
+						bool			bEvaluate = false;
+
+						for (nSize = 0, i = nSub + 1; i > 0; )
+						{
+							i--;
+
+							nSubNode = *(this->get_sub_node (nNode, i));
+
+							size_type	nMaxIdx = this->get_max_index (nSubNode);
+
+							nSize += nMaxIdx;
+							nSize++;
+
+							if ((nSize == nOperand) && (i > 0))
+							{
+								pIterState->nSubPos = i - 1;
+
+								return;
+							}
+
+							if (nSize > nOperand)
+							{
+								nSize--;
+
+								nOperand = nSize - nOperand;
+
+								bEvaluate = true;
+
+								break;
+							}
+						}
+
+						if (bEvaluate)
+						{
+							nNode = nSubNode;
+
+							break;
+						}
+						else
+						{
+							do
+							{
+								pIterState->nNode = this->get_parent (nNode);
+								pIterState->nSubPos = this->find_sub_node_offset (pIterState->nNode, nNode);
+
+								nNode = pIterState->nNode;
+							} while (pIterState->nSubPos == 0);
+
+							pIterState->nSubPos--;
+
+							nOperand -= nSize;
+
+							nNode = pIterState->nNode;
+							nSub = pIterState->nSubPos;
+
+							if (nOperand == 0)
+							{
+								return;
+							}
+						}
+					}
+
+					this->convert_pos_to_container_pos (nNode, nOperand, pIterState->nNode, pIterState->nSubPos);
+				}
+
+				break;
+			}
+		}
+	}
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::is_iter_pos_evaluated (void *pState, typename _t_datalayerproperties::size_type nPos) const
+{
+	iterator_state_t	*pIterState = (iterator_state_t *) pState;
+
+	return (pIterState->nAssociatedPos == nPos);
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+_t_data* CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::get_iter_data (void *pState) const
+{
+	iterator_state_t	*pIterState = (iterator_state_t *) pState;
+
+	return (this->get_data (pIterState->nNode, pIterState->nSubPos));
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::set_iter_data (void *pState, const _t_data &rData)
+{
+	iterator_state_t	*pIterState = (iterator_state_t *) pState;
+
+	_t_data		*pData = this->get_data (pIterState->nNode, pIterState->nSubPos);
+
+	*pData = rData;
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::show_tree (std::ofstream &ofs, typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::node_iter_type nParent, char *pAlloc) const
 {
 	node_t					*psNodeDesc, *psSubNodeDesc;
 	uint64_t				nNumIdx;
-	_t_subnodeiter			i;
+	sub_node_iter_type		i;
 	bool					bError = false;
 	std::string				strError;
-	_t_nodeiter				nSerVectorTest;
-	_t_sizetype				*pnSerVector;
+	node_iter_type			nSerVectorTest;
+	size_type				*pnSerVector;
 
 	/*
 	**	If argument ofs is a stream that is not open, then this method will
@@ -2194,7 +2865,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	{
 		psNodeDesc = get_node (nNode);
 	}
-	catch (exception *pE)
+	catch (::std::exception *pE)
 	{
 		strError = pE->what ();
 
@@ -2205,15 +2876,15 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	{
 		ofs << "<table cellspacing=\"0\"><tr><td>";
 		ofs << "<table border=\"1\" cellspacing=\"0\">";
-		ofs << "<tr align=center>" << endl;
-		ofs << "<td>" << endl;
+		ofs << "<tr align=center>" << ::std::endl;
+		ofs << "<td>" << ::std::endl;
 	}
 
 	if (bError)
 	{
 		if (ofs.is_open ())
 		{
-			ofs << "<b><font color=\"#FF0000\">get_node failed on node " << nNode << "<br>Reason: " << strError << "<br><br></font></b>" << endl;
+			ofs << "<b><font color=\"#FF0000\">get_node failed on node " << nNode << "<br>Reason: " << strError << "<br><br></font></b>" << ::std::endl;
 		}
 		else
 		{
@@ -2224,7 +2895,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	{	// if a node claims to be its own parent, then it also must be the root node, otherwise the node's state is invalid
 		if (ofs.is_open ())
 		{
-			ofs << "<b><font color=\"#FF0000\">node claims to be root<br><br></font></b>" << endl;
+			ofs << "<b><font color=\"#FF0000\">node claims to be root<br><br></font></b>" << ::std::endl;
 		}
 		else
 		{
@@ -2235,7 +2906,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	{	// if the node's parent state is not equal to the node it was recursively called into, then the node's state is invalid
 		if (ofs.is_open ())
 		{
-			ofs << "<b><font color=\"#FF0000\">nodes parent state invalid<br><br></font></b>" << endl;
+			ofs << "<b><font color=\"#FF0000\">nodes parent state invalid<br><br></font></b>" << ::std::endl;
 		}
 		else
 		{
@@ -2246,7 +2917,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 	{	// if this node was processed before, then the tree state is invalid
 		if (ofs.is_open ())
 		{
-			ofs << "<b><font color=\"#FF0000\">node is linked to more than once<br><br></font></b>" << endl;
+			ofs << "<b><font color=\"#FF0000\">node is linked to more than once<br><br></font></b>" << ::std::endl;
 		}
 		else
 		{
@@ -2279,7 +2950,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 		{
 			if (ofs.is_open ())
 			{
-				ofs << "<b><font color=\"#FF0000\">nMaxIdx is inconsistent<br></font></b><br>" << endl;
+				ofs << "<b><font color=\"#FF0000\">nMaxIdx is inconsistent<br></font></b><br>" << ::std::endl;
 			}
 			else
 			{
@@ -2289,7 +2960,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 		
 		if (ofs.is_open ())
 		{
-			ofs << "<a name=\"node_" << nNode << "\"></a>" << endl;
+			ofs << "<a name=\"node_" << nNode << "\"></a>" << ::std::endl;
 			ofs << "nMaxIdx: " << psNodeDesc->nMaxIdx << "<br>node: " << nNode << "<br>";
 			ofs << "<a href=\"#node_" << psNodeDesc->nParent << "\">parent: " << psNodeDesc->nParent << "</a>";
 		}
@@ -2297,10 +2968,10 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 	if (ofs.is_open ())
 	{
-		ofs << "</td>" << endl;
-		ofs << "</tr>" << endl;
-		ofs << "<tr align=center>" << endl;
-		ofs << "<td>" << endl;
+		ofs << "</td>" << ::std::endl;
+		ofs << "</tr>" << ::std::endl;
+		ofs << "<tr align=center>" << ::std::endl;
+		ofs << "<td>" << ::std::endl;
 		ofs << "<table border=\"1\" cellspacing=\"0\">";
 	}
 
@@ -2315,18 +2986,18 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 		// both cases lead to the conclusion that the tree's state is invalid
 		if (ofs.is_open ())
 		{
-			if (CBTreeBase_t::size () != 0)
+			if (CBTreeBaseDefaults_t::size () != 0)
 			{
-				ofs << "<tr align=center><td><b><font color=\"#FF0000\">no data</font></b></td></tr>" << endl;
+				ofs << "<tr align=center><td><b><font color=\"#FF0000\">no data</font></b></td></tr>" << ::std::endl;
 			}
 			else
 			{
-				ofs << "<tr align=center><td>no data</td></tr>" << endl;
+				ofs << "<tr align=center><td>no data</td></tr>" << ::std::endl;
 			}
 		}
 		else
 		{
-			if (CBTreeBase_t::size () != 0)
+			if (CBTreeBaseDefaults_t::size () != 0)
 			{
 				return (false);
 			}
@@ -2341,7 +3012,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 			if (!is_leaf (nNode))
 			{
-				ofs << "<td><font color=\"#CCCCCC\">linear offset:<br> 0 </font></td>" << endl;
+				ofs << "<td><font color=\"#CCCCCC\">linear offset:<br> 0 </font></td>" << ::std::endl;
 			}
 		}
 
@@ -2354,11 +3025,11 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 		{
 			if (ofs.is_open ())
 			{
-				ofs << "<td>" << endl;
+				ofs << "<td>" << ::std::endl;
 			}
 			
 			// test or display one data item
-			bool bPassed = show_node (ofs, nNode, i);
+			bool bPassed = this->show_node (ofs, nNode, i);
 
 			if (ofs.is_open ())
 			{
@@ -2374,7 +3045,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 			if (!is_leaf (nNode))
 			{
-				nSerVectorTest += (_t_nodeiter) this->get_max_index (*(this->get_sub_node (nNode, i)));
+				nSerVectorTest += (node_iter_type) this->get_max_index (*(this->get_sub_node (nNode, i)));
 
 				bPassed = (nSerVectorTest + i) == pnSerVector[i];
 			}
@@ -2385,7 +3056,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 			if (ofs.is_open ())
 			{
-				ofs << "</td>" << endl;
+				ofs << "</td>" << ::std::endl;
 
 				if (!is_leaf (nNode))
 				{
@@ -2397,7 +3068,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 					if (!bPassed) ofs << "</font>";
 					
-					ofs << "</td>" << endl;
+					ofs << "</td>" << ::std::endl;
 				}
 			}
 			else if (!bPassed)
@@ -2408,7 +3079,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 		if (ofs.is_open ())
 		{
-			ofs << "</tr>" << endl;
+			ofs << "</tr>" << ::std::endl;
 		}
 
 		// if this is not a leaf node ...
@@ -2417,7 +3088,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 			// ... then all sub nodes must be test or displayed
 			if (ofs.is_open ())
 			{
-				ofs << "<tr align=center>" << endl;
+				ofs << "<tr align=center>" << ::std::endl;
 			}
 
 			// test or display all sub nodes
@@ -2425,7 +3096,7 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 			{
 				if (ofs.is_open ())
 				{
-					ofs << "<td>" << endl;
+					ofs << "<td>" << ::std::endl;
 				}
 
 				// test or display one sub node
@@ -2445,41 +3116,41 @@ bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 			
 				if (ofs.is_open ())
 				{
-					ofs << "</td>" << endl;
+					ofs << "</td>" << ::std::endl;
 
-					ofs << "<td></td>" << endl;
+					ofs << "<td></td>" << ::std::endl;
 				}
 			}
 
 			if (ofs.is_open ())
 			{
-				ofs << "</tr>" << endl;
+				ofs << "</tr>" << ::std::endl;
 			}
 		}
 	}
 
 	if (ofs.is_open ())
 	{
-		ofs << "</table>" << endl;
-		ofs << "</td>" << endl;
-		ofs << "</tr>" << endl;
-		ofs << "</table>" << endl;
-		ofs << "</table>" << endl;
+		ofs << "</table>" << ::std::endl;
+		ofs << "</td>" << ::std::endl;
+		ofs << "</tr>" << ::std::endl;
+		ofs << "</table>" << ::std::endl;
+		ofs << "</table>" << ::std::endl;
 	}
 
 	// if this call made it down here then it is either in display mode or did not find any error
 	return (true);
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::shownodelist (std::ofstream &ofs, char *pAlloc) const
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::shownodelist (std::ofstream &ofs, char *pAlloc) const
 {
-	_t_nodeiter	ui64;
-	node_t		*psNodeDesc;
+	node_iter_type	ui64;
+	node_t			*psNodeDesc;
 
-	ofs << "<H1>node list</H1>" << endl;
-	ofs << "<br>" << endl;
-	ofs << "<table>" << endl;
+	ofs << "<H1>node list</H1>" << ::std::endl;
+	ofs << "<br>" << ::std::endl;
+	ofs << "<table>" << ::std::endl;
 
 	// display the entire node list - regradless if a node is in use or not
 	for (ui64 = 0; ui64 < this->m_nTreeSize; ui64++)
@@ -2488,17 +3159,17 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 		
 		psNodeDesc = get_node (ui64);
 		
-		ofs << "<tr>" << endl;
-		ofs << "<td>" << endl;
+		ofs << "<tr>" << ::std::endl;
+		ofs << "<td>" << ::std::endl;
 		ofs << "<a name=\"node_list_" << ui64 << "\">";
 		ofs << "node: " << ui64;
-		ofs << "</a>" << endl;
-		ofs << "</td>" << endl;
-		ofs << "<td><a href=\"#node_" << ui64 << "\">tree</a></td>" << endl;
-		ofs << "<td><a href=\"#node_dump_" << ui64 << "\">dump</a></td>" << endl;
-		ofs << "</tr>" << endl;
-		ofs << "<tr>" << endl;
-		ofs << "<td></td><td>" << endl;
+		ofs << "</a>" << ::std::endl;
+		ofs << "</td>" << ::std::endl;
+		ofs << "<td><a href=\"#node_" << ui64 << "\">tree</a></td>" << ::std::endl;
+		ofs << "<td><a href=\"#node_dump_" << ui64 << "\">dump</a></td>" << ::std::endl;
+		ofs << "</tr>" << ::std::endl;
+		ofs << "<tr>" << ::std::endl;
+		ofs << "<td></td><td>" << ::std::endl;
 
 		if (!bInUse)
 		{
@@ -2507,64 +3178,121 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeit
 
 		ofs << "<a href=\"#node_list_" << psNodeDesc->nParent << "\">";
 		ofs << "parent: " << psNodeDesc->nParent;
-		ofs << "</a>" << endl;
+		ofs << "</a>" << ::std::endl;
 		
 		if (!bInUse)
 		{
 			ofs << "</font>";
 		}
 
-		ofs << "</td>" << endl;
-		ofs << "<td>" << endl;
+		ofs << "</td>" << ::std::endl;
+		ofs << "<td>" << ::std::endl;
 		
 		if (!bInUse)
 		{
 			ofs << "<font color=\"#CCCCCC\">";
 		}
 
-		ofs << "nNumData: " << psNodeDesc->nNumData << endl;
+		ofs << "nNumData: " << psNodeDesc->nNumData << ::std::endl;
 		
 		if (!bInUse)
 		{
 			ofs << "</font>";
 		}
 
-		ofs << "</td>" << endl;
+		ofs << "</td>" << ::std::endl;
 
-		ofs << "<td>" << endl;
+		ofs << "<td>" << ::std::endl;
 		
 		if (!bInUse)
 		{
 			ofs << "<font color=\"#CCCCCC\">";
 		}
 
-		ofs << "nMaxIdx: " << psNodeDesc->nMaxIdx << endl;
+		ofs << "nMaxIdx: " << psNodeDesc->nMaxIdx << ::std::endl;
 		
 		if (!bInUse)
 		{
 			ofs << "</font>";
 		}
 
-		ofs << "</td>" << endl;
+		ofs << "</td>" << ::std::endl;
 
-		ofs << "</tr>" << endl;
+		ofs << "</tr>" << ::std::endl;
 	}
 
-	ofs << "</table>" << endl;
+	ofs << "</table>" << ::std::endl;
 }
 
-template <class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_datalayerproperties, class _t_datalayer>
-void CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer>::_swap
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::_swap
 	(
-		CBTreeBaseDefaults<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter, _t_datalayerproperties, _t_datalayer> &rBT
+		CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &rBT
 	)
 {
-	fast_swap<_t_datalayer *> (this->m_pData, rBT.m_pData);
-	fast_swap<_t_datalayerproperties *> (this->m_pClDataLayerProperties, rBT.m_pClDataLayerProperties);
+	fast_swap<data_layer_type *> (this->m_pData, rBT.m_pData);
+	fast_swap<data_layer_properties_type *> (this->m_pClDataLayerProperties, rBT.m_pClDataLayerProperties);
 
-	CBTreeBaseIf_t	&rLowLevel = dynamic_cast <CBTreeBaseIf_t &> (rBT);
+	fast_swap<node_iter_type> (this->m_nRootNode, rBT.m_nRootNode);
+	fast_swap<node_iter_type> (this->m_nTreeSize, rBT.m_nTreeSize);
+	fast_swap<sub_node_iter_type> (this->m_nNodeSize, rBT.m_nNodeSize);
+	fast_swap<uint32_t> (this->m_nGrowBy, rBT.m_nGrowBy);
+	fast_swap<uint32_t> (this->m_nPoolIDnodeDesc, rBT.m_nPoolIDnodeDesc);
+	fast_swap<uint32_t> (this->m_nPoolIDnodeMaintenance, rBT.m_nPoolIDnodeMaintenance);
+	fast_swap<uint32_t> (this->m_nPoolIDdata, rBT.m_nPoolIDdata);
+	fast_swap<uint32_t> (this->m_nPoolIDsubNodes, rBT.m_nPoolIDsubNodes);
+	fast_swap<uint32_t> (this->m_nPoolIDserialVector, rBT.m_nPoolIDserialVector);
+	fast_swap<node_iter_type *> (this->m_pRebuildFIFO, rBT.m_pRebuildFIFO);
+	fast_swap<uint32_t> (this->m_nRebuildFIFOSize, rBT.m_nRebuildFIFOSize);
+	fast_swap<uint32_t> (this->m_nRebuildFIFOreadPos, rBT.m_nRebuildFIFOreadPos);
+	fast_swap<uint32_t> (this->m_nRebuildFIFOwritePos, rBT.m_nRebuildFIFOwritePos);
+	fast_swap<uint32_t> (this->m_nAutoShrinkThreshold, rBT.m_nAutoShrinkThreshold);
+	fast_swap<uint32_t> (this->m_nAutoShrinkCounter, rBT.m_nAutoShrinkCounter);
 
-	CBTreeBaseIf_t::_swap (rLowLevel);
+#if defined (_DEBUG)
+
+	fast_swap<node_iter_type *> (this->m_pNodeTrace, rBT.m_pNodeTrace);
+	fast_swap<uint32_t> (this->m_nNodeTraceDepth, rBT.m_nNodeTraceDepth);
+	fast_swap<uint32_t> (this->m_nNodeTraceDepthMax, rBT.m_nNodeTraceDepthMax);
+
+#endif
+
+	fast_swap<node_iter_type> (this->m_nNextAlloc, rBT.m_nNextAlloc);
+
+	CBTreeDefaults_t	&rIterIf = dynamic_cast <CBTreeDefaults_t &> (rBT);
+
+	CBTreeDefaults_t::_swap (rIterIf);
+}
+
+template<class _ti_pos, class _t_data, class _t_datalayerproperties>
+void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::setup_pools ()
+{
+	CBTreeIOperBlockPoolDesc_t		sPoolDesc;
+
+	sPoolDesc.nTotalSize = sizeof (node_t);
+	sPoolDesc.nEntrySize = sizeof (node_t);
+
+	m_nPoolIDnodeDesc = this->create_dataPool (&sPoolDesc);
+
+	sPoolDesc.nTotalSize = sizeof (node_maintainence_t);
+	sPoolDesc.nEntrySize = sizeof (node_maintainence_t);
+
+	m_nPoolIDnodeMaintenance = this->create_dataPool (&sPoolDesc);
+
+	sPoolDesc.nTotalSize = sizeof (_t_data) * get_node_max_data_size ();
+	sPoolDesc.nEntrySize = sizeof (_t_data);
+
+	m_nPoolIDdata = this->create_dataPool (&sPoolDesc);
+
+	sPoolDesc.nTotalSize = (uint32_t)(sizeof (node_iter_type) * get_node_max_sub_nodes ());
+	sPoolDesc.nEntrySize = (uint32_t)(sizeof (node_iter_type));
+
+	m_nPoolIDsubNodes = this->create_dataPool (&sPoolDesc);
+
+	sPoolDesc.nTotalSize = sizeof (size_type) * this->get_node_max_data_size ();
+	sPoolDesc.nEntrySize = sizeof (size_type);
+
+	m_nPoolIDserialVector = this->create_dataPool (&sPoolDesc);
 }
 
 #endif // BTREEBASEDEFAULTS_CPP
