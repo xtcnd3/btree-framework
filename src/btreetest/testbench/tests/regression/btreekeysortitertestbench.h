@@ -20,9 +20,9 @@
 #include <iostream>
 #include <vector>
 
-#include "btreetestcommon.h"
-#include "btreetestkeysort.h"
-#include "btreekeysorttestprimitive.h"
+#include "testbench/common/btreetestcommon.h"
+#include "testbench/application_classes/regression/btreetestkeysort.h"
+#include "testbench/primitives/btreekeysorttestprimitive.h"
 
 #include "btreeiofile.h"
 
