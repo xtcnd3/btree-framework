@@ -14,7 +14,7 @@
 #ifndef	BTREEASSOCIATIVE_CPP
 #define	BTREEASSOCIATIVE_CPP
 
-#include "btreeassociative.h"
+#include "abstract_data_classes/btreeassociative.h"
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative
@@ -324,7 +324,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 	position_t			sPos;
 	size_type			nRetval = (size_type) 0;
 
-	if (this->m_pData != NULL)
+	if (!this->empty ())
 	{
 		// convert object to a position structure for internal use
 		sPos.pKey = m_pRemoveKey;
@@ -741,7 +741,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 
 	/*
 	**	The actual serialize process is done by CBTreeBaseDefaults::serialize.
-	**	All this method does is to convert nFrom and nTo into the templateparameter _ti_pos (CBTreeKeySortPos <size_type, _t_key>)
+	**	All this method does is to convert nFrom and nTo into the template parameter _ti_pos (CBTreeKeySortPos <size_type, _t_key>)
 	**	and nLen. This has to be done, since CBTreeBaseDefaults::serialize has no concept of what an size_type in terms of a position is.
 	*/
 
@@ -1005,7 +1005,7 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_at (const t
 	sub_node_iter_type	nSubPos;
 
 	// if data layer is present ...
-	if (this->m_pData != NULL)
+	if (!this->empty ())
 	{
 		// ... and the linear position does not exceed the size of this tree ...
 		if (nPos < this->size ())
@@ -1021,96 +1021,6 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_at (const t
 
 	return (retval);
 }
-
-/*
-
-get - get one specific instance using key
-
-key			- contains an object specifying the key which is to be extracted from this parameter
-nInstance	- specifies the instance of the entry sharing the same key as parameter "key"
-pObj		- specifies a pointer where the entry will be copied to
-
-This method extracts the key from the object of the first parameter (key) and copies
-the instance of entry sharing the same key to the location pObj is pointing at.
-The method count may be used to determine how many instances of the key in question exist.
-
-The method returns true if it was successful, otherwise false.
-
-*/
-
-//template<class _t_data, class _t_key, class _t_datalayerproperties>
-//bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get (const _t_key &rKey, typename _t_datalayerproperties::size_type nInstance, _t_data *pObj) const
-//{
-//	bool						retval = false;
-//	node_iter_type				nNode = this->m_nRootNode, nodeSeen;
-//	sub_node_iter_type			subPos, subPosSeen;
-//	bool						bBounce;
-//	size_type					u64;
-//
-//	// if data layer not present ...
-//	if (this->m_pData == NULL)
-//	{
-//		// ... then return failure
-//		return (retval);
-//	}
-//
-//	// if no entry with that is preset ...
-//	if (!find_oneKey (rKey, nNode, subPos))
-//	{
-//		// ... then return failure
-//		return (retval);
-//	}
-//
-//	// find the first entry of sharing the same key and make it the "seen" position
-//	find_firstKey (nNode, subPos, nodeSeen, subPosSeen);
-//
-//	// walk through key streak until the instance in question has been found
-//	for (u64 = 0ULL; u64 < nInstance; u64++)
-//	{
-//		// determine next position
-//		this->move_next (nodeSeen, subPosSeen, nNode, subPos, bBounce);
-//
-//		// if next position doesn't exist ...
-//		if (bBounce)
-//		{
-//			// ... then abort procedure
-//			break;
-//		}
-//
-//		// extract key of next position
-//		extract_key (m_pGetNewKey, nNode, subPos);
-//
-//		// if key of next postion is not equal with current key ...
-//		if (this->comp (*m_pGetNewKey, rKey) != 0)
-//		{
-//			// ... then abort procedure
-//			break;
-//		}
-//
-//		// assume next position as current position
-//		nodeSeen = nNode;
-//		subPosSeen = subPos;
-//	}
-//
-//	// if procedure had been aborted ...
-//	if (u64 < nInstance)
-//	{
-//		// ... then return failure
-//		return (retval);
-//	}
-//
-//	retval = true;
-//
-//	// obtain data instance
-//	*pObj = *(this->get_data (nodeSeen, subPosSeen));
-//
-//#if defined (_DEBUG)
-//	BTREE_ASSERT (nInstance == get_instancePos (nodeSeen, subPosSeen), "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get (_t_data, uint64_t, _t_data *): comparison of external and internal instance position mismatch!");
-//#endif
-//
-//	// return success
-//	return (retval);
-//}
 
 /*
 
@@ -1135,7 +1045,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 	node_t							*psNodeDesc;
 
 	// if data layer not present ...
-	if (this->m_pData == NULL)
+	if (this->empty ())
 	{
 		// ... then return failure
 		return (retval);
@@ -1252,7 +1162,7 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t 
 					else if (this->comp (*(extract_key (*m_ppShortLiveKey, nNode, nSubData)), *(sPos.pKey)) == 0)
 					{
 						// ... and it is key's instance of interest ...
-						if ((sPos.nInstance == ~0ULL) || (sPos.nInstance == get_instancePos (nNode, nSubData)))
+						if ((sPos.nInstance == (size_type) (~0)) || (sPos.nInstance == get_instancePos (nNode, nSubData)))
 						{
 							// ... then abort search
 							ui32 = 0UL;
@@ -1289,7 +1199,7 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t 
 				if (triCmpRslt == 0)
 				{
 					// ... and it is key's instance of interest ...
-					if ((get_instancePos (nNode, nSubPos) == sPos.nInstance) || (sPos.nInstance == ~0ULL))
+					if ((sPos.nInstance == (size_type) (~0)) || (get_instancePos (nNode, nSubPos) == sPos.nInstance))
 					{
 						// ... then flag the find
 						bFound = true;
@@ -1303,7 +1213,7 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t 
 		if (!bFound)
 		{
 			// ... and if a specific key instance is being sought ...
-			if (sPos.nInstance != ~0ULL)
+			if (sPos.nInstance != (size_type) ~0)
 			{
 				// ... then test for other instances that share the same key and if any of those has the correct instance
 				allocateShortLiveKey ();
@@ -2652,14 +2562,14 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_swap
 		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rContainer
 	)
 {
-	fast_swap <_t_key **> (m_ppShortLiveKey, rContainer.m_ppShortLiveKey);
-	fast_swap <_t_key **> (m_ppTempFindFirstKeyKey, rContainer.m_ppTempFindFirstKeyKey);
-	fast_swap <_t_key *> (m_pRemoveKey, rContainer.m_pRemoveKey);
-	fast_swap <_t_key *> (m_pTempRemoveKey, rContainer.m_pTempRemoveKey);
-	fast_swap <_t_key *> (m_pInstancesNewKey, rContainer.m_pInstancesNewKey);
-	fast_swap <_t_key *> (m_pTempFindFirstKeyNewKey, rContainer.m_pTempFindFirstKeyNewKey);
-	fast_swap <_t_key *> (m_pAddToNodeKey, rContainer.m_pAddToNodeKey);
-	fast_swap <_t_key *> (m_pGetNewKey, rContainer.m_pGetNewKey);
+	fast_swap (m_ppShortLiveKey, rContainer.m_ppShortLiveKey);
+	fast_swap (m_ppTempFindFirstKeyKey, rContainer.m_ppTempFindFirstKeyKey);
+	fast_swap (m_pRemoveKey, rContainer.m_pRemoveKey);
+	fast_swap (m_pTempRemoveKey, rContainer.m_pTempRemoveKey);
+	fast_swap (m_pInstancesNewKey, rContainer.m_pInstancesNewKey);
+	fast_swap (m_pTempFindFirstKeyNewKey, rContainer.m_pTempFindFirstKeyNewKey);
+	fast_swap (m_pAddToNodeKey, rContainer.m_pAddToNodeKey);
+	fast_swap (m_pGetNewKey, rContainer.m_pGetNewKey);
 
 #if defined (_DEBUG)
 
