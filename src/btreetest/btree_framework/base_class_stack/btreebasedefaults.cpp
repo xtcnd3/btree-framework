@@ -13,7 +13,7 @@
 #ifndef	BTREEBASEDEFAULTS_CPP
 #define	BTREEBASEDEFAULTS_CPP
 
-#include "btreebasedefaults.h"
+#include "base_class_stack/btreebasedefaults.h"
 
 template<class _ti_pos, class _t_data, class _t_datalayerproperties>
 CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::CBTreeBaseDefaults (_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
@@ -24,10 +24,10 @@ CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::CBTreeBaseDefaults
 							typename _t_datalayerproperties::node_iter_type, 
 							typename _t_datalayerproperties::sub_node_iter_type
 						> (psCacheDescription, nNodeSize)
-	,	m_nRootNode (0ULL)
-	,	m_nTreeSize (0ULL)
+	,	m_nRootNode ((node_iter_type) 0)
+	,	m_nTreeSize ((size_type) 0)
 	,	m_nNodeSize (nNodeSize)
-	,	m_nGrowBy (64UL)
+	,	m_nGrowBy ((size_type) 64)
 	,	m_nAutoShrinkThreshold (nNodeSize * 2)
 	,	m_nAutoShrinkCounter (0)
 	,	m_pData (NULL)
@@ -38,10 +38,10 @@ CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::CBTreeBaseDefaults
 
 	m_nRebuildFIFOSize = 0UL;
 	m_pRebuildFIFO = NULL;
-	m_nRebuildFIFOreadPos = 0ULL;
-	m_nRebuildFIFOwritePos = 0ULL;
+	m_nRebuildFIFOreadPos = 0UL;
+	m_nRebuildFIFOwritePos = 0UL;
 
-	m_nNextAlloc = 0ULL;
+	m_nNextAlloc = (node_iter_type) 0;
 
 #if defined (_DEBUG)
 	m_pNodeTrace = NULL;
@@ -83,8 +83,8 @@ CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::CBTreeBaseDefaults
 
 	BTREE_ASSERT (m_pClDataLayerProperties != NULL, "CBTreeBaseDefaults<>::CBTreeBaseDefaults (CBTreeBaseDefaults<> &): insufficient memory!");
 
-	m_nRootNode = 0ULL;
-	m_nTreeSize = 0ULL;
+	m_nRootNode = (node_iter_type) 0;
+	m_nTreeSize = (size_type) 0;
 
 	m_nNodeSize = rBT.m_nNodeSize;
 
@@ -92,10 +92,10 @@ CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::CBTreeBaseDefaults
 
 	m_nRebuildFIFOSize = 0UL;
 	m_pRebuildFIFO = NULL;
-	m_nRebuildFIFOreadPos = 0ULL;
-	m_nRebuildFIFOwritePos = 0ULL;
+	m_nRebuildFIFOreadPos = 0UL;
+	m_nRebuildFIFOwritePos = 0UL;
 
-	m_nNextAlloc = 0ULL;
+	m_nNextAlloc = (node_iter_type) 0;
 
 #if defined (_DEBUG)
 	m_pNodeTrace = NULL;
@@ -155,7 +155,7 @@ This method returns true if this b-tree instance contains no data, otherwise fal
 template<class _ti_pos, class _t_data, class _t_datalayerproperties>
 bool CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::empty () const
 {
-	bool	bRetval = CBTreeBaseDefaults_t::size () == 0ULL;
+	bool	bRetval = CBTreeBaseDefaults_t::size () == (size_type) 0;
 
 	return (bRetval);
 }
@@ -173,7 +173,7 @@ typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, 
 {
 	if (m_pData == NULL)
 	{
-		return (0ULL);
+		return (0);
 	}
 
 	return (get_max_index (this->m_nRootNode));
@@ -199,8 +199,8 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::clear ()
 		m_pData = NULL;
 	}
 
-	this->m_nTreeSize = 0ULL;
-	this->m_nNextAlloc = 0ULL;
+	this->m_nTreeSize = (size_type) 0;
+	this->m_nNextAlloc = (node_iter_type) 0;
 }
 
 /*
@@ -236,9 +236,9 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::unload ()
 
 	this->m_pRebuildFIFO = NULL;
 
-	this->m_nRebuildFIFOwritePos = 0ULL;
-	this->m_nRebuildFIFOreadPos = 0ULL;
-	this->m_nRebuildFIFOSize = 0ULL;
+	this->m_nRebuildFIFOwritePos = 0UL;
+	this->m_nRebuildFIFOreadPos = 0UL;
+	this->m_nRebuildFIFOSize = 0UL;
 
 #if defined (_DEBUG)
 	// destroy node trace buffer
@@ -548,7 +548,7 @@ add_to_node
 template<class _ti_pos, class _t_data, class _t_datalayerproperties>
 typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::add_to_node (_ti_pos sPos, const _t_data &rData, typename _t_datalayerproperties::node_iter_type nNode, uint32_t nDepth, typename _t_datalayerproperties::node_iter_type &rnRsltNode, typename _t_datalayerproperties::sub_node_iter_type &rnRsltSub, typename _t_datalayerproperties::size_type *pnPos)
 {
-	size_type				retval = 0ULL;
+	size_type				retval = 0;
 	node_iter_type			*pnSubNode;
 	sub_node_iter_type		nSubPos;
 	size_type				*pnSerVector;
@@ -586,7 +586,7 @@ typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, 
 		// all pointers to data layer need to be re-initialised
 		
 		// if rebuild FIFO ran out of entries ...
-		if (this->rebuild_FIFO_fillstate () == 0ULL)
+		if (this->rebuild_FIFO_fillstate () == 0UL)
 		{
 			// ... then quick auto-update this node by increasing amount of data contained in this tree branch by one
 			this->rebuild_node (nNode, 1, nSubPos);
@@ -614,7 +614,7 @@ typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, 
 	}
 
 	// if rebuild FIFO is not empty ...
-	if (this->rebuild_FIFO_fillstate () > 1ULL)
+	if (this->rebuild_FIFO_fillstate () > 1UL)
 	{
 		// ... then run a full update on both this node and the newly created node on the same level
 		this->rebuild_node (this->rebuild_FIFO_get ());
@@ -770,7 +770,7 @@ typename _t_datalayerproperties::node_iter_type CBTreeBaseDefaults<_ti_pos, _t_d
 		memcpy ((void *) pNewNodeData, (void *) &(pNodeData[this->m_nNodeSize]), sizeof (*pNodeData) * (size_t)(this->m_nNodeSize - 1ULL));
 
 		// copy data at middle position to object to be moved to parent node
-		sData = pNodeData[this->m_nNodeSize - 1ULL];
+		sData = pNodeData[this->m_nNodeSize - 1];
 
 		// if split happened on leaf node level ...
 		if (is_leaf (nNode))
@@ -869,14 +869,14 @@ typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, 
 			nRightSize = get_data_count (*pnRightNode);
 
 			// if left and right node have size t - 1 ...
-			if ((nLeftSize == (this->m_nNodeSize - 1ULL)) && (nRightSize == (this->m_nNodeSize - 1ULL)))
+			if ((nLeftSize == (this->m_nNodeSize - 1)) && (nRightSize == (this->m_nNodeSize - 1)))
 			{
 				// ... then mark them for a merge
 				bMergeNodes = true;
 			}
 			// if one of the nodes has size t - 1 and the other is larger ...
-			else if (((nLeftSize == (this->m_nNodeSize - 1ULL)) && (nRightSize >= this->m_nNodeSize)) ||
-					((nRightSize == (this->m_nNodeSize - 1ULL)) && (nLeftSize >= this->m_nNodeSize)))
+			else if (((nLeftSize == (this->m_nNodeSize - 1)) && (nRightSize >= this->m_nNodeSize)) ||
+					((nRightSize == (this->m_nNodeSize - 1)) && (nLeftSize >= this->m_nNodeSize)))
 			{
 				// ... then mark the for a rotate
 				bRotateNodes = true;
@@ -1875,7 +1875,7 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::convert_pos_t
 		// ... then search for the next sub node or find data in current node
 		
 		// if the linear position is smaller than the node size parameter ...
-		if (nPos < (node_iter_type) this->get_node_min_data_size () - 1)
+		if (nPos < (node_iter_type) (this->get_node_min_data_size () - 1))
 		{
 			// ... then the resulting location is guaranteed to be in the initial sub-node
 			nMax = 0;
@@ -1937,7 +1937,11 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::convert_pos_t
 	{
 #if defined (_DEBUG)
 
-		BTREE_ASSERT (nPos < 0x80000000ULL, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::convert_pos_to_container_pos: nodes sub element addressing exceeds possible node size");
+		const sub_node_iter_type	nAllBitsAsserted = (sub_node_iter_type) ~0;
+		const sub_node_iter_type	nMaxPositivePos = nAllBitsAsserted >> 1;
+		const size_type				nMaxPos = (size_type) ~nMaxPositivePos;
+
+		BTREE_ASSERT (nPos < nMaxPos, "CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::convert_pos_to_container_pos: nodes sub element addressing exceeds possible node size");
 
 #endif
 		// ... otherwise return with result here
@@ -3230,34 +3234,34 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::_swap
 		CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &rBT
 	)
 {
-	fast_swap<data_layer_type *> (this->m_pData, rBT.m_pData);
-	fast_swap<data_layer_properties_type *> (this->m_pClDataLayerProperties, rBT.m_pClDataLayerProperties);
+	fast_swap (this->m_pData, rBT.m_pData);
+	fast_swap (this->m_pClDataLayerProperties, rBT.m_pClDataLayerProperties);
 
-	fast_swap<node_iter_type> (this->m_nRootNode, rBT.m_nRootNode);
-	fast_swap<node_iter_type> (this->m_nTreeSize, rBT.m_nTreeSize);
-	fast_swap<sub_node_iter_type> (this->m_nNodeSize, rBT.m_nNodeSize);
-	fast_swap<uint32_t> (this->m_nGrowBy, rBT.m_nGrowBy);
-	fast_swap<uint32_t> (this->m_nPoolIDnodeDesc, rBT.m_nPoolIDnodeDesc);
-	fast_swap<uint32_t> (this->m_nPoolIDnodeMaintenance, rBT.m_nPoolIDnodeMaintenance);
-	fast_swap<uint32_t> (this->m_nPoolIDdata, rBT.m_nPoolIDdata);
-	fast_swap<uint32_t> (this->m_nPoolIDsubNodes, rBT.m_nPoolIDsubNodes);
-	fast_swap<uint32_t> (this->m_nPoolIDserialVector, rBT.m_nPoolIDserialVector);
-	fast_swap<node_iter_type *> (this->m_pRebuildFIFO, rBT.m_pRebuildFIFO);
-	fast_swap<uint32_t> (this->m_nRebuildFIFOSize, rBT.m_nRebuildFIFOSize);
-	fast_swap<uint32_t> (this->m_nRebuildFIFOreadPos, rBT.m_nRebuildFIFOreadPos);
-	fast_swap<uint32_t> (this->m_nRebuildFIFOwritePos, rBT.m_nRebuildFIFOwritePos);
-	fast_swap<uint32_t> (this->m_nAutoShrinkThreshold, rBT.m_nAutoShrinkThreshold);
-	fast_swap<uint32_t> (this->m_nAutoShrinkCounter, rBT.m_nAutoShrinkCounter);
+	fast_swap (this->m_nRootNode, rBT.m_nRootNode);
+	fast_swap (this->m_nTreeSize, rBT.m_nTreeSize);
+	fast_swap (this->m_nNodeSize, rBT.m_nNodeSize);
+	fast_swap (this->m_nGrowBy, rBT.m_nGrowBy);
+	fast_swap (this->m_nPoolIDnodeDesc, rBT.m_nPoolIDnodeDesc);
+	fast_swap (this->m_nPoolIDnodeMaintenance, rBT.m_nPoolIDnodeMaintenance);
+	fast_swap (this->m_nPoolIDdata, rBT.m_nPoolIDdata);
+	fast_swap (this->m_nPoolIDsubNodes, rBT.m_nPoolIDsubNodes);
+	fast_swap (this->m_nPoolIDserialVector, rBT.m_nPoolIDserialVector);
+	fast_swap (this->m_pRebuildFIFO, rBT.m_pRebuildFIFO);
+	fast_swap (this->m_nRebuildFIFOSize, rBT.m_nRebuildFIFOSize);
+	fast_swap (this->m_nRebuildFIFOreadPos, rBT.m_nRebuildFIFOreadPos);
+	fast_swap (this->m_nRebuildFIFOwritePos, rBT.m_nRebuildFIFOwritePos);
+	fast_swap (this->m_nAutoShrinkThreshold, rBT.m_nAutoShrinkThreshold);
+	fast_swap (this->m_nAutoShrinkCounter, rBT.m_nAutoShrinkCounter);
 
 #if defined (_DEBUG)
 
-	fast_swap<node_iter_type *> (this->m_pNodeTrace, rBT.m_pNodeTrace);
-	fast_swap<uint32_t> (this->m_nNodeTraceDepth, rBT.m_nNodeTraceDepth);
-	fast_swap<uint32_t> (this->m_nNodeTraceDepthMax, rBT.m_nNodeTraceDepthMax);
+	fast_swap (this->m_pNodeTrace, rBT.m_pNodeTrace);
+	fast_swap (this->m_nNodeTraceDepth, rBT.m_nNodeTraceDepth);
+	fast_swap (this->m_nNodeTraceDepthMax, rBT.m_nNodeTraceDepthMax);
 
 #endif
 
-	fast_swap<node_iter_type> (this->m_nNextAlloc, rBT.m_nNextAlloc);
+	fast_swap (this->m_nNextAlloc, rBT.m_nNextAlloc);
 
 	CBTreeDefaults_t	&rIterIf = dynamic_cast <CBTreeDefaults_t &> (rBT);
 

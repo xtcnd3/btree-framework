@@ -58,7 +58,7 @@ public:
 
 	typedef	typename CBTreeBaseIf_t::CBTreeDefaults_t											CBTreeDefaults_t;
 
-#define	BAYERTREE_NODE_MAINTAINANCE_ALLOCATION			0x00000001ULL
+#define	BAYERTREE_NODE_MAINTAINANCE_ALLOCATION			0x00000001UL
 
 protected:
 
@@ -234,7 +234,7 @@ protected:
 
 	sub_node_iter_type								m_nNodeSize;			// is t
 
-	uint32_t										m_nGrowBy;
+	size_type										m_nGrowBy;
 
 	// data pool IDs
 	uint32_t										m_nPoolIDnodeDesc;
