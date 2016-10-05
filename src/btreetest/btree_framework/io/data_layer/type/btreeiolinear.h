@@ -27,8 +27,6 @@
 
 #if defined (_MSC_VER)
 
- #include <windows.h>
-
  #include <io.h>
 
 #elif defined(__GNUC__) || defined(__GNUG__)
@@ -38,12 +36,10 @@
  #include <sys/time.h>
  #include <sys/vfs.h>
 
- #include <windows.h>
-
 #endif
 
-#include "btreeio.h"
-#include "btreeaux.h"
+#include "io/data_layer/base/btreeio.h"
+#include "super_classes/btreeaux.h"
 
 template<class _t_datalayerproperties>
 class CBTreeLinearIO : public CBTreeIO<_t_datalayerproperties>
