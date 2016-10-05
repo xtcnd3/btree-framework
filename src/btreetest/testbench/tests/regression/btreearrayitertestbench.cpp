@@ -27,7 +27,7 @@ void TestBTreeArrayIterBasic (_t_container *pContainer, _t_reference *pReference
 	citer_ref_t				sCIterRef;
 	data_t					sEntryViaRef;
 	data_t					sEntryViaIter;
-	uint64_t				ui64;
+	size_type				i;
 	uint32_t				nTurn;
 	size_type				nThisStepSize;
 
@@ -62,7 +62,7 @@ void TestBTreeArrayIterBasic (_t_container *pContainer, _t_reference *pReference
 
 		bool	bForward = (((nTurn & 0x1) == 0x0) != bDescend);
 
-		ui64 = bForward ? 0ULL : pContainer->size ();
+		i = bForward ? 0ULL : pContainer->size ();
 
 		if (bForward)
 		{
@@ -75,24 +75,24 @@ void TestBTreeArrayIterBasic (_t_container *pContainer, _t_reference *pReference
 			get_end (pReference, sCIterRef);
 		}
 
-		while (bForward ? ui64 < pContainer->size () : ui64 > 0)
+		while (bForward ? i < pContainer->size () : i > 0)
 		{
 			if (!bForward)
 			{
-				if (ui64 >= nStepSize)
+				if (i >= nStepSize)
 				{
 					nThisStepSize = nStepSize;
 				}
 				else
 				{
-					nThisStepSize = (uint32_t) ui64;
+					nThisStepSize = (uint32_t) i;
 				}
 
-				ui64 -= nThisStepSize;
+				i -= nThisStepSize;
 
 				if (nStepSize == 1)
 				{
-					if ((ui64 & 0x1) == 0x0)
+					if ((i & 0x1) == 0x0)
 					{
 						sIter--;
 						sCIterRef--;
@@ -110,7 +110,7 @@ void TestBTreeArrayIterBasic (_t_container *pContainer, _t_reference *pReference
 				}
 			}
 
-			::std::cout << ui64 << " " << "\r" << ::std::flush;
+			::std::cout << i << " " << "\r" << ::std::flush;
 
 			sEntryViaRef = *sCIterRef;
 
@@ -121,7 +121,7 @@ void TestBTreeArrayIterBasic (_t_container *pContainer, _t_reference *pReference
 				::std::cerr << ::std::endl;
 				::std::cerr << "iterator mismatch!" << ::std::endl;
 				::std::cerr << "turn around: " << nTurn << ::std::endl;
-				::std::cerr << "position: " << ui64 << ::std::endl;
+				::std::cerr << "position: " << i << ::std::endl;
 				::std::cerr << "data via interface" << ::std::endl;
 				::std::cerr << "nData: " << sEntryViaRef.nData << ::std::endl;
 				::std::cerr << "nDebug: " << sEntryViaRef.nDebug << ::std::endl;
@@ -134,20 +134,20 @@ void TestBTreeArrayIterBasic (_t_container *pContainer, _t_reference *pReference
 
 			if (bForward)
 			{
-				if ((ui64 + nStepSize) >= pContainer->size ())
+				if ((i + nStepSize) >= pContainer->size ())
 				{
-					nThisStepSize = pContainer->size () - ui64;
+					nThisStepSize = pContainer->size () - i;
 				}
 				else
 				{
 					nThisStepSize = nStepSize;
 				}
 
-				ui64 += nThisStepSize;
+				i += nThisStepSize;
 
 				if (nThisStepSize == 1)
 				{
-					if ((ui64 & 0x1) == 0x0)
+					if ((i & 0x1) == 0x0)
 					{
 						sIter++;
 						sCIterRef++;
@@ -273,30 +273,13 @@ void TestBTreeArrayIterBiDirectionalSubScriptor (_t_container *pContainer, _t_re
 	value_type				sEntry;
 	_t_subscripttype		i;
 	iter_ref_t				sIterRef;
+	::std::string			sTypeStr;
 
 	::std::cout << "basic array iterator bi-directional sub-scription test" << ::std::endl;
 
-#if defined(__GNUC__) || defined(__GNUG__)
+	get_typename (i, sTypeStr);
 
-	int		nStatus;
-	char	*pszTypeid = abi::__cxa_demangle (typeid (_t_subscripttype).name (), 0, 0, &nStatus);
-
-	if (pszTypeid != NULL)
-	{
-		::std::cout << "_t_sizetype is set to: " << pszTypeid << ::std::endl;
-
-		free ((void *) pszTypeid);
-	}
-	else
-	{
-		::std::cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << ::std::endl;
-	}
-
-#else
-
-	::std::cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << ::std::endl;
-
-#endif
+	::std::cout << "_t_subscripttype is set to: " << sTypeStr << ::std::endl;
 
 	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
@@ -326,7 +309,7 @@ void TestBTreeArrayIterBiDirectionalSubScriptor (_t_container *pContainer, _t_re
 
 	get_begin (pReference, sIterRef);
 
-	for (i = 0; i < pContainer->size (); i++)
+	for (i = 0; i < (_t_subscripttype) pContainer->size (); i++)
 	{
 		if (((value_type) *sIter) != ((value_type) *sIterRef))
 		{
@@ -356,30 +339,13 @@ void TestBTreeArrayIterCompound (_t_container *pContainer, _t_reference *pRefere
 	value_type				sEntry;
 	_t_offsettype			i;
 	iter_ref_t				sIterRef;
+	::std::string			sTypeStr;
 
 	::std::cout << "basic array iterator compound operator test" << ::std::endl;
 
-#if defined(__GNUC__) || defined(__GNUG__)
+	get_typename (i, sTypeStr);
 
-	int		nStatus;
-	char	*pszTypeid = abi::__cxa_demangle (typeid (_t_offsettype).name (), 0, 0, &nStatus);
-
-	if (pszTypeid != NULL)
-	{
-		::std::cout << "_t_sizetype is set to: " << pszTypeid << ::std::endl;
-
-		free ((void *) pszTypeid);
-	}
-	else
-	{
-		::std::cout << "_t_sizetype is set to: " << typeid (_t_offsettype).name () << ::std::endl;
-	}
-
-#else
-
-	::std::cout << "_t_sizetype is set to: " << typeid (_t_offsettype).name () << ::std::endl;
-
-#endif
+	::std::cout << "_t_offsettype is set to: " << sTypeStr << ::std::endl;
 
 	arrayPrim_add (pContainer, nNumEntries, BTREETEST_ARRAY_PRIMITIVE_SEEK_RANDOM);
 
