@@ -12,12 +12,12 @@
 #include <list>
 #include <vector>
 
-#include "btreetestcommon.h"
-#include "btreetestarrayperf.h"
+#include "testbench/common/btreetestcommon.h"
+#include "testbench/application_classes/performance/btreetestarrayperf.h"
 
 #include "btreeioram.h"
 
-#include "./associative/btreemultimap.h"
+#include "specific_data_classes/btreemultimap.h"
 
 typedef enum
 {
