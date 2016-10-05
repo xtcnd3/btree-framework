@@ -23,12 +23,12 @@
 
 #include <type_traits>
 
-#include "btreetestmap.h"
+#include "testbench/application_classes/regression/btreetestmap.h"
 
-#include "btreemultimapprimitives.h"
+#include "testbench/primitives/btreemultimapprimitives.h"
 
-#include "btreetestcommon.h"
-#include "./associative/btreemap.h"
+#include "testbench/common/btreetestcommon.h"
+#include "specific_data_classes/btreemap.h"
 
 template<class _t_key, class _t_map>
 class CBTreeTestBenchMultiMap;
@@ -36,7 +36,7 @@ class CBTreeTestBenchMultiMap;
 typedef enum
 {
 	BTREETEST_MAP_ASSIGNMENT_OPERATOR, 
-	BTREETEST_MAP_STL_IF_INSERT, 
+	BTREETEST_MAP_STL_IF_INSERT = 1000, 
 	BTREETEST_MAP_STL_IF_INSERT_VIA_ITERATOR, 
 	BTREETEST_MAP_STL_IF_ERASE_VIA_ITERATOR, 
 	BTREETEST_MAP_STL_IF_ERASE_VIA_KEY, 
@@ -598,6 +598,6 @@ void TestBTreeMapSTLifInsertViaIterator (_t_map *pClM, uint32_t nNumEntries)
 }
 
 template<class _t_container>
-void TestBTreeSTLmap (uint32_t nTestNum, _t_container *pMapWrapper);
+void TestBTreeSTLmap (uint32_t nTestNum, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pMapWrapper);
 
 #endif // !BTREEMAPTESTBENCH_H
