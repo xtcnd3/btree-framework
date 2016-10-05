@@ -27,8 +27,6 @@
 
 #if defined (_MSC_VER)
 
- #include <windows.h>
-
  #include <io.h>
 
 #elif defined(__GNUC__) || defined(__GNUG__)
@@ -38,11 +36,9 @@
  #include <sys/time.h>
  #include <sys/vfs.h>
 
- #include <windows.h>
-
 #endif
 
-#include "btreeioprop.h"
+#include "io/properties/base/btreeioprop.h"
 
 #define	BTREEDATA_ASSERT(c,m)							if (!(c)) throw (new ::std::runtime_error (m))
 
