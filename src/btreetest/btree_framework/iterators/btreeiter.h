@@ -18,8 +18,8 @@
 
 #include <stdint.h>
 
-#include "btreecommon.h"
-#include "btreeaux.h"
+#include "common/btreecommon.h"
+#include "super_classes/btreeaux.h"
 
 template<class _ti_container>
 class CBTreeIterator;
