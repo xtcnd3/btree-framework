@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "btreeaux.h"
+#include "super_classes/btreeaux.h"
 
 CBTreeSuper::CBTreeSuper ()
 	:	m_nNumPools (0)

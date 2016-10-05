@@ -18,8 +18,8 @@
 
 #include <chrono>
 
-#include "btreecommon.h"
-#include "btreeio.h"
+#include "common/btreecommon.h"
+#include "io/data_layer/base/btreeio.h"
 
 class CBTreeSuper
 {
