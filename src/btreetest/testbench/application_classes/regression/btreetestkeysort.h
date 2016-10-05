@@ -24,7 +24,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "btreetestcommon.h"
+#include "testbench/common/btreetestcommon.h"
 
 #include "btreekeysort.h"
 

@@ -16,7 +16,7 @@
 #ifndef BTREETESTARRAY_CPP
 #define	BTREETESTARRAY_CPP
 
-#include "btreetestarray.h"
+#include "testbench/application_classes/regression/btreetestarray.h"
 
 template<class _t_datalayerproperties>
 CBTreeTestArray<_t_datalayerproperties>::CBTreeTestArray 

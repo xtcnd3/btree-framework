@@ -16,7 +16,7 @@
 #ifndef	BTREETESTKEYSORT_CPP
 #define	BTREETESTKEYSORT_CPP
 
-#include "btreetestkeysort.h"
+#include "testbench/application_classes/regression/btreetestkeysort.h"
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeKeySortTest<_t_data, _t_key, _t_datalayerproperties>::CBTreeKeySortTest
