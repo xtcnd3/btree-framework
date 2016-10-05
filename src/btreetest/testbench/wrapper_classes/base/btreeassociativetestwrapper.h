@@ -20,17 +20,17 @@
 
 #include <sstream>
 
-#include "btreeassociative.h"
+#include "abstract_data_classes/btreeassociative.h"
 
-#include "btreetestkeysort.h"
-#include "btreekeysorttestprimitive.h"
+#include "testbench/application_classes/regression/btreetestkeysort.h"
+#include "testbench/primitives/btreekeysorttestprimitive.h"
 
-template<class _t_data, class _t_value, class _t_ref_container>
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
 class CBTreeAssociativeTestWrapper
 {
 public:
 
-	typedef CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
+	typedef CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																CBTreeAssociativeTestWrapper_t;
 	
 	typedef _t_ref_container									reference_t;
@@ -46,7 +46,7 @@ public:
 
 	typedef _t_data												value_test_type;
 	typedef uint32_t											key_test_type;
-	typedef uint64_t											size_test_type;
+	typedef _t_sizetype											size_test_type;
 
 	typedef CBTreeAssociativeIf<_t_value, key_test_type, size_test_type>
 																CBTreeAssociativeIf_t;
@@ -60,13 +60,13 @@ public:
 	typedef typename CBTreeAssociativeIf_t::const_reverse_iterator
 																test_const_reverse_iterator;
 
-							CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
+							CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																(const uint32_t nNodeSize, const uint32_t nPageSize);
 
-							CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
+							CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																(const CBTreeAssociativeTestWrapper &rContainer);
 
-	virtual					~CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
+	virtual					~CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																();
 
 	size_type				size								() const;
