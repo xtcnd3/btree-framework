@@ -1,0 +1,1 @@
+-type keysort -test 6 -sizetype 32

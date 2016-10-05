@@ -1,0 +1,1 @@
+-type array-iter -test 18 -sizetype 32

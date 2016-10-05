@@ -1,0 +1,1 @@
+-type stl-multimap -test 1002 -sizetype 32
