@@ -16,7 +16,7 @@
 
 #include <stdint.h>
 
-#include "btreecommon.h"
+#include "common/btreecommon.h"
 
 template<class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_addresstype = uint64_t, class _t_offsettype = uint32_t>
 class CBTreeIOproperties
