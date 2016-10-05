@@ -15,8 +15,8 @@
 
 #include "btreearraytestwrapper.h"
 
-template<class _t_data, class _t_ref_container>
-CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const uint32_t nNodeSize, const uint32_t nPageSize)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::CBTreeArrayTestWrapper (const uint32_t nNodeSize, const uint32_t nPageSize)
 	:	m_nNodeSize (nNodeSize)
 	,	m_nPageSize (nPageSize)
 	,	m_bSkipLimitedContainers (false)
@@ -25,17 +25,17 @@ CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const
 {
 	m_pReference = new reference_t;
 
-	BTREE_ASSERT (m_pReference != NULL, "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const uint32_t, const uint32_t): ERROR: insufficient memory! (m_pReference)");
+	BTREE_ASSERT (m_pReference != NULL, "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::CBTreeArrayTestWrapper (const uint32_t, const uint32_t): ERROR: insufficient memory! (m_pReference)");
 
 	m_pClAccessWrapper = new CBTreeArrayTestAccessWrapper_t (*this);
 
-	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const uint32_t, const uint32_t): ERROR: insufficient memory! (m_pClAccessWrapper)");
+	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::CBTreeArrayTestWrapper (const uint32_t, const uint32_t): ERROR: insufficient memory! (m_pClAccessWrapper)");
 
 	m_psReturnData = new value_type ();
 
-	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const uint32_t, const uint32_t): ERROR: insufficient memory! (m_psReturnData)");
+	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::CBTreeArrayTestWrapper (const uint32_t, const uint32_t): ERROR: insufficient memory! (m_psReturnData)");
 
-	this->m_nNumContainers = CBTreeArrayTestWrapper<_t_data, _t_ref_container>::m_nNumArrays;
+	this->m_nNumContainers = CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::m_nNumArrays;
 
 	this->instantiate_container_array ();
 
@@ -44,8 +44,8 @@ CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const
 	this->transfer_containers ();
 }
 
-template<class _t_data, class _t_ref_container>
-CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const CBTreeArrayTestWrapper_t &rContainer)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::CBTreeArrayTestWrapper (const CBTreeArrayTestWrapper_t &rContainer)
 	:	m_nNodeSize (rContainer.m_nNodeSize)
 	,	m_nPageSize (rContainer.m_nPageSize)
 	,	m_bSkipLimitedContainers (rContainer.m_bSkipLimitedContainers)
@@ -54,17 +54,17 @@ CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const
 {
 	m_pReference = new reference_t (*(rContainer.m_pReference));
 
-	BTREE_ASSERT (m_pReference != NULL, "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const CBTreeArrayTestWrapper_t &): ERROR: insufficient memory! (m_pReference)");
+	BTREE_ASSERT (m_pReference != NULL, "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::CBTreeArrayTestWrapper (const CBTreeArrayTestWrapper_t &): ERROR: insufficient memory! (m_pReference)");
 
 	m_pClAccessWrapper = new CBTreeArrayTestAccessWrapper_t (*this);
 
-	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const CBTreeArrayTestWrapper_t &): ERROR: insufficient memory! (m_pClAccessWrapper)");
+	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::CBTreeArrayTestWrapper (const CBTreeArrayTestWrapper_t &): ERROR: insufficient memory! (m_pClAccessWrapper)");
 
 	m_psReturnData = new value_type ();
 
-	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const CBTreeArrayTestWrapper_t &): ERROR: insufficient memory! (m_psReturnData)");
+	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::CBTreeArrayTestWrapper (const CBTreeArrayTestWrapper_t &): ERROR: insufficient memory! (m_psReturnData)");
 
-	this->m_nNumContainers = CBTreeArrayTestWrapper<_t_data, _t_ref_container>::m_nNumArrays;
+	this->m_nNumContainers = CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::m_nNumArrays;
 
 	this->instantiate_container_array ();
 
@@ -75,8 +75,8 @@ CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestWrapper (const
 	this->test ();
 }
 
-template<class _t_data, class _t_ref_container>
-CBTreeArrayTestWrapper<_t_data, _t_ref_container>::~CBTreeArrayTestWrapper ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::~CBTreeArrayTestWrapper ()
 {
 	uint32_t	ui32;
 
@@ -109,8 +109,8 @@ CBTreeArrayTestWrapper<_t_data, _t_ref_container>::~CBTreeArrayTestWrapper ()
 	}
 }
 
-template<class _t_data, class _t_ref_container>
-bool CBTreeArrayTestWrapper<_t_data, _t_ref_container>::empty () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+bool CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::empty () const
 {
 	uint32_t	ui32;
 	bool		bRetval = this->m_pReference->empty ();
@@ -124,7 +124,7 @@ bool CBTreeArrayTestWrapper<_t_data, _t_ref_container>::empty () const
 
 		if (bRetval != this->m_ppContainers[ui32]->empty ())
 		{
-			::std::cerr << "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::empty () const: ERROR: unexpected result! container: " << ui32 << ::std::endl;
+			::std::cerr << "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::empty () const: ERROR: unexpected result! container: " << ui32 << ::std::endl;
 
 			exit (-1);
 		}
@@ -133,8 +133,8 @@ bool CBTreeArrayTestWrapper<_t_data, _t_ref_container>::empty () const
 	return (bRetval);
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_type CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_type CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size () const
 {
 	size_type		nRslt = this->m_pReference->size ();
 	uint32_t		ui32;
@@ -157,81 +157,81 @@ typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_type CBTreeArra
 	return (nRslt);
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::cbegin () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::cbegin () const
 {
 	return (this->m_pReference->cbegin ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::cend () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::cend () const
 {
 	return (this->m_pReference->cend ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::crbegin () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::crbegin () const
 {
 	return (this->m_pReference->crbegin ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::crend () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::crend () const
 {
 	return (this->m_pReference->crend ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::begin ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::begin ()
 {
 	return (this->m_pReference->begin ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::end ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::end ()
 {
 	return (this->m_pReference->end ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::rbegin ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::rbegin ()
 {
 	return (this->m_pReference->rbegin ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::rend ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::rend ()
 {
 	return (this->m_pReference->rend ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::begin () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::begin () const
 {
 	return (this->m_pReference->begin ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::end () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::end () const
 {
 	return (this->m_pReference->end ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::rbegin () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::rbegin () const
 {
 	return (this->m_pReference->rbegin ());
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_ref_container>::rend () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_reverse_iterator CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::rend () const
 {
 	return (this->m_pReference->rend ());
 }
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 template<class _t_iterator>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign (_t_iterator &rItFirst, _t_iterator &rItLast)
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::assign (_t_iterator &rItFirst, _t_iterator &rItLast)
 {
 	uint32_t		ui32 = 0;
 
@@ -282,9 +282,9 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign (_t_iterator &rIt
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 template<class _t_iterator>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign_via_self_reference (_t_iterator &rItFirst, _t_iterator &rItLast)
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::assign_via_self_reference (_t_iterator &rItFirst, _t_iterator &rItLast)
 {
 	_t_iterator				sItBegin;
 	size_test_type			nFirst;
@@ -295,8 +295,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign_via_self_referenc
 
 	get_begin (this->m_pReference, sItBegin);
 
-	nFirst = ::std::distance (sItBegin, rItFirst);
-	nLast = ::std::distance (sItBegin, rItLast);
+	nFirst = (size_test_type) ::std::distance (sItBegin, rItFirst);
+	nLast = (size_test_type) ::std::distance (sItBegin, rItLast);
 
 	this->m_pReference->assign (sItTmpBegin, sItTmpEnd);
 
@@ -334,8 +334,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign_via_self_referenc
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign (typename _t_ref_container::size_type nNewSize, const typename _t_ref_container::value_type& rVal)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::assign (typename _t_ref_container::size_type nNewSize, const typename _t_ref_container::value_type& rVal)
 {
 	uint32_t	ui32;
 
@@ -348,14 +348,14 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign (typename _t_ref_
 			continue;
 		}
 
-		this->m_ppContainers[ui32]->assign (nNewSize, rVal);
+		this->m_ppContainers[ui32]->assign ((_t_sizetype) nNewSize, rVal);
 	}
 
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::push_back (const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::value_type &rData)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::push_back (const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::value_type &rData)
 {
 	uint32_t	ui32;
 
@@ -374,8 +374,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::push_back (const typenam
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::pop_back ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::pop_back ()
 {
 	uint32_t	ui32;
 
@@ -394,11 +394,11 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::pop_back ()
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
-	CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::iterator
+	CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::insert
 	(
-		typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator sCIterPos, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::value_type& rData
+		typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator sCIterPos, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::value_type& rData
 	)
 {
 	uint32_t		ui32;
@@ -448,13 +448,13 @@ typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
 	return (sIterRefRslt);
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
-	CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::iterator
+	CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::insert
 	(
-		typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator sCIterPos, 
-		const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_type nLen, 
-		const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::value_type& rData
+		typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator sCIterPos, 
+		const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_type nLen, 
+		const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::value_type& rData
 	)
 {
 	uint32_t		ui32;
@@ -483,7 +483,7 @@ typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
 
 		::std::advance (sCIterTest, (int) nDist);
 
-		sIterRslt = this->m_ppContainers[ui32]->insert (sCIterTest, nLen, rData);
+		sIterRslt = this->m_ppContainers[ui32]->insert (sCIterTest, (size_test_type) nLen, rData);
 
 		sIterBegin = this->m_ppContainers[ui32]->begin ();
 
@@ -504,12 +504,12 @@ typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
 	return (sIterRefRslt);
 }
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 template<class _t_iterator>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
-	CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::iterator
+	CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::insert
 	(
-		typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator sCIterPos, 
+		typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator sCIterPos, 
 		_t_iterator &rItFirst, 
 		_t_iterator &rItLast
 	)
@@ -571,11 +571,11 @@ typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
 	return (sIterRefRslt);
 }
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 template<class _t_iterator>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert_via_self_reference
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::insert_via_self_reference
 	(
-		typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator sCIterPos, 
+		typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator sCIterPos, 
 		_t_iterator &rItFirst, 
 		_t_iterator &rItLast
 	)
@@ -592,9 +592,9 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert_via_self_referenc
 	get_begin (this->m_pReference, sItBegin);
 	get_begin (this->m_pReference, sCItBegin);
 
-	nFirst = ::std::distance (sItBegin, rItFirst);
-	nLast = ::std::distance (sItBegin, rItLast);
-	nPos = ::std::distance (sCItBegin, sCIterPos);
+	nFirst = (size_test_type) ::std::distance (sItBegin, rItFirst);
+	nLast = (size_test_type) ::std::distance (sItBegin, rItLast);
+	nPos = (size_test_type) ::std::distance (sCItBegin, sCIterPos);
 
 	this->m_pReference->insert (sCIterPos, sItTmpBegin, sItTmpEnd);
 
@@ -632,11 +632,11 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert_via_self_referenc
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
-	CBTreeArrayTestWrapper<_t_data, _t_ref_container>::erase
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::iterator
+	CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::erase
 	(
-		typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator sCIterPos
+		typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator sCIterPos
 	)
 {
 	uint32_t		ui32;
@@ -686,12 +686,12 @@ typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
 	return (sIterRefRslt);
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
-	CBTreeArrayTestWrapper<_t_data, _t_ref_container>::erase
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::iterator
+	CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::erase
 	(
-		typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator sCIterFirst, 
-		typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::const_iterator sCIterLast
+		typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator sCIterFirst, 
+		typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::const_iterator sCIterLast
 	)
 {
 	uint32_t		ui32;
@@ -749,8 +749,8 @@ typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::iterator
 	return (sIterRefRslt);
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::replace (const_iterator sCIterPos, const _t_data& rData)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::replace (const_iterator sCIterPos, const _t_data& rData)
 {
 	uint32_t		ui32;
 	iterator		sIter = this->m_pReference->begin ();
@@ -780,8 +780,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::replace (const_iterator 
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::swap (CBTreeArrayTestWrapper<_t_data, _t_ref_container> &rArrayWrapper)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::swap (CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container> &rArrayWrapper)
 {
 	uint32_t	ui32;
 
@@ -795,8 +795,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::swap (CBTreeArrayTestWra
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::clear ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::clear ()
 {
 	uint32_t	ui32;
 
@@ -810,8 +810,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::clear ()
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_type CBTreeArrayTestWrapper<_t_data, _t_ref_container>::serialize (const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_type nStart, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_type nLen, typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::value_type *pData) const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_type CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::serialize (const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_type nStart, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_type nLen, typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::value_type *pData) const
 {
 	typedef typename _t_ref_container::size_type			size_type;
 	
@@ -829,7 +829,7 @@ typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_type CBTreeArra
 			continue;
 		}
 
-		nSize = this->m_ppContainers[ui32]->serialize (nStart, nLen, pData);
+		nSize = this->m_ppContainers[ui32]->serialize ((size_test_type) nStart, (size_test_type) nLen, pData);
 
 		if (ui32 == 0)
 		{
@@ -862,8 +862,8 @@ typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_type CBTreeArra
 	return (nRslt);
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::unload ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::unload ()
 {
 	uint32_t	ui32;
 
@@ -875,8 +875,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::unload ()
 	test ();
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::show_integrity (const char *pszPrefix)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::show_integrity (const char *pszPrefix)
 {
 	uint32_t				i;
 	
@@ -890,8 +890,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::show_integrity (const ch
 	}
 }
 
-template<class _t_data, class _t_ref_container>
-CBTreeArrayTestWrapper<_t_data, _t_ref_container> & CBTreeArrayTestWrapper<_t_data, _t_ref_container>::operator= (const CBTreeArrayTestWrapper<_t_data, _t_ref_container> &rContainer)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container> & CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::operator= (const CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container> &rContainer)
 {
 	uint32_t		ui32;
 
@@ -911,24 +911,24 @@ CBTreeArrayTestWrapper<_t_data, _t_ref_container> & CBTreeArrayTestWrapper<_t_da
 	return (*this);
 }
 
-template<class _t_data, class _t_ref_container>
-CBTreeArrayTestWrapper<_t_data, _t_ref_container> & CBTreeArrayTestWrapper<_t_data, _t_ref_container>::operator= (CBTreeArrayTestWrapper<_t_data, _t_ref_container> &&rRhBT)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container> & CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::operator= (CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container> &&rRhBT)
 {
 
 }
 
-template<class _t_data, class _t_ref_container>
-typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::CBTreeArrayTestAccessWrapper_t CBTreeArrayTestWrapper<_t_data, _t_ref_container>::operator[] (const typename reference_t::size_type nPos)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::CBTreeArrayTestAccessWrapper_t CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::operator[] (const typename reference_t::size_type nPos)
 {
 	BTREE_ASSERT_EXCEPT (nPos < this->size (), ::std::out_of_range, "CBTreeArrayTestWrapper<>::operator[] (const size_type): nPos exceeds range!");
 
-	m_pClAccessWrapper->set (nPos);
+	m_pClAccessWrapper->set ((size_test_type) nPos);
 
 	return (*m_pClAccessWrapper);
 }
 
-template<class _t_data, class _t_ref_container>
-const _t_data& CBTreeArrayTestWrapper<_t_data, _t_ref_container>::operator[] (const typename reference_t::size_type nPos) const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+const _t_data& CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::operator[] (const typename reference_t::size_type nPos) const
 {
 	BTREE_ASSERT_EXCEPT (nPos < this->size (), ::std::out_of_range, "CBTreeArrayTestWrapper<>::operator[] (const size_type) const: nPos exceeds range!");
 
@@ -943,8 +943,8 @@ const _t_data& CBTreeArrayTestWrapper<_t_data, _t_ref_container>::operator[] (co
 	return (*m_psReturnData);
 }
 
-template<class _t_data, class _t_ref_container>
-bool CBTreeArrayTestWrapper<_t_data, _t_ref_container>::operator== (const CBTreeArrayTestWrapper_t &rContainer) const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+bool CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::operator== (const CBTreeArrayTestWrapper_t &rContainer) const
 {
 	if (this == &rContainer)
 	{
@@ -1012,20 +1012,20 @@ bool CBTreeArrayTestWrapper<_t_data, _t_ref_container>::operator== (const CBTree
 	return (true);
 }
 
-template<class _t_data, class _t_ref_container>
-bool CBTreeArrayTestWrapper<_t_data, _t_ref_container>::operator!= (const CBTreeArrayTestWrapper_t &rContainer) const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+bool CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::operator!= (const CBTreeArrayTestWrapper_t &rContainer) const
 {
 	return (!(*(this) == rContainer));
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::skip_containers_with_limited_address_space (const bool bEnable)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::skip_containers_with_limited_address_space (const bool bEnable)
 {
 	m_bSkipLimitedContainers = bEnable;
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::test () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::test () const
 {
 	uint32_t			i;
 
@@ -1040,8 +1040,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::test () const
 	}
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::disable_atomic_testing () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::disable_atomic_testing () const
 {
 	uint32_t			i;
 
@@ -1051,8 +1051,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::disable_atomic_testing (
 	}
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::enable_atomic_testing () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::enable_atomic_testing () const
 {
 	uint32_t			i;
 
@@ -1062,8 +1062,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::enable_atomic_testing ()
 	}
 }
 
-template<class _t_data, class _t_ref_container>
-bool CBTreeArrayTestWrapper<_t_data, _t_ref_container>::is_limited_container (uint32_t nContainer) const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+bool CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::is_limited_container (uint32_t nContainer) const
 {
 	switch (nContainer)
 	{
@@ -1076,28 +1076,28 @@ bool CBTreeArrayTestWrapper<_t_data, _t_ref_container>::is_limited_container (ui
 	return (true);
 }
 
-template<class _t_data, class _t_ref_container>
-bool CBTreeArrayTestWrapper<_t_data, _t_ref_container>::skip_container (uint32_t nContainer) const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+bool CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::skip_container (uint32_t nContainer) const
 {
 	return (is_limited_container (nContainer) && m_bSkipLimitedContainers);
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::instantiate_container_array ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::instantiate_container_array ()
 {
 	m_ppContainers = new CBTreeArrayIf_t * [this->get_num_containers ()];
 
-	BTREE_ASSERT (NULL != m_ppContainers, "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::instantiate_container_array (): ERROR: insufficient memory! (m_ppContainers)");
+	BTREE_ASSERT (NULL != m_ppContainers, "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::instantiate_container_array (): ERROR: insufficient memory! (m_ppContainers)");
 }
 
-template<class _t_data, class _t_ref_container>
-uint32_t CBTreeArrayTestWrapper<_t_data, _t_ref_container>::get_num_containers () const
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+uint32_t CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::get_num_containers () const
 {
 	return (this->m_nNumArrays);
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::init_containers (const uint32_t nNodeSize, const uint32_t nPageSize)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::init_containers (const uint32_t nNodeSize, const uint32_t nPageSize)
 {
 	CBTreeIOpropertiesRAM<size_test_type, uint64_t, uint32_t, uint64_t, uint32_t>		sRAMprop6565;
 	CBTreeIOpropertiesRAM<size_test_type, uint64_t, uint32_t, uint32_t, uint32_t>		sRAMprop6555;
@@ -1203,8 +1203,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::init_containers (const u
 	BTREE_ASSERT (NULL != m_pContainerFile5454large, "CBTreeArrayTestWrapper<_t_data, _t_value, _t_ref_container>::init_containers: ERROR: insufficient memory! (m_pContainerFile5454large)");
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::init_containers (const CBTreeArrayTestWrapper_t &rWrapper)
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::init_containers (const CBTreeArrayTestWrapper_t &rWrapper)
 {
 	uint32_t	i = 0;
 
@@ -1247,7 +1247,7 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::init_containers (const C
 	m_pContainerFile5554large = new CBTreeTestArray<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> > (*rWrapper.m_pContainerFile5554large); i++;
 	m_pContainerFile5454large = new CBTreeTestArray<CBTreeIOpropertiesFile <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> > (*rWrapper.m_pContainerFile5454large); i++;
 
-	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::init_containers (const CBTreeArrayTestWrapper &): ERROR: Unexpected number of test containers instantiated!");
+	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::init_containers (const CBTreeArrayTestWrapper &): ERROR: Unexpected number of test containers instantiated!");
 
 	i = 0;
 
@@ -1336,8 +1336,8 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::init_containers (const C
 	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeArrayTestWrapper<_t_data, _t_value, _t_ref_container>::init_containers (const CBTreeAssociativeTestWrapper &): ERROR: Unexpected number of test containers after setting reference container!");
 }
 
-template<class _t_data, class _t_ref_container>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::transfer_containers ()
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::transfer_containers ()
 {
 	uint32_t		i = 0;
 
@@ -1380,12 +1380,12 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::transfer_containers ()
 	this->m_ppContainers[i] = dynamic_cast<CBTreeArrayIf_t *> (m_pContainerFile5554large); i++;
 	this->m_ppContainers[i] = dynamic_cast<CBTreeArrayIf_t *> (m_pContainerFile5454large); i++;
 
-	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeArrayTestWrapper<_t_data, _t_ref_container>::transfer_containers: ERROR: Unexpected number of test containers!");
+	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::transfer_containers: ERROR: Unexpected number of test containers!");
 }
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 template<class _t_container, class _t_iterator>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::test_insert_all_containers (_t_container *pContainer, const size_type nDist, _t_iterator &sItFirst, _t_iterator &sItLast)
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::test_insert_all_containers (_t_container *pContainer, const size_type nDist, _t_iterator &sItFirst, _t_iterator &sItLast)
 {
 	test_const_iterator		sCIterTest;
 	test_iterator			sIterRslt;
@@ -1407,9 +1407,9 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::test_insert_all_containe
 	}
 }
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 template<class _t_iterator>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign_via_self_reference_all (_t_iterator &rIter, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nFirst, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nLast)
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::assign_via_self_reference_all (_t_iterator &rIter, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nFirst, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nLast)
 {
 	uint32_t			ui32 = 0;
 
@@ -1451,9 +1451,9 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign_via_self_referenc
 	if (!skip_container (ui32)) assign_via_self_reference_one (m_pContainerFile5454large, rIter, nFirst, nLast); ui32++;
 }
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 template<class _t_container, class _t_iterator>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign_via_self_reference_one (_t_container *pContainer, _t_iterator &rIter, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nFirst, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nLast)
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::assign_via_self_reference_one (_t_container *pContainer, _t_iterator &rIter, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nFirst, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nLast)
 {
 	_t_iterator		sItFirst;
 	_t_iterator		sItLast;
@@ -1467,9 +1467,9 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::assign_via_self_referenc
 	pContainer->assign (sItFirst, sItLast);
 }
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 template<class _t_iterator>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert_via_self_reference_all (_t_iterator &rIter, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nPos, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nFirst, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nLast)
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::insert_via_self_reference_all (_t_iterator &rIter, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nPos, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nFirst, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nLast)
 {
 	uint32_t			ui32 = 0;
 
@@ -1511,9 +1511,9 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert_via_self_referenc
 	if (!skip_container (ui32)) insert_via_self_reference_one (m_pContainerFile5454large, rIter, nPos, nFirst, nLast); ui32++;
 }
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 template<class _t_container, class _t_iterator>
-void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert_via_self_reference_one (_t_container *pContainer, _t_iterator &rIter, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nPos, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nFirst, const typename CBTreeArrayTestWrapper<_t_data, _t_ref_container>::size_test_type nLast)
+void CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::insert_via_self_reference_one (_t_container *pContainer, _t_iterator &rIter, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nPos, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nFirst, const typename CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::size_test_type nLast)
 {
 	typename _t_container::const_iterator	sCItPos;
 	_t_iterator								sItFirst;
@@ -1530,15 +1530,15 @@ void CBTreeArrayTestWrapper<_t_data, _t_ref_container>::insert_via_self_referenc
 	pContainer->insert (sCItPos, sItFirst, sItLast);
 }
 	
-template<class _t_data, class _t_ref_container>
-const uint32_t CBTreeArrayTestWrapper<_t_data, _t_ref_container>::m_nNumArrays = 36;
+template<class _t_data, class _t_sizetype, class _t_ref_container>
+const uint32_t CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>::m_nNumArrays = 36;
 
 /*******************************************************/
 
 template<class _t_container, class _t_ref_container>
 CBTreeArrayConstTestAccessWrapper<_t_container, _t_ref_container>::CBTreeArrayConstTestAccessWrapper
 	(
-		CBTreeArrayTestWrapper<typename _t_container::value_type, _t_ref_container>	&rInstance
+		CBTreeArrayTestWrapper<typename _t_container::value_type, typename _t_container::size_type, _t_ref_container>	&rInstance
 	)
 	:	m_rInstance (rInstance)
 	,	m_nPos (0)
@@ -1599,7 +1599,7 @@ CBTreeArrayConstTestAccessWrapper<_t_container, _t_ref_container>::operator cons
 template<class _t_container, class _t_ref_container>
 CBTreeArrayTestAccessWrapper<_t_container, _t_ref_container>::CBTreeArrayTestAccessWrapper
 	(
-		CBTreeArrayTestWrapper<typename _t_container::value_type, _t_ref_container>	&rInstance
+		CBTreeArrayTestWrapper<typename _t_container::value_type, typename _t_container::size_type, _t_ref_container>	&rInstance
 	)
 	:	CBTreeArrayConstTestAccessWrapper<_t_container, _t_ref_container> (rInstance)
 {

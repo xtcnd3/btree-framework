@@ -21,25 +21,25 @@
 
 #include <stdint.h>
 
-#include <btreeiofile.h>
-#include <btreeioram.h>
+#include "btreeiofile.h"
+#include "btreeioram.h"
 
 #include "btreearray.h"
-#include "btreetestkeysort.h"
+#include "testbench/application_classes/regression/btreetestkeysort.h"
 
-#include "btreeassociativetestwrapper.h"
+#include "testbench/wrapper_classes/base/btreeassociativetestwrapper.h"
 
-#include "btreekeysorttestprimitive.h"
+#include "testbench/primitives/btreekeysorttestprimitive.h"
 
-template<class _t_data, class _t_value, class _t_ref_container>
-class CBTreeKeySortTestWrapper	:	public CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+class CBTreeKeySortTestWrapper	:	public CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 {
 public:
 
-	typedef CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>
+	typedef CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																CBTreeKeySortTestWrapper_t;
 
-	typedef CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
+	typedef CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																CBTreeAssociativeTestWrapper_t;
 
 	typedef _t_ref_container									reference_t;
@@ -55,7 +55,7 @@ public:
 
 	typedef _t_data												value_test_type;
 	typedef uint32_t											key_test_type;
-	typedef uint64_t											size_test_type;
+	typedef _t_sizetype											size_test_type;
 
 	typedef CBTreeAssociativeIf<_t_value, uint32_t, size_test_type>
 																CBTreeAssociativeIf_t;
@@ -69,13 +69,13 @@ public:
 	typedef typename CBTreeAssociativeIf_t::const_reverse_iterator
 																test_const_reverse_iterator;
 
-							CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>
+							CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																(const uint32_t nNodeSize, const uint32_t nPageSize);
 
-							CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>
+							CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																(const CBTreeKeySortTestWrapper &rContainer);
 
-							~CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>
+							~CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																();
 
 	template<class _t_iterator>
@@ -141,4 +141,3 @@ protected:
 #include "btreekeysorttestwrapper.cpp"
 
 #endif // BTREEKEYSORTTESTWRAPPER_H
-

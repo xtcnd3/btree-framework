@@ -16,13 +16,13 @@
 #ifndef	BTREEKEYSORTTESTWRAPPER_CPP
 #define	BTREEKEYSORTTESTWRAPPER_CPP
 
-#include "btreekeysorttestwrapper.h"
+#include "testbench/wrapper_classes/btreekeysorttestwrapper.h"
 
-template<class _t_data, class _t_value, class _t_ref_container>
-CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper (const uint32_t nNodeSize, const uint32_t nPageSize)
-	:	CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container> (nNodeSize, nPageSize)
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper (const uint32_t nNodeSize, const uint32_t nPageSize)
+	:	CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container> (nNodeSize, nPageSize)
 {
-	this->m_nNumContainers = CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::m_nNumContainersKS;
+	this->m_nNumContainers = CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::m_nNumContainersKS;
 
 	this->instantiate_container_array ();
 
@@ -31,11 +31,11 @@ CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTest
 	this->transfer_containers ();
 }
 
-template<class _t_data, class _t_value, class _t_ref_container>
-CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper (const CBTreeKeySortTestWrapper &rContainer)
-	:	CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container> (rContainer)
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper (const CBTreeKeySortTestWrapper &rContainer)
+	:	CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container> (rContainer)
 {
-	this->m_nNumContainers = CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::m_nNumContainersKS;
+	this->m_nNumContainers = CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::m_nNumContainersKS;
 
 	this->instantiate_container_array ();
 
@@ -46,14 +46,14 @@ CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTest
 	this->test ();
 }
 
-template<class _t_data, class _t_value, class _t_ref_container>
-CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::~CBTreeKeySortTestWrapper ()
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::~CBTreeKeySortTestWrapper ()
 {
 }
 
-template<class _t_data, class _t_value, class _t_ref_container>
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
 template<class _t_iterator>
-void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::insert (_t_iterator sIterFirst, _t_iterator sIterLast)
+void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::insert (_t_iterator sIterFirst, _t_iterator sIterLast)
 {
 	uint32_t		i = 0;
 
@@ -98,20 +98,20 @@ void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::insert (_t_i
 	m_pContainerFile5554large->insert (sIterFirst, sIterLast); i++;
 	m_pContainerFile5454large->insert (sIterFirst, sIterLast); i++;
 
-	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::insert<_t_iterator>: ERROR: Unexpected number of test containers!");
+	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::insert<_t_iterator>: ERROR: Unexpected number of test containers!");
 
 	this->test ();
 }
 
-template<class _t_data, class _t_value, class _t_ref_container>
-typename CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::iterator CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::insert (const typename CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::value_type &rData)
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+typename CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::iterator CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::insert (const typename CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::value_type &rData)
 {
 	return (CBTreeAssociativeTestWrapper_t::insert (rData));
 }
 
-template<class _t_data, class _t_value, class _t_ref_container>
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
 template<class _t_iterator, class _t_test_iterator>
-void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::insert_self_reference (_t_iterator sIterFirst, _t_iterator sIterLast, _t_test_iterator &rIterTest)
+void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::insert_self_reference (_t_iterator sIterFirst, _t_iterator sIterLast, _t_test_iterator &rIterTest)
 {
 	uint32_t			i = 0;
 	_t_iterator			sIterBegin;
@@ -168,13 +168,13 @@ void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::insert_self_
 	get_begin (this->m_ppContainers[i], sIterTestFirst); sIterTestLast = sIterTestFirst; ::std::advance (sIterTestFirst, nFirst); ::std::advance (sIterTestLast, nLast); m_pContainerFile5554large->insert (sIterTestFirst, sIterTestLast); i++;
 	get_begin (this->m_ppContainers[i], sIterTestFirst); sIterTestLast = sIterTestFirst; ::std::advance (sIterTestFirst, nFirst); ::std::advance (sIterTestLast, nLast); m_pContainerFile5454large->insert (sIterTestFirst, sIterTestLast); i++;
 
-	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::insert<_t_iterator>: ERROR: Unexpected number of test containers!");
+	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::insert<_t_iterator>: ERROR: Unexpected number of test containers!");
 
 	this->test ();
 }
 
-template<class _t_data, class _t_value, class _t_ref_container>
-void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::init_containers (const uint32_t nNodeSize, const uint32_t nPageSize)
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::init_containers (const uint32_t nNodeSize, const uint32_t nPageSize)
 {
 	CBTreeIOpropertiesRAM<size_test_type, uint64_t, uint32_t, uint64_t, uint32_t>		sRAMprop6565;
 	CBTreeIOpropertiesRAM<size_test_type, uint64_t, uint32_t, uint32_t, uint32_t>		sRAMprop6555;
@@ -240,48 +240,48 @@ void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::init_contain
 	m_pContainerFile5554large = new CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> > (sFilePropertiesDefault5554, &sCacheDescNearestBigger, nNodeSize * 2, this->m_pReference);
 	m_pContainerFile5454large = new CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> > (sFilePropertiesDefault5454, &sCacheDescLarge, nNodeSize, this->m_pReference);
 
-	BTREE_ASSERT (NULL != m_pContainerRAM6565_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM6555_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5555_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5554_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5454_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5444_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM4444_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM6565_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_2n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM6555_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_2n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5555_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_2n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5554_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_2n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5454_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_2n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5444_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_2n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM4444_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_2n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM6565_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_4n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM6555_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_4n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5555_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_4n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5554_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_4n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5454_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_4n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM5444_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_4n)");
-	BTREE_ASSERT (NULL != m_pContainerRAM4444_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_4n)");
-	BTREE_ASSERT (NULL != m_pContainerFile6565min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565min)");
-	BTREE_ASSERT (NULL != m_pContainerFile6555min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555min)");
-	BTREE_ASSERT (NULL != m_pContainerFile5555min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555min)");
-	BTREE_ASSERT (NULL != m_pContainerFile5554min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554min)");
-	BTREE_ASSERT (NULL != m_pContainerFile5454min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454min)");
+	BTREE_ASSERT (NULL != m_pContainerRAM6565_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM6555_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5555_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5554_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5454_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5444_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM4444_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM6565_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_2n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM6555_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_2n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5555_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_2n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5554_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_2n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5454_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_2n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5444_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_2n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM4444_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_2n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM6565_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_4n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM6555_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_4n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5555_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_4n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5554_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_4n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5454_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_4n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM5444_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_4n)");
+	BTREE_ASSERT (NULL != m_pContainerRAM4444_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_4n)");
+	BTREE_ASSERT (NULL != m_pContainerFile6565min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565min)");
+	BTREE_ASSERT (NULL != m_pContainerFile6555min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555min)");
+	BTREE_ASSERT (NULL != m_pContainerFile5555min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555min)");
+	BTREE_ASSERT (NULL != m_pContainerFile5554min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554min)");
+	BTREE_ASSERT (NULL != m_pContainerFile5454min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454min)");
 
-	BTREE_ASSERT (NULL != m_pContainerFile6565default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565default)");
-	BTREE_ASSERT (NULL != m_pContainerFile6555default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555default)");
-	BTREE_ASSERT (NULL != m_pContainerFile5555default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555default)");
-	BTREE_ASSERT (NULL != m_pContainerFile5554default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554default)");
-	BTREE_ASSERT (NULL != m_pContainerFile5454default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454default)");
+	BTREE_ASSERT (NULL != m_pContainerFile6565default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565default)");
+	BTREE_ASSERT (NULL != m_pContainerFile6555default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555default)");
+	BTREE_ASSERT (NULL != m_pContainerFile5555default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555default)");
+	BTREE_ASSERT (NULL != m_pContainerFile5554default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554default)");
+	BTREE_ASSERT (NULL != m_pContainerFile5454default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454default)");
 
-	BTREE_ASSERT (NULL != m_pContainerFile6565large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565large)");
-	BTREE_ASSERT (NULL != m_pContainerFile6555large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555large)");
-	BTREE_ASSERT (NULL != m_pContainerFile5555large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555large)");
-	BTREE_ASSERT (NULL != m_pContainerFile5554large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554large)");
-	BTREE_ASSERT (NULL != m_pContainerFile5454large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454large)");
+	BTREE_ASSERT (NULL != m_pContainerFile6565large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565large)");
+	BTREE_ASSERT (NULL != m_pContainerFile6555large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555large)");
+	BTREE_ASSERT (NULL != m_pContainerFile5555large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555large)");
+	BTREE_ASSERT (NULL != m_pContainerFile5554large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554large)");
+	BTREE_ASSERT (NULL != m_pContainerFile5454large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454large)");
 }
 
-template<class _t_data, class _t_value, class _t_ref_container>
-void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::init_containers (const CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container> &rWrapper)
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::init_containers (const CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container> &rWrapper)
 {
 	uint32_t	i = 0;
 
@@ -326,50 +326,50 @@ void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::init_contain
 	m_pContainerFile5554large = new CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint32_t, uint32_t, uint16_t> > (*rThisWrapper.m_pContainerFile5554large); i++;
 	m_pContainerFile5454large = new CBTreeKeySortTest<value_test_type, uint32_t, CBTreeIOpropertiesFile <size_test_type, uint32_t, uint16_t, uint32_t, uint16_t> > (*rThisWrapper.m_pContainerFile5454large); i++;
 
-	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::init_container (const CBTreeAssociativeTestWrapper &): ERROR: Unexpected number of test containers instantiated!");
+	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::init_container (const CBTreeAssociativeTestWrapper &): ERROR: Unexpected number of test containers instantiated!");
 
 	i = 0;
 
-	BTREE_ASSERT (NULL != m_pContainerRAM6565_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM6555_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5555_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5554_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5454_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5444_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM4444_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM6565_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_2n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM6555_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_2n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5555_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_2n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5554_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_2n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5454_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_2n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5444_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_2n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM4444_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_2n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM6565_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_4n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM6555_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_4n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5555_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_4n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5554_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_4n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5454_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_4n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM5444_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_4n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerRAM4444_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_4n)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile6565min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565min)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile6555min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555min)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile5555min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555min)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile5554min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554min)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile5454min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454min)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM6565_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM6555_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5555_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5554_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5454_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5444_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM4444_n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM6565_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_2n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM6555_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_2n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5555_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_2n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5554_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_2n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5454_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_2n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5444_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_2n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM4444_2n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_2n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM6565_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6565_4n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM6555_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM6555_4n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5555_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5555_4n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5554_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5554_4n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5454_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5454_4n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM5444_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM5444_4n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerRAM4444_4n, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerRAM4444_4n)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile6565min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565min)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile6555min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555min)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile5555min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555min)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile5554min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554min)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile5454min, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454min)"); i++;
 
-	BTREE_ASSERT (NULL != m_pContainerFile6565default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565default)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile6555default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555default)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile5555default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555default)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile5554default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554default)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile5454default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454default)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile6565default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565default)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile6555default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555default)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile5555default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555default)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile5554default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554default)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile5454default, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454default)"); i++;
 
-	BTREE_ASSERT (NULL != m_pContainerFile6565large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565large)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile6555large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555large)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile5555large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555large)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile5554large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554large)"); i++;
-	BTREE_ASSERT (NULL != m_pContainerFile5454large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454large)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile6565large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6565large)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile6555large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile6555large)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile5555large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5555large)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile5554large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5554large)"); i++;
+	BTREE_ASSERT (NULL != m_pContainerFile5454large, "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeKeySortTestWrapper: ERROR: insufficient memory! (m_pContainerFile5454large)"); i++;
 
-	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::init_container (const CBTreeAssociativeTestWrapper &): ERROR: Unexpected number of test containers checked to be instantiated successfully!");
+	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::init_container (const CBTreeAssociativeTestWrapper &): ERROR: Unexpected number of test containers checked to be instantiated successfully!");
 
 	i = 0;
 
@@ -412,11 +412,11 @@ void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::init_contain
 	m_pContainerFile5554large->set_reference (this->m_pReference); i++;
 	m_pContainerFile5454large->set_reference (this->m_pReference); i++;
 
-	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::init_container (const CBTreeAssociativeTestWrapper &): ERROR: Unexpected number of test containers after setting reference container!");
+	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::init_container (const CBTreeAssociativeTestWrapper &): ERROR: Unexpected number of test containers after setting reference container!");
 }
 
-template<class _t_data, class _t_value, class _t_ref_container>
-void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::transfer_containers ()
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::transfer_containers ()
 {
 	uint32_t		i = 0;
 
@@ -459,10 +459,10 @@ void CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::transfer_con
 	this->m_ppContainers[i] = dynamic_cast<CBTreeAssociativeIf_t *> (m_pContainerFile5554large); i++;
 	this->m_ppContainers[i] = dynamic_cast<CBTreeAssociativeIf_t *> (m_pContainerFile5454large); i++;
 
-	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::CBTreeMapTestWrapper: ERROR: Unexpected number of test containers!");
+	BTREE_ASSERT (i == this->get_num_containers (), "CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::CBTreeMapTestWrapper: ERROR: Unexpected number of test containers!");
 }
 	
-template<class _t_data, class _t_value, class _t_ref_container>
-const uint32_t CBTreeKeySortTestWrapper<_t_data, _t_value, _t_ref_container>::m_nNumContainersKS = 36;
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+const uint32_t CBTreeKeySortTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>::m_nNumContainersKS = 36;
 
 #endif // BTREEKEYSORTTESTWRAPPER_CPP

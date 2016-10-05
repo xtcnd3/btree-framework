@@ -18,24 +18,24 @@
 
 #include <stdint.h>
 
-#include <btreeiofile.h>
-#include <btreeioram.h>
+#include "btreeiofile.h"
+#include "btreeioram.h"
 
 #include "btreearray.h"
-#include "btreetestmap.h"
+#include "testbench/application_classes/regression/btreetestmap.h"
 
-#include "btreeassociativetestwrapper.h"
+#include "testbench/wrapper_classes/base/btreeassociativetestwrapper.h"
 
-#include "btreemultimapprimitives.h"
+#include "testbench/primitives/btreemultimapprimitives.h"
 
-template<class _t_data, class _t_value, class _t_ref_container>
-class CBTreeMapTestWrapper	:	public CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
+template<class _t_data, class _t_value, class _t_sizetype, class _t_ref_container>
+class CBTreeMapTestWrapper	:	public CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 {
 public:
 
-	typedef CBTreeMapTestWrapper<_t_data, _t_value, _t_ref_container>		CBTreeMapTestWrapper_t;
+	typedef CBTreeMapTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>		CBTreeMapTestWrapper_t;
 
-	typedef CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_ref_container>
+	typedef CBTreeAssociativeTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																CBTreeAssociativeTestWrapper_t;
 
 	typedef _t_ref_container									reference_t;
@@ -51,7 +51,7 @@ public:
 
 	typedef _t_data												value_test_type;
 	typedef uint32_t											key_test_type;
-	typedef uint64_t											size_test_type;
+	typedef _t_sizetype											size_test_type;
 
 	typedef CBTreeAssociativeIf<_t_value, key_test_type, size_test_type>
 																CBTreeAssociativeIf_t;
@@ -93,13 +93,13 @@ public:
 	typedef	struct key_compare_s<key_type>						key_compare;
 	typedef struct value_compare_s<value_type>					value_compare;
 
-							CBTreeMapTestWrapper<_t_data, _t_value, _t_ref_container>
+							CBTreeMapTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																(const uint32_t nNodeSize, const uint32_t nPageSize);
 
-							CBTreeMapTestWrapper<_t_data, _t_value, _t_ref_container>
+							CBTreeMapTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																(const CBTreeMapTestWrapper &rContainer);
 
-							~CBTreeMapTestWrapper<_t_data, _t_value, _t_ref_container>
+							~CBTreeMapTestWrapper<_t_data, _t_value, _t_sizetype, _t_ref_container>
 																();
 
 	template<class _t_iterator>

@@ -15,10 +15,10 @@
 
 #include <stdint.h>
 
-#include <btreeiofile.h>
-#include <btreeioram.h>
+#include "btreeiofile.h"
+#include "btreeioram.h"
 
-#include "btreetestarray.h"
+#include "testbench/application_classes/regression/btreetestarray.h"
 
 template<class _t_container, class _t_ref_container>
 class CBTreeArrayConstTestAccessWrapper;
@@ -26,12 +26,12 @@ class CBTreeArrayConstTestAccessWrapper;
 template<class _t_container, class _t_ref_container>
 class CBTreeArrayTestAccessWrapper;
 
-template<class _t_data, class _t_ref_container>
+template<class _t_data, class _t_sizetype, class _t_ref_container>
 class CBTreeArrayTestWrapper
 {
 public:
 
-	typedef CBTreeArrayTestWrapper<_t_data, _t_ref_container>	CBTreeArrayTestWrapper_t;
+	typedef CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>	CBTreeArrayTestWrapper_t;
 
 	typedef _t_ref_container									reference_t;
 
@@ -44,7 +44,7 @@ public:
 	typedef typename reference_t::size_type						size_type;
 
 	typedef _t_data												value_test_type;
-	typedef uint64_t											size_test_type;
+	typedef _t_sizetype											size_test_type;
 
 	typedef	CBTreeArrayIf<value_test_type, size_test_type>		CBTreeArrayIf_t;
 
@@ -59,14 +59,14 @@ public:
 																CBTreeArrayTestAccessWrapper_t;
 
 	// construction
-								CBTreeArrayTestWrapper<_t_data, _t_ref_container>
+								CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>
 																(const uint32_t nNodeSize, const uint32_t nPageSize);
 
-								CBTreeArrayTestWrapper<_t_data, _t_ref_container>
-																(const CBTreeArrayTestWrapper<_t_data, _t_ref_container> &rContainer);
+								CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>
+																(const CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container> &rContainer);
 
 	// destruction
-								~CBTreeArrayTestWrapper<_t_data, _t_ref_container>
+								~CBTreeArrayTestWrapper<_t_data, _t_sizetype, _t_ref_container>
 																();
 
 	bool						empty							() const;
@@ -251,7 +251,7 @@ public:
 
 						CBTreeArrayConstTestAccessWrapper<_t_container, _t_ref_container>
 						(
-							CBTreeArrayTestWrapper<value_test_type, _t_ref_container>	&rInstance
+							CBTreeArrayTestWrapper<value_test_type, size_test_type, _t_ref_container>	&rInstance
 						);
 
 						~CBTreeArrayConstTestAccessWrapper<_t_container, _t_ref_container> ();
@@ -265,7 +265,8 @@ public:
 
 protected:
 
-	CBTreeArrayTestWrapper<value_test_type, _t_ref_container>	&m_rInstance;
+	CBTreeArrayTestWrapper<value_test_type, size_test_type, _t_ref_container>
+																&m_rInstance;
 	size_test_type												m_nPos;
 	value_test_type												m_sData;
 };
@@ -285,7 +286,7 @@ public:
 	
 						CBTreeArrayTestAccessWrapper<_t_container, _t_ref_container>
 						(
-							CBTreeArrayTestWrapper<value_test_type, _t_ref_container>	&rInstance
+							CBTreeArrayTestWrapper<value_test_type, size_test_type, _t_ref_container>	&rInstance
 						);
 
 						~CBTreeArrayTestAccessWrapper<_t_container, _t_ref_container> ();
