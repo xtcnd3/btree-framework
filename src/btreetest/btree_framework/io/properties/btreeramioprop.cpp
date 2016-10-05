@@ -14,7 +14,7 @@
 #ifndef BTREEIORAMPROP_CPP
 #define BTREEIORAMPROP_CPP
 
-#include "btreeramioprop.h"
+#include "io/properties/btreeramioprop.h"
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 CBTreeIOpropertiesRAM<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeIOpropertiesRAM ()

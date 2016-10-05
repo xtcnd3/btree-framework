@@ -18,8 +18,8 @@
 
 #include <type_traits>
 
-#include "btreecommon.h"
-#include "btreeioprop.h"
+#include "common/btreecommon.h"
+#include "io/properties/base/btreeioprop.h"
 #include "btreeioram.h"
 
 template<class _t_sizetype = uint64_t, class _t_nodeiter = uint64_t, class _t_subnodeiter = uint32_t, class _t_addresstype = uint64_t, class _t_offsettype = uint32_t>

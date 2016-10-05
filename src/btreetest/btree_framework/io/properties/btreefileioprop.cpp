@@ -14,7 +14,7 @@
 #ifndef BTREEIOFILEPROP_CPP
 #define BTREEIOFILEPROP_CPP
 
-#include "btreefileioprop.h"
+#include "io/properties/btreefileioprop.h"
 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::CBTreeIOpropertiesFile (const char *pszPathName, _t_addresstype nAddrSpaceSoftLimit)
