@@ -583,7 +583,7 @@ typename _t_datalayerproperties::size_type CBTreeArray<_t_data, _t_datalayerprop
 
 	/*
 	**	The actual serialize process is done by CBTreeBaseDefaults::serialize.
-	**	All this method does is to convert nFrom and nTo into the templateparameter _ti_pos (CBTreeArrayPos <size_type>)
+	**	All this method does is to convert nFrom and nTo into the template parameter _ti_pos (CBTreeArrayPos <size_type>)
 	**	and nLen. This has to be done, since CBTreeBaseDefaults::serialize has no concept of what an size_type in terms of a position is.
 	*/
 
@@ -837,7 +837,7 @@ bool CBTreeArray<_t_data, _t_datalayerproperties>::get_at (const typename _t_dat
 	node_iter_type		nNode;
 	sub_node_iter_type	nSubPos;
 
-	if (this->m_pData != NULL)
+	if (!this->empty ())
 	{
 		if (nPos < this->size ())
 		{
