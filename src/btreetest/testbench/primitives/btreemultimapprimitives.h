@@ -18,10 +18,10 @@
 
 #include <type_traits>
 
-#include "btreetestmap.h"
-#include "btreetestmultimap.h"
+#include "testbench/application_classes/regression/btreetestmap.h"
+#include "testbench/application_classes/regression/btreetestmultimap.h"
 
-#include "./associative/btreemultimap.h"
+#include "specific_data_classes/btreemultimap.h"
 
 typedef CBTreePairTest<const uint32_t, mapMap_t>										mapPair_t;
 
@@ -36,7 +36,7 @@ typedef enum
 } btreetest_multimap_primitive_seek_e;
 
 template<class _t_container>
-void multiMapPrim_add (_t_container *pClMM, uint32_t nEntries, uint32_t &nFromWhereOrSeed, btreetest_multimap_primitive_seek_e eWhere);
+void multiMapPrim_add (_t_container *pClMM, typename _t_container::size_type nEntries, uint32_t &nFromWhereOrSeed, btreetest_multimap_primitive_seek_e eWhere);
 
 #endif // !BTREEMULTIMAPPRIMITIVES_H
 

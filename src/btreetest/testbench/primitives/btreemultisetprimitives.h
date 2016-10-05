@@ -16,8 +16,8 @@
 
 #include <stdint.h>
 
-#include "btreetestcommon.h"
-#include "./associative/btreemultiset.h"
+#include "testbench/common/btreetestcommon.h"
+#include "specific_data_classes/btreemultiset.h"
 
 typedef enum
 {
@@ -28,10 +28,10 @@ typedef enum
 } btreetest_multiset_primitive_seek_e;
 
 template<class _t_container>
-void multiSetPrim_add (_t_container *pClMS, uint32_t nEntries, uint32_t &nFromWhereOrSeed, btreetest_multiset_primitive_seek_e eWhere);
+void multiSetPrim_add (_t_container *pClMS, typename _t_container::size_type nEntries, uint32_t &nFromWhereOrSeed, btreetest_multiset_primitive_seek_e eWhere);
 
 template<class _t_container>
-void multiSetPrim_add (_t_container *pClMS, uint32_t nEntries, uint32_t &nFromWhereOrSeed, btreetest_multiset_primitive_seek_e eWhere)
+void multiSetPrim_add (_t_container *pClMS, typename _t_container::size_type nEntries, uint32_t &nFromWhereOrSeed, btreetest_multiset_primitive_seek_e eWhere)
 {
 	typedef typename _t_container::value_type		value_type;
 

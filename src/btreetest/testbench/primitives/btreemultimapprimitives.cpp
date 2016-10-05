@@ -14,10 +14,10 @@
 #ifndef BTREEMULTIMAPPRIMITIVES_CPP
 #define BTREEMULTIMAPPRIMITIVES_CPP
 
-#include "btreemultimapprimitives.h"
+#include "testbench/primitives/btreemultimapprimitives.h"
 
 template<class _t_container>
-void multiMapPrim_add (_t_container *pClMM, uint32_t nEntries, uint32_t &nFromWhereOrSeed, btreetest_multimap_primitive_seek_e eWhere)
+void multiMapPrim_add (_t_container *pClMM, typename _t_container::size_type nEntries, uint32_t &nFromWhereOrSeed, btreetest_multimap_primitive_seek_e eWhere)
 {
 	typedef typename _t_container::value_type		data_t;
 
