@@ -40,48 +40,44 @@
 
 #include "btreearray.h"
 
-#include "btreetestarray.h"
-#include "btreetestkeysort.h"
+#include "testbench/application_classes/regression/btreetestarray.h"
+#include "testbench/application_classes/regression/btreetestkeysort.h"
 
-#include "btreetestmultimap.h"
-#include "btreetestmap.h"
-#include "btreetestmultiset.h"
-#include "btreetestset.h"
+#include "testbench/application_classes/regression/btreetestmultimap.h"
+#include "testbench/application_classes/regression/btreetestmap.h"
+#include "testbench/application_classes/regression/btreetestmultiset.h"
+#include "testbench/application_classes/regression/btreetestset.h"
 
-#include "btreearraytestbench.h"
-#include "btreearraytestbench.cpp"
-#include "btreekeysorttestbench.h"
-#include "btreekeysorttestbench.cpp"
+#include "testbench/tests/regression/btreearraytestbench.h"
+#include "testbench/tests/regression/btreearraytestbench.cpp"
+#include "testbench/tests/regression/btreekeysorttestbench.h"
+#include "testbench/tests/regression/btreekeysorttestbench.cpp"
 
-#include "btreearrayitertestbench.h"
-#include "btreearrayitertestbench.cpp"
-#include "btreekeysortitertestbench.h"
-#include "btreekeysortitertestbench.cpp"
+#include "testbench/tests/regression/btreearrayitertestbench.h"
+#include "testbench/tests/regression/btreearrayitertestbench.cpp"
+#include "testbench/tests/regression/btreekeysortitertestbench.h"
+#include "testbench/tests/regression/btreekeysortitertestbench.cpp"
 
-#include "btreemultimaptestbench.h"
-#include "btreemultimaptestbench.cpp"
-#include "btreemaptestbench.h"
-#include "btreemaptestbench.cpp"
-#include "btreemultisettestbench.h"
-#include "btreemultisettestbench.cpp"
-#include "btreesettestbench.h"
-#include "btreesettestbench.cpp"
+#include "testbench/tests/regression/btreemultimaptestbench.h"
+#include "testbench/tests/regression/btreemultimaptestbench.cpp"
+#include "testbench/tests/regression/btreemaptestbench.h"
+#include "testbench/tests/regression/btreemaptestbench.cpp"
+#include "testbench/tests/regression/btreemultisettestbench.h"
+#include "testbench/tests/regression/btreemultisettestbench.cpp"
+#include "testbench/tests/regression/btreesettestbench.h"
+#include "testbench/tests/regression/btreesettestbench.cpp"
 
-#include "btreekeysorttestwrapper.h"
-#include "btreemaptestwrapper.h"
-#include "btreemultimaptestwrapper.h"
-#include "btreesettestwrapper.h"
-#include "btreemultisettestwrapper.h"
+#include "testbench/tests/performance/btreearrayperftestbench.h"
 
-#include "btreearraytestwrapper.h"
+#include "testbench/wrapper_classes/btreearraytestwrapper.h"
+#include "testbench/wrapper_classes/btreekeysorttestwrapper.h"
+
+#include "testbench/wrapper_classes/btreemaptestwrapper.h"
+#include "testbench/wrapper_classes/btreemultimaptestwrapper.h"
+#include "testbench/wrapper_classes/btreesettestwrapper.h"
+#include "testbench/wrapper_classes/btreemultisettestwrapper.h"
 
 #include "avp_path_find_core.h"
-
-#include "btreearrayperftestbench.h"
-
-#if defined (_MSC_VER)
- #include "stdafx.h"
-#endif
 
 using namespace std;
 
@@ -117,7 +113,19 @@ typedef enum
 	BTREETYPE_STL_SET
 } btreeType_e;
 
-int main(int argc, char **argv)
+typedef enum
+{
+	APPLICATION_TYPE_NOT_SPECIFIED, 
+	APPLICATION_TYPE_AVP
+} application_type_e;
+
+typedef enum
+{
+	SIZE_TYPE_32, 
+	SIZE_TYPE_64
+} size_type_e;
+
+int main (int argc, char **argv)
 {
 #if defined(__GNUC__) || defined(__GNUG__)
 	// this variable is for gdb to test when errno gets modified, since errno as such doesn't exist anymore -> usage: watch *pErrno
@@ -130,7 +138,9 @@ int main(int argc, char **argv)
 	uint32_t				nTestNum = ~0x0;
 	uint32_t				nNodeSize = 2;
 	btreeType_e				eBtreeType = BTREETYPE_NOT_SPECIFIED;
+	application_type_e		eApplicationType = APPLICATION_TYPE_NOT_SPECIFIED;
 	bool					bPerformanceTest = false;
+	size_type_e				eSizeType =	SIZE_TYPE_64;
 
 #if defined (_MSC_VER)
 
@@ -217,6 +227,15 @@ int main(int argc, char **argv)
 				return (-1);
 			}
 		}
+		else if (strcmp (argv[i], "-app") == 0)
+		{
+			i++;
+
+			if (strcmp (argv[i], "avp") == 0)
+			{
+				eApplicationType = APPLICATION_TYPE_AVP;
+			}
+		}
 		else if (strcmp (argv[i], "-test") == 0)
 		{
 			i++;
@@ -229,6 +248,31 @@ int main(int argc, char **argv)
 
 			sscanf (argv[i], "%u", &nNodeSize);
 		}
+		else if (strcmp (argv[i], "-sizetype") == 0)
+		{
+			uint32_t	nSizeType;
+
+			i++;
+
+			sscanf (argv[i], "%u", &nSizeType);
+
+			switch (nSizeType)
+			{
+			case	32	:	eSizeType =	SIZE_TYPE_32;
+
+							break;
+
+			case	64	:	eSizeType =	SIZE_TYPE_64;
+
+							break;
+
+			default		:	::std::cerr << "ERROR: Unknown size type specified!" << ::std::endl;
+
+							return (-1);
+
+							break;
+			}
+		}
 		else if (strcmp (argv[i], "-performance") == 0)
 		{
 			bPerformanceTest = true;
@@ -239,68 +283,26 @@ int main(int argc, char **argv)
 		}
 	}
 
-	CBTreeKeySortTestWrapper<keySortEntry_t, keySortEntry_t, keysort_reference_t>	*pKeySortWrapper = new CBTreeKeySortTestWrapper<keySortEntry_t, keySortEntry_t, keysort_reference_t> (nNodeSize, nPageSize);
+	CBTreeKeySortTestWrapper<keySortEntry_t, keySortEntry_t, uint32_t, keysort_reference_t>	*pKeySortWrapper32 = NULL;
+	CBTreeKeySortTestWrapper<keySortEntry_t, keySortEntry_t, uint64_t, keysort_reference_t>	*pKeySortWrapper64 = NULL;
 
-	if (pKeySortWrapper == NULL)
-	{
-		::std::cerr << "insufficient memory!" << ::std::endl;
+	CBTreeKeySortTestWrapper<keySortPair_t, keySortPair_t, uint32_t, keysort_reference_t>	*pKeySortPairWrapper32 = NULL;
+	CBTreeKeySortTestWrapper<keySortPair_t, keySortPair_t, uint64_t, keysort_reference_t>	*pKeySortPairWrapper64 = NULL;
 
-		return (-1);
-	}
+	CBTreeMapTestWrapper<mapPair_t, ::std::pair<uint32_t, mapMap_t>, uint32_t, map_reference_t>	*pMapWrapper32 = NULL;
+	CBTreeMapTestWrapper<mapPair_t, ::std::pair<uint32_t, mapMap_t>, uint64_t, map_reference_t>	*pMapWrapper64 = NULL;
 
-	CBTreeKeySortTestWrapper<keySortPair_t, keySortPair_t, keysort_reference_t>	*pKeySortPairWrapper = new CBTreeKeySortTestWrapper<keySortPair_t, keySortPair_t, keysort_reference_t> (nNodeSize, nPageSize);
+	CBTreeMultiMapTestWrapper<multiMapPair_t, ::std::pair<uint32_t, multiMapMap_t>, uint32_t, multimap_reference_t>	*pMultiMapWrapper32 = NULL;
+	CBTreeMultiMapTestWrapper<multiMapPair_t, ::std::pair<uint32_t, multiMapMap_t>, uint64_t, multimap_reference_t>	*pMultiMapWrapper64 = NULL;
 
-	if (pKeySortPairWrapper == NULL)
-	{
-		::std::cerr << "insufficient memory!" << ::std::endl;
+	CBTreeSetTestWrapper<uint32_t, uint32_t, uint32_t, set_reference_t>				*pSetWrapper32 = NULL;
+	CBTreeSetTestWrapper<uint32_t, uint32_t, uint64_t, set_reference_t>				*pSetWrapper64 = NULL;
 
-		return (-1);
-	}
+	CBTreeMultiSetTestWrapper<uint32_t, uint32_t, uint32_t, multiset_reference_t>	*pMultiSetWrapper32 = NULL;
+	CBTreeMultiSetTestWrapper<uint32_t, uint32_t, uint64_t, multiset_reference_t>	*pMultiSetWrapper64 = NULL;
 
-	CBTreeMapTestWrapper<mapPair_t, ::std::pair<uint32_t, mapMap_t>, map_reference_t>	*pMapWrapper = new CBTreeMapTestWrapper<mapPair_t, ::std::pair<uint32_t, mapMap_t>, map_reference_t> (nNodeSize, nPageSize);
-
-	if (pMapWrapper == NULL)
-	{
-		::std::cerr << "insufficient memory!" << ::std::endl;
-
-		return (-1);
-	}
-
-	CBTreeMultiMapTestWrapper<multiMapPair_t, ::std::pair<uint32_t, multiMapMap_t>, multimap_reference_t>	*pMultiMapWrapper = new CBTreeMultiMapTestWrapper<multiMapPair_t, ::std::pair<uint32_t, multiMapMap_t>, multimap_reference_t> (nNodeSize, nPageSize);
-
-	if (pMultiMapWrapper == NULL)
-	{
-		::std::cerr << "insufficient memory!" << ::std::endl;
-
-		return (-1);
-	}
-
-	CBTreeSetTestWrapper<uint32_t, uint32_t, set_reference_t>	*pSetWrapper = new CBTreeSetTestWrapper<uint32_t, uint32_t, set_reference_t> (nNodeSize, nPageSize);
-
-	if (pSetWrapper == NULL)
-	{
-		::std::cerr << "insufficient memory!" << ::std::endl;
-
-		return (-1);
-	}
-
-	CBTreeMultiSetTestWrapper<uint32_t, uint32_t, multiset_reference_t>	*pMultiSetWrapper = new CBTreeMultiSetTestWrapper<uint32_t, uint32_t, multiset_reference_t> (nNodeSize, nPageSize);
-
-	if (pMultiSetWrapper == NULL)
-	{
-		::std::cerr << "insufficient memory!" << ::std::endl;
-
-		return (-1);
-	}
-
-	CBTreeArrayTestWrapper<arrayEntry_t, ::std::list<arrayEntry_t> >	*pArrayWrapper = new CBTreeArrayTestWrapper<arrayEntry_t, ::std::list<arrayEntry_t> > (nNodeSize, nPageSize);
-
-	if (pArrayWrapper == NULL)
-	{
-		::std::cerr << "insufficient memory!" << ::std::endl;
-
-		return (-1);
-	}
+	CBTreeArrayTestWrapper<arrayEntry_t, uint32_t, ::std::list<arrayEntry_t> >		*pArrayWrapper32 = NULL;
+	CBTreeArrayTestWrapper<arrayEntry_t, uint64_t, ::std::list<arrayEntry_t> >		*pArrayWrapper64 = NULL;
 
 	try
 	{
@@ -368,26 +370,49 @@ int main(int argc, char **argv)
 		{
 			switch (eBtreeType)
 			{
-			case BTREETYPE_KEY_SORT		:	TestBTreeKeySort (nTestNum, nNodeSize, nPageSize, pKeySortWrapper, pKeySortPairWrapper);
+			case BTREETYPE_KEY_SORT		:	
+			{
+				switch (eSizeType)
+				{
+				case SIZE_TYPE_32	:	TestBTreeKeySort (nTestNum, nNodeSize, nPageSize, pKeySortWrapper32, pKeySortPairWrapper32);
 
-											break;
+										break;
 
-			case BTREETYPE_ARRAY		:	switch (nTestNum)
-											{
-											case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_ITER:
-											case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_CITER:
-											case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_RITER:
-											case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_CRITER:
-												{
-													pArrayWrapper->skip_containers_with_limited_address_space (true);
+				case SIZE_TYPE_64	:	TestBTreeKeySort (nTestNum, nNodeSize, nPageSize, pKeySortWrapper64, pKeySortPairWrapper64);
 
-													break;
-												}
-											}
+										break;
 
-											TestBTreeArray (nTestNum, nNodeSize, pArrayWrapper);
+				default				:	::std::cerr << "ERROR: size type not specified or not supported!" << ::std::endl;
 
-											break;
+										return (-1);
+
+										break;
+				}
+				
+				break;
+			}
+
+			case BTREETYPE_ARRAY		:	
+			{
+				switch (eSizeType)
+				{
+				case SIZE_TYPE_32	:	TestBTreeArray (nTestNum, nNodeSize, nPageSize, pArrayWrapper32);
+
+										break;
+
+				case SIZE_TYPE_64	:	TestBTreeArray (nTestNum, nNodeSize, nPageSize, pArrayWrapper64);
+
+										break;
+
+				default				:	::std::cerr << "ERROR: size type not specified or not supported!" << ::std::endl;
+
+										return (-1);
+
+										break;
+				}
+				
+				break;
+			}
 
 			case BTREETYPE_INDEX		:	
 
@@ -401,48 +426,172 @@ int main(int argc, char **argv)
 
 											break;
 
-			case BTREETYPE_APPLICATION	:	switch (nTestNum)
-											{
-											case	0	:	
-											case	1	:	
-											case	2	:	nRetval = avp_path_find_core (nTestNum, nNodeSize);
+			case BTREETYPE_APPLICATION	:	
+				switch (eApplicationType)
+				{
+					case APPLICATION_TYPE_AVP	:
+					{
+						switch (nTestNum)
+						{
+						case	0	:	
+						case	1	:	
+						case	2	:	nRetval = avp_path_find_core (nTestNum, nNodeSize);
 
-															break;
+										break;
 
-											default		:	cerr << "ERROR: unknown application test specified! -test " << nTestNum << endl;
+						default		:	cerr << "ERROR: unknown AVP application test specified! -test " << nTestNum << endl;
 
-															break;
-											}
+										break;
+						}
 
-											break;
+						break;
+					}
+
+					default						:
+					{
+						::std::cerr << "ERROR: application type not specified or not supported!" << ::std::endl;
+
+						return (-1);
+
+						break;
+					}
+				}
+
+				break;
 
 			case BTREETYPE_KEY_SORT_ITERATOR	:
-											
-											TestBTreeKeySortIter<uint64_t> (nTestNum, nNodeSize, nPageSize);
+			{
+				switch (eSizeType)
+				{
+				case SIZE_TYPE_32	:	TestBTreeKeySortIter<uint32_t> (nTestNum, nNodeSize, nPageSize);
 
-											break;
+										break;
 
-			case BTREETYPE_ARRAY_ITERATOR:	TestBTreeArrayIter<uint64_t> (nTestNum, nNodeSize, nPageSize);
+				case SIZE_TYPE_64	:	TestBTreeKeySortIter<uint64_t> (nTestNum, nNodeSize, nPageSize);
 
-											break;
+										break;
 
-			case BTREETYPE_STL_MULTIMAP:	TestBTreeSTLmultiMap (nTestNum, pMultiMapWrapper);
+				default				:	::std::cerr << "ERROR: size type not specified or not supported!" << ::std::endl;
 
-											break;
+										return (-1);
 
-			case BTREETYPE_STL_MAP		:	TestBTreeSTLmap (nTestNum, pMapWrapper);
+										break;
+				}
+				
+				break;
+			}
 
-											break;
+			case BTREETYPE_ARRAY_ITERATOR:	
+			{
+				switch (eSizeType)
+				{
+				case SIZE_TYPE_32	:	TestBTreeArrayIter<uint32_t> (nTestNum, nNodeSize, nPageSize);
 
-			case BTREETYPE_STL_MULTISET	:	TestBTreeSTLmultiSet (nTestNum, pMultiSetWrapper);
+										break;
 
-											break;
+				case SIZE_TYPE_64	:	TestBTreeArrayIter<uint64_t> (nTestNum, nNodeSize, nPageSize);
 
-			case BTREETYPE_STL_SET		:	TestBTreeSTLset (nTestNum, pSetWrapper);
+										break;
 
-											break;
+				default				:	::std::cerr << "ERROR: size type not specified or not supported!" << ::std::endl;
 
-			default						:	cerr << "ERROR: btree type not specified or not supported!" << endl;
+										return (-1);
+
+										break;
+				}
+				
+				break;
+			}
+
+			case BTREETYPE_STL_MULTIMAP:	
+			{
+				switch (eSizeType)
+				{
+				case SIZE_TYPE_32	:	TestBTreeSTLmultiMap (nTestNum, nNodeSize, nPageSize, pMultiMapWrapper32);
+
+										break;
+
+				case SIZE_TYPE_64	:	TestBTreeSTLmultiMap (nTestNum, nNodeSize, nPageSize, pMultiMapWrapper64);
+
+										break;
+
+				default				:	::std::cerr << "ERROR: size type not specified or not supported!" << ::std::endl;
+
+										return (-1);
+
+										break;
+				}
+				
+				break;
+			}
+
+			case BTREETYPE_STL_MAP		:	
+			{
+				switch (eSizeType)
+				{
+				case SIZE_TYPE_32	:	TestBTreeSTLmap (nTestNum, nNodeSize, nPageSize, pMapWrapper32);
+
+										break;
+
+				case SIZE_TYPE_64	:	TestBTreeSTLmap (nTestNum, nNodeSize, nPageSize, pMapWrapper64);
+
+										break;
+
+				default				:	::std::cerr << "ERROR: size type not specified or not supported!" << ::std::endl;
+
+										return (-1);
+
+										break;
+				}
+				
+				break;
+			}
+
+			case BTREETYPE_STL_MULTISET:
+			{
+				switch (eSizeType)
+				{
+				case SIZE_TYPE_32	:	TestBTreeSTLmultiSet (nTestNum, nNodeSize, nPageSize, pMultiSetWrapper32);
+
+										break;
+
+				case SIZE_TYPE_64	:	TestBTreeSTLmultiSet (nTestNum, nNodeSize, nPageSize, pMultiSetWrapper64);
+
+										break;
+
+				default				:	::std::cerr << "ERROR: size type not specified or not supported!" << ::std::endl;
+
+										return (-1);
+
+										break;
+				}
+				
+				break;
+			}
+
+			case BTREETYPE_STL_SET:
+			{
+				switch (eSizeType)
+				{
+				case SIZE_TYPE_32	:	TestBTreeSTLset (nTestNum, nNodeSize, nPageSize, pSetWrapper32);
+
+										break;
+
+				case SIZE_TYPE_64	:	TestBTreeSTLset (nTestNum, nNodeSize, nPageSize, pSetWrapper64);
+
+										break;
+
+				default				:	::std::cerr << "ERROR: size type not specified or not supported!" << ::std::endl;
+
+										return (-1);
+
+										break;
+				}
+
+				break;
+			}
+
+			default						:	::std::cerr << "ERROR: btree type not specified or not supported!" << ::std::endl;
 
 											return (-1);
 
@@ -452,19 +601,11 @@ int main(int argc, char **argv)
 	}
 	catch (std::runtime_error *pe)
 	{
-		cerr << endl << "ERROR caught in test bench main: ";
-		cerr << pe->what () << endl;
+		::std::cerr << ::std::endl << "ERROR caught in test bench main: ";
+		::std::cerr << pe->what () << ::std::endl;
 		
 		nRetval = -1;
 	}
-	
-	delete pArrayWrapper;
-	delete pMultiSetWrapper;
-	delete pSetWrapper;
-	delete pMultiMapWrapper;
-	delete pMapWrapper;
-	delete pKeySortPairWrapper;
-	delete pKeySortWrapper;
 
 #if defined (_MSC_VER)
 
