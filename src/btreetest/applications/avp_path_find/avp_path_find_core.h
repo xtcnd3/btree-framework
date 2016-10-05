@@ -22,8 +22,7 @@
 #include <stdint.h>
 
 #include <iterator>
-
-#include <windows.h>
+#include <chrono>
 
 #if defined (USE_STL)
 
@@ -208,9 +207,9 @@ typedef struct
 
 typedef struct
 {
-	uint32_t			nID;
-	LARGE_INTEGER		nStart;
-	uint64_t			nComplexity;
+	uint32_t									nID;
+	std::chrono::system_clock::time_point		sStartClock;
+	uint64_t									nComplexity;
 } time_statistic_t;
 
 #if defined (USE_STL)
