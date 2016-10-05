@@ -14,7 +14,7 @@
 #ifndef	BTREERAMIO_H
 #define	BTREERAMIO_H
 
-#include "btreeiolinear.h"
+#include "io/data_layer/type/btreeiolinear.h"
 
 template<class _t_datalayerproperties>
 class CBTreeRAMIO : public CBTreeLinearIO<_t_datalayerproperties>

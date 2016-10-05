@@ -16,7 +16,7 @@
 
 #include "btreeioram.h"
 
-#include "btreeramioprop.h"
+#include "io/properties/btreeramioprop.h"
 
 template<class _t_datalayerproperties>
 CBTreeRAMIO<_t_datalayerproperties>::CBTreeRAMIO
