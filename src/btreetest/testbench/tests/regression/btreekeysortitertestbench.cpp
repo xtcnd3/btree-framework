@@ -171,8 +171,8 @@ void TestBTreeKeySortConstIterBasic (_t_container *pContainer, _t_reference *pRe
 		sRIter = bForward ? pContainer->rbegin () : pContainer->rend ();
 		sCRIter = bForward ? pContainer->crbegin () : pContainer->crend ();
 
-		nIter = bForward ? 0 : pReference->size ();
-		nRIter = bForward ? pReference->size () : 0;
+		nIter = bForward ? 0 : (size_type) pReference->size ();
+		nRIter = bForward ? (size_type) pReference->size () : 0;
 		nRIter--;
 
 		while (bForward ? i < pContainer->size () : i > 0)
@@ -328,7 +328,7 @@ void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, _t_container *pC
 	{
 		get_begin (pContainer, rIter);
 
-		for (rI = 0; rI < pContainer->size (); rI++)
+		for (rI = 0; (typename ::std::make_unsigned<_t_subscripttype>::type) rI < pContainer->size (); rI++)
 		{
 			sData = rIter[rI];
 
@@ -381,31 +381,14 @@ void TestBTreeKeySortIterSubScriptor (_t_container *pContainer, _t_container *pC
 	riter_t					sRIter;
 	criter_t				sCRIter;
 	_t_subscripttype		i;
+	::std::string			sTypeStr;
 	
 	::std::cout << "basic keysort iterator sub-scription test" << ::std::endl;
 	
-#if defined(__GNUC__) || defined(__GNUG__)
+	get_typename (i, sTypeStr);
 
-	int		nStatus;
-	char	*pszTypeid = abi::__cxa_demangle (typeid (_t_subscripttype).name (), 0, 0, &nStatus);
-
-	if (pszTypeid != NULL)
-	{
-		::std::cout << "_t_sizetype is set to: " << pszTypeid << ::std::endl;
-		
-		free ((void *) pszTypeid);
-	}
-	else
-	{
-		::std::cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << ::std::endl;
-	}
+	::std::cout << "_t_subscripttype is set to: " << sTypeStr << ::std::endl;
 	
-#else
-
-	::std::cout << "_t_sizetype is set to: " << typeid (_t_subscripttype).name () << ::std::endl;
-	
-#endif
-
 	associative_container_add_primitive (pContainer, nNumEntries, nSeed, BTREETEST_KEY_GENERATION_RANDOM);
 
 	TestBTreeKeySortIterSubScriptor (pContainer, pCntContainer, sIter, i, true);
@@ -451,7 +434,7 @@ void TestBTreeKeySortIterCompound (_t_container *pContainer, _t_container *pCont
 	{
 		get_begin (pContainer, rIter);
 
-		for (rI = 0; rI < pContainer->size (); rI++)
+		for (rI = 0; rI < (_t_offsettype) pContainer->size (); rI++)
 		{
 			rIter += rI;
 			{

@@ -400,7 +400,7 @@ void TestBTreeMultiSetSTLifFind (_t_multiset *pClMSet, typename _t_multiset::siz
 		exit (-1);
 	}
 
-	nKey = nNumEntries + 1;
+	nKey = (key_type) (nNumEntries + 1);
 
 	sCIterRslt = pClMSet->find (nKey);
 
@@ -472,7 +472,7 @@ void TestBTreeMultiSetSTLifLowerBoundUpperBound (_t_multiset *pClMSet, typename 
 		exit (-1);
 	}
 
-	nKey = nNumEntries + 1;
+	nKey = (key_type) (nNumEntries + 1);
 
 	sCIterUpper = pClMSet->upper_bound (nKey);
 
@@ -486,9 +486,23 @@ void TestBTreeMultiSetSTLifLowerBoundUpperBound (_t_multiset *pClMSet, typename 
 }
 
 template<class _t_container>
-void TestBTreeSTLmultiSet (uint32_t nTestNum, _t_container *pContainerpMSetWrapper)
+void TestBTreeSTLmultiSet (uint32_t nTestNum, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pContainerpMSetWrapper)
 {
-	::std::cout << "b-tree multi-map test bench selected" << ::std::endl;
+	typename _t_container::size_test_type		sTypeSelect;
+	::std::string								sTypeStr;
+
+	get_typename (sTypeSelect, sTypeStr);
+
+	::std::cout << "b-tree multi-set test bench selected using type " << sTypeStr << ::std::endl;
+
+	pContainerpMSetWrapper = new _t_container (nNodeSize, nPageSize);
+
+	if (pContainerpMSetWrapper == NULL)
+	{
+		::std::cerr << "insufficient memory!" << ::std::endl;
+
+		exit (-1);
+	}
 
 	switch (nTestNum)
 	{
@@ -578,4 +592,6 @@ void TestBTreeSTLmultiSet (uint32_t nTestNum, _t_container *pContainerpMSetWrapp
 			break;
 		}
 	}
+
+	delete pContainerpMSetWrapper;
 }

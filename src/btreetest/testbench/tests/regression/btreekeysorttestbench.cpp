@@ -1502,8 +1502,10 @@ void TestBTreeKeySortSTLifFind (_t_container *pContainer, _t_pair_container *pPa
 
 	typedef typename _t_pair_container::const_iterator			citer_pair_t;
 
-	typename _t_container::key_type			nLastKey = 1;
-	typename _t_container::key_type			nKey;
+	typedef typename _t_container::key_type						key_type;
+
+	key_type								nLastKey = 1;
+	key_type								nKey;
 	typename _t_pair_container::key_type	nPairKey;
 	typename _t_pair_container::size_type	nNumEntriesPair = (typename _t_pair_container::size_type) nNumEntries;
 	typename _t_pair_container::size_type	i;
@@ -1560,7 +1562,7 @@ void TestBTreeKeySortSTLifFind (_t_container *pContainer, _t_pair_container *pPa
 		exit (-1);
 	}
 
-	nKey = nNumEntries + 1;
+	nKey = (key_type) (nNumEntries + 1);
 
 	sCIterRslt = pContainer->find (nKey);
 
@@ -1584,7 +1586,7 @@ void TestBTreeKeySortSTLifFind (_t_container *pContainer, _t_pair_container *pPa
 
 	for (i = 0; i < nNumEntries; i++)
 	{
-		keySortPair_t		sEntryPair (i + 1, {generate_rand32 (), g_nDebug});
+		keySortPair_t		sEntryPair ((typename _t_pair_container::key_type) (i + 1), {generate_rand32 (), g_nDebug});
 
 		g_nDebug++;
 
@@ -1639,7 +1641,7 @@ void TestBTreeKeySortSTLifFind (_t_container *pContainer, _t_pair_container *pPa
 		exit (-1);
 	}
 
-	nPairKey = nNumEntries + 1;
+	nPairKey = (typename _t_pair_container::key_type) (nNumEntries + 1);
 
 	sCItPairRslt = pPairContainer->find (nPairKey);
 
@@ -1669,8 +1671,10 @@ void TestBTreeKeySortSTLifLowerBoundUpperBound (_t_container *pContainer, _t_pai
 
 	typedef typename _t_pair_container::const_iterator		citer_pair_t;
 
-	typename _t_container::key_type			nLastKey;
-	typename _t_container::key_type			nKey;
+	typedef typename _t_container::key_type					key_type;
+
+	key_type								nLastKey;
+	key_type								nKey;
 	typename _t_pair_container::key_type	nPairKey;
 	typename _t_pair_container::size_type	nNumEntriesPair = (typename _t_pair_container::size_type) nNumEntries;
 	uint32_t								i;
@@ -1727,7 +1731,7 @@ void TestBTreeKeySortSTLifLowerBoundUpperBound (_t_container *pContainer, _t_pai
 		exit (-1);
 	}
 
-	nKey = nNumEntries + 1;
+	nKey = (key_type) (nNumEntries + 1);
 
 	sCIterUpper = pContainer->upper_bound (nKey);
 
@@ -1793,7 +1797,7 @@ void TestBTreeKeySortSTLifLowerBoundUpperBound (_t_container *pContainer, _t_pai
 		exit (-1);
 	}
 
-	nPairKey = nNumEntries + 1;
+	nPairKey = (typename _t_pair_container::key_type) nNumEntries + 1;
 
 	sCItPairUpper = pPairContainer->upper_bound (nPairKey);
 
@@ -2357,7 +2361,30 @@ void TestBTreeKeySortCCoperatorOverloadCompare (_t_container *pContainer, typena
 template<class _t_container, class _t_pair_container>
 void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pKeySortTestWrapper, _t_pair_container *pKeySortPairTestWrapper)
 {
-	::std::cout << "b-tree keysort test bench selected" << ::std::endl;
+	typename _t_container::size_test_type		sTypeSelect;
+	::std::string								sTypeStr;
+
+	get_typename (sTypeSelect, sTypeStr);
+
+	::std::cout << "b-tree keysort test bench selected using type " << sTypeStr << ::std::endl;
+
+	pKeySortTestWrapper = new _t_container (nNodeSize, nPageSize);
+
+	if (pKeySortTestWrapper == NULL)
+	{
+		::std::cerr << "insufficient memory!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	pKeySortPairTestWrapper = new _t_pair_container (nNodeSize, nPageSize);
+
+	if (pKeySortPairTestWrapper == NULL)
+	{
+		::std::cerr << "insufficient memory!" << ::std::endl;
+
+		exit (-1);
+	}
 
 	switch (nTest)
 	{
@@ -2441,22 +2468,6 @@ void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, _
 			break;
 		}
 
-	case BTREETEST_KEYSORT_CODE_COVERAGE_DETERMINE_POSITION	:
-		{
-			TestBTreeKeySortCCdeterminePosition (pKeySortTestWrapper, nNodeSize);
-			TestBTreeKeySortCCdeterminePosition (pKeySortPairTestWrapper, nNodeSize);
-
-			break;
-		}
-
-	case BTREETEST_KEYSORT_CODE_COVERAGE_FIND_FIRST_KEY		:
-		{
-			TestBTreeKeySortCCfindFirstKey (pKeySortTestWrapper, nNodeSize);
-			TestBTreeKeySortCCfindFirstKey (pKeySortPairTestWrapper, nNodeSize);
-
-			break;
-		}
-
 	case BTREETEST_KEYSORT_HTML_OUTPUT						:
 		{
 			TestBTreeKeySortHTMLoutput (pKeySortTestWrapper, 64);
@@ -2489,28 +2500,6 @@ void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, _
 			break;
 		}
 
-	case BTREETEST_KEYSORT_GET_INIT_POS_OF_KEY_ON_LEAF_NODE	:
-		{
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 2);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 3);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 4);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 5);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 6);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 7);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 8);
-
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 2);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 3);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 4);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 5);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 6);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 7);
-			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 8);
-
-			break;
-		}
 	case BTREETEST_KEYSORT_SERLIALIZE_ALL					:
 		{
 			TestBTreeKeySortSerialize (pKeySortTestWrapper, 1, 128, 128);
@@ -2626,14 +2615,53 @@ void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, _
 			break;
 		}
 
-	case BTREETEST_KEYSORT_CC_SET_ITER_DATA	:
+	case BTREETEST_KEYSORT_CODE_COVERAGE_DETERMINE_POSITION	:
+		{
+			TestBTreeKeySortCCdeterminePosition (pKeySortTestWrapper, nNodeSize);
+			TestBTreeKeySortCCdeterminePosition (pKeySortPairTestWrapper, nNodeSize);
+
+			break;
+		}
+
+	case BTREETEST_KEYSORT_CODE_COVERAGE_FIND_FIRST_KEY		:
+		{
+			TestBTreeKeySortCCfindFirstKey (pKeySortTestWrapper, nNodeSize);
+			TestBTreeKeySortCCfindFirstKey (pKeySortPairTestWrapper, nNodeSize);
+
+			break;
+		}
+
+	case BTREETEST_KEYSORT_CODE_COVERAGE_GET_INIT_POS_OF_KEY_ON_LEAF_NODE	:
+		{
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 2);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 3);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 4);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 5);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 6);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 7);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortTestWrapper, nNodeSize * 8);
+
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 2);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 3);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 4);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 5);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 6);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 7);
+			TestBTreeKeySortLowerBoundOnLeafNode (pKeySortPairTestWrapper, nNodeSize * 8);
+
+			break;
+		}
+
+	case BTREETEST_KEYSORT_CODE_COVERAGE_SET_ITER_DATA	:
 		{
 			TestBTreeKeySortCCsetIterData (pKeySortTestWrapper, pKeySortPairTestWrapper, 16);
 
 			break;
 		}
 
-	case BTREETEST_KEYSORT_CC_OPERATOR_OVERLOAD_COMPARE:
+	case BTREETEST_KEYSORT_CODE_COVERAGE_OPERATOR_OVERLOAD_COMPARE:
 		{
 			TestBTreeKeySortCCoperatorOverloadCompare (pKeySortTestWrapper, 16);
 			TestBTreeKeySortCCoperatorOverloadCompare (pKeySortPairTestWrapper, 16);
@@ -2650,4 +2678,7 @@ void TestBTreeKeySort (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, _
 			break;
 		}
 	}
+
+	delete pKeySortTestWrapper;
+	delete pKeySortPairTestWrapper;
 }

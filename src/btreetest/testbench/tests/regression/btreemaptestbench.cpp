@@ -406,7 +406,7 @@ void TestBTreeMapSTLifFind (_t_map *pClM, typename _t_map::size_type nNumEntries
 		exit (-1);
 	}
 
-	nKey = nNumEntries + 1;
+	nKey = (key_type) (nNumEntries + 1);
 
 	sCIterRslt = pClM->find (nKey);
 
@@ -478,7 +478,7 @@ void TestBTreeMapSTLifLowerBoundUpperBound (_t_map *pClM, typename _t_map::size_
 		exit (-1);
 	}
 
-	nKey = nNumEntries + 1;
+	nKey = (key_type) (nNumEntries + 1);
 
 	sCIterUpper = pClM->upper_bound (nKey);
 
@@ -492,9 +492,23 @@ void TestBTreeMapSTLifLowerBoundUpperBound (_t_map *pClM, typename _t_map::size_
 }
 
 template<class _t_container>
-void TestBTreeSTLmap (uint32_t nTestNum, _t_container *pMapWrapper)
+void TestBTreeSTLmap (uint32_t nTestNum, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pMapWrapper)
 {
-	::std::cout << "b-tree multi-map test bench selected" << ::std::endl;
+	typename _t_container::size_test_type		sTypeSelect;
+	::std::string								sTypeStr;
+
+	get_typename (sTypeSelect, sTypeStr);
+
+	::std::cout << "b-tree map test bench selected using type " << sTypeStr << ::std::endl;
+
+	pMapWrapper = new _t_container (nNodeSize, nPageSize);
+
+	if (pMapWrapper == NULL)
+	{
+		::std::cerr << "insufficient memory!" << ::std::endl;
+
+		exit (-1);
+	}
 
 	switch (nTestNum)
 	{
@@ -584,4 +598,6 @@ void TestBTreeSTLmap (uint32_t nTestNum, _t_container *pMapWrapper)
 			break;
 		}
 	}
+
+	delete pMapWrapper;
 }

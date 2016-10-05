@@ -383,7 +383,7 @@ void TestBTreeSetSTLifFind (_t_set *pClSet, typename _t_set::size_type nNumEntri
 		exit (-1);
 	}
 
-	nKey = nNumEntries + 1;
+	nKey = (key_type) (nNumEntries + 1);
 
 	sCIterRslt = pClSet->find (nKey);
 
@@ -455,7 +455,7 @@ void TestBTreeSetSTLifLowerBoundUpperBound (_t_set *pClSet, typename _t_set::siz
 		exit (-1);
 	}
 
-	nKey = nNumEntries + 1;
+	nKey = (key_type) (nNumEntries + 1);
 
 	sCIterUpper = pClSet->upper_bound (nKey);
 
@@ -469,9 +469,23 @@ void TestBTreeSetSTLifLowerBoundUpperBound (_t_set *pClSet, typename _t_set::siz
 }
 
 template<class _t_container>
-void TestBTreeSTLset (uint32_t nTestNum, _t_container *pContainerpSetWrapper)
+void TestBTreeSTLset (uint32_t nTestNum, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pContainerpSetWrapper)
 {
-	::std::cout << "b-tree multi-map test bench selected" << ::std::endl;
+	typename _t_container::size_test_type		sTypeSelect;
+	::std::string								sTypeStr;
+
+	get_typename (sTypeSelect, sTypeStr);
+
+	::std::cout << "b-tree set test bench selected using type " << sTypeStr << ::std::endl;
+
+	pContainerpSetWrapper = new _t_container (nNodeSize, nPageSize);
+
+	if (pContainerpSetWrapper == NULL)
+	{
+		::std::cerr << "insufficient memory!" << ::std::endl;
+
+		exit (-1);
+	}
 
 	switch (nTestNum)
 	{
@@ -561,4 +575,6 @@ void TestBTreeSTLset (uint32_t nTestNum, _t_container *pContainerpSetWrapper)
 			break;
 		}
 	}
+
+	delete pContainerpSetWrapper;
 }

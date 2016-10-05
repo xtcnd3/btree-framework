@@ -1277,12 +1277,13 @@ void TestBTreeArraySTLifEraseMultiple (_t_container *pContainer, typename _t_con
 	typedef typename _t_container::iterator							iter_t;
 	typedef typename _t_container::const_iterator					citer_t;
 	typedef typename _t_container::value_type						value_type;
+	typedef typename _t_container::size_type						size_type;
 	typedef typename ::std::list<value_type>::const_iterator		citer_list_t;
 
 	::std::list<value_type>			sList;
-	uint32_t						i;
-	uint32_t						j;
-	uint32_t						k;
+	size_type						i;
+	size_type						j;
+	size_type						k;
 	citer_t							sCIterA;
 	citer_t							sCIterB;
 	value_type						sEntry;
@@ -1426,8 +1427,37 @@ void TestBTreeArraySTLifSwap (_t_container *pContainer, typename _t_container::s
 }
 
 template<class _t_container>
-void TestBTreeArray (uint32_t nTest, uint32_t nNodeSize, _t_container *pArrayWrapper)
+void TestBTreeArray (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pArrayWrapper)
 {
+	typename _t_container::size_test_type		sTypeSelect;
+	::std::string								sTypeStr;
+
+	get_typename (sTypeSelect, sTypeStr);
+
+	::std::cout << "b-tree array test bench selected using type " << sTypeStr << ::std::endl;
+
+	pArrayWrapper = new _t_container (nNodeSize, nPageSize);
+
+	if (pArrayWrapper == NULL)
+	{
+		::std::cerr << "insufficient memory!" << ::std::endl;
+
+		exit (-1);
+	}
+
+	switch (nTest)
+	{
+	case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_ITER		:
+	case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_CITER		:
+	case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_RITER		:
+	case BTREETEST_ARRAY_STL_IF_INSERT_VIA_ITERATOR_LARGE_CRITER	:
+		{
+			pArrayWrapper->skip_containers_with_limited_address_space (true);
+
+			break;
+		}
+	}
+											
 	switch (nTest)
 	{
 	case BTREETEST_ARRAY_BASIC_FIFO			:
@@ -1671,4 +1701,6 @@ void TestBTreeArray (uint32_t nTest, uint32_t nNodeSize, _t_container *pArrayWra
 			break;
 		}
 	}
+
+	delete pArrayWrapper;
 }
