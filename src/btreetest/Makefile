@@ -1,8 +1,13 @@
-GPP=g++
-COV=lcov
-GEN=genhtml
-VALGRIND=/usr/bin/valgrind
-NICE=nice
+GPP = g++
+COV = lcov
+GEN = genhtml
+VALGRIND = /usr/bin/valgrind
+NICE = nice
+SH = sh
+MAKE = make
+CMAKE = cmake
+PWD = pwd
+CP = cp
 
 PROGREL = ./btreetest
 PROGDBG = ./btreetest_dbg
@@ -17,226 +22,85 @@ VALGRIND_REPORT = valgrind_report.txt
 
 NICE_ARGS = -n 19
 
-INCLUDE_PATHS = -I./btree_framework -I./compatibility -I./avp_path_find
+CMAKE_DIR = ./cmake
+CMAKE_DIR_DEBUG = $(CMAKE_DIR)/debug
+CMAKE_DIR_RELEASE = $(CMAKE_DIR)/release
+CMAKE_DIR_COVERAGE = $(CMAKE_DIR)/coverage
 
-CFLAGS_REL = -O3 --std=c++11 -march=native -fpermissive -DBTREE_ITERATOR_REGISTRATION -DBTREEFRAMEWORK_TEST_BENCH_ENABLED $(INCLUDE_PATHS)
-CFLAGS_DBG = -g -O0 --std=c++11 -ftemplate-backtrace-limit=0 -fpermissive -DBTREE_ITERATOR_REGISTRATION -DBTREEFRAMEWORK_TEST_BENCH_ENABLED -D_DEBUG $(INCLUDE_PATHS)
-CFLAGS_COV = -g -O0 --std=c++11 -fprofile-arcs -ftest-coverage -coverage -fno-inline -fno-inline-small-functions -fno-default-inline -fpermissive -DBTREE_ITERATOR_REGISTRATION -DBTREEFRAMEWORK_TEST_BENCH_ENABLED -D_DEBUG $(INCLUDE_PATHS)
+CMAKE_LISTS_FILE = ./CMakeLists.txt
 
-LFLAGS_REL = 
-LFLAGS_DBG = 
-LFLAGS_COV = -lgcov -coverage
+MAKEFILE_VIA_CMAKE_DEBUG = $(CMAKE_DIR_DEBUG)/Makefile
+MAKEFILE_VIA_CMAKE_RELEASE = $(CMAKE_DIR_RELEASE)/Makefile
+MAKEFILE_VIA_CMAKE_COVERAGE = $(CMAKE_DIR_COVERAGE)/Makefile
 
-SOURCE =													\
-./compatibility/windows.cpp									\
-./btree_framework/btreecommon.cpp							\
-./btree_framework/btreeioprop.cpp							\
-./btree_framework/btreeramioprop.cpp						\
-./btree_framework/btreefileioprop.cpp						\
-./btree_framework/btreeio.cpp								\
-./btree_framework/btreeioblock.cpp							\
-./btree_framework/btreeiolinear.cpp							\
-./btree_framework/btreeioram.cpp							\
-./btree_framework/btreeiofile.cpp							\
-./btree_framework/btreeaux.cpp								\
-./btree_framework/btreeif.cpp								\
-./btree_framework/btreedefaults.cpp							\
-./btree_framework/btreebaseif.cpp							\
-./btree_framework/btreebasedefaults.cpp						\
-./btree_framework/btreeiter.cpp								\
-./btree_framework/btreeassociative.cpp						\
-./btree_framework/btreearray.cpp							\
-./btree_framework/btreekeysort.cpp							\
-./btree_framework/associative/base/btreeassociativebase.cpp	\
-./btree_framework/associative/btreemap.cpp					\
-./btree_framework/associative/btreemultimap.cpp				\
-./btree_framework/associative/btreemultiset.cpp				\
-./btree_framework/associative/btreeset.cpp					\
-./avp_path_find/avp_path_find_core.cpp						\
-./btreetestcommon.cpp										\
-./btreecommonprimitives.cpp									\
-./btreearraytestprimitive.cpp								\
-./btreekeysorttestprimitive.cpp								\
-./btreemultimapprimitives.cpp								\
-./btreemultisetprimitives.cpp								\
-./btreetestarray.cpp										\
-./btreetestkeysort.cpp										\
-./btreetestmap.cpp											\
-./btreetestmultimap.cpp										\
-./btreetestmultiset.cpp										\
-./btreetestset.cpp											\
-./btreearraytestwrapper.cpp									\
-./btreeassociativetestwrapper.cpp							\
-./btreemaptestwrapper.cpp									\
-./btreemultimaptestwrapper.cpp								\
-./btreesettestwrapper.cpp									\
-./btreemultisettestwrapper.cpp								\
-./btreekeysorttestwrapper.cpp								\
-./btreearraytestbench.cpp									\
-./btreearrayitertestbench.cpp								\
-./btreekeysorttestbench.cpp									\
-./btreekeysortitertestbench.cpp								\
-./btreemaptestbench.cpp										\
-./btreemultimaptestbench.cpp								\
-./btreemultisettestbench.cpp								\
-./btreesettestbench.cpp										\
-./btreetestarrayperf.cpp									\
-./btreearrayperftestbench.cpp								\
-./btreetest.cpp
+MAKEFILE_REGRESSION_TESTS = ./Makefile.regression
+MAKEFILE_CODE_COVERAGE_TESTS = ./Makefile.code_coverage
+MAKEFILE_VALIDATION_TESTS = ./Makefile.validation
+MAKEFILE_PERFORMANCE_TESTS = ./Makefile.performance
 
-VGFLAGS = --tool=memcheck -v --child-silent-after-fork=yes --leak-check=full --leak-resolution=high --show-leak-kinds=all --show-reachable=yes --track-origins=yes --num-callers=30 --read-var-info=yes --keep-stacktraces=alloc-and-free
+TEST_GENERATE_SCRIPT = ./generate_tests.sh
+TEST_RESULT_SCRIPT = ./test_result.sh
 
-OBJREL = $(patsubst %.cpp,%.rel.o,$(SOURCE))
-OBJDBG = $(patsubst %.cpp,%.dbg.o,$(SOURCE))
-OBJCOV = $(patsubst %.cpp,%.cov.o,$(SOURCE))
+VGFLAGS = --tool=memcheck -v --child-silent-after-fork=yes --leak-check=full --leak-resolution=high --show-leak-kinds=all --show-reachable=yes --track-origins=yes --num-callers=30 --read-var-info=yes --keep-stacktraces=alloc-and-free --log-file=valgrind.log
 
-REGRESSION_ARRAY_TESTS = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-REGRESSION_KEYSORT_TESTS = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33
-REGRESSION_ARRAY_ITER_TESTS = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
-REGRESSION_KEYSORT_ITER_TESTS = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
-REGRESSION_MULTIMAP_TESTS = 0 1 2 3 4 5 6 7 8 9 10
-REGRESSION_MAP_TESTS = 0 1 2 3 4 5 6 7 8 9 10
-REGRESSION_MULTISET_TESTS = 0 1 2 3 4 5 6 7 8 9 10
-REGRESSION_SET_TESTS = 0 1 2 3 4 5 6 7 8 9 10
-PERFORMANCE_APP_AVP_TESTS = 0 1 2
-
-ARRAY_TESTS = $(patsubst %,ARRAY_TEST_%,$(REGRESSION_ARRAY_TESTS))
-KEYSORT_TESTS = $(patsubst %,KEYSORT_TEST_%,$(REGRESSION_KEYSORT_TESTS))
-MULTIMAP_TESTS = $(patsubst %,MULTIMAP_TEST_%,$(REGRESSION_MULTIMAP_TESTS))
-MAP_TESTS = $(patsubst %,MAP_TEST_%,$(REGRESSION_MAP_TESTS))
-MULTISET_TESTS = $(patsubst %,MULTISET_TEST_%,$(REGRESSION_MULTISET_TESTS))
-SET_TESTS = $(patsubst %,SET_TEST_%,$(REGRESSION_SET_TESTS))
-
-ARRAY_ITER_TESTS = $(patsubst %,ARRAY_ITER_TEST_%,$(REGRESSION_ARRAY_ITER_TESTS))
-KEYSORT_ITER_TESTS = $(patsubst %,KEYSORT_ITER_TEST_%,$(REGRESSION_KEYSORT_ITER_TESTS))
-
-APP_AVP_TESTS = $(patsubst %,APP_AVP_TEST_%,$(PERFORMANCE_APP_AVP_TESTS))
-
-ARRAY_COV_TESTS = $(patsubst %,ARRAY_COV_TEST_%,$(REGRESSION_ARRAY_TESTS))
-KEYSORT_COV_TESTS = $(patsubst %,KEYSORT_COV_TEST_%,$(REGRESSION_KEYSORT_TESTS))
-MULTIMAP_COV_TESTS = $(patsubst %,MULTIMAP_COV_TEST_%,$(REGRESSION_MULTIMAP_TESTS))
-MAP_COV_TESTS = $(patsubst %,MAP_COV_TEST_%,$(REGRESSION_MAP_TESTS))
-MULTISET_COV_TESTS = $(patsubst %,MULTISET_COV_TEST_%,$(REGRESSION_MULTISET_TESTS))
-SET_COV_TESTS = $(patsubst %,SET_COV_TEST_%,$(REGRESSION_SET_TESTS))
-
-ARRAY_ITER_COV_TESTS = $(patsubst %,ARRAY_ITER_COV_TEST_%,$(REGRESSION_ARRAY_ITER_TESTS))
-KEYSORT_ITER_COV_TESTS = $(patsubst %,KEYSORT_ITER_COV_TEST_%,$(REGRESSION_KEYSORT_ITER_TESTS))
-
-APP_AVP_COV_TESTS = $(patsubst %,APP_AVP_COV_TEST_%,$(PERFORMANCE_APP_AVP_TESTS))
-
-VG_ARRAY_TESTS = $(patsubst %,VG_ARRAY_TEST_%,$(REGRESSION_ARRAY_TESTS))
-VG_KEYSORT_TESTS = $(patsubst %,VG_KEYSORT_TEST_%,$(REGRESSION_KEYSORT_TESTS))
-VG_MULTIMAP_TESTS = $(patsubst %,VG_MULTIMAP_TEST_%,$(REGRESSION_MULTIMAP_TESTS))
-VG_MAP_TESTS = $(patsubst %,VG_MAP_TEST_%,$(REGRESSION_MAP_TESTS))
-VG_MULTISET_TESTS = $(patsubst %,VG_MULTISET_TEST_%,$(REGRESSION_MULTISET_TESTS))
-VG_SET_TESTS = $(patsubst %,VG_SET_TEST_%,$(REGRESSION_SET_TESTS))
-
-VG_ARRAY_ITER_TESTS = $(patsubst %,VG_ARRAY_ITER_TEST_%,$(REGRESSION_ARRAY_ITER_TESTS))
-VG_KEYSORT_ITER_TESTS = $(patsubst %,VG_KEYSORT_ITER_TEST_%,$(REGRESSION_KEYSORT_ITER_TESTS))
-
-VG_APP_AVP_TESTS = $(patsubst %,VG_APP_AVP_TEST_%,$(PERFORMANCE_APP_AVP_TESTS))
-
-APP_COV_TESTS = $(APP_AVP_COV_TESTS)
-VG_APPS = $(VG_APP_AVP_TESTS)
 
 all: regression valgrind_report coverage_report performance release
 
-%.rel.o: %.cpp
-	$(GPP) $(CFLAGS_REL) -c -o $@ $<
 
-%.dbg.o: %.cpp
-	$(GPP) $(CFLAGS_DBG) -c -o $@ $<
+$(MAKEFILE_VIA_CMAKE_DEBUG): $(CMAKE_LISTS_FILE)
+	mkdir -p $(CMAKE_DIR_DEBUG)
+	cd $(CMAKE_DIR_DEBUG); \
+	$(CMAKE) ../..
 
-%.cov.o: %.cpp
-	$(GPP) $(CFLAGS_COV) -c -o $@ $<
+debug: $(MAKEFILE_VIA_CMAKE_DEBUG)
+	$(MAKE) -C $(CMAKE_DIR_DEBUG) -f ../../$(MAKEFILE_VIA_CMAKE_DEBUG) btreetest
+	$(CP) $(CMAKE_DIR_DEBUG)/btreetest $(PROGDBG)
 
-release: $(OBJREL)
-	$(GPP) $(LFLAGS_REL) $? -o $(PROGREL)
 
-debug: $(OBJDBG)
-	$(GPP) $(LFLAGS_DBG) $? -o $(PROGDBG)
+$(MAKEFILE_VIA_CMAKE_RELEASE): $(CMAKE_LISTS_FILE)
+	mkdir -p $(CMAKE_DIR_RELEASE)
+	cd $(CMAKE_DIR_RELEASE); \
+	$(CMAKE) -D LINUX_BUILD_RELEASE=ON -D LINUX_BUILD_DEBUG=OFF ../..
 
-coverage: $(OBJCOV)
-	$(GPP) $(LFLAGS_COV) $? -o $(PROGCOV)
 
-array_tests: $(ARRAY_TESTS)
+release: $(MAKEFILE_VIA_CMAKE_RELEASE)
+	$(MAKE) -C $(CMAKE_DIR_RELEASE) -f ../../$(MAKEFILE_VIA_CMAKE_RELEASE) btreetest
+	$(CP) $(CMAKE_DIR_RELEASE)/btreetest $(PROGREL)
 
-keysort_tests: $(KEYSORT_TESTS)
 
-map_tests: $(MAP_TESTS)
+$(MAKEFILE_VIA_CMAKE_COVERAGE): $(CMAKE_LISTS_FILE)
+	mkdir -p $(CMAKE_DIR_COVERAGE)
+	cd $(CMAKE_DIR_COVERAGE); \
+	$(CMAKE) -D LINUX_BUILD_COVERAGE=ON -D LINUX_BUILD_DEBUG=OFF ../..
 
-multimap_tests: $(MULTIMAP_TESTS)
+coverage: $(MAKEFILE_VIA_CMAKE_COVERAGE)
+	$(MAKE) -C $(CMAKE_DIR_COVERAGE) -f ../../$(MAKEFILE_VIA_CMAKE_COVERAGE) btreetest
+	$(CP) $(CMAKE_DIR_COVERAGE)/btreetest $(PROGCOV)
 
-set_tests: $(SET_TESTS)
 
-multiset_tests: $(MULTISET_TESTS)
+$(MAKEFILE_REGRESSION_TESTS): 
+	$(eval $@PWD := $(shell $(PWD)))
+	$(SH) $(TEST_GENERATE_SCRIPT) $(MAKEFILE_REGRESSION_TESTS) $($@PWD)/$(PROGDBG) ./tests/regression
 
-array_iter_tests: $(ARRAY_ITER_TESTS)
+$(MAKEFILE_CODE_COVERAGE_TESTS): 
+	$(eval $@PWD := $(shell $(PWD)))
+	$(SH) $(TEST_GENERATE_SCRIPT) $(MAKEFILE_CODE_COVERAGE_TESTS) $($@PWD)/$(PROGCOV) ./tests/code_coverage
 
-keysort_iter_tests: $(KEYSORT_ITER_TESTS)
+$(MAKEFILE_VALIDATION_TESTS):
+	$(eval $@PWD := $(shell $(PWD)))
+	$(SH) $(TEST_GENERATE_SCRIPT) $(MAKEFILE_VALIDATION_TESTS) "$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) $($@PWD)/$(PROGDBG)" ./tests/validation
 
-regression: array_tests keysort_tests map_tests multimap_tests set_tests multiset_tests array_iter_tests keysort_iter_tests
 
-performance: $(APP_AVP_TESTS)
+regression: $(MAKEFILE_REGRESSION_TESTS) debug
+	$(MAKE) -f $(MAKEFILE_REGRESSION_TESTS) tests
+	$(SH) $(TEST_RESULT_SCRIPT) tests
 
-ARRAY_TEST_%: debug
-	$(PROGDBG) -type array -test $(patsubst ARRAY_TEST_%,%,$@)
-
-KEYSORT_TEST_%: debug
-	$(PROGDBG) -type keysort -test $(patsubst KEYSORT_TEST_%,%,$@)
-	
-MULTIMAP_TEST_%: debug
-	$(PROGDBG) -type stl-multimap -test $(patsubst MULTIMAP_TEST_%,%,$@)
-
-MAP_TEST_%: debug
-	$(PROGDBG) -type stl-map -test $(patsubst MAP_TEST_%,%,$@)
-
-MULTISET_TEST_%: debug
-	$(PROGDBG) -type stl-multiset -test $(patsubst MULTISET_TEST_%,%,$@)
-
-SET_TEST_%: debug
-	$(PROGDBG) -type stl-set -test $(patsubst SET_TEST_%,%,$@)
-
-ARRAY_ITER_TEST_%: debug
-	$(PROGDBG) -type array-iter -test $(patsubst ARRAY_ITER_TEST_%,%,$@)
-
-KEYSORT_ITER_TEST_%: debug
-	$(PROGDBG) -type keysort-iter -test $(patsubst KEYSORT_ITER_TEST_%,%,$@)
-
-APP_AVP_TEST_%: release
-	$(PROGREL) -type app -test $(patsubst APP_AVP_TEST_%,%,$@)
 
 $(COVERAGE_BASE): coverage
 	$(COV) -i -c -b . -d . -o $(COVERAGE_BASE)
 
-ARRAY_COV_TEST_%: $(COVERAGE_BASE)
-	$(PROGCOV) -type array -test $(patsubst ARRAY_COV_TEST_%,%,$@)
-
-KEYSORT_COV_TEST_%: $(COVERAGE_BASE)
-	$(PROGCOV) -type keysort -test $(patsubst KEYSORT_COV_TEST_%,%,$@)
-	
-MULTIMAP_COV_TEST_%: $(COVERAGE_BASE)
-	$(PROGCOV) -type stl-multimap -test $(patsubst MULTIMAP_COV_TEST_%,%,$@)
-
-MAP_COV_TEST_%: $(COVERAGE_BASE)
-	$(PROGCOV) -type stl-map -test $(patsubst MAP_COV_TEST_%,%,$@)
-
-MULTISET_COV_TEST_%: $(COVERAGE_BASE)
-	$(PROGCOV) -type stl-multiset -test $(patsubst MULTISET_COV_TEST_%,%,$@)
-
-SET_COV_TEST_%: $(COVERAGE_BASE)
-	$(PROGCOV) -type stl-set -test $(patsubst SET_COV_TEST_%,%,$@)
-
-ARRAY_ITER_COV_TEST_%: $(COVERAGE_BASE)
-	$(PROGCOV) -type array-iter -test $(patsubst ARRAY_ITER_COV_TEST_%,%,$@)
-	
-KEYSORT_ITER_COV_TEST_%: $(COVERAGE_BASE)
-	$(PROGCOV) -type keysort-iter -test $(patsubst KEYSORT_ITER_COV_TEST_%,%,$@)
-	
-APP_AVP_COV_TEST_%: $(COVERAGE_BASE)
-	$(PROGCOV) -type app -test $(patsubst APP_AVP_COV_TEST_%,%,$@)
-
-$(COVERAGE_OUT): $(APP_COV_TESTS) $(ARRAY_COV_TESTS) $(KEYSORT_COV_TESTS) $(MULTIMAP_COV_TESTS) $(MAP_COV_TESTS) $(MULTISET_COV_TESTS) $(SET_COV_TESTS) $(ARRAY_ITER_COV_TESTS) $(KEYSORT_ITER_COV_TESTS)
+$(COVERAGE_OUT): $(MAKEFILE_CODE_COVERAGE_TESTS) $(COVERAGE_BASE)
+	$(MAKE) -f $(MAKEFILE_CODE_COVERAGE_TESTS) tests
 	$(COV) -c -b . -d . -o $(COVERAGE_OUT)
 
 $(COVERAGE_COMB): $(COVERAGE_OUT)
@@ -247,101 +111,42 @@ coverage_report: $(COVERAGE_COMB)
 	mkdir $(COVERAGE_REPORT)
 	$(GEN) $(COVERAGE_COMB) -o $(COVERAGE_REPORT)
 
-VG_ARRAY_TEST_%: debug
-	$(eval $@PARAMS := -type array -test $(patsubst VG_ARRAY_TEST_%,%,$@))
-	$(eval $@LOG_FILE := vg_array$(patsubst VG_ARRAY_TEST_%,%,$@).vglog)
-	$(eval $@OUT_FILE := vg_array$(patsubst VG_ARRAY_TEST_%,%,$@).vgout)
-	$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) --log-file=$($@LOG_FILE) $(PROGDBG) $($@PARAMS)
-	echo $(PROGDBG) $($@PARAMS) > $($@OUT_FILE)
-	cat $($@LOG_FILE) >> $($@OUT_FILE)
-	cat $($@OUT_FILE) >> $(VALGRIND_REPORT)
-	rm -fv $($@LOG_FILE) $($@OUT_FILE)
 
-VG_KEYSORT_TEST_%: debug
-	$(eval $@PARAMS := -type keysort -test $(patsubst VG_KEYSORT_TEST_%,%,$@))
-	$(eval $@LOG_FILE := vg_keysort$(patsubst VG_KEYSORT_TEST_%,%,$@).vglog)
-	$(eval $@OUT_FILE := vg_keysort$(patsubst VG_KEYSORT_TEST_%,%,$@).vgout)
-	$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) --log-file=$($@LOG_FILE) $(PROGDBG) $($@PARAMS)
-	echo $(PROGDBG) $($@PARAMS) > $($@OUT_FILE)
-	cat $($@LOG_FILE) >> $($@OUT_FILE)
-	cat $($@OUT_FILE) >> $(VALGRIND_REPORT)
-	rm -fv $($@LOG_FILE) $($@OUT_FILE)
-	
-VG_MULTIMAP_TEST_%: debug
-	$(eval $@PARAMS := -type stl-multimap -test $(patsubst VG_MULTIMAP_TEST_%,%,$@))
-	$(eval $@LOG_FILE := vg_multimap$(patsubst VG_MULTIMAP_TEST_%,%,$@).vglog)
-	$(eval $@OUT_FILE := vg_multimap$(patsubst VG_MULTIMAP_TEST_%,%,$@).vgout)
-	$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) --log-file=$($@LOG_FILE) $(PROGDBG) $($@PARAMS)
-	echo $(PROGDBG) $($@PARAMS) > $($@OUT_FILE)
-	cat $($@LOG_FILE) >> $($@OUT_FILE)
-	cat $($@OUT_FILE) >> $(VALGRIND_REPORT)
-	rm -fv $($@LOG_FILE) $($@OUT_FILE)
+valgrind_report: $(MAKEFILE_VALIDATION_TESTS) debug
+	$(MAKE) -f $(MAKEFILE_VALIDATION_TESTS) tests
 
-VG_MAP_TEST_%: debug
-	$(eval $@PARAMS := -type stl-map -test $(patsubst VG_MAP_TEST_%,%,$@))
-	$(eval $@LOG_FILE := vg_map$(patsubst VG_MAP_TEST_%,%,$@).vglog)
-	$(eval $@OUT_FILE := vg_map$(patsubst VG_MAP_TEST_%,%,$@).vgout)
-	$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) --log-file=$($@LOG_FILE) $(PROGDBG) $($@PARAMS)
-	echo $(PROGDBG) $($@PARAMS) > $($@OUT_FILE)
-	cat $($@LOG_FILE) >> $($@OUT_FILE)
-	cat $($@OUT_FILE) >> $(VALGRIND_REPORT)
-	rm -fv $($@LOG_FILE) $($@OUT_FILE)
 
-VG_MULTISET_TEST_%: debug
-	$(eval $@PARAMS := -type stl-multiset -test $(patsubst VG_MULTISET_TEST_%,%,$@))
-	$(eval $@LOG_FILE := vg_multiset$(patsubst VG_MULTISET_TEST_%,%,$@).vglog)
-	$(eval $@OUT_FILE := vg_multiset$(patsubst VG_MULTISET_TEST_%,%,$@).vgout)
-	$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) --log-file=$($@LOG_FILE) $(PROGDBG) $($@PARAMS)
-	echo $(PROGDBG) $($@PARAMS) > $($@OUT_FILE)
-	cat $($@LOG_FILE) >> $($@OUT_FILE)
-	cat $($@OUT_FILE) >> $(VALGRIND_REPORT)
-	rm -fv $($@LOG_FILE) $($@OUT_FILE)
+clean: 
+	rm -fv $(PROGREL) $(PROGDBG) $(PROGCOV) $(COVERAGE_BASE) $(COVERAGE_OUT) $(COVERAGE_COMB) ./*/*.gcov ./*/*.gcda ./*/*.gcno ./*/*.gch ./*.gcov ./*.gcda ./*.gcno ./*.gch *.vglog *.vgout $(VALGRIND_REPORT) $(MAKEFILE_REGRESSION_TESTS) $(MAKEFILE_CODE_COVERAGE_TESTS) $(MAKEFILE_VALIDATION_TESTS)
+	rm -rfv $(CMAKE_DIR)
 
-VG_SET_TEST_%: debug
-	$(eval $@PARAMS := -type stl-set -test $(patsubst VG_SET_TEST_%,%,$@))
-	$(eval $@LOG_FILE := vg_set$(patsubst VG_SET_TEST_%,%,$@).vglog)
-	$(eval $@OUT_FILE := vg_set$(patsubst VG_SET_TEST_%,%,$@).vgout)
-	$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) --log-file=$($@LOG_FILE) $(PROGDBG) $($@PARAMS)
-	echo $(PROGDBG) $($@PARAMS) > $($@OUT_FILE)
-	cat $($@LOG_FILE) >> $($@OUT_FILE)
-	cat $($@OUT_FILE) >> $(VALGRIND_REPORT)
-	rm -fv $($@LOG_FILE) $($@OUT_FILE)
+clean_regression_tests: $(MAKEFILE_REGRESSION_TESTS)
+	$(MAKE) -f $(MAKEFILE_REGRESSION_TESTS) clean
 
-VG_ARRAY_ITER_TEST_%: debug
-	$(eval $@PARAMS := -type array-iter -test $(patsubst VG_ARRAY_ITER_TEST_%,%,$@))
-	$(eval $@LOG_FILE := vg_array$(patsubst VG_ARRAY_ITER_TEST_%,%,$@).vglog)
-	$(eval $@OUT_FILE := vg_array$(patsubst VG_ARRAY_ITER_TEST_%,%,$@).vgout)
-	$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) --log-file=$($@LOG_FILE) $(PROGDBG) $($@PARAMS)
-	echo $(PROGDBG) $($@PARAMS) > $($@OUT_FILE)
-	cat $($@LOG_FILE) >> $($@OUT_FILE)
-	cat $($@OUT_FILE) >> $(VALGRIND_REPORT)
-	rm -fv $($@LOG_FILE) $($@OUT_FILE)
-	
-VG_KEYSORT_ITER_TEST_%: debug
-	$(eval $@PARAMS := -type keysort-iter -test $(patsubst VG_KEYSORT_ITER_TEST_%,%,$@))
-	$(eval $@LOG_FILE := vg_array$(patsubst VG_KEYSORT_ITER_TEST_%,%,$@).vglog)
-	$(eval $@OUT_FILE := vg_array$(patsubst VG_KEYSORT_ITER_TEST_%,%,$@).vgout)
-	$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) --log-file=$($@LOG_FILE) $(PROGDBG) $($@PARAMS)
-	echo $(PROGDBG) $($@PARAMS) > $($@OUT_FILE)
-	cat $($@LOG_FILE) >> $($@OUT_FILE)
-	cat $($@OUT_FILE) >> $(VALGRIND_REPORT)
-	rm -fv $($@LOG_FILE) $($@OUT_FILE)
-	
-VG_APP_AVP_TEST_%: debug
-	$(eval $@PARAMS := -type app -test $(patsubst VG_APP_AVP_TEST_%,%,$@))
-	$(eval $@LOG_FILE := vg_app_avp$(patsubst VG_APP_AVP_COV_TEST_%,%,$@).vglog)
-	$(eval $@OUT_FILE := vg_app_avp$(patsubst VG_APP_AVP_COV_TEST_%,%,$@).vgout)
-	$(NICE) $(NICE_ARGS) $(VALGRIND) $(VGFLAGS) --log-file=$($@LOG_FILE) $(PROGDBG) $($@PARAMS)
-	echo $(PROGDBG) $($@PARAMS) > $($@OUT_FILE)
-	cat $($@LOG_FILE) >> $($@OUT_FILE)
-	cat $($@OUT_FILE) >> $(VALGRIND_REPORT)
-	rm -fv $($@LOG_FILE) $($@OUT_FILE)
+clean_failed_regression_tests: $(MAKEFILE_REGRESSION_TESTS)
+	$(MAKE) -f $(MAKEFILE_REGRESSION_TESTS) clean_failed
 
-valgrind_report: $(VG_APPS) $(VG_ARRAY_TESTS) $(VG_KEYSORT_TESTS) $(VG_MULTIMAP_TESTS) $(VG_MAP_TESTS) $(VG_MULTISET_TESTS) $(VG_SET_TESTS) $(VG_ARRAY_ITER_TESTS) $(VG_KEYSORT_ITER_TESTS)
+clean_coverage_tests: $(MAKEFILE_CODE_COVERAGE_TESTS)
+	$(MAKE) -f $(MAKEFILE_CODE_COVERAGE_TESTS) clean
 
-clean:
-	rm -fv $(PROGREL) $(PROGDBG) $(PROGCOV) $(OBJREL) $(OBJDBG) $(OBJCOV) $(COVERAGE_BASE) $(COVERAGE_OUT) $(COVERAGE_COMB) ./*/*.gcov ./*/*.gcda ./*/*.gcno ./*/*.gch ./*.gcov ./*.gcda ./*.gcno ./*.gch *.vglog *.vgout $(VALGRIND_REPORT)
+clean_failed_coverage_tests: $(MAKEFILE_CODE_COVERAGE_TESTS)
+	$(MAKE) -f $(MAKEFILE_CODE_COVERAGE_TESTS) clean_failed
 
-clean_coverage:
-	rm -rfv $(COVERAGE_REPORT) $(COVERAGE_BASE) $(COVERAGE_OUT) $(COVERAGE_COMB) ./*/*.gcov ./*/*.gcda ./*/*.gch ./*.gcov ./*.gcda ./*.gch
+clean_validation_tests: $(MAKEFILE_VALIDATION_TESTS)
+	$(MAKE) -f $(MAKEFILE_VALIDATION_TESTS) clean
+
+clean_failed_validation_tests: $(MAKEFILE_VALIDATION_TESTS)
+	$(MAKE) -f $(MAKEFILE_VALIDATION_TESTS) clean_failed
+
+clean_tests: clean_regression_tests clean_coverage_tests clean_validation_tests
+
+clean_failed_tests: clean_failed_regression_tests clean_failed_coverage_tests clean_failed_validation_tests
+
+clean_coverage: $(MAKEFILE_CODE_COVERAGE_TESTS)
+	rm -rfv $(COVERAGE_REPORT) $(COVERAGE_BASE) $(COVERAGE_OUT) $(COVERAGE_COMB) $(MAKEFILE_CODE_COVERAGE_TESTS) ./*/*.gcov ./*/*.gcda ./*/*.gch ./*.gcov ./*.gcda ./*.gch
+
+clean_all: clean_tests clean_coverage clean
+
+
+.PHONY: clean clean_regression_tests clean_coverage_tests clean_validation_tests clean_failed_regression_tests clean_failed_coverage_tests clean_failed_validation_tests clean_tests clean_failed_tests clean_coverage $(MAKEFILE_REGRESSION_TESTS) $(MAKEFILE_CODE_COVERAGE_TESTS) $(MAKEFILE_VALIDATION_TESTS)
 
