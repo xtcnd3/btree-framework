@@ -17,9 +17,9 @@
 #include <iterator>
 #include <list>
 
-#include "btreebasedefaults.h"
+#include "base_class_stack/btreebasedefaults.h"
 
-#include "btreeiter.h"
+#include "iterators/btreeiter.h"
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 class CBTreeAssociative;

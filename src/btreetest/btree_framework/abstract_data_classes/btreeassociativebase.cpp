@@ -15,7 +15,7 @@
 #ifndef BTREEASSOCAITIVEBASE_CPP
 #define	BTREEASSOCAITIVEBASE_CPP
 
-#include "./associative/base/btreeassociativebase.h"
+#include "abstract_data_classes/btreeassociativebase.h"
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociativeBase
@@ -60,70 +60,6 @@ CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties> &
 	}
 
 	return (*this);
-}
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::iterator
-	CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::begin ()
-{
-	return (iterator (this, 0));
-}
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::iterator
-	CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::end ()
-{
-	return (iterator (this, this->size ()));
-}
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::reverse_iterator
-	CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::rbegin ()
-{
-	iterator			sIter (this, this->size (), false);
-
-	return (reverse_iterator (sIter));
-}
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::reverse_iterator
-	CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::rend ()
-{
-	iterator			sIter (this, 0, false);
-
-	return (reverse_iterator (sIter));
-}
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::const_iterator
-	CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::begin () const
-{
-	return (const_iterator (this, 0));
-}
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::const_iterator
-	CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::end () const
-{
-	return (const_iterator (this, this->size ()));
-}
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::const_reverse_iterator
-	CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::rbegin () const
-{
-	const_iterator			sIter (this, this->size (), false);
-
-	return (const_reverse_iterator (sIter));
-}
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::const_reverse_iterator
-	CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::rend () const
-{
-	const_iterator			sIter (this, 0, false);
-
-	return (const_reverse_iterator (sIter));
 }
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>

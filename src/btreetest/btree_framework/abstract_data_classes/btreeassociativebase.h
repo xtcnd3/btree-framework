@@ -17,8 +17,8 @@
 
 #include <utility>
 
-#include "btreeassociative.h"
-#include "btreeiter.h"
+#include "abstract_data_classes/btreeassociative.h"
+#include "iterators/btreeiter.h"
 
 template<class _t_data, class _t_key = _t_data, class _t_datalayerproperties = CBTreeIOpropertiesRAM <> >
 class CBTreeAssociativeBase
@@ -68,16 +68,6 @@ public:
 													();
 
 	CBTreeAssociativeBase_t &		operator=				(const CBTreeAssociativeBase_t &rBT);
-
-	iterator				begin					();
-	iterator				end						();
-	reverse_iterator		rbegin					();
-	reverse_iterator		rend					();
-
-	const_iterator			begin					() const;
-	const_iterator			end						() const;
-	const_reverse_iterator	rbegin					() const;
-	const_reverse_iterator	rend					() const;
 
 	size_type				max_size				() const;
 
