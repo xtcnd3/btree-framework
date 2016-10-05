@@ -27,11 +27,11 @@
 #include <iterator>
 #include <algorithm>
 
-#include "btreebasedefaults.h"
+#include "base_class_stack/btreebasedefaults.h"
 
-#include "btreecommon.h"
-#include "btreeaux.h"
-#include "btreeiter.h"
+#include "common/btreecommon.h"
+#include "super_classes/btreeaux.h"
+#include "iterators/btreeiter.h"
 
 template<class _t_data, class _t_sizetype>
 class CBTreeArrayConstAccessWrapper;
