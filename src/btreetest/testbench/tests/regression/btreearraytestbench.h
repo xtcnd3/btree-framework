@@ -24,9 +24,9 @@
 #include <list>
 #include <vector>
 
-#include "btreetestcommon.h"
-#include "btreetestarray.h"
-#include "btreearraytestprimitive.h"
+#include "testbench/common/btreetestcommon.h"
+#include "testbench/application_classes/regression/btreetestarray.h"
+#include "testbench/primitives/btreearraytestprimitive.h"
 
 typedef enum
 {
@@ -47,9 +47,9 @@ typedef enum
 	BTREETEST_ARRAY_SERLIALIZE_HALF_NODE, 
 	BTREETEST_ARRAY_SERLIALIZE_PART_NODE, 
 	BTREETEST_ARRAY_SERLIALIZE_INCOMPLETE, 
-	BTREETEST_ARRAY_CODE_COVERAGE_ROOT_MERGE_WITH_LOWER_RIGHT, 
 	BTREETEST_ARRAY_SELF_REFERENCE_VIA_SUBSCRIPT_WRAPPER, 
-	BTREETEST_ARRAY_STL_IF_ASSIGN_FILL, 
+	BTREETEST_ARRAY_SERLIALIZE_ZERO_LENGTH, 
+	BTREETEST_ARRAY_STL_IF_ASSIGN_FILL = 1000, 
 	BTREETEST_ARRAY_STL_IF_ASSIGN_VIA_ITERATOR, 
 	BTREETEST_ARRAY_STL_IF_PUSH_BACK_POP_BACK, 
 	BTREETEST_ARRAY_STL_IF_INSERT_MULTIPLE, 
@@ -61,7 +61,7 @@ typedef enum
 	BTREETEST_ARRAY_STL_IF_ERASE_SINGLE, 
 	BTREETEST_ARRAY_STL_IF_ERASE_MULTIPLE, 
 	BTREETEST_ARRAY_STL_IF_SWAP, 
-	BTREETEST_ARRAY_SERLIALIZE_ZERO_LENGTH
+	BTREETEST_ARRAY_CODE_COVERAGE_ROOT_MERGE_WITH_LOWER_RIGHT = 2000
 } btreetest_array_e;
 
 typedef enum
@@ -83,6 +83,6 @@ typedef enum
 } btreetest_array_stl_if_insert_via_iterator_e;
 
 template<class _t_container>
-void TestBTreeArray (uint32_t nTest, uint32_t nNodeSize, _t_container *pArrayWrapper);
+void TestBTreeArray (uint32_t nTest, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pArrayWrapper);
 
 #endif // BTREEARRAYTESTBENCH_H

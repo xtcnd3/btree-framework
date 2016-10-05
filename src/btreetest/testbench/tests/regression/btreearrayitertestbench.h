@@ -25,9 +25,9 @@
  #include <cxxabi.h>
 #endif
 
-#include "btreetestcommon.h"
-#include "btreetestarray.h"
-#include "btreearraytestprimitive.h"
+#include "testbench/common/btreetestcommon.h"
+#include "testbench/application_classes/regression/btreetestarray.h"
+#include "testbench/primitives/btreearraytestprimitive.h"
 
 #include "btreeiofile.h"
 
@@ -53,7 +53,7 @@ typedef enum
 	BTREETEST_ARRAY_ITER_COMPARE_OPERATORS, 
 	BTREETEST_ARRAY_ITER_SWAP, 
 	BTREETEST_ARRAY_ITER_CONST_SWAP, 
-	BTREETEST_ARRAY_ITER_CC_SAME_INSTANCE_COMPARE, 
+	BTREETEST_ARRAY_ITER_CC_SAME_INSTANCE_COMPARE = 2000, 
 	BTREETEST_ARRAY_ITER_CC_IS_TIME_STAMP_UP_TO_DATE_AFTER_RE_ASSIGNMENT, 
 	BTREETEST_ARRAY_ITER_CC_UPDATE_TIME_STAMP_RE_REGISTER, 
 	BTREETEST_ARRAY_ITER_CC_ASSIGN_UNINITIALIZED_INSTANCE, 
