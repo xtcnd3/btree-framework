@@ -427,12 +427,12 @@ void CBTreeDefaults<_t_data, _t_sizetype>::_swap
 		CBTreeDefaults<_t_data, _t_sizetype> &rBT
 	)
 {
-	fast_swap<bayerTreeCacheDescription_t> (this->m_sCacheDescription, rBT.m_sCacheDescription);
+	fast_swap (this->m_sCacheDescription, rBT.m_sCacheDescription);
 
 #if defined (USE_PERFORMANCE_COUNTERS)
 
-	fast_swap<uint64_t> (this->m_nHitCtr, rBT.m_nHitCtr);
-	fast_swap<uint64_t> (this->m_nMissCtr, rBT.m_nMissCtr);
+	fast_swap (this->m_nHitCtr, rBT.m_nHitCtr);
+	fast_swap (this->m_nMissCtr, rBT.m_nMissCtr);
 
 #endif
 
