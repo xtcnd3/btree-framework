@@ -1,0 +1,1 @@
+-type array -test 7 -sizetype 32

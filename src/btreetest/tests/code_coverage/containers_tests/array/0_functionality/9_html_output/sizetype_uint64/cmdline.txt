@@ -1,0 +1,1 @@
+-type array -test 9 -sizetype 64

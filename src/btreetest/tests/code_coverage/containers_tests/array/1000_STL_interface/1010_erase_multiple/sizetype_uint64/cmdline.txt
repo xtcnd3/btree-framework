@@ -1,0 +1,1 @@
+-type array -test 1010 -sizetype 64
