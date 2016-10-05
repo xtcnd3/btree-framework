@@ -24,14 +24,14 @@
 template<class _t_key>
 class CBTreeTestBenchMultiSet;
 
-#include "btreesettestbench.h"
+#include "testbench/tests/regression/btreesettestbench.h"
 
-#include "btreetestmultiset.h"
+#include "testbench/application_classes/regression/btreetestmultiset.h"
 
-#include "btreemultisetprimitives.h"
+#include "testbench/primitives/btreemultisetprimitives.h"
 
-#include "btreetestcommon.h"
-#include "./associative/btreemultiset.h"
+#include "testbench/common/btreetestcommon.h"
+#include "specific_data_classes/btreemultiset.h"
 
 template<class _t_key>
 class CBTreeTestBenchMultiSet	:	public ::std::multiset<_t_key>
@@ -86,7 +86,7 @@ typedef CBTreeTestBenchMultiSet<uint32_t>			multiset_reference_t;
 typedef enum
 {
 	BTREETEST_MULTISET_ASSIGNMENT_OPERATOR, 
-	BTREETEST_MULTISET_STL_IF_INSERT, 
+	BTREETEST_MULTISET_STL_IF_INSERT = 1000, 
 	BTREETEST_MULTISET_STL_IF_INSERT_VIA_ITERATOR, 
 	BTREETEST_MULTISET_STL_IF_ERASE_VIA_ITERATOR, 
 	BTREETEST_MULTISET_STL_IF_ERASE_VIA_KEY, 
@@ -99,6 +99,6 @@ typedef enum
 } btreetest_multiset_t;
 
 template<class _t_container>
-void TestBTreeSTLmultiSet (uint32_t nTestNum, _t_container *pContainerpMSetWrapper);
+void TestBTreeSTLmultiSet (uint32_t nTestNum, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pContainerpMSetWrapper);
 
 #endif // !BTREEMULTISETTESTBENCH_H
