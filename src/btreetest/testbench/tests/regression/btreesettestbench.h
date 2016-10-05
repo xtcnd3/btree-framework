@@ -24,19 +24,19 @@
 template<class _t_key>
 class CBTreeTestBenchSet;
 
-#include "btreemultisettestbench.h"
+#include "testbench/tests/regression/btreemultisettestbench.h"
 
-#include "btreetestset.h"
+#include "testbench/application_classes/regression/btreetestset.h"
 
-#include "btreemultisetprimitives.h"
+#include "testbench/primitives/btreemultisetprimitives.h"
 
-#include "btreetestcommon.h"
-#include "./associative/btreeset.h"
+#include "testbench/common/btreetestcommon.h"
+#include "specific_data_classes/btreeset.h"
 
 typedef enum
 {
 	BTREETEST_SET_ASSIGNMENT_OPERATOR, 
-	BTREETEST_SET_STL_IF_INSERT, 
+	BTREETEST_SET_STL_IF_INSERT = 1000, 
 	BTREETEST_SET_STL_IF_INSERT_VIA_ITERATOR, 
 	BTREETEST_SET_STL_IF_ERASE_VIA_ITERATOR, 
 	BTREETEST_SET_STL_IF_ERASE_VIA_KEY, 
@@ -572,6 +572,6 @@ void TestBTreeSetSTLifInsertViaIterator (_t_map *pClM, uint32_t nNumEntries)
 }
 
 template<class _t_container>
-void TestBTreeSTLset (uint32_t nTestNum, _t_container *pContainerpSetWrapper);
+void TestBTreeSTLset (uint32_t nTestNum, uint32_t nNodeSize, uint32_t nPageSize, _t_container *pContainerpSetWrapper);
 
 #endif // !BTREESETTESTBENCH_H
