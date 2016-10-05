@@ -16,7 +16,7 @@
 #ifndef BTREETESTMULTIMAP_CPP
 #define	BTREETESTMULTIMAP_CPP
 
-#include "btreetestmultimap.h"
+#include "testbench/application_classes/regression/btreetestmultimap.h"
 
 template<class _t_datalayerproperties>
 CBTreeTestMultiMap<_t_datalayerproperties>::CBTreeTestMultiMap
@@ -211,27 +211,27 @@ void CBTreeTestMultiMap<_t_datalayerproperties>::clear ()
 	test ();
 }
 
-template<class _t_datalayerproperties>
-typename CBTreeTestMultiMap<_t_datalayerproperties>::key_compare
-	CBTreeTestMultiMap<_t_datalayerproperties>::key_comp () const
-{
-	key_compare		sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
-
-template<class _t_datalayerproperties>
-typename CBTreeTestMultiMap<_t_datalayerproperties>::value_compare
-	CBTreeTestMultiMap<_t_datalayerproperties>::value_comp () const
-{
-	value_compare	sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
+//template<class _t_datalayerproperties>
+//typename CBTreeTestMultiMap<_t_datalayerproperties>::key_compare
+//	CBTreeTestMultiMap<_t_datalayerproperties>::key_comp () const
+//{
+//	key_compare		sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
+//
+//template<class _t_datalayerproperties>
+//typename CBTreeTestMultiMap<_t_datalayerproperties>::value_compare
+//	CBTreeTestMultiMap<_t_datalayerproperties>::value_comp () const
+//{
+//	value_compare	sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
 
 template<class _t_datalayerproperties>
 bool CBTreeTestMultiMap<_t_datalayerproperties>::operator== (const CBTreeTestMultiMap_t &rTMM) const

@@ -21,10 +21,10 @@
 #include <set>
 #include <utility>
 
-#include "btreetestcommon.h"
+#include "testbench/common/btreetestcommon.h"
 
-#include "btreebasedefaults.h"
-#include "./associative/btreemultiset.h"
+#include "base_class_stack/btreebasedefaults.h"
+#include "specific_data_classes/btreemultiset.h"
 
 template<class _t_datalayerproperties>
 class CBTreeTestMultiSet
@@ -102,8 +102,8 @@ public:
 
 	void					clear					();
 
-	key_compare				key_comp				() const;
-	value_compare			value_comp				() const;
+//	key_compare				key_comp				() const;
+//	value_compare			value_comp				() const;
 	
 	bool					operator==				(const CBTreeTestMultiSet &rTMM) const;
 	bool					operator!=				(const CBTreeTestMultiSet &rTMM) const;

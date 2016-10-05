@@ -21,10 +21,10 @@
 #include <map>
 #include <utility>
 
-#include "btreetestcommon.h"
+#include "testbench/common/btreetestcommon.h"
 
-#include "btreebasedefaults.h"
-#include "./associative/btreemap.h"
+#include "base_class_stack/btreebasedefaults.h"
+#include "specific_data_classes/btreemap.h"
 
 typedef struct mapMap_s
 {
@@ -106,8 +106,8 @@ public:
 
 	void					clear					();
 
-	key_compare				key_comp				() const;
-	value_compare			value_comp				() const;
+//	key_compare				key_comp				() const;
+//	value_compare			value_comp				() const;
 	
 	bool					operator==				(const CBTreeTestMap &rTMM) const;
 	bool					operator!=				(const CBTreeTestMap &rTMM) const;

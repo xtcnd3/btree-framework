@@ -22,10 +22,10 @@
 #include <utility>
 #include <type_traits>
 
-#include "btreetestcommon.h"
+#include "testbench/common/btreetestcommon.h"
 
-#include "btreebasedefaults.h"
-#include "./associative/btreemultimap.h"
+#include "base_class_stack/btreebasedefaults.h"
+#include "specific_data_classes/btreemultimap.h"
 
 typedef struct multiMapMap_s
 {
@@ -112,8 +112,8 @@ public:
 
 	void					clear					();
 
-	key_compare				key_comp				() const;
-	value_compare			value_comp				() const;
+//	key_compare				key_comp				() const;
+//	value_compare			value_comp				() const;
 	
 	bool					operator==				(const CBTreeTestMultiMap &rTMM) const;
 	bool					operator!=				(const CBTreeTestMultiMap &rTMM) const;

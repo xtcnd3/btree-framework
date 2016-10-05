@@ -16,7 +16,7 @@
 #ifndef BTREETESTSET_CPP
 #define	BTREETESTSET_CPP
 
-#include "btreetestset.h"
+#include "testbench/application_classes/regression/btreetestset.h"
 
 template<class _t_datalayerproperties>
 CBTreeTestSet<_t_datalayerproperties>::CBTreeTestSet
@@ -197,27 +197,27 @@ void CBTreeTestSet<_t_datalayerproperties>::clear ()
 	test ();
 }
 
-template<class _t_datalayerproperties>
-typename CBTreeTestSet<_t_datalayerproperties>::key_compare
-	CBTreeTestSet<_t_datalayerproperties>::key_comp () const
-{
-	key_compare		sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
-
-template<class _t_datalayerproperties>
-typename CBTreeTestSet<_t_datalayerproperties>::value_compare
-	CBTreeTestSet<_t_datalayerproperties>::value_comp () const
-{
-	value_compare	sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
+//template<class _t_datalayerproperties>
+//typename CBTreeTestSet<_t_datalayerproperties>::key_compare
+//	CBTreeTestSet<_t_datalayerproperties>::key_comp () const
+//{
+//	key_compare		sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
+//
+//template<class _t_datalayerproperties>
+//typename CBTreeTestSet<_t_datalayerproperties>::value_compare
+//	CBTreeTestSet<_t_datalayerproperties>::value_comp () const
+//{
+//	value_compare	sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
 
 template<class _t_datalayerproperties>
 bool CBTreeTestSet<_t_datalayerproperties>::operator== (const CBTreeTestSet_t &rTSet) const
