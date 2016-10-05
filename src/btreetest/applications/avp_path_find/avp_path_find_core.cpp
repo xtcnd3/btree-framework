@@ -100,28 +100,23 @@ void start_timer (time_statistic_t *psTimeStatistic, uint32_t nID, uint64_t nSta
 	{
 		psTimeStatistic->nID = nID;
 		psTimeStatistic->nComplexity = nStartComplexity;
-
-		QueryPerformanceCounter (&(psTimeStatistic->nStart));
+		psTimeStatistic->sStartClock = std::chrono::system_clock::now ();
 	}
 }
 
 void end_timer (time_statistic_t *psTimeStatistic, uint64_t nEndComplexity)
 {
-	LARGE_INTEGER	sEndTime;
-	LARGE_INTEGER	sFreq;
-	uint64_t		nAvgComplexity;
+	std::chrono::system_clock::time_point	sEndClock;
+	uint64_t								nAvgComplexity;
 	
 	if (g_bPrintStatistics)
 	{
-		QueryPerformanceCounter (&sEndTime);
-		QueryPerformanceFrequency (&sFreq);
+		sEndClock = std::chrono::system_clock::now ();
 
-		double			nTimeDiff = (double) sEndTime.QuadPart;
+		std::chrono::duration<double> sTimeSpan = std::chrono::duration_cast<std::chrono::duration<double>> (sEndClock - psTimeStatistic->sStartClock);
+
+		double			nTimeDiff = sTimeSpan.count ();
 		double			nOpsPerSec;
-
-		nTimeDiff -= (double) psTimeStatistic->nStart.QuadPart;
-
-		nTimeDiff /= (double) sFreq.QuadPart;
 
 		if (nEndComplexity != psTimeStatistic->nComplexity)
 		{
@@ -141,11 +136,11 @@ void end_timer (time_statistic_t *psTimeStatistic, uint64_t nEndComplexity)
 
 			nAvgComplexity = (nEndComplexity + psTimeStatistic->nComplexity) / 2;
 
-			::std::cerr << psTimeStatistic->nID << "\t" << nAvgComplexity << "\t" << ((uint64_t) nOpsPerSec);
+//			::std::cerr << psTimeStatistic->nID << "\t" << nAvgComplexity << "\t" << ((uint64_t) nOpsPerSec);
 
-			::std::cerr << "\t" << psTimeStatistic->nComplexity << "\t" << nEndComplexity << "\t" << psTimeStatistic->nStart.QuadPart << "\t" << sEndTime.QuadPart << "\t" << sFreq.QuadPart;
+//			::std::cerr << "\t" << psTimeStatistic->nComplexity << "\t" << nEndComplexity << "\t" << psTimeStatistic->nStart.QuadPart << "\t" << sEndTime.QuadPart << "\t" << sFreq.QuadPart;
 
-			::std::cerr << ::std::endl;
+//			::std::cerr << ::std::endl;
 		}
 	}
 }
