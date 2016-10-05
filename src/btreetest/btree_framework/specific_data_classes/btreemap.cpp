@@ -15,7 +15,7 @@
 #ifndef BTREEMAP_CPP
 #define	BTREEMAP_CPP
 
-#include "./associative/btreemap.h"
+#include "specific_data_classes/btreemap.h"
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap
@@ -99,27 +99,27 @@ void CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::swap (typename C
 	}
 }
 
-template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
-typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_compare
-	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_comp () const
-{
-	key_compare		sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
-
-template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
-typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_compare
-	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_comp () const
-{
-	value_compare		sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
+//template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+//typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_compare
+//	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_comp () const
+//{
+//	key_compare		sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
+//
+//template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+//typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_compare
+//	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_comp () const
+//{
+//	value_compare		sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::extract_key (typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *pKey, const typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type &rData) const

@@ -15,7 +15,7 @@
 #ifndef BTREESET_CPP
 #define	BTREESET_CPP
 
-#include "./associative/btreeset.h"
+#include "specific_data_classes/btreeset.h"
 
 template<class _t_keytype, class _t_datalayerproperties>
 CBTreeSet<_t_keytype, _t_datalayerproperties>::CBTreeSet
@@ -99,27 +99,27 @@ void CBTreeSet<_t_keytype, _t_datalayerproperties>::swap (typename CBTreeSet<_t_
 	}
 }
 
-template<class _t_keytype, class _t_datalayerproperties>
-typename CBTreeSet<_t_keytype, _t_datalayerproperties>::key_compare
-	CBTreeSet<_t_keytype, _t_datalayerproperties>::key_comp () const
-{
-	key_compare		sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
-
-template<class _t_keytype, class _t_datalayerproperties>
-typename CBTreeSet<_t_keytype, _t_datalayerproperties>::value_compare
-	CBTreeSet<_t_keytype, _t_datalayerproperties>::value_comp () const
-{
-	value_compare		sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
+//template<class _t_keytype, class _t_datalayerproperties>
+//typename CBTreeSet<_t_keytype, _t_datalayerproperties>::key_compare
+//	CBTreeSet<_t_keytype, _t_datalayerproperties>::key_comp () const
+//{
+//	key_compare		sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
+//
+//template<class _t_keytype, class _t_datalayerproperties>
+//typename CBTreeSet<_t_keytype, _t_datalayerproperties>::value_compare
+//	CBTreeSet<_t_keytype, _t_datalayerproperties>::value_comp () const
+//{
+//	value_compare		sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
 
 template<class _t_keytype, class _t_datalayerproperties>
 void CBTreeSet<_t_keytype, _t_datalayerproperties>::_swap (typename CBTreeSet<_t_keytype, _t_datalayerproperties>::CBTreeSet_t &rContainer)

@@ -15,7 +15,7 @@
 #ifndef BTREEMULTIMAP_CPP
 #define	BTREEMULTIMAP_CPP
 
-#include "./associative/btreemultimap.h"
+#include "specific_data_classes/btreemultimap.h"
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMultiMap
@@ -62,27 +62,27 @@ void CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::swap (typen
 	}
 }
 
-template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
-typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_compare
-	CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_comp () const
-{
-	key_compare		sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
-
-template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
-typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_compare
-	CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_comp () const
-{
-	value_compare		sRslt;
-
-	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-
-	return (sRslt);
-}
+//template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+//typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_compare
+//	CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_comp () const
+//{
+//	key_compare		sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
+//
+//template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+//typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_compare
+//	CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_comp () const
+//{
+//	value_compare		sRslt;
+//
+//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
+//
+//	return (sRslt);
+//}
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::extract_key (typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *pKey, const typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type &rData) const

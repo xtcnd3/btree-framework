@@ -15,7 +15,7 @@
 #ifndef BTREEMAP_H
 #define	BTREEMAP_H
 
-#include "./associative/base/btreeassociativebase.h"
+#include "abstract_data_classes/btreeassociativebase.h"
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties = CBTreeIOpropertiesRAM <> >
 class CBTreeMap
@@ -81,8 +81,8 @@ public:
 	void					swap					(CBTreeAssociativeIf_t &rContainerIf);
 	void					swap					(CBTreeMap_t &rContainer);
 
-	key_compare				key_comp				() const;
-	value_compare			value_comp				() const;
+//	key_compare				key_comp				() const;
+//	value_compare			value_comp				() const;
 	
 protected:
 
