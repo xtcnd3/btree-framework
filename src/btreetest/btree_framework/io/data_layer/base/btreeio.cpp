@@ -14,7 +14,7 @@
 #ifndef	BTREEIO_CPP
 #define	BTREEIO_CPP
 
-#include "btreeio.h"
+#include "io/data_layer/base/btreeio.h"
 
 template<class _t_datalayerproperties>
 CBTreeIO<_t_datalayerproperties>::CBTreeIO
@@ -26,7 +26,7 @@ CBTreeIO<_t_datalayerproperties>::CBTreeIO
 	:	m_psDataPools (NULL)
 	,	m_nNumDataPools (nNumDataPools)
 	,	m_bCacheFreeze (false)
-	,	m_nMaxNodes (0ULL)
+	,	m_nMaxNodes (0)
 {
 	uint32_t			ui32;
 
