@@ -16,7 +16,7 @@
 
 #include "btreeiofile.h"
 
-#include "btreefileioprop.h"
+#include "io/properties/btreefileioprop.h"
 
 template<class _t_datalayerproperties>
 CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
@@ -53,7 +53,6 @@ CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 #endif
 
 	std::stringstream	aszFilename;
-	LARGE_INTEGER		sTimeui64;
 	uint32_t			nFails = 0;
 	bool				bOpenedFile = false;
 	uint32_t			nAttempts = 0;
@@ -117,11 +116,11 @@ CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 	do
 	{
 		m_strTempFile = m_pClDataLayerProperties->get_pathname ();
-	
-		QueryPerformanceCounter (&sTimeui64);
+
+		auto		sClock = ::std::chrono::high_resolution_clock::now ();
 	
 		aszFilename.clear ();
-		aszFilename << ::std::hex << ::std::setfill ('0') << ::std::setw (16) << sTimeui64.QuadPart << ::std::setw (2) << nFails << ::std::dec;
+		aszFilename << ::std::hex << ::std::setfill ('0') << ::std::setw (16) << sClock.time_since_epoch ().count () << ::std::setw (2) << nFails << ::std::dec;
 
 		if ((m_strTempFile[m_strTempFile.size () - 1] != '/') && (m_strTempFile[m_strTempFile.size () - 1] != '\\'))
 		{
@@ -409,7 +408,7 @@ void CBTreeFileIO<_t_datalayerproperties>::set_size (typename _t_datalayerproper
 
 		lseek64 (m_nFileDesc, n64curPos, SEEK_SET);
 
-		BTREE_ASSERT (nSize == 0ULL, "CBTreeFileIO<_t_datalayerproperties>::set_size: Failed to set new file size!");
+		BTREE_ASSERT (nSize == 0, "CBTreeFileIO<_t_datalayerproperties>::set_size: Failed to set new file size!");
 
 #endif
 
