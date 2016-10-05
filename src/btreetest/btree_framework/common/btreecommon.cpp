@@ -13,7 +13,7 @@
 #ifndef BTREECOMMON_CPP
 #define BTREECOMMON_CPP
 
-#include "btreecommon.h"
+#include "common/btreecommon.h"
 
 template<class _t_type, typename _t_intrinsic>
 void xor_swap (_t_type &rLhs, _t_type &rRhs)

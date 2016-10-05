@@ -40,8 +40,8 @@
 
 #include <memory.h>
 
-#include "btreeaux.h"
-#include "btreeiter.h"
+#include "super_classes/btreeaux.h"
+#include "iterators/btreeiter.h"
 
 typedef struct
 {
