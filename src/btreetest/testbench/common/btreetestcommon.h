@@ -29,7 +29,7 @@
  #include <cxxabi.h>
 #endif
 
-#include "btreecommon.h"
+#include "common/btreecommon.h"
 
 
 extern uint32_t		g_nDebug;

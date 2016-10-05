@@ -11,7 +11,7 @@
 **
 ************************************************************/
 
-#include "btreetestcommon.h"
+#include "testbench/common/btreetestcommon.h"
 
 uint32_t		g_nDebug = 0;
 
