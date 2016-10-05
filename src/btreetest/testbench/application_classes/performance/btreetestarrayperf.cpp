@@ -3,6 +3,6 @@
 #ifndef BTREETESTARRAYPERF_CPP
 #define	BTREETESTARRAYPERF_CPP
 
-#include "btreetestarrayperf.h"
+#include "testbench/application_classes/performance/btreetestarrayperf.h"
 
 #endif
