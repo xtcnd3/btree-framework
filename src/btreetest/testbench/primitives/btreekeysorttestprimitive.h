@@ -16,10 +16,10 @@
 
 #include <stdint.h>
 
-#include "btreetestcommon.h"
-#include "btreetestkeysort.h"
+#include "testbench/common/btreetestcommon.h"
+#include "testbench/application_classes/regression/btreetestkeysort.h"
 
-#include "btreeprimitivedefinitions.h"
+#include "testbench/primitives/btreeprimitivedefinitions.h"
 
 typedef CBTreePairTest<const uint32_t, keySortMap_t>										keySortPair_t;
 

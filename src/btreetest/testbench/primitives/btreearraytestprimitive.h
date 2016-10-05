@@ -18,8 +18,8 @@
 
 #include <iostream>
 
-#include "btreetestcommon.h"
-#include "btreetestarray.h"
+#include "testbench/common/btreetestcommon.h"
+#include "testbench/application_classes/regression/btreetestarray.h"
 
 typedef enum
 {

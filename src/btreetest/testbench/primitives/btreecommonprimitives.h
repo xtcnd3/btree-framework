@@ -18,8 +18,8 @@
 
 #include <iostream>
 
-#include "btreeprimitivedefinitions.h"
-#include "btreetestcommon.h"
+#include "testbench/primitives/btreeprimitivedefinitions.h"
+#include "testbench/common/btreetestcommon.h"
 
 template<class _t_container>
 void associative_container_add_primitive (_t_container *pContainer, typename _t_container::size_type nEntries, uint32_t &nFromWhereOrSeed, btreetest_key_generation_e eGenerator)
