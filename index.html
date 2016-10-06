@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Btree-framework by andreas-steffens</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/andreas-steffens/btree-framework">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/andreas-steffens/btree-framework/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/andreas-steffens/btree-framework/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Btree-framework</h1>
+          <p>The btree-framework is a set of template based classes with interfaces similar to existing STL classes such as multimap.</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/andreas-steffens">andreas-steffens</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <p>btree-framework</p>
+
+<p>The btree-framework is aimed at programmers that are looking for associative data container classes capable of handling data sets at a very large scale. Said data containers are coming with an interface similar to the existing STL container classes map, multimap, set and multiset. Furthermore, iterators, with a random access qualifier enabled, are supported, which ought to allow for a quick interchange between this framework and existing STL containers. Also, an array type, that isn't suffering from any slow down when data is inserted or removed at the beginning of the list, is available. This array type has an interface similar to the STL class vector. All container types can be abstracted and allow applications to create  their own container type hierarchy.</p>
+
+<p><a href="https://github.com/andreas-steffens/btree-framework">btree-framework</a></p>
+
+<ul>
+<li>any container provided, may it be an associative and a linear type, is based on a btree structure
+
+<ul>
+<li>which is supposed to deliver increased performance, since other implementations use linear arrays, link lists and red-black as well as binary trees</li>
+<li>any of the above structures developes poor performance when it comes to large data amounts, while btree can scale quite well to that end</li>
+</ul>
+</li>
+<li>any container type can be abstracted, as oppose to the existing STL equivalents
+
+<ul>
+<li>allowing applications to create their own container type hierarchy</li>
+<li>also the sorting criteria is a virtual method and not a template parameter</li>
+</ul>
+</li>
+<li>supports scary iterator assignments, as described by Bjarne Sproustrup’s paper “Minimizing Dependencies within Generic Classes for Faster and Smaller Programs”</li>
+<li>iterators have random tag capability</li>
+<li>can handle very large amounts of data (64 bit address space)
+
+<ul>
+<li>with other STL implementations, the programmer depends what size_t is set to, while with this framework the address space type can be set</li>
+</ul>
+</li>
+<li>cmake support
+<br>
+<br>
+## Documentation</li>
+</ul>
+
+<p>The documentation of this project comes in two flavours and can be found as an</p>
+
+<ul>
+<li>Open Document Text file (.ODT)<a href="https://github.com/andreas-steffens/btree-framework/blob/master/doc/btree%20programmer%20guide.odt?raw=true">here</a> or as a</li>
+<li>Portable Document Format file (.PDF)<a href="https://github.com/andreas-steffens/btree-framework/blob/master/doc/btree%20programmer%20guide.pdf?raw=true">here</a>
+</li>
+</ul>
+
+<p>The documentation is pretty large and might be a bit overwelming. To address that problem, please find the section "Where to start" in the <a href="https://github.com/andreas-steffens/btree-framework/blob/master/README">README</a> file. This section tells what sections need to be initially read in order to understand how this framework is working and supposed to be used.
+<br>
+<br></p>
+
+<h2>
+<a id="how-to-build" class="anchor" href="#how-to-build" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How To Build</h2>
+
+<p>This project supports cmake, which ought to make it very easy to include the resulting btree-framework library in any project that uses cmake. </p>
+
+<p><b>How to build the windows btree-framework test bench for x86 and x86_64 platforms?</b></p>
+
+<p>Via cygwin command execute the following commands:</p>
+
+<pre><code>cd .../to/your/projects/location
+git clone https://github.com/andreas-steffens/btree-framework.git
+cd btree-framework/src/btreetest
+</code></pre>
+
+<p>Here you can find a number of batch files called msvce201x.x86(_64).bat. These batch files can be executed via command line or windows explorer. Each of those batch files creates a directory named "cmake" and creates all cmake files and visual studio express solution files, set up for the selected platform and visual studio express version, in there. Then it tries to open whatever the visual studio express application can be found under the registery key: HKEY_CLASSES_ROOT\Applications\WDExpress.exe\shell\open\command</p>
+
+<pre><code>msvce2013.x86.bat    - Visual Studio Express 2013 with platform Win32
+msvce2013.x86_64.bat - Visual Studio Express 2013 with platform x64
+msvce2015.x86.bat    - Visual Studio Express 2015 with platform Win32
+msvce2015.x86_64.bat - Visual Studio Express 2015 with platform x64
+</code></pre>
+
+<p>If the project needs re-opening at a later point, simply use the same batch file again. In the event that you select the wrong batch file, cmake will refuse to create new project files and aborts with an error message. As a result your existing project files remain unharmed.
+In case you want build the project say for a different platform, then you need to close the visual studio instance that has the btree-framework project open. After that, you need to delete or rename the afore mentioned cmake directory and execute a different batch file that generates the project files for the desired platform. However, any modifications that have been made to the project will be lost!</p>
+
+<ul>
+<li>windows library stand alone</li>
+<li>linux test bench build</li>
+<li>linux library stand alone
+<br>
+<br>
+## Version</li>
+</ul>
+
+<p>The current version of the project is: 0.05 (alpha)</p>
+
+<p>Please don't be discouraged by the fact that the version contains the word "alpha". What this means is that the feature set is incomplete (see below).</p>
+
+<ul>
+<li>emplace ()</li>
+<li>emplace_hint ()</li>
+<li>initializer_list&lt;&gt; support</li>
+<li>move constructors and move assignment operators</li>
+<li>equal_range ()
+<br>
+<br>
+## Agenda</li>
+</ul>
+
+<p><br>
+<br></p>
+
+<h2>
+<a id="btree-framework-project-on-facebook" class="anchor" href="#btree-framework-project-on-facebook" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Btree-Framework Project on Facebook</h2>
+
+<p>If you want to see updates or release on the btree-framework project, then follow this link: <a href="https://www.facebook.com/btreeframework">https://www.facebook.com/btreeframework</a>
+Every release post also contains a brief change log statement, allowing to tell what major changes have been made.
+<br>
+<br></p>
+
+<h2>
+<a id="contact" class="anchor" href="#contact" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contact</h2>
+
+<p>Please see <a href="https://github.com/andreas-steffens/btree-framework/blob/master/README">README</a> section "Feedback".
+<br>
+<br></p>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>Licensed under the Lesser GNU Public License, Version 3.0: <a href="http://www.gnu.org/licenses/lgpl-3.0.txt">http://www.gnu.org/licenses/lgpl-3.0.txt</a></p>
+
+<p>Author: Andreas Steffens</p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
