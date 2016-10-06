@@ -53,7 +53,6 @@ CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 #endif
 
 	std::stringstream	aszFilename;
-	uint32_t			nFails = 0;
 	bool				bOpenedFile = false;
 	uint32_t			nAttempts = 0;
 	pagesize_t			nPageSize;
@@ -118,9 +117,14 @@ CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 		m_strTempFile = m_pClDataLayerProperties->get_pathname ();
 
 		auto		sClock = ::std::chrono::high_resolution_clock::now ();
+
+		std::default_random_engine					sRandonGenerator;
+		std::uniform_int_distribution<uint32_t>		sRandRange (0, 0xFFFF);
+
+		uint32_t									nRandomComponentOfTempFileName = sRandRange (sRandonGenerator);
 	
 		aszFilename.clear ();
-		aszFilename << ::std::hex << ::std::setfill ('0') << ::std::setw (16) << sClock.time_since_epoch ().count () << ::std::setw (2) << nFails << ::std::dec;
+		aszFilename << ::std::hex << ::std::setfill ('0') << ::std::setw (16) << sClock.time_since_epoch ().count () << ::std::setw (2) << nAttempts << ::std::setw (4) << nRandomComponentOfTempFileName << ::std::dec;
 
 		if ((m_strTempFile[m_strTempFile.size () - 1] != '/') && (m_strTempFile[m_strTempFile.size () - 1] != '\\'))
 		{
@@ -178,7 +182,7 @@ CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 
 		nAttempts++;
 
-	} while ((!bOpenedFile) && (nAttempts <= 15));
+	} while ((!bOpenedFile) && (nAttempts <= 0xFF));
 
 	BTREE_ASSERT (bOpenedFile, "CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO: failed to open temporary file!");
 
