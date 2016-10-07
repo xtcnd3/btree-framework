@@ -1,1 +1,0 @@
--type keysort -test 1002 -sizetype 64

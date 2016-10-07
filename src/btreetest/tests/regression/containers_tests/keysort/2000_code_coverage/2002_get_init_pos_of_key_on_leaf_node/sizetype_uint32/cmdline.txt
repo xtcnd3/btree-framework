@@ -1,1 +1,0 @@
--type keysort -test 2002 -sizetype 32
