@@ -52,7 +52,6 @@ CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 
 #endif
 
-	std::stringstream	aszFilename;
 	bool				bOpenedFile = false;
 	uint32_t			nAttempts = 0;
 	pagesize_t			nPageSize;
@@ -114,17 +113,27 @@ CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 
 	do
 	{
+		std::stringstream	aszFilename;
+
 		m_strTempFile = m_pClDataLayerProperties->get_pathname ();
 
 		auto		sClock = ::std::chrono::high_resolution_clock::now ();
 
-		std::default_random_engine					sRandonGenerator;
-		std::uniform_int_distribution<uint32_t>		sRandRange (0, 0xFFFF);
+		aszFilename << ::std::hex << ::std::setfill ('0') << ::std::setw (16) << sClock.time_since_epoch ().count () << ::std::setw (2) << nAttempts;
 
-		uint32_t									nRandomComponentOfTempFileName = sRandRange (sRandonGenerator);
-	
-		aszFilename.clear ();
-		aszFilename << ::std::hex << ::std::setfill ('0') << ::std::setw (16) << sClock.time_since_epoch ().count () << ::std::setw (2) << nAttempts << ::std::setw (4) << nRandomComponentOfTempFileName << ::std::dec;
+		try
+		{
+			std::random_device							sRandonGenerator;
+
+			uint32_t									nRandomComponentOfTempFileName = sRandonGenerator () % (uint32_t) (0x00010000);
+
+			aszFilename << ::std::setw (4) << nRandomComponentOfTempFileName;
+		}
+		catch (::std::exception *pE)
+		{
+		}
+
+		aszFilename << ::std::dec;
 
 		if ((m_strTempFile[m_strTempFile.size () - 1] != '/') && (m_strTempFile[m_strTempFile.size () - 1] != '\\'))
 		{

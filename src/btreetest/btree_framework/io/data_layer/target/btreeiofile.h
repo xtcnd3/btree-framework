@@ -36,6 +36,7 @@
 
 #include <chrono>
 #include <random>
+#include <exception>
 
 #include "io/data_layer/type/btreeioblock.h"
 #include "super_classes/btreeaux.h"
