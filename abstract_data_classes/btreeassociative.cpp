@@ -1323,7 +1323,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::rebuild_node (c
 			}
 
 			// seek point where serial vector mismatches expected sequence based on sub-node indexes
-			for (ui32 = nSubStart; ui32 < (nNumData - 1); ui32++)
+			for (ui32 = nSubStart; ui32 < sub_node_iter_type (nNumData - 1); ui32++)
 			{
 				pnSubNode = this->get_sub_node (nNode, ui32);
 
@@ -1336,7 +1336,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::rebuild_node (c
 			}
 
 			// update remaining serial vector part by using fast modifier
-			for (; ui32 < (nNumData - 1); ui32++)
+			for (; ui32 < sub_node_iter_type (nNumData - 1); ui32++)
 			{
 				pnSerVector[ui32] += triMod;
 			}
