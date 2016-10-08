@@ -869,14 +869,14 @@ typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, 
 			nRightSize = get_data_count (*pnRightNode);
 
 			// if left and right node have size t - 1 ...
-			if ((nLeftSize == (this->m_nNodeSize - 1)) && (nRightSize == (this->m_nNodeSize - 1)))
+			if ((nLeftSize == size_type (this->m_nNodeSize - 1)) && (nRightSize == size_type (this->m_nNodeSize - 1)))
 			{
 				// ... then mark them for a merge
 				bMergeNodes = true;
 			}
 			// if one of the nodes has size t - 1 and the other is larger ...
-			else if (((nLeftSize == (this->m_nNodeSize - 1)) && (nRightSize >= this->m_nNodeSize)) ||
-					((nRightSize == (this->m_nNodeSize - 1)) && (nLeftSize >= this->m_nNodeSize)))
+			else if (((nLeftSize == size_type (this->m_nNodeSize - 1)) && (nRightSize >= this->m_nNodeSize)) ||
+					((nRightSize == size_type (this->m_nNodeSize - 1)) && (nLeftSize >= this->m_nNodeSize)))
 			{
 				// ... then mark the for a rotate
 				bRotateNodes = true;
@@ -1404,7 +1404,7 @@ typename _t_datalayerproperties::size_type CBTreeBaseDefaults<_ti_pos, _t_data, 
 			{
 				psData = this->get_data_buffer (nNode);
 
-				if ((this->get_data_count (nNode) - nSubData) < nRem)
+				if (sub_node_iter_type (this->get_data_count (nNode) - nSubData) < nRem)
 				{
 					nRem = this->get_data_count (nNode) - nSubData;
 				}
@@ -1799,7 +1799,7 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::move_next (ty
 	if (is_leaf (*psNodeDesc))
 	{
 		// ... and the right most position has not been reached ...
-		if (nSub < (get_data_count (*psNodeDesc) - 1))
+		if (nSub < sub_node_iter_type (get_data_count (*psNodeDesc) - 1))
 		{
 			// ... then increment sub position and return
 			nSub++;
@@ -1875,7 +1875,7 @@ void CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>::convert_pos_t
 		// ... then search for the next sub node or find data in current node
 		
 		// if the linear position is smaller than the node size parameter ...
-		if (nPos < (node_iter_type) (this->get_node_min_data_size () - 1))
+		if (nPos < size_type (this->get_node_min_data_size () - 1))
 		{
 			// ... then the resulting location is guaranteed to be in the initial sub-node
 			nMax = 0;
