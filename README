@@ -1,19 +1,15 @@
 btree-framework
 
 Author: Andreas Steffens
-Version: 0.04b (alpha)
-License: GPL v2
-
-
-Introduction
-
-The btree-framework is aimed at programmers that are looking for associative data container classes capable of handling data sets at a very large scale. Said data containers are coming with an interface similar to the existing STL container classes map, multimap, set and multiset. Furthermore, iterators, with a random access qualifier enabled, are supported, which ought to allow for a quick interchange between this framework and existing STL containers. Also, an array type, that isn't suffering from any slow down when data is inserted or removed at the beginning of the list, is available. This array type has an interface similar to the STL class vector. All container types can be abstracted and allow applications to create  their own container type hierarchy.
+Version: 0.05 (alpha)
+License: LGPL v3.0
 
 Contents
 
 1. Where to start
 2. How to build this framework
 2.1. Linux
+2.1.1. How to build using a makefile
 2.2. Windows
 2.3. build flags
 2.4. What has to be included
@@ -30,7 +26,7 @@ Contents
 
 1. Where to start
 
-The folder ./doc contains an open office document file called "btree programmer guide.odt". That documentation explains this b-tree framework in detail, but only a sub set of sections is required to understand to get started. See below:
+The folder ./doc holds two files containing the same documentation. One file is displaying the documentation as an Open Office Text file (.odt), while the other is a Portable Document Format file (.pdf). That documentation explains this b-tree framework in detail, but only a sub set of sections is required to understand to get started. See below:
 
 Quick Start Guide
 Programmer Guide
@@ -60,78 +56,114 @@ Programmer Guide
 2.1. Linux
 
 For this framework to compile, a compiler capable to support the C++11 dialect is required.
-This release was tested with: GCC (C++) 5.3.1 20160406 (Fedora 23)
+This release was tested with: GCC (C++) 6.2.1 20160916 (Fedora 24 x86_64)
 
-To build the b-tree regression test system go to ./src/btreetest
-and run "make debug".
+To build the b-tree test bench execute the following commands:
 
-List of make file rulese:
-all             - runs regression, valgrind_report, coverage_report, performance, release
-debug           - builds regression test binary with debug flags
-release         - builds regression test binary with release flags
-coverage        - builds regression test binary with debug and coverage flags
-regression      - runs regression tests using debug binary
-performance     - runs performance tests using release binary (this is not ready yet)
-coverage_report - runs regression tests using coverage binary and creates result displayed as HTML
-valgrind_report - runs regression tests using valgrind with debug binary (warning: takes days or maybe weeks to run)
-clean           - removes any build file (may those be intermediate or final)
-clean_coverage  - removes any coverage or coverage report file (may those be intermediate or final)
+cd .../to/your/projects/location
+git clone --recursive https://github.com/andreas-steffens/btree-framework-testbench
+cd btree-framework/src/btreetest
+make debug
 
-To compile the b-tree framework into another project the files in the following locations are relevant:
-./src/btreetest/btree_framework
-./src/btreetest/compatibility
+List of make file rules:
+all								- runs regression, valgrind_report, coverage_report, performance, release
+debug							- builds regression test binary with debug flags
+release							- builds regression test binary with release flags
+coverage						- builds regression test binary with debug and coverage flags
+regression						- runs regression tests using debug binary
+performance						- runs performance tests using release binary (this is not ready yet)
+coverage_report					- runs regression tests using coverage binary and creates result displayed as HTML
+valgrind_report					- runs regression tests using valgrind with debug binary (warning: takes days or maybe weeks to run)
+clean							- removes any build file (may those be intermediate or final)
+clean_coverage					- removes any coverage or coverage report file (may those be intermediate or final)
+clean_regression_tests			- cleans all regression tests regardless of their result
+clean_failed_regression_tests	- cleans all regression tests that returned with an error code
+clean_coverage_tests			- cleans all code coverage tests regardless of their result
+clean_failed_coverage_tests		- cleans all code coverage tests that returned with an error code
+clean_validation_tests			- cleans all validation tests regardless of their result
+clean_failed_validation_tests	- cleans all validation tests that returned with an error code
+clean_tests						- runs clean_regression_tests clean_coverage_tests clean_validation_tests
+clean_failed_tests				- runs clean_failed_regression_tests clean_failed_coverage_tests clean_failed_validation_tests
 
-These folders are then copied or sym. linked to your target or common code location.
-The additional include paths your compiler needs to be aware of are:
-/relative/or/absolute/path/to/your/common/location/btree_framework
-/relative/or/absolute/path/to/your/common/location/compatibility
+2.1.1. How to build using a makefile
 
-Optionally the build flags "_DEBUG" or "BTREE_ITERATOR_REGISTRATION" need to be set (see below).
+In order to build the btree framework without cmake using a makefile follow the step below:
+
+1) Clone the btree framework from github
+
+cd /relative/or/absolute/path/to/your/common/location/
+git clone https://github.com/andreas-steffens/btree-framework
+cd btree-framework/src/btreetest
+
+2) Add the following files to your build
+
+/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreemap.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreearray.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreekeysort.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreemultiset.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreeset.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreemultimap.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkabstract_data_classes/btreeassociative.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkabstract_data_classes/btreeassociativebase.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworksuper_classes/btreeaux.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/type/btreeioblock.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/type/btreeiolinear.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/target/btreeioram.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/target/btreeiofile.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/base/btreeio.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkio/properties/btreeramioprop.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkio/properties/btreefileioprop.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkio/properties/base/btreeioprop.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkcommon/btreecommon.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkiterators/btreeiter.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkbase_class_stack/btreedefaults.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkbase_class_stack/btreebasedefaults.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkbase_class_stack/btreeif.cpp
+/relative/or/absolute/path/to/your/common/location/btree-frameworkbase_class_stack/btreebaseif.cpp
+
+3) Add the following include directories to your build
+
+/relative/or/absolute/path/to/your/common/location/btree-framework
+/relative/or/absolute/path/to/your/common/location/btree-framework/specific_data_classes
+/relative/or/absolute/path/to/your/common/location/btree-framework/io/data_layer/target
+
+4) Add the following optional build flags to your build
+
+- _DEBUG
+- BTREE_ITERATOR_REGISTRATION
+
+Please find the description of these build flags in section "2.3. build flags".
 
 
 2.2. Windows
 
-For this framework to compile, at least Visual Sudio 2013 Express or a compiler that supports the C++11 dialect is required.
-This release was tested with: Visual Sudio 2013 Express Version: 12.0.40629.00 (update 5)
+For this framework to compile, at least Visual Studio 2013 Express or a compiler that supports the C++11 dialect is required.
+This release was tested with: Visual Studio Express 2013 Version: 12.0.40629.00 (update 5)
 
 To build the b-tree regression test system:
 1. Create a new project
 2. Copy files from this release to your project location
 3. The project needs to be aware of the following include locations:
-/relative/or/absolute/path/to/your/project/location/avp_path_find
-/relative/or/absolute/path/to/your/project/location/btree_framework
-/relative/or/absolute/path/to/your/project/location/compatibility
+/relative/or/absolute/path/to/your/project/location/btree-framework
+/relative/or/absolute/path/to/your/project/location/btree-framework/specific_data_classes
+/relative/or/absolute/path/to/your/project/location/btree-framework/io/data_layer/target
 4. add the build flag "BTREE_ITERATOR_REGISTRATION" to the any build, if required (see below)
-
-To compile the b-tree framework into another project the files in the following locations are relevant:
-./src/btreetest/btree_framework
-./src/btreetest/compatibility
-
-These folders are then copied to your target or common code location.
-The additional include paths that need to be in your project settings are:
-/relative/or/absolute/path/to/your/common/or/project/location/btree_framework
 
 
 2.3. build flags
 
 BTREE_ITERATOR_REGISTRATION:
 
-If your code makes sure, that any b-tree framework iterator instance is destroyed before its respective associated constainer instance is destroyed, then the build flag BTREE_ITERATOR_REGISTRATION can be omitted, otherwise you would be facing access violations at run time. If your code doesn't make sure, iterators are destroyed before their associated container or you are in doubt, then enable the build flag BTREE_ITERATOR_REGISTRATION. Disabling this flag results in sligtly faster code.
+If your code makes sure, that any b-tree framework iterator instance is destroyed before its respective associated container instance is destroyed, then the build flag BTREE_ITERATOR_REGISTRATION can be omitted, otherwise you would be facing access violations at run time. If your code doesn't make sure, iterators are destroyed before their associated container or you are in doubt, then enable the build flag BTREE_ITERATOR_REGISTRATION. Disabling this flag results in slightly faster code.
 
 _DEBUG:
 
-If the code is compiled to generate a debug binary, then this flag ought to enabled. It switches additional code for higher level debug functionality as well as performance counter code on. Furthermore, additional safe guard assertions are enabled to sanity check input parameters on lower level methods. In short: It enables code not required by a release build.
+If the code is compiled to generate a debug binary, then this flag ought to enabled. It switches additional code for higher level debug functionality as well as performance counter code on. Furthermore, additional asserts are enabled to sanity check input parameters on lower level methods. In short: It enables code not required by a release build.
 
 
-2.4. What has to be included
+2.4. What has to be includes are required
 
-Depending on what data layer will be in use, at least one of the follwoing files needs to included:
-btreeioram.h	- contains everything required for the RAM data layer to work
-btreeiofile.h	- contains everything required for the file data layer to work
-
-The above files also include their respective data layer property classes.
-
-If an STL container interchangeable class is required for the project, then see the table below:
+If an STL compatible container class is required for the project, then see the table below:
 
 include file		btree framework container		STL container
 
@@ -143,6 +175,16 @@ btreeset.h			CBTreeSet						set
 Depending on what other container type is required, at least one of the following files needs to be included:
 btreekeysort.h	- includes ordered associative container: CBTreeKeySort
 btreearray.h	- includes array type: CBTreeArray
+
+Any of the above container types needs to know what data layer type is going to be used with it. This is set via the container's respective template parameter
+Depending on what data layer will be in use, at least one of the following files needs to included:
+
+include file		data layer type		property type				description
+
+btreeioram.h		CBTreeFileIO		CBTreeIOpropertiesFile		contains everything required for the RAM data layer to work
+btreeiofile.h		CBTreeRAMIO			CBTreeIOpropertiesRAM		contains everything required for the file data layer to work
+
+Note: The above files also include their respective data layer property classes, so that additional includes are not needed.
 
 
 3. Feedback
@@ -163,7 +205,7 @@ email: btreeframework@gmail.com
 The subject ought to tell me briefly what the email is about. For instance:
 "BUG: CBTree_classname::method_name - undefined behaviour in corner case"
 
-The keyword at the beginning as well as the follwing text allow me to quickly assess what I am dealing with.
+The keyword at the beginning as well as the following text allow me to quickly assess what I am dealing with.
 Also, the keyword allows to have filter rules in place. The subject currently is being filtered for the following keywords:
 
 BUG: anything code related that is not behaving as documented
@@ -211,4 +253,4 @@ If something has been covered by the documentation, then you will probably get a
 First of all, I am not an english native speaker and at this point you probably have already spotted a number of grammar and spelling mistakes. Those are not what I mean by "Improper english". What I mean is content like this: "Yo, c my hax yo!"
 It doesn't inspire any confidence and will just make me move on to the next email.
 Also, what I don't like is when someone writes the letter "u" instead of the word "you" or similar shortcuts. This allows for room to doubt your motivation and once I have that room it is likely that I will divert my interest to something else, like the next email. Just don't allow me to have that room...
-Shortcuts, which are within context, such as: "Ctrl+C", are fine though.
+Shortcuts or abbreviations, which are within context, such as: "Ctrl+C", are fine though.
