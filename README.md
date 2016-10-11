@@ -9,8 +9,8 @@ And finally, the project supports cmake, which is explained in the "How To Build
 ## Documentation
 
 The documentation of this project comes in two flavours:
-- [Open Document Text file (.ODT)](https://github.com/andreas-steffens/btree-framework/blob/master/doc/btree%20programmer%20guide.odt?raw=true)
-- [Portable Document Format file (.PDF)](https://github.com/andreas-steffens/btree-framework/blob/master/doc/btree%20programmer%20guide.pdf?raw=true)
+- [Open Document Text file (.ODT)](https://github.com/andreas-steffens/btree-framework-testbench/blob/master/doc/btree%20programmer%20guide.odt?raw=true)
+- [Portable Document Format file (.PDF)](https://github.com/andreas-steffens/btree-framework-testbench/blob/master/doc/btree%20programmer%20guide.pdf?raw=true)
 
 The documentation is pretty large and might be a bit overwhelming. To address that problem, please find the section "1. Where to start" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file. This section tells what sections need to be initially read in order to understand how this framework is working and supposed to be used.
 <br>
@@ -169,5 +169,4 @@ Please see [README](https://github.com/andreas-steffens/btree-framework/blob/mas
 
 Licensed under the Lesser GNU Public License, Version 3.0: [http://www.gnu.org/licenses/lgpl-3.0.txt](http://www.gnu.org/licenses/lgpl-3.0.txt)
 
-Author: Andreas Steffens
 
