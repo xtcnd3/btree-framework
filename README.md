@@ -28,7 +28,7 @@ git clone https://github.com/andreas-steffens/btree-framework
 ```
 <br>
 <br>
-If your project doesn't use cmake, then please refer to section "2.2. Windows" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file. Under linux you will have to add this project as a library or as source manually to your make files.
+If your project doesn't use cmake, then please refer to section "2.2. Windows" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file. Under linux you will have to add this project as a library or as source manually to your make files. Please read section "2.1.1. How to build using a makefile" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file, to see how to do that.
 <br>
 <br>
 If your project uses cmake, then the appropriate CMakeLists.txt(s) need(s) to be modified. By default, the directory in which the btree framework is cloned into, is called btree-framework, if you have used the above commands. Since it is also possible to have this project as a sub-module in another repository, it can be checked out to a folder with a different name. Hence, in the below description the btree framework main directory is displayed as this placeholder: `<btree-framework>`.
@@ -133,7 +133,7 @@ In order to see all build rules, please see section "2.1. Linux" of the [README]
 
 The current version of the project is: 0.05 (alpha)
 
-Please don't be discouraged by the fact that the version contains the word "alpha". What this means is that the feature set is incomplete. See below to find out what is missing:
+Please don't be discouraged by the fact that the version contains the word "alpha". What this means is that the feature set is incomplete, but what has been implemented is stable and thoroughly tested. See below to find out what is missing:
 
 - emplace ()
 - emplace&#95;hint ()
