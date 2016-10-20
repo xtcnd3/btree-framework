@@ -4,6 +4,8 @@
 The btree-framework provides a number of associative and linear containers, each being based on a btree structure. The intention is to deliver increased performance, since other implementations use linear arrays, link lists and red-black as well as binary trees. Any of the above methods develops poor performance when it comes to large data amounts, while btrees can scale quite well to that end. Furthermore, the provided containers come with an API interface compatible to existing STL containers, which enables a quick switch between container types within a project. Any btree container type can be abstracted, as oppose to their existing STL equivalents, allowing applications to create their own container type hierarchy. Also, the sorting criteria is a virtual method and not a template parameter, which makes it possible for iterators to support so called "scary assignments", as described by Bjarne Sproustrup’s paper [“Minimizing Dependencies within Generic Classes for Faster and Smaller Programs”](http://www.stroustrup.com/SCARY.pdf). For increased scalability, the size&#95;type is selected via a template parameter and unlike other implementations, is not bound to what size&#95;t is set to.
 
 And finally, the project supports cmake, which is explained in the "How To Build" section below.
+
+Note: Please understand that this is not a stand-alone project and needs to be build as a sub-module or library in a project, which employs the btree-framework. If you want to see a project where this framework is being actively used, then please go to the [btree-frame<b>-testbench</b> project](https://github.com/andreas-steffens/btree-framework-testbench) and follow the how-to-build instructions there.
 <br>
 <br>
 ## Documentation
@@ -95,7 +97,7 @@ Via cygwin command execute the following commands:
 ```
 cd .../to/your/projects/location
 git clone --recursive https://github.com/andreas-steffens/btree-framework-testbench
-cd btree-framework/src/btreetest
+cd btree-framework-testbench/src/btreetest
 ```
 
 Here you can find a number of batch files called msvce201x.x86(&#95;64).bat. These batch files can be executed via command line or the windows explorer. Each of those batch files creates a directory named "cmake" and generates all cmake files as well as the respective visual studio express solution files, set up for the selected platform and visual studio express version, in there. Then it tries to open whatever visual studio express application can be found under the registry key HKEY&#95;CLASSES&#95;ROOT\Applications\WDExpress.exe\shell\open\command. Please see below what versions of visual studio express and target platforms are currently supported:
@@ -119,7 +121,7 @@ Via command execute the following commands:
 ```
 cd .../to/your/projects/location
 git clone --recursive https://github.com/andreas-steffens/btree-framework-testbench
-cd btree-framework/src/btreetest
+cd btree-framework-testbench/src/btreetest
 make debug        # this builds the binary with debug settings
 make regression   # this builds the binary with debug settings and runs all regression tests
 ```
