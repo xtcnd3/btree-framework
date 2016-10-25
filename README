@@ -26,7 +26,12 @@ Contents
 
 1. Where to start
 
-The folder ./doc holds two files containing the same documentation. One file is displaying the documentation as an Open Office Text file (.odt), while the other is a Portable Document Format file (.pdf). That documentation explains this b-tree framework in detail, but only a sub set of sections is required to understand to get started. See below:
+In order to download the documentation, you need to check out the btree framework test bench using the following command lines:
+
+cd .../to/your/projects/location
+git clone --recursive https://github.com/andreas-steffens/btree-framework-testbench
+
+The folder ./btree-framework-testbench/doc holds two files containing the same documentation. One file is displaying the documentation as an Open Office Text file (.odt), while the other is a Portable Document Format file (.pdf). That documentation explains this b-tree framework in detail, but only a sub set of sections is required to be understood to get started. See below:
 
 Quick Start Guide
 Programmer Guide
@@ -48,8 +53,6 @@ Programmer Guide
 				extract_key () addendum
 
 
-
-
 2. How to build this framework under linux or windows
 
 
@@ -62,7 +65,7 @@ To build the b-tree test bench execute the following commands:
 
 cd .../to/your/projects/location
 git clone --recursive https://github.com/andreas-steffens/btree-framework-testbench
-cd btree-framework/src/btreetest
+cd btree-framework-testbench/src/btreetest
 make debug
 
 List of make file rules:
@@ -85,6 +88,7 @@ clean_failed_validation_tests	- cleans all validation tests that returned with a
 clean_tests						- runs clean_regression_tests clean_coverage_tests clean_validation_tests
 clean_failed_tests				- runs clean_failed_regression_tests clean_failed_coverage_tests clean_failed_validation_tests
 
+
 2.1.1. How to build using a makefile
 
 In order to build the btree framework without cmake using a makefile follow the step below:
@@ -93,33 +97,33 @@ In order to build the btree framework without cmake using a makefile follow the 
 
 cd /relative/or/absolute/path/to/your/common/location/
 git clone https://github.com/andreas-steffens/btree-framework
-cd btree-framework/src/btreetest
+cd btree-framework-testbench/src/btreetest
 
 2) Add the following files to your build
 
-/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreemap.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreearray.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreekeysort.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreemultiset.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreeset.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkspecific_data_classes/btreemultimap.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkabstract_data_classes/btreeassociative.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkabstract_data_classes/btreeassociativebase.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworksuper_classes/btreeaux.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/type/btreeioblock.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/type/btreeiolinear.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/target/btreeioram.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/target/btreeiofile.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkio/data_layer/base/btreeio.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkio/properties/btreeramioprop.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkio/properties/btreefileioprop.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkio/properties/base/btreeioprop.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkcommon/btreecommon.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkiterators/btreeiter.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkbase_class_stack/btreedefaults.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkbase_class_stack/btreebasedefaults.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkbase_class_stack/btreeif.cpp
-/relative/or/absolute/path/to/your/common/location/btree-frameworkbase_class_stack/btreebaseif.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/specific_data_classes/btreemap.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/specific_data_classes/btreearray.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/specific_data_classes/btreekeysort.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/specific_data_classes/btreemultiset.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/specific_data_classes/btreeset.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/specific_data_classes/btreemultimap.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/abstract_data_classes/btreeassociative.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/abstract_data_classes/btreeassociativebase.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/super_classes/btreeaux.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/io/data_layer/type/btreeioblock.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/io/data_layer/type/btreeiolinear.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/io/data_layer/target/btreeioram.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/io/data_layer/target/btreeiofile.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/io/data_layer/base/btreeio.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/io/properties/btreeramioprop.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/io/properties/btreefileioprop.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/io/properties/base/btreeioprop.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/common/btreecommon.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/iterators/btreeiter.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/base_class_stack/btreedefaults.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/base_class_stack/btreebasedefaults.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/base_class_stack/btreeif.cpp
+/relative/or/absolute/path/to/your/common/location/btree-framework/base_class_stack/btreebaseif.cpp
 
 3) Add the following include directories to your build
 
