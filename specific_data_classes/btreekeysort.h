@@ -2,7 +2,7 @@
 **
 ** file:	btreekeysort.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -62,7 +62,7 @@ public:
 
 	// construction
 						CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
+													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
 
 						CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>
 													(CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rBT, bool bAssign = true);

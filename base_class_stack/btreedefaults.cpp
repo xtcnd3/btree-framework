@@ -2,7 +2,7 @@
 **
 ** file:	btreedefaults.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -17,9 +17,8 @@
 #include "btreedefaults.h"
 
 template<class _t_data, class _t_sizetype>
-CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults (const bayerTreeCacheDescription_t *psCacheDescription)
+CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults ()
 	:	CBTreeIf<_t_data, _t_sizetype> ()
-	,	m_sCacheDescription (*psCacheDescription)
 {
 #if defined (BTREE_ITERATOR_REGISTRATION)
 	
@@ -28,10 +27,10 @@ CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults (const bayerTreeCacheDescri
 //	m_psRIterRegister = new typename ::std::set<reverse_iterator *> ();
 //	m_psCRIterRegister = new typename ::std::set<const_reverse_iterator *> ();
 
-	BTREE_ASSERT (m_psIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (bayerTreeCacheDescription_t *): insufficient memory! (m_psIterRegister)");
-	BTREE_ASSERT (m_psCIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (bayerTreeCacheDescription_t *): insufficient memory! (m_psCIterRegister)");
-//	BTREE_ASSERT (m_psRIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (bayerTreeCacheDescription_t *): insufficient memory! (m_psRIterRegister)");
-//	BTREE_ASSERT (m_psCRIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (bayerTreeCacheDescription_t *): insufficient memory! (m_psCRIterRegister)");
+	BTREE_ASSERT (m_psIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (): insufficient memory! (m_psIterRegister)");
+	BTREE_ASSERT (m_psCIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (): insufficient memory! (m_psCIterRegister)");
+//	BTREE_ASSERT (m_psRIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (): insufficient memory! (m_psRIterRegister)");
+//	BTREE_ASSERT (m_psCRIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (): insufficient memory! (m_psCRIterRegister)");
 
 #endif
 
@@ -66,8 +65,6 @@ CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults (const CBTreeDefaults<_t_da
 //	BTREE_ASSERT (m_psCRIterRegister != NULL, "CBTreeDefaults<>::CBTreeDefaults (const CBTreeDefaults<_t_data, _t_sizetype> &): insufficient memory! (m_psCRIterRegister)");
 
 #endif
-
-	m_sCacheDescription = rBT.m_sCacheDescription;
 
 #if defined (USE_PERFORMANCE_COUNTERS)
 	m_nHitCtr = 0;
@@ -427,8 +424,6 @@ void CBTreeDefaults<_t_data, _t_sizetype>::_swap
 		CBTreeDefaults<_t_data, _t_sizetype> &rBT
 	)
 {
-	fast_swap (this->m_sCacheDescription, rBT.m_sCacheDescription);
-
 #if defined (USE_PERFORMANCE_COUNTERS)
 
 	fast_swap (this->m_nHitCtr, rBT.m_nHitCtr);

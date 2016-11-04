@@ -2,7 +2,7 @@
 **
 ** file:	btreefileioprop.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -45,7 +45,8 @@ public:
 					CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
 															(
 																const char *pszPathName, 
-																address_type nAddrSpaceSoftLimit = BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT
+																address_type nAddrSpaceSoftLimit = BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT, 
+																address_type nBlockSize = 4096
 															);
 
 					CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
@@ -54,14 +55,17 @@ public:
 					~CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
 															();
 
-	const char		*get_pathname							();
+	const char		*get_pathname							() const;
 	
-	address_type	get_address_space_soft_limit			();
+	address_type	get_address_space_soft_limit			() const;
+
+	address_type	get_blocksize							() const;
 
 protected:
 
 	::std::string	*m_pStrPathNames;
 	address_type	m_nAddrSpaceSoftLimit;
+	address_type	m_nBlockSize;
 };
 
 #endif // BTREEIOFILEPROP_H

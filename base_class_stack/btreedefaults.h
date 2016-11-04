@@ -2,7 +2,7 @@
 **
 ** file:	btreedefaults.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -42,7 +42,7 @@ public:
 
 	// construction
 									CBTreeDefaults<_t_data, _t_sizetype>
-															(const bayerTreeCacheDescription_t *psCacheDescription);
+															();
 
 									CBTreeDefaults<_t_data, _t_sizetype>
 															(const CBTreeDefaults<_t_data, _t_sizetype> &rBT);
@@ -84,9 +84,6 @@ protected:
 //	void							unregister_iterator		(const_reverse_iterator *pCRIter);
 
 	void							_swap					(CBTreeDefaults &rBT);
-
-	// properties
-	bayerTreeCacheDescription_t								m_sCacheDescription;
 
 #if defined (USE_PERFORMANCE_COUNTERS)
 

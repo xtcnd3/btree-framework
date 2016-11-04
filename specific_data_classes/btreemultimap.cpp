@@ -2,7 +2,7 @@
 **
 ** file:	btreemultimap.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -19,11 +19,10 @@
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMultiMap
-	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
+	(_t_datalayerproperties &rDataLayerProperties, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
 	:	CBTreeAssociativeBase<typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties>
 		(
 			rDataLayerProperties, 
-			psCacheDescription, 
 			nNodeSize
 		)
 {
@@ -62,34 +61,12 @@ void CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::swap (typen
 	}
 }
 
-//template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
-//typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_compare
-//	CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_comp () const
-//{
-//	key_compare		sRslt;
-//
-//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-//
-//	return (sRslt);
-//}
-//
-//template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
-//typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_compare
-//	CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_comp () const
-//{
-//	value_compare		sRslt;
-//
-//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-//
-//	return (sRslt);
-//}
-
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::extract_key (typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *pKey, const typename CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type &rData) const
 {
-	*pKey = rData.first;
+	pKey;
 
-	return (pKey);
+	return ((typename ::std::remove_const<_t_keytype>::type *) &(rData.first));
 }
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>

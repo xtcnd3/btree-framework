@@ -2,7 +2,7 @@
 **
 ** file:	btreecommon.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **

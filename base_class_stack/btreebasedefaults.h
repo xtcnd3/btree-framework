@@ -2,7 +2,7 @@
 **
 ** file:	btreebasedefaults.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -58,6 +58,11 @@ public:
 
 	typedef	typename CBTreeBaseIf_t::CBTreeDefaults_t											CBTreeDefaults_t;
 
+	typedef typename CBTreeBaseIf_t::iterator													iterator;
+	typedef typename CBTreeBaseIf_t::const_iterator												const_iterator;
+	typedef typename CBTreeBaseIf_t::reverse_iterator											reverse_iterator;
+	typedef typename CBTreeBaseIf_t::const_reverse_iterator										const_reverse_iterator;
+	
 #define	BAYERTREE_NODE_MAINTAINANCE_ALLOCATION			0x00000001UL
 
 protected:
@@ -90,7 +95,7 @@ public:
 
 	// construction
 						CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
+													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
 
 						CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>
 													(const CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &rBT);
@@ -131,7 +136,7 @@ protected:
 
 	// complex primitives
 	node_iter_type		create_node					(node_iter_type nParent);
-	size_type			add_to_node					(_ti_pos sPos, const value_type &rData, node_iter_type nNode, uint32_t nDepth, node_iter_type &rnRsltNode, sub_node_iter_type &rnRsltSub, size_type *pnPos = NULL);
+	size_type			add_to_node					(_ti_pos sPos, node_iter_type nNode, uint32_t nDepth, node_iter_type &rnRsltNode, sub_node_iter_type &rnRsltSub, size_type *pnPos = NULL);
 	node_iter_type		split_node					(node_iter_type nNode);
 	size_type			remove_from_node			(_ti_pos sPos, node_iter_type nNode, uint32_t nDepth);
 	node_iter_type		merge_node					(node_iter_type nNode, sub_node_iter_type nSub);
@@ -140,8 +145,10 @@ protected:
 
 	size_type			serialize					(const _ti_pos nFrom, const size_type nLen, value_type *pData, const bool bReadOpr = true) const;
 
+	bool				insert_via_iterator			(const_iterator &rCIterPos, node_iter_type &rNode, sub_node_iter_type &rSubPos);
+
 	// primitives
-	sub_node_iter_type	insert_data_into_node		(node_iter_type nNode, sub_node_iter_type nSubPos, const value_type &rData, node_iter_type nSubNode = (node_iter_type) ~0x0, int triMod = -1);
+	void				insert_data_into_node		(node_iter_type &rnNode, sub_node_iter_type &rnSubPos, node_iter_type nSubNode = (node_iter_type) ~0x0, int triMod = -1);
 
 	void				remove_data_from_leaf		(node_iter_type nNode, sub_node_iter_type nSub);
 	void				remove_data_from_node		(node_iter_type nNode, sub_node_iter_type nSub, sub_node_iter_type nSubNode);
@@ -210,6 +217,7 @@ protected:
 	void				attache_traced_node			(node_iter_type nNode);
 	void				detache_traced_node			();
 
+	// heuristic
 	float				get_average_access_depth	();
 
 	// iterator interface
@@ -222,6 +230,9 @@ protected:
 	value_type			*get_iter_data				(void *pState) const;
 	void				set_iter_data				(void *pState, const value_type &rData);
 
+	bool				is_simple_evaluation_possible (void *pState, size_type nPos) const;
+
+	// debug aid
 	bool				show_tree					(std::ofstream &ofs, node_iter_type nNode, node_iter_type nParent, char *pAlloc) const;
 	void				shownodelist				(std::ofstream &ofs, char *pAlloc) const;
 

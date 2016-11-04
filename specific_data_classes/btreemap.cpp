@@ -2,7 +2,7 @@
 **
 ** file:	btreemap.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -19,11 +19,10 @@
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap
-	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
+	(_t_datalayerproperties &rDataLayerProperties, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
 	:	CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties>
 		(
 			rDataLayerProperties, 
-			psCacheDescription, 
 			nNodeSize
 		)
 {
@@ -83,6 +82,52 @@ typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::iterator
 }
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::iterator
+	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::insert (typename CBTreeMap_t::const_iterator sCIterHint, const typename CBTreeMap_t::value_type &rData)
+{
+	bool				bFallBack = true;
+	node_iter_type		nNode;
+	sub_node_iter_type	nSubPos;
+
+	if (sCIterHint.is_evaluated ())
+	{
+		iterator_state_t	*psIterState = (iterator_state_t *) sCIterHint.get_iterator_state ();
+
+		if (this->is_leaf (psIterState->nNode))
+		{
+			position_t			sPos;
+
+			sPos.nInstance = ~0;
+			sPos.pKey = this->extract_key (this->m_pAddToNodeKey, rData);
+
+			nSubPos = this->find_next_sub_pos (psIterState->nNode, sPos);
+
+			if ((nSubPos != 0) && (nSubPos != this->get_data_count (psIterState->nNode)))
+			{
+				size_type		nDiff = size_type (nSubPos - psIterState->nSubPos);
+
+				::std::advance (sCIterHint, nDiff);
+
+				bFallBack = this->insert_via_iterator (sCIterHint, nNode, nSubPos);
+			}
+		}
+	}
+
+	if (bFallBack)
+	{
+		return (this->insert (rData));
+	}
+	else
+	{
+		value_type	*psData = this->get_data (nNode, nSubPos);
+
+		*psData = ::std::move (rData);
+
+		return (iterator (sCIterHint));
+	}
+}
+
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 void CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::swap (typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeAssociativeIf_t &rContainerIf)
 {
 	CBTreeMap_t		&rContainer = dynamic_cast<CBTreeMap_t &> (rContainerIf);
@@ -99,34 +144,12 @@ void CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::swap (typename C
 	}
 }
 
-//template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
-//typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_compare
-//	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_comp () const
-//{
-//	key_compare		sRslt;
-//
-//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-//
-//	return (sRslt);
-//}
-//
-//template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
-//typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_compare
-//	CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_comp () const
-//{
-//	value_compare		sRslt;
-//
-//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-//
-//	return (sRslt);
-//}
-
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::extract_key (typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::key_type *pKey, const typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type &rData) const
 {
-	*pKey = rData.first;
+	pKey;
 
-	return (pKey);
+	return ((typename ::std::remove_const<_t_keytype>::type *) &(rData.first));
 }
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>

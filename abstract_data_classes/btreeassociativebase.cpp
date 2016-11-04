@@ -2,7 +2,7 @@
 **
 ** file:	btreeassociativebase.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -19,11 +19,10 @@
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociativeBase
-	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
+	(_t_datalayerproperties &rDataLayerProperties, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
 	:	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
 		(
 			rDataLayerProperties, 
-			psCacheDescription, 
 			nNodeSize
 		)
 {

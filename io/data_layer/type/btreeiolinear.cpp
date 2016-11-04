@@ -2,7 +2,7 @@
 **
 ** file:	btreeiolinear.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -19,11 +19,10 @@
 template<class _t_datalayerproperties>
 CBTreeLinearIO<_t_datalayerproperties>::CBTreeLinearIO
 (
-	typename CBTreeLinearIO<_t_datalayerproperties>::address_type nBlockSize, 
 	uint32_t nNumDataPools, 
 	CBTreeIOperBlockPoolDesc_t *psDataPools
 )
-	:	CBTreeIO<_t_datalayerproperties> (nBlockSize, nNumDataPools, psDataPools)
+	:	CBTreeIO<_t_datalayerproperties> (nNumDataPools, psDataPools)
 	,	m_ppsPools (NULL)
 {
 	m_ppsPools = new uint8_t * [this->m_nNumDataPools];

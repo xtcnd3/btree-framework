@@ -2,12 +2,12 @@
 **
 ** file:	btreeassociative.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
 ** This file contains code for the b-tree framework's
-** key sort interface class.
+** abstract associative container interface class.
 **
 ************************************************************/
 
@@ -20,20 +20,18 @@ template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
-		const bayerTreeCacheDescription_t *psCacheDescription, 
 		typename _t_datalayerproperties::sub_node_iter_type nNodeSize
 	)
 	:	CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties>
 	(
 		rDataLayerProperties, 
-		psCacheDescription, 
 		nNodeSize
 	)
 {
 #if defined (_DEBUG)
 	m_pbShortLiveKeyInUse = new bool (false);
 
-	BTREE_ASSERT (m_pbShortLiveKeyInUse != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type): insufficient memory!");
+	BTREE_ASSERT (m_pbShortLiveKeyInUse != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (_t_datalayerproperties &, sub_node_iter_type): insufficient memory!");
 #endif
 
 	m_pRemoveKey = NULL;
@@ -45,13 +43,13 @@ CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative
 
 	m_ppShortLiveKey = new _t_key *;
 
-	BTREE_ASSERT (m_ppShortLiveKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type) (m_ppShortLiveKey): insufficient memory!");
+	BTREE_ASSERT (m_ppShortLiveKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (_t_datalayerproperties &, sub_node_iter_type) (m_ppShortLiveKey): insufficient memory!");
 
 	*m_ppShortLiveKey = NULL;
 
 	m_ppTempFindFirstKeyKey = new _t_key *;
 
-	BTREE_ASSERT (m_ppTempFindFirstKeyKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type) (m_ppTempFindFirstKeyKey): insufficient memory!");
+	BTREE_ASSERT (m_ppTempFindFirstKeyKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (_t_datalayerproperties &, sub_node_iter_type) (m_ppTempFindFirstKeyKey): insufficient memory!");
 
 	*m_ppTempFindFirstKeyKey = NULL;
 	
@@ -173,13 +171,136 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 
 	sIterState.nAssociatedPos = 0;
 
-	nRetval = this->add_to_node (sPos, rData, this->m_nRootNode, 0, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos);
+	// allocate space for one more data entry
+	nRetval = this->add_to_node (sPos, this->m_nRootNode, 0, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos);
 
 	BTREE_ASSERT (nRetval == 1, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert (const _t_data &): Failed to create new entry!");
 
+	// insert data by constructing it in place
+	value_type	*pData = this->get_data (sIterState.nNode, sIterState.nSubPos);
+
+	new (pData) value_type (rData);
+
+	// create iterator pointing at location of new entry to be returned
 	iterator		sRetval (this, sIterState.nAssociatedPos, &sIterState, this->get_time_stamp (), false);
 
 	return (sRetval);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
+	(
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator sCIterHint, 
+		const typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::value_type &rData
+	)
+{
+	iterator_state_t			sIterState;
+	iterator_state_t			*psIterState;
+	position_t					sPos;
+	bool						bFallBack = true;
+	sub_node_iter_type			nSubPos;
+	
+	this->create_root ();
+
+	// convert object to a position structure for internal use
+	//
+	// nInstance is left to any (~0), since it will be ignored but 
+	// has to be set to not turn up on any valgrind report and this
+	// object will be appended to any set of entries that share
+	// the same key
+	sPos.nInstance = ~0;
+	sPos.pKey = extract_key (m_pAddToNodeKey, rData);
+
+	// if hint iterator is referring to a valid location ...
+	if (sCIterHint.is_evaluated ())
+	{
+		psIterState = (iterator_state_t *) sCIterHint.get_iterator_state ();
+
+		// ... and the operation is going to take place on a leaf node ...
+		if (this->is_leaf (psIterState->nNode))
+		{
+			nSubPos = this->find_next_sub_pos (psIterState->nNode, sPos);
+
+			// ... and it was possible to confirm the hint was correct by making
+			// sure the operation will take place within the node in question
+			if ((nSubPos != 0) && (nSubPos != this->get_data_count (psIterState->nNode)))
+			{
+				// ... then attempt to accelerate the allocation operation
+				size_type		nDiff = size_type (nSubPos - psIterState->nSubPos);
+
+				::std::advance (sCIterHint, nDiff);
+
+				bFallBack = this->insert_via_iterator (sCIterHint, sIterState.nNode, sIterState.nSubPos);
+			}
+		}
+	}
+
+	// if the accelerated allocation failed...
+	if (bFallBack)
+	{
+		// ... then use the regular allocation
+		sIterState.nAssociatedPos = 0;
+
+		size_type	nRetval = this->add_to_node (sPos, this->m_nRootNode, 0, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos);
+
+		BTREE_ASSERT (nRetval == 1, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace_hint (const_iterator, _t_va_args && ...): Failed to create new entry!");
+	}
+	else
+	{
+		// otherwise update the external pointer of the iterator to be returned
+		sIterState.nAssociatedPos = sCIterHint.get_pos ();
+	}
+
+	// insert data by constructing it in place
+	value_type	*pData = this->get_data (sIterState.nNode, sIterState.nSubPos);
+
+	*pData = rData;
+
+	// create iterator pointing at location of new entry to be returned
+	iterator		sRetval (this, sIterState.nAssociatedPos, &sIterState, this->get_time_stamp (), false);
+
+	return (sRetval);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
+	(
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator sItFirst, 
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator sItLast
+	)
+{
+	this->template insert <iterator> (sItFirst, sItLast);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
+	(
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator sItFirst, 
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator sItLast
+	)
+{
+	this->template insert <const_iterator> (sItFirst, sItLast);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
+	(
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::reverse_iterator sItFirst, 
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::reverse_iterator sItLast
+	)
+{
+	this->template insert <reverse_iterator> (sItFirst, sItLast);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
+	(
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_reverse_iterator sItFirst, 
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_reverse_iterator sItLast
+	)
+{
+	this->template insert <const_reverse_iterator> (sItFirst, sItLast);
 }
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
@@ -196,67 +317,84 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert (_t_iter
 		return;
 	}
 
+	// if the input iterators are referring to this container ...
 	if (this->test_self_reference_of_iterator_to_this (sItFirst, sItLast, bSelfReverse, &psItFirst, &psItLast))
 	{
+		// ... then switch to self reference mode
+
+		// by, in reverse order, copying data block by block from this container to a temporary container, to
+		// then insert those blocks again 
 		const_iterator						sIt = (const_iterator) (*psItLast);
 		const_iterator						sItLower;
 		const_iterator						sItUpper;
 		value_type							sData;
 		key_type							sKey;
-		key_type							sPrevKey;
-		bool								bBounce;
+		key_type							*psKey;
 		key_type							sFirstKey;
 		key_type							sLastKey;
+		key_type							*psFirstKey;
+		key_type							*psLastKey;
 		typename ::std::list<_t_data>		sList;
 
+		// determine key of initial block
 		sData = *((const_iterator) (*psItFirst));
 
-		this->extract_key (&sFirstKey, sData);
+		psFirstKey = this->extract_key (&sFirstKey, sData);
 
+		// determine key of final block
 		(*psItLast)--;
 
 		sData = *((const_iterator) (*psItLast));
 
-		this->extract_key (&sLastKey, sData);
+		psLastKey = this->extract_key (&sLastKey, sData);
 
 		(*psItLast)++;
 
+		// in reverse order ...
 		while (sIt != ((const_iterator) (*psItFirst)))
 		{
 			sIt--;
 
+			// determine the key value of the current block
 			sData = *sIt;
 
-			this->extract_key (&sKey, sData);
+			psKey = this->extract_key (&sKey, sData);
 
+			// deteremine the range of the current block
 			sItLower = this->lower_bound (sKey);
 			sItUpper = this->upper_bound (sKey);
 
-			if (this->comp (sKey, sFirstKey) == 0)
+			// if it is the initial block ...
+			if (this->comp (*psKey, *psFirstKey) == 0)
 			{
+				// ... then use the first position given by the transfer parameter instead of the determined block
 				sItLower = ((const_iterator) (*psItFirst));
 			}
 
-			if (this->comp (sKey, sLastKey) == 0)
+			// if it is the final block ...
+			if (this->comp (*psKey, *psLastKey) == 0)
 			{
+				// ... then use the last position given by the transfer parameter instead of the determined block
 				sItUpper = ((const_iterator) (*psItLast));
 			}
 
+			// clear temporary buffer
 			sList.clear ();
 
+			// insert block into temporary buffer
 			sList.insert (sList.begin (), sItLower, sItUpper);
 
+			// re-insert data into self referenced container
 			CBTreeAssociative_t::insert (sList.cbegin (), sList.cend ());
 
-			this->get_prev_key (sKey, sPrevKey, bBounce);
-
-			if (bBounce)
+			// if the end has been reached prematurely ...
+			if (sItLower == ((const_iterator) (*psItFirst)))
 			{
+				// ... then end transfer
 				break;
 			}
 
-			sKey = sPrevKey;
-
+			// go to next block
 			sIt = sItLower;
 		}
 
@@ -265,6 +403,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert (_t_iter
 	}
 	else
 	{
+		// otherwise transfer data one by one
 #if defined (_DEBUG)
 
 		uint32_t	nDebug = 0;
@@ -290,6 +429,144 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert (_t_iter
 #endif
 		}
 	}
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace
+	(
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::value_type &&rData
+	)
+{
+	// method provides the actual code for the virtual emplace (value_type &&) of CBTreeAssociativeIf
+	return (this->template emplace<value_type &&> (::std::forward<value_type> (rData)));
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace_hint
+	(
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator sCIterHint, 
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::value_type &&rData
+	)
+{
+	// method provides the actual code for the virtual emplace_hint (const_iterator, value_type &&) of CBTreeAssociativeIf
+	return (this->template emplace_hint<value_type &&> (sCIterHint, ::std::forward<value_type> (rData)));
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+template<class ..._t_va_args>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace (_t_va_args && ... rrArgs)
+{
+	size_type					nRetval;
+	iterator_state_t			sIterState;
+	position_t					sPos;
+	value_type					*psInput = new value_type (::std::forward<_t_va_args> (rrArgs) ...);
+	
+	this->create_root ();
+
+	// convert object to a position structure for internal use
+	//
+	// nInstance is left to any (~0), since it will be ignored but 
+	// has to be set to not turn up on any valgrind report and this
+	// object will be appended to any set of entries that share
+	// the same key
+	sPos.nInstance = ~0;
+	sPos.pKey = extract_key (m_pAddToNodeKey, *psInput);
+
+	sIterState.nAssociatedPos = 0;
+
+	// allocate space for one more entry
+	nRetval = this->add_to_node (sPos, this->m_nRootNode, 0, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos);
+
+	BTREE_ASSERT (nRetval == 1, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace (_t_va_args && ...): Failed to create new entry!");
+
+	// insert data by moving it in place
+	value_type	*pData = this->get_data (sIterState.nNode, sIterState.nSubPos);
+
+	*pData = ::std::move (*psInput);
+
+	delete psInput;
+
+	// create iterator pointing at location of new entry to be returned
+	iterator		sRetval (this, sIterState.nAssociatedPos, &sIterState, this->get_time_stamp (), false);
+
+	return (sRetval);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+template<class ..._t_va_args>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace_hint
+	(
+		typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator sCIterHint, 
+		_t_va_args && ... rrArgs
+	)
+{
+	iterator_state_t			sIterState;
+	position_t					sPos;
+	value_type					*psInput = new value_type (::std::forward<_t_va_args> (rrArgs) ...);
+	bool						bFallBack = true;
+	sub_node_iter_type			nSubPos;
+	
+	this->create_root ();
+
+	// convert object to a position structure for internal use
+	//
+	// nInstance is left to any (~0), since it will be ignored but 
+	// has to be set to not turn up on any valgrind report and this
+	// object will be appended to any set of entries that share
+	// the same key
+	sPos.nInstance = ~0;
+	sPos.pKey = extract_key (m_pAddToNodeKey, *psInput);
+
+	// if hint iterator is referring to a valid location ...
+	if (sCIterHint.is_evaluated ())
+	{
+		iterator_state_t		*psIterState = (iterator_state_t *) sCIterHint.get_iterator_state ();
+
+		// ... and the operation is going to take place on a leaf node ...
+		if (this->is_leaf (psIterState->nNode))
+		{
+			nSubPos = this->find_next_sub_pos (psIterState->nNode, sPos);
+
+			// ... and it was possible to confirm the hint was correct by making
+			// sure the operation will take place within the node in question
+			if ((nSubPos != 0) && (nSubPos != this->get_data_count (psIterState->nNode)))
+			{
+				size_type		nDiff = size_type (nSubPos - psIterState->nSubPos);
+
+				::std::advance (sCIterHint, nDiff);
+
+				// ... then attempt to accelerate the allocation operation
+				bFallBack = this->insert_via_iterator (sCIterHint, sIterState.nNode, sIterState.nSubPos);
+
+				sIterState.nAssociatedPos = psIterState->nAssociatedPos;
+			}
+		}
+	}
+
+	// if the accelerated allocation failed...
+	if (bFallBack)
+	{
+		// ... then use the regular allocation
+		size_type	nRetval = this->add_to_node (sPos, this->m_nRootNode, 0, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos);
+
+		BTREE_ASSERT (nRetval == 1, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace_hint (const_iterator, _t_va_args && ...): Failed to create new entry!");
+	}
+
+	// insert data by moving it in place
+	value_type	*pData = this->get_data (sIterState.nNode, sIterState.nSubPos);
+
+	*pData = ::std::move (*psInput);
+
+	delete psInput;
+
+	// create iterator pointing at location of new entry to be returned
+	iterator		sRetval (this, sIterState.nAssociatedPos, &sIterState, this->get_time_stamp (), false);
+
+	return (sRetval);
 }
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
@@ -357,8 +634,10 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	difference_type		nDiff = ::std::distance (sCIterFirst, sCIterLast);
 	difference_type		i;
 
+	// remove nDiff entries one by one always from the first position
 	for (i = 0; i < nDiff; i++)
 	{
+		// which allows to use the accelarated remove method, since the iterator in use is almost always valid
 		this->erase_via_reference (sCIterFirst);
 	}
 
@@ -374,12 +653,15 @@ CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find
 {
 	iterator_state_t		sIterState;
 	
+	// if key has been found ...
 	if (CBTreeAssociative::_find (rKey, sIterState.nNode, sIterState.nSubPos, sIterState.nAssociatedPos))
 	{
+		// ... then return iterator referring to initial location
 		return (iterator (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false));
 	}
 	else
 	{
+		// otherwise return state of failure
 		return (this->end ());
 	}
 }
@@ -393,12 +675,15 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_itera
 {
 	iterator_state_t		sIterState;
 	
+	// if key has been found ...
 	if (CBTreeAssociative::_find (rKey, sIterState.nNode, sIterState.nSubPos, sIterState.nAssociatedPos))
 	{
+		// ... then return iterator referring to initial location
 		return (const_iterator (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false));
 	}
 	else
 	{
+		// otherwise return state of failure
 		return (this->cend ());
 	}
 }
@@ -440,12 +725,15 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 {
 	iterator_state_t		sIterState;
 	
+	// if key in question is the last key ...
 	if (CBTreeAssociative_t::_upper_bound (rKey, sIterState.nNode, sIterState.nSubPos, sIterState.nAssociatedPos))
 	{
+		// ... then return iterator equivalent to end ()
 		return (iterator (this, sIterState.nAssociatedPos, false));
 	}
 	else
 	{
+		// otherwise generate iterator referring to next key
 		return (iterator (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false));
 	}
 }
@@ -459,12 +747,15 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_itera
 {
 	iterator_state_t		sIterState;
 	
+	// if key in question is the last key ...
 	if (CBTreeAssociative_t::_upper_bound (rKey, sIterState.nNode, sIterState.nSubPos, sIterState.nAssociatedPos))
 	{
+		// ... then return iterator equivalent to end ()
 		return (const_iterator (this, sIterState.nAssociatedPos, false));
 	}
 	else
 	{
+		// otherwise generate iterator referring to next key
 		return (const_iterator (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false));
 	}
 }
@@ -488,6 +779,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_next_key (c
 {
 	node_iter_type					nNode, nNextNode;
 	sub_node_iter_type				nSub, nNextSub;
+	key_type						*psNextKey;
 	
 	bBounce = false;
 	
@@ -502,37 +794,53 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_next_key (c
 	
 	nNode = this->m_nRootNode;
 	
+	// trace into tree structure until entry of interest has been found
 	while (1)
 	{
+		// determine sub-position of current node that has the next greater key value
 		nSub = this->get_firstSubPos (nNode, rKey, true);
 		
+		// if sub-position is not referring to the last sub-node of the current node ...
 		if (nSub < this->get_data_count (nNode))
 		{
-			this->extract_key (&rNextKey, nNode, nSub);
+			// ... then use sub-position directly
+			psNextKey = this->extract_key (&rNextKey, nNode, nSub);
 
+			// if the current node is a leaf node ...
 			if (this->is_leaf (nNode))
 			{
-				while (this->comp (rKey, rNextKey) == 0)
+				// ... then walk through the node until an entry containing a different key has been discovered
+				while (this->comp (rKey, *psNextKey) == 0)
 				{
+					// go to next data entry
 					this->move_next (nNode, nSub, nNextNode, nNextSub, bBounce);
 
+					// if end of container has been reached ...
 					if (bBounce)
 					{
+						// ... then terminate operation
 						return;
 					}
 
-					this->extract_key (&rNextKey, nNextNode, nNextSub);
+					// determine key of next entry
+					psNextKey = this->extract_key (&rNextKey, nNextNode, nNextSub);
 
+					// update potential return value
 					nNode = nNextNode;
 					nSub = nNextSub;
 				}
 
+				// tracing further from a leaf node is not possible - terminate operation
 				break;
 			}
 			else
 			{
-				if (this->comp (rKey, rNextKey) == 0)
+				// otherwise trace further into tree structure
+
+				// if a matching key has been found within an inner node
+				if (this->comp (rKey, *psNextKey) == 0)
 				{
+					// determine following leave node position
 					this->move_next (nNode, nSub, nNextNode, nNextSub, bBounce);
 
 					if (bBounce)
@@ -540,42 +848,51 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_next_key (c
 						return;
 					}
 
+					// update return value
 					nNode = nNextNode;
 					nSub = nNextSub;
 				}
 				else
 				{
+					//  otherwise trace into next node
 					nNode = *(this->get_sub_node (nNode, nSub));
 				}
 			}
 		}
 		else
 		{
+			// otherwise trace into last leave node
 			nSub--;
 
-			this->move_next (nNode, nSub , nNextNode, nNextSub, bBounce);
+			this->move_next (nNode, nSub, nNextNode, nNextSub, bBounce);
 
 			if (bBounce)
 			{
 				return;
 			}
 
-			this->extract_key (&rNextKey, nNode, nSub);
+			// determine if the next key is within the current inner node or on the least leave node
+			psNextKey = this->extract_key (&rNextKey, nNode, nSub);
 
 			nNode = nNextNode;
 			nSub = nNextSub;
 
-			if (this->comp (rKey, rNextKey) > 0)
+			// if the inner node key is greater than the key in question ...
+			if (this->comp (rKey, *psNextKey) > 0)
 			{
-				this->extract_key (&rNextKey, nNextNode, nNextSub);
+				psNextKey = this->extract_key (&rNextKey, nNextNode, nNextSub);
 
-				if (this->comp (rKey, rNextKey) < 0)
+				// ... and the first key on the leave node is smaller than the key in question
+				if (this->comp (rKey, *psNextKey) < 0)
 				{
-					return;
+					// ... then the initial key on the leave node is the next key
+					break;
 				}
 			}
 		}
 	}
+
+	rNextKey = *psNextKey;
 }
 
 /*
@@ -609,22 +926,28 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_prev_key (c
 		return;
 	}
 
+	// if key is present ...
 	if (this->find_oneKey (rKey, nNode, nSub))
 	{
+		// ... then look for initial data entry associated with that key value
 		this->find_firstKey (nNode, nSub, nPrevNode, nPrevSub);
 
 		nNode = nPrevNode;
 		nSub = nPrevSub;
 	}
 
+	// go to previous data entry
 	this->move_prev (nNode, nSub, nPrevNode, nPrevSub, bBounce);
 				
+	// if there is no data prior to the already found initial entry ...
 	if (bBounce)
 	{
+		// ... then abort operation
 		return;
 	}
 	
-	this->extract_key (&rPrevKey, nPrevNode, nPrevSub);
+	// otherwise return key value prior to input key value
+	rPrevKey = *(this->extract_key (&rPrevKey, nPrevNode, nPrevSub));
 }
 
 /*
@@ -678,10 +1001,10 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 		}
 
 		// extract key of next entry
-		extract_key (m_pInstancesNewKey, nNode, nSubPos);
+		key_type	*psKey = extract_key (m_pInstancesNewKey, nNode, nSubPos);
 
 		// if key is no longer matching ...
-		if (this->comp (*m_pInstancesNewKey, rKey) != 0)
+		if (this->comp (*psKey, rKey) != 0)
 		{
 			// ... then abort
 			break;
@@ -737,6 +1060,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 {
 	position_t			sPos;
 	key_type			sKey;
+	key_type			*psKey;
 	value_type			sData;
 
 	/*
@@ -747,10 +1071,10 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 
 	get_at (nStart, sData);
 
-	extract_key (&sKey, sData);
+	psKey = extract_key (&sKey, sData);
 
 	// if initial position is requested or the key is unique ...
-	if ((nStart == 0) || (count (sKey) == 1))
+	if ((nStart == 0) || (count (*psKey) == 1))
 	{
 		// ... then initial instance of key is implied
 		sPos.nInstance = 0;
@@ -758,12 +1082,12 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 	else
 	{
 		// ... otherwise determine instance
-		size_type		nInit = get_init_pos_of_key (sKey);
+		size_type		nInit = get_init_pos_of_key (*psKey);
 
 		sPos.nInstance = nStart - nInit;
 	}
 
-	sPos.pKey = &sKey;
+	sPos.pKey = psKey;
 
 	return (CBTreeBaseDefaults_t::serialize (sPos, nLen, pData));
 }
@@ -810,16 +1134,6 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::operator== (con
 	}
 
 	has_equal_operator	sSelectHasEqualOperator;
-	const uint32_t		nLocalVectorBits = 32;		// used as number of bits in the local vector
-	const uint32_t		nLocalVectorShift = 5;
-	const uint32_t		nLocalVectorMask = 0x1F;
-	uint32_t			uLocalVector;
-	uint32_t			*pLocalVector;
-	uint32_t			ui32;
-	uint32_t			nRemaining;
-	uint32_t			nLocalVectorSize;
-	value_type			sData;
-	key_type			sKey;
 
 	const_iterator		sCIterThis = this->cbegin ();
 	const_iterator		sCIterThisEnd = this->cend ();
@@ -828,105 +1142,13 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::operator== (con
 
 	while (sCIterThis < sCIterThisEnd)
 	{
-		sData = *sCIterThis;
-
-		this->extract_key (&sKey, sData);
-
-		const_iterator		sCIterThisKeyLower = this->lower_bound (sKey);
-		const_iterator		sCIterThisKeyUpper = this->upper_bound (sKey);
-		const_iterator		sCIter;
-		const_iterator		sCIterRhsKeyLower = rRhs.lower_bound (sKey);
-		const_iterator		sCIterRhsKeyUpper = rRhs.upper_bound (sKey);
-		const_iterator		sCIterRhs;
-		size_type			nCountThis;
-		size_type			nCountRhs;
-		size_type			i;
-		value_type			sDataRhs;
-		key_type			sKeyRhs;
-
-		nCountThis = this->count (sKey);
-
-		nCountRhs = rRhs.count (sKey);
-
-		if (nCountThis != nCountRhs)
+		if (!this->compare_entry (*sCIterThis, *sCIterRhs, sSelectHasEqualOperator))
 		{
 			return (false);
 		}
 
-		nLocalVectorSize = (((uint32_t) nCountRhs + (nLocalVectorBits - 1)) >> nLocalVectorShift);
-
-		if (nCountRhs < nLocalVectorBits)
-		{
-			uLocalVector = 0;
-
-			pLocalVector = &uLocalVector;
-		}
-		else
-		{
-			pLocalVector = (uint32_t *) calloc ((size_t) nLocalVectorSize, sizeof (*pLocalVector));
-		}
-
-		for (sCIter = sCIterThisKeyLower, i = 0; sCIter < sCIterThisKeyUpper; sCIter++, i++)
-		{
-			sData = *sCIter;
-
-			for (sCIterRhs = sCIterRhsKeyLower; sCIterRhs < sCIterRhsKeyUpper; sCIterRhs++)
-			{
-				sDataRhs = *sCIterRhs;
-
-				this->extract_key (&sKeyRhs, sDataRhs);
-
-				if (this->comp (sKey, sKeyRhs) == 0)
-				{
-					if (this->compare_entry (sData, sDataRhs, sSelectHasEqualOperator))
-					{
-						if ((pLocalVector[i >> nLocalVectorShift] & (1 << (i & nLocalVectorMask))) == 0)
-						{
-							pLocalVector[i >> nLocalVectorShift] |= 1 << (i & nLocalVectorMask);
-
-							if (sCIterRhs == sCIterRhsKeyLower)
-							{
-								sCIterRhsKeyLower++;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		nRemaining = (uint32_t) nCountRhs;
-
-		for (ui32 = 0; ui32 < nLocalVectorSize; ui32++)
-		{
-			if (nRemaining >= nLocalVectorBits)
-			{
-				if (pLocalVector[ui32] != ~0x0)
-				{
-					break;
-				}
-
-				nRemaining -= nLocalVectorBits;
-			}
-			else
-			{
-				if (pLocalVector[ui32] != (((1U << nRemaining) - 1) & nLocalVectorMask))
-				{
-					break;
-				}
-			}
-		}
-
-		if (nCountRhs >= nLocalVectorBits)
-		{
-			free ((void *) pLocalVector);
-		}
-
-		if ((sCIter < sCIterThisKeyUpper) || (ui32 < nLocalVectorSize))
-		{
-			return (false);
-		}
-
-		sCIterThis = sCIterThisKeyUpper;
+		::std::advance (sCIterThis, 1);
+		::std::advance (sCIterRhs, 1);
 	}
 
 	return (true);
@@ -959,9 +1181,9 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_assign
 	size_type						nSkewWidth = this->get_node_max_sub_nodes ();
 	size_type						nEntries = 1;
 	size_type						i;
-	size_type						j;
+	const_iterator					sCIter;
+	const_iterator					sCIterEnd = rAssociative.cend ();
 	size_type						nAverageNodeSize = this->get_node_max_sub_nodes ();
-	value_type						sData;
 
 	nAverageNodeSize *= 3;
 	nAverageNodeSize /= 4;
@@ -976,11 +1198,45 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_assign
 	// copy data using skew width
 	for (i = 0; i < nSkewWidth; i++)
 	{
-		for (j = i; j < rAssociative.size (); j += nSkewWidth)
-		{
-			rAssociative.get_at (j, sData);
+		sCIter = rAssociative.cbegin ();
 
-			this->insert (sData);
+		::std::advance (sCIter, i);
+
+		for (; sCIter < sCIterEnd; ::std::advance (sCIter, nSkewWidth))
+		{
+			key_type	sKey;
+			key_type	*psKey;
+			value_type	sData (*sCIter);
+
+			psKey = this->extract_key (&sKey, sData);
+
+			size_type	nNumKeyPresentInDest = this->count (*psKey);
+
+			if (nNumKeyPresentInDest == 0)
+			{
+				size_type	nNumKeyPresentInSrc = rAssociative.count (*psKey);
+
+				if (nNumKeyPresentInSrc == 1)
+				{
+					this->insert (sData);
+				}
+				else
+				{
+					const_iterator	sCIterSrcLower = rAssociative.lower_bound (*psKey);
+					const_iterator	sCIterSrcUpper = rAssociative.upper_bound (*psKey);
+
+					this->insert (sCIterSrcLower, sCIterSrcUpper);
+
+					// if the previous insert copied all remaining data ...
+					if (this->size () == rAssociative.size ())
+					{
+						// ... then abort early
+						i = nSkewWidth;
+
+						break;
+					}
+				}
+			}
 		}
 	}
 }
@@ -1152,14 +1408,15 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t 
 				// test for correct position in sub-division
 				for (nSubData = uBase; nSubData < this->get_data_count (*psNodeDesc); nSubData += ui32)
 				{
+					triCmpRslt = this->comp (*(extract_key (*m_ppShortLiveKey, nNode, nSubData)), *(sPos.pKey));
 					// if the key of the current sub-position is smaller than the sought key ...
-					if (this->comp (*(extract_key (*m_ppShortLiveKey, nNode, nSubData)), *(sPos.pKey)) < 0)
+					if (triCmpRslt < 0)
 					{
 						// ... then advance to next sub-division
 						uBase = nSubData;
 					}
 					// if current key is equal to sought key ...
-					else if (this->comp (*(extract_key (*m_ppShortLiveKey, nNode, nSubData)), *(sPos.pKey)) == 0)
+					else if (triCmpRslt == 0)
 					{
 						// ... and it is key's instance of interest ...
 						if ((sPos.nInstance == (size_type) (~0)) || (sPos.nInstance == get_instancePos (nNode, nSubData)))
@@ -1451,7 +1708,9 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t 
 	psData = this->get_data (nPrevNode, nPrevSubPos);
 
 	// get key of previous position
-	m_pTempRemoveKey = extract_key (m_pTempRemoveKey, *psData);
+	key_type	*psKey = extract_key (m_pTempRemoveKey, *psData);
+
+	*m_pTempRemoveKey = *psKey;
 
 	sPos.pKey = m_pTempRemoveKey;
 	sPos.nInstance = get_instancePos (nPrevNode, nPrevSubPos);
@@ -1497,7 +1756,9 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t 
 	psData = this->get_data (nNextNode, nNextSubPos);
 
 	// get key of previous position
-	m_pTempRemoveKey = extract_key (m_pTempRemoveKey, *psData);
+	key_type	*psKey = extract_key (m_pTempRemoveKey, *psData);
+
+	*m_pTempRemoveKey = *psKey;
 
 	sPos.pKey = m_pTempRemoveKey;
 	sPos.nInstance = get_instancePos (nNextNode, nNextSubPos);
@@ -1697,7 +1958,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 	node_iter_type				*pnNode;
 
 	// determine one key of the key raw in question
-	*m_ppTempFindFirstKeyKey = extract_key (*m_ppTempFindFirstKeyKey, nFromNode, nFromSub);
+	key_type	*psKeyInit = extract_key (*m_ppTempFindFirstKeyKey, nFromNode, nFromSub);
 
 	// continue searching for the initial position of key raw until either the beginning of the list or a different key has been found
 	while (true)
@@ -1708,7 +1969,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 
 		if (	this->is_leaf (nNode) || 
 				(nSub == 0) || 
-				(this->comp (**m_ppTempFindFirstKeyKey, *(extract_key (m_pTempFindFirstKeyNewKey, nNode, nSub - 1))) != 0)
+				(this->comp (*psKeyInit, *(extract_key (m_pTempFindFirstKeyNewKey, nNode, nSub - 1))) != 0)
 			)
 		{
 			// move to previous position
@@ -1732,10 +1993,10 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 			break;
 		}
 
-		extract_key (m_pTempFindFirstKeyNewKey, nFromNode, nFromSub);
+		key_type	*psKey = extract_key (m_pTempFindFirstKeyNewKey, nFromNode, nFromSub);
 
 		// if a different key has been found ...
-		if (this->comp (*m_pTempFindFirstKeyNewKey, **m_ppTempFindFirstKeyKey) != 0)
+		if (this->comp (*psKey, *psKeyInit) != 0)
 		{
 			// ... then abort searching
 			break;
@@ -1786,9 +2047,9 @@ typename _t_datalayerproperties::sub_node_iter_type CBTreeAssociative<_t_data, _
 		allocateShortLiveKey ();
 		{
 			// get key of current middle position
-			*m_ppShortLiveKey = extract_key (*m_ppShortLiveKey, nNode, ui32);
+			key_type	*psKey = extract_key (*m_ppShortLiveKey, nNode, ui32);
 
-			triCmpRslt = this->comp (rKey, **m_ppShortLiveKey);
+			triCmpRslt = this->comp (rKey, *psKey);
 
 			// if search key is smaller than or equal to middle key ...
 			if (triCmpRslt <= 0)
@@ -1821,9 +2082,9 @@ typename _t_datalayerproperties::sub_node_iter_type CBTreeAssociative<_t_data, _
 				allocateShortLiveKey ();
 
 				// get key of current middle position
-				*m_ppShortLiveKey = extract_key (*m_ppShortLiveKey, nNode, ui32);
+				key_type	*psKey = extract_key (*m_ppShortLiveKey, nNode, ui32);
 
-				triCmpRslt = this->comp (rKey, **m_ppShortLiveKey);
+				triCmpRslt = this->comp (rKey, *psKey);
 
 				// if search key is smaller than or equal to middle key ...
 				if (triCmpRslt < 0)
@@ -1883,10 +2144,10 @@ typename _t_datalayerproperties::sub_node_iter_type CBTreeAssociative<_t_data, _
 		allocateShortLiveKey ();
 
 		// get key of current middle position
-		*m_ppShortLiveKey = extract_key (*m_ppShortLiveKey, nNode, ui32);
+		key_type	*psKey = extract_key (*m_ppShortLiveKey, nNode, ui32);
 
 		// if search key is smaller than middle key ...
-		if (this->comp (*(sPos.pKey), **m_ppShortLiveKey) < 0)
+		if (this->comp (*(sPos.pKey), *psKey) < 0)
 		{
 			// ... then range maximum assumes middle position
 			nMaxPos = ui32;
@@ -1951,10 +2212,10 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find_oneKey (co
 			allocateShortLiveKey ();
 
 			// extract key from node's sub postition
-			*m_ppShortLiveKey = extract_key (*m_ppShortLiveKey, nNode, nSub);
+			key_type	*psKey = extract_key (*m_ppShortLiveKey, nNode, nSub);
 
 			// if extracted key is equal to searched key ...
-			if (this->comp (**m_ppShortLiveKey, rKey) == 0)
+			if (this->comp (*psKey, rKey) == 0)
 			{
 				// ... then abort searching
 				bFound = 1;
@@ -2022,7 +2283,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 	bool				bBounce;
 	
 	// determine one key of the key raw in question
-	*m_ppTempFindFirstKeyKey = extract_key (*m_ppTempFindFirstKeyKey, nFromNode, nFromSub);
+	key_type	*psKeyInit = extract_key (*m_ppTempFindFirstKeyKey, nFromNode, nFromSub);
 
 	// continue searching for the initial position of key raw until either the beginning of the list or a different key has been found
 	while (1)
@@ -2035,7 +2296,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 
 		if (	this->is_leaf (nNode) || 
 				(nSub == 0) || 
-				(this->comp (**m_ppTempFindFirstKeyKey, *(extract_key (m_pTempFindFirstKeyNewKey, nNode, nSub - 1))) != 0)
+				(this->comp (*psKeyInit, *(extract_key (m_pTempFindFirstKeyNewKey, nNode, nSub - 1))) != 0)
 			)
 		{
 			// move to previous position
@@ -2062,9 +2323,9 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 			break;
 		}
 
-		extract_key (m_pTempFindFirstKeyNewKey, nFromNode, nFromSub);
+		key_type	*psKey = extract_key (m_pTempFindFirstKeyNewKey, nFromNode, nFromSub);
 
-		if (this->comp (*m_pTempFindFirstKeyNewKey, **m_ppTempFindFirstKeyKey) != 0)
+		if (this->comp (*psKey, *psKeyInit) != 0)
 		{
 			break;
 		}
@@ -2139,7 +2400,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::erase_via_refer
 
 		this->convert_pos_to_container_pos (this->m_nRootNode, nPos, nNode, nSubPos);
 
-		this->extract_key (m_pRemoveKey, nNode, nSubPos);
+		*m_pRemoveKey = *(this->extract_key (m_pRemoveKey, nNode, nSubPos));
 
 		sPos.pKey = m_pRemoveKey;
 		sPos.nInstance = this->get_instancePos (nNode, nSubPos);
@@ -2303,7 +2564,7 @@ template<class _t_data, class _t_key, class _t_datalayerproperties>
 bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::show_node (std::ofstream &ofs, const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSubPos) const
 {
 	std::stringstream			buf;
-	value_type				*psData;
+	value_type					*psData;
 	node_iter_type				nNeightbourNode;
 	sub_node_iter_type			nNeightbourSub;
 	int							nErrCnt = 0;
@@ -2316,6 +2577,9 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::show_node (std:
 	sub_node_iter_type			nNextSub;
 	bool						bBounce;
 	key_type					sKey;
+	key_type					*psNextKey;
+	key_type					*psPrevKey;
+	key_type					*psKey;
 
 	psData = this->get_data (nNode, nSubPos);
 
@@ -2341,10 +2605,10 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::show_node (std:
 				key_type		sPrevKey;
 				key_type		sKey;
 
-				this->extract_key (&sPrevKey, *psPrevData);
-				this->extract_key (&sKey, *psData);
+				psPrevKey = this->extract_key (&sPrevKey, *psPrevData);
+				psKey = this->extract_key (&sKey, *psData);
 
-				if (this->comp (sPrevKey, sKey) > 0)
+				if (this->comp (*psPrevKey, *psKey) > 0)
 				{
 					if (!ofs.is_open ())
 					{
@@ -2391,11 +2655,11 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::show_node (std:
 
 				if (bBounce == false)
 				{
-					this->extract_key (*(this->m_ppShortLiveKey), nNeightbourNode, nNeightbourSub);
+					psPrevKey = this->extract_key (*(this->m_ppShortLiveKey), nNeightbourNode, nNeightbourSub);
 
-					this->extract_key (&sKey, *psData);
+					psKey = this->extract_key (&sKey, *psData);
 
-					if (this->comp (**(this->m_ppShortLiveKey), sKey) == 0)
+					if (this->comp (*psPrevKey, *psKey) == 0)
 					{
 						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) + 1))
 						{
@@ -2417,11 +2681,11 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::show_node (std:
 
 				if (bBounce == false)
 				{
-					this->extract_key (*(this->m_ppShortLiveKey), nNeightbourNode, nNeightbourSub);
+					psPrevKey = this->extract_key (*(this->m_ppShortLiveKey), nNeightbourNode, nNeightbourSub);
 
-					this->extract_key (&sKey, *psData);
+					psKey = this->extract_key (&sKey, *psData);
 
-					if (this->comp (**(this->m_ppShortLiveKey), sKey) == 0)
+					if (this->comp (*psPrevKey, *psKey) == 0)
 					{
 						if (this->get_instancePos (nNode, nSubPos) != (this->get_instancePos (nNeightbourNode, nNeightbourSub) - 1))
 						{
@@ -2463,10 +2727,10 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::show_node (std:
 				key_type		sNextKey;
 				key_type		sKey;
 
-				this->extract_key (&sNextKey, *psNextData);
-				this->extract_key (&sKey, *psData);
+				psNextKey = this->extract_key (&sNextKey, *psNextData);
+				psKey = this->extract_key (&sKey, *psData);
 
-				if (this->comp (sNextKey, sKey) < 0)
+				if (this->comp (*psNextKey, *psKey) < 0)
 				{
 					if (!ofs.is_open ())
 					{

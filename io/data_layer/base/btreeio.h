@@ -2,7 +2,7 @@
 **
 ** file:	btreeio.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -80,7 +80,6 @@ public:
 	// construction
 						CBTreeIO<_t_datalayerproperties>
 													(
-														address_type nBlockSize, 
 														uint32_t nNumDataPools, 
 														CBTreeIOperBlockPoolDesc_t *psDataPools
 													);

@@ -2,7 +2,7 @@
 **
 ** file:	btreemultiset.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -64,7 +64,7 @@ public:
 
 	// construction
 							CBTreeMultiSet<_t_keytype, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
+													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
 
 							CBTreeMultiSet<_t_keytype, _t_datalayerproperties>
 													(const CBTreeMultiSet_t &rBT, bool bAssign = true);

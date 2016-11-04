@@ -2,7 +2,7 @@
 **
 ** file:	btreeiofile.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -22,12 +22,11 @@ template<class _t_datalayerproperties>
 CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 (
 	_t_datalayerproperties &rDataLayerProperties, 
-	typename _t_datalayerproperties::address_type nBlockSize, 
 	typename _t_datalayerproperties::sub_node_iter_type nNodeSize, 
 	uint32_t nNumDataPools, 
 	CBTreeIOperBlockPoolDesc_t *psDataPools
 )
-	:	CBTreeBlockIO<_t_datalayerproperties> (nBlockSize, nNodeSize, nNumDataPools, psDataPools)
+	:	CBTreeBlockIO<_t_datalayerproperties> (nNodeSize, nNumDataPools, psDataPools)
 
 #if defined (_MSC_VER)
 
@@ -90,6 +89,8 @@ CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 
 #endif
 
+	address_type	nBlockSize = m_pClDataLayerProperties->get_blocksize ();
+
 	if (nBlockSize == 0)
 	{
 		nBlockSize = (address_type) nPageSize;
@@ -131,6 +132,7 @@ CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 		}
 		catch (::std::exception *pE)
 		{
+			pE;
 		}
 
 		aszFilename << ::std::dec;
@@ -322,7 +324,7 @@ pData	- pointer to new data
 
 template<class _t_datalayerproperties>
 template<class _t_dl_data>
-void CBTreeFileIO<_t_datalayerproperties>::insert_dataIntoPool (uint32_t nPool, typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nNodeLen, typename _t_datalayerproperties::sub_node_iter_type nOffset, typename _t_datalayerproperties::sub_node_iter_type nDataLen, const _t_dl_data *pData)
+void CBTreeFileIO<_t_datalayerproperties>::insert_dataIntoPool (uint32_t nPool, typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nNodeLen, typename _t_datalayerproperties::sub_node_iter_type nOffset, typename _t_datalayerproperties::sub_node_iter_type nDataLen)
 {
 #if defined (_DEBUG)
 
@@ -333,7 +335,7 @@ void CBTreeFileIO<_t_datalayerproperties>::insert_dataIntoPool (uint32_t nPool, 
 	_t_dl_data		*psNodeData = this->template get_pooledData<_t_dl_data> (nPool, nNode);
 
 	memmove ((void *) &(psNodeData[nOffset + nDataLen]), (void *) &(psNodeData[nOffset]), sizeof (*psNodeData) * (nNodeLen - nOffset));
-	memcpy ((void *) &(psNodeData[nOffset]), (void *) pData, sizeof (*psNodeData) * nDataLen);
+//	memcpy ((void *) &(psNodeData[nOffset]), (void *) pData, sizeof (*psNodeData) * nDataLen);
 }
 
 template<class _t_datalayerproperties>

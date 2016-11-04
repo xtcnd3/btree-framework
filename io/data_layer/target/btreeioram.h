@@ -2,7 +2,7 @@
 **
 ** file:	btreeioram.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -31,7 +31,6 @@ public:
 						CBTreeRAMIO<_t_datalayerproperties>
 													(
 														_t_datalayerproperties &rDataLayerProperties, 
-														address_type nBlockSize, 
 														sub_node_iter_type nNodeSize,
 														uint32_t nNumDataPools, 
 														CBTreeIOperBlockPoolDesc_t *psDataPools
@@ -52,7 +51,7 @@ public:
 
 	// mid level data access
 	template<class _t_dl_data>
-	void				insert_dataIntoPool			(uint32_t nPool, node_iter_type nNode, sub_node_iter_type nNodeLen, sub_node_iter_type nOffset, sub_node_iter_type nDataLen, const _t_dl_data *pData);
+	void				insert_dataIntoPool			(uint32_t nPool, node_iter_type nNode, sub_node_iter_type nNodeLen, sub_node_iter_type nOffset, sub_node_iter_type nDataLen);
 
 	// maintanence
 	void				set_size					(node_iter_type nMaxNodes);

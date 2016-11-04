@@ -2,7 +2,7 @@
 **
 ** file:	btreebaseif.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -17,8 +17,8 @@
 #include "btreebaseif.h"
 
 template<class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter>
-CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::CBTreeBaseIf (const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize)
-	:	CBTreeDefaults<_t_data, _t_sizetype> (psCacheDescription)
+CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::CBTreeBaseIf (_t_subnodeiter nNodeSize)
+	:	CBTreeDefaults<_t_data, _t_sizetype> ()
 {
 }
 

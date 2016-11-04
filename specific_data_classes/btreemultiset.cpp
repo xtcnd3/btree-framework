@@ -2,7 +2,7 @@
 **
 ** file:	btreemultiset.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -19,11 +19,10 @@
 
 template<class _t_keytype, class _t_datalayerproperties>
 CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::CBTreeMultiSet
-	(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
+	(_t_datalayerproperties &rDataLayerProperties, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
 	:	CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties>
 		(
 			rDataLayerProperties, 
-			psCacheDescription, 
 			nNodeSize
 		)
 {
@@ -61,28 +60,6 @@ void CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::swap (typename CBTreeMu
 		this->_swap (rContainer);
 	}
 }
-
-//template<class _t_keytype, class _t_datalayerproperties>
-//typename CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::key_compare
-//	CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::key_comp () const
-//{
-//	key_compare		sRslt;
-//
-//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-//
-//	return (sRslt);
-//}
-//
-//template<class _t_keytype, class _t_datalayerproperties>
-//typename CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::value_compare
-//	CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::value_comp () const
-//{
-//	value_compare		sRslt;
-//
-//	sRslt.pThis = (CBTreeAssociativeIf_t *) (this);
-//
-//	return (sRslt);
-//}
 
 template<class _t_keytype, class _t_datalayerproperties>
 void CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::_swap (typename CBTreeMultiSet<_t_keytype, _t_datalayerproperties>::CBTreeMultiSet_t &rContainer)

@@ -2,7 +2,7 @@
 **
 ** file:	btreebaseif.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -35,9 +35,14 @@ public:
 	typedef const value_type*											const_pointer;
 	typedef	typename ::std::make_signed<size_type>::type				difference_type;
 
+	typedef typename CBTreeDefaults_t::iterator							iterator;
+	typedef typename CBTreeDefaults_t::const_iterator					const_iterator;
+	typedef typename CBTreeDefaults_t::reverse_iterator					reverse_iterator;
+	typedef typename CBTreeDefaults_t::const_reverse_iterator			const_reverse_iterator;
+
 	// construction
 							CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>
-													(const bayerTreeCacheDescription_t *psCacheDescription, _t_subnodeiter nNodeSize);
+													(_t_subnodeiter nNodeSize);
 
 							CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>
 													(const CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &rBT);

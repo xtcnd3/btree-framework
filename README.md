@@ -1,7 +1,7 @@
 [btree-framework](https://github.com/andreas-steffens/btree-framework)
 =================
 
-The btree-framework provides a number of associative and linear containers, each being based on a btree structure. The intention is to deliver increased performance, since other implementations use linear arrays, link lists and red-black as well as binary trees. Any of the above methods develops poor performance when it comes to large data amounts, while btrees can scale quite well to that end. Furthermore, the provided containers come with an API interface compatible to existing STL containers, which enables a quick switch between container types within a project. Any btree container type can be abstracted, as oppose to their existing STL equivalents, allowing applications to create their own container type hierarchy. Also, the sorting criteria is a virtual method and not a template parameter, which makes it possible for iterators to support so called "scary assignments", as described by Bjarne Sproustrup’s paper [“Minimizing Dependencies within Generic Classes for Faster and Smaller Programs”](http://www.stroustrup.com/SCARY.pdf). For increased scalability, the size&#95;type is selected via a template parameter and unlike other implementations, is not bound to what size&#95;t is set to.
+The btree-framework provides a number of associative and linear containers, each being based on a btree structure. The intention is to deliver increased performance, since other implementations use linear arrays, link lists and red-black as well as binary trees. Any of the above methods develop poor performance when it comes to large data amounts, while btrees can scale quite well to that end. Furthermore, the provided containers come with an API interface compatible to existing STL containers, which enables a quick switch between container types within a project. Any btree container type can be abstracted, as oppose to their existing STL equivalents, allowing applications to create their own container type hierarchy. Also, the sorting criteria is a virtual method and not a template parameter, which makes it possible for iterators to support so called "scary assignments", as described by Bjarne Sproustrup’s paper [“Minimizing Dependencies within Generic Classes for Faster and Smaller Programs”](http://www.stroustrup.com/SCARY.pdf). For increased scalability, the size&#95;type is selected via a template parameter and unlike other implementations, is not bound to what size&#95;t is set to.
 
 And finally, the project supports cmake, which is explained in the "How To Build" section below.
 
@@ -30,7 +30,7 @@ git clone https://github.com/andreas-steffens/btree-framework
 ```
 <br>
 <br>
-If your project doesn't use cmake, then please refer to section "2.2. Windows" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file. Under linux you will have to add this project as a library or as source manually to your make files. Please read section "2.1.1. How to build using a makefile" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file, to see how to do that.
+If your project doesn't use cmake, then please refer to section "2.2.2. How to make the framework part of an exsting project which uses visual studio" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file. Under linux you will have to add this project as a library or as source manually to your make files. Please read section "2.1.2. How to make the framework part of an exsting project which uses a makefile" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file, to see how to do that.
 <br>
 <br>
 If your project uses cmake, then the appropriate CMakeLists.txt(s) need(s) to be modified. By default, the directory in which the btree framework is cloned into, is called btree-framework, if you have used the above commands. Since it is also possible to have this project as a sub-module in another repository, it can be checked out to a folder with a different name. Hence, in the below description the btree framework main directory is displayed as this placeholder: `<btree-framework>`.
@@ -104,10 +104,10 @@ Here you can find a number of batch files called msvce201x.x86(&#95;64).bat. The
 
 
 ```
-msvce2013.x86.bat    - Visual Studio Express 2013 with platform Win32
-msvce2013.x86_64.bat - Visual Studio Express 2013 with platform x64
-msvce2015.x86.bat    - Visual Studio Express 2015 with platform Win32
-msvce2015.x86_64.bat - Visual Studio Express 2015 with platform x64
+msvce2013.x86.bat    - Visual Studio Express 2013 for platform Win32
+msvce2013.x86_64.bat - Visual Studio Express 2013 for platform x64
+msvce2015.x86.bat    - Visual Studio Express 2015 for platform Win32
+msvce2015.x86_64.bat - Visual Studio Express 2015 for platform x64
 ```
 
 If the project needs re-opening at a later point, simply use the same batch file again. In the event that you accidentally select the wrong batch file, cmake will refuse to create new project files and aborts with an error message. As a result your existing project files remain unharmed.
@@ -126,7 +126,7 @@ make debug        # this builds the binary with debug settings
 make regression   # this builds the binary with debug settings and runs all regression tests
 ```
 
-In order to see all build rules, please see section "2.1. Linux" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file.
+In order to see all build rules, please see section "2.1.1. How to build the test bench using cmake" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file.
 
 
 <br>

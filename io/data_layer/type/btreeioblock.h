@@ -2,7 +2,7 @@
 **
 ** file:	btreeioblock.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -61,7 +61,6 @@ public:
 	// construction
 							CBTreeBlockIO<_t_datalayerproperties>
 														(
-															address_type nBlockSize, 
 															sub_node_iter_type nNodeSize,
 															uint32_t nNumDataPools, 
 															CBTreeIOperBlockPoolDesc_t *psDataPools

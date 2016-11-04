@@ -2,7 +2,7 @@
 **
 ** file:	btreemultimap.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -65,7 +65,7 @@ public:
 
 	// construction
 							CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
+													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
 
 							CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>
 													(const CBTreeMultiMap_t &rBT, bool bAssign = true);

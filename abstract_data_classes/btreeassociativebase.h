@@ -2,7 +2,7 @@
 **
 ** file:	btreeassociativebase.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -54,11 +54,14 @@ public:
 	typedef typename CBTreeIf_t::reverse_iterator				reverse_iterator;
 	typedef	typename CBTreeIf_t::const_reverse_iterator			const_reverse_iterator;
 
+	typedef	typename CBTreeAssociative_t::iterator_state_t		iterator_state_t;
+	typedef	typename CBTreeAssociative_t::position_t			position_t;
+
 	typedef	typename CBTreeBaseDefaults_t::node_t				node_t;
 
 	// construction
 							CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
+													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
 
 							CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>
 													(const CBTreeAssociativeBase_t &rBT, bool bAssign = true);

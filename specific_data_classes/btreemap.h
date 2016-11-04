@@ -2,7 +2,7 @@
 **
 ** file:	btreemap.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -60,12 +60,15 @@ public:
 	typedef typename CBTreeAssociativeBase_t::reverse_iterator			reverse_iterator;
 	typedef typename CBTreeAssociativeBase_t::const_reverse_iterator	const_reverse_iterator;
 
+	typedef	typename CBTreeAssociativeBase_t::iterator_state_t			iterator_state_t;
+	typedef	typename CBTreeAssociativeBase_t::position_t				position_t;
+
 	typedef	typename CBTreeAssociativeIf_t::key_compare					key_compare;
 	typedef typename CBTreeAssociativeIf_t::value_compare				value_compare;
 
 	// construction
 							CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
+													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
 
 							CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>
 													(const CBTreeMap_t &rBT, bool bAssign = true);
@@ -77,6 +80,8 @@ public:
 	template<class _t_iterator>
 	void					insert					(_t_iterator sItFirst, _t_iterator sItLast);
 	iterator				insert					(const value_type &rData);
+
+	iterator				insert					(const_iterator sCIterHint, const value_type &rData);
 
 	void					swap					(CBTreeAssociativeIf_t &rContainerIf);
 	void					swap					(CBTreeMap_t &rContainer);
@@ -93,7 +98,7 @@ protected:
 	template<class _t_iterator>
 	bool					test_self_reference_of_iterator_to_this (_t_iterator &sItFirst, _t_iterator &sItLast, bool &bSelfReverse, const_iterator **ppsItFirst, const_iterator **ppsItLast)
 	{
-		return (btree_keysort_self_reference_of_iterator_to_this_arbiter<value_type, key_type, data_layer_properties_type, _t_iterator>::test_self_reference_of_iterator_to_this (this, sItFirst, sItLast, bSelfReverse, ppsItFirst, ppsItLast));
+		return (btree_associative_container_iterator_self_reference_arbiter<value_type, key_type, data_layer_properties_type, _t_iterator>::test_self_reference_of_iterator_to_this (this, sItFirst, sItLast, bSelfReverse, ppsItFirst, ppsItLast));
 	}
 
 public:

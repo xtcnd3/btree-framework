@@ -2,7 +2,7 @@
 **
 ** file:	btreeio.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -19,7 +19,6 @@
 template<class _t_datalayerproperties>
 CBTreeIO<_t_datalayerproperties>::CBTreeIO
 (
-	typename CBTreeIO<_t_datalayerproperties>::address_type nBlockSize, 
 	uint32_t nNumDataPools, 
 	CBTreeIOperBlockPoolDesc_t *psDataPools
 )

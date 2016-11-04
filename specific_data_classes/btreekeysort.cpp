@@ -2,7 +2,7 @@
 **
 ** file:	btreekeysort.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -20,13 +20,11 @@ template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::CBTreeKeySort
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
-		const bayerTreeCacheDescription_t *psCacheDescription, 
 		typename _t_datalayerproperties::sub_node_iter_type nNodeSize
 	)
 	:	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
 	(
 		rDataLayerProperties, 
-		psCacheDescription, 
 		nNodeSize
 	)
 {
@@ -121,11 +119,13 @@ void CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::set_iter_data (void
 	_t_data		*pData = this->get_data (pIterState->nNode, pIterState->nSubPos);
 	_t_key		sKeyContainer;
 	_t_key		sKeyNew;
+	_t_key		*psKeyContainer;
+	_t_key		*psKeyNew;
 
-	this->extract_key (&sKeyContainer, *pData);
-	this->extract_key (&sKeyNew, rData);
+	psKeyContainer = this->extract_key (&sKeyContainer, *pData);
+	psKeyNew = this->extract_key (&sKeyNew, rData);
 
-	if (this->comp (sKeyContainer, sKeyNew) == 0)
+	if (this->comp (*psKeyContainer, *psKeyNew) == 0)
 	{
 		*pData = rData;
 	}

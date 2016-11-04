@@ -2,7 +2,7 @@
 **
 ** file:	btreearray.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -26,6 +26,7 @@
 #include <fstream>
 #include <iterator>
 #include <algorithm>
+#include <functional>
 
 #include "base_class_stack/btreebasedefaults.h"
 
@@ -223,6 +224,9 @@ public:
 	virtual iterator	insert						(const_iterator sCIterPos, const value_type& rData) = 0;
 	virtual iterator	insert						(const_iterator sCIterPos, const _t_sizetype nLen, const value_type& rData) = 0;
 
+	virtual iterator	emplace						(const_iterator sCIterPos, value_type &&rData) = 0;
+	virtual iterator	emplace_back				(value_type &&rData) = 0;
+
 	virtual iterator	erase						(const_iterator sCIterPos) = 0;
 	virtual iterator	erase						(const_iterator sCIterFirst, const_iterator sCIterLast) = 0;
 
@@ -297,7 +301,7 @@ public:
 
 	// construction
 								CBTreeArray<_t_data, _t_datalayerproperties>
-														(_t_datalayerproperties &rDataLayerProperties, const bayerTreeCacheDescription_t *psCacheDescription, sub_node_iter_type nNodeSize);
+														(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
 
 								CBTreeArray<_t_data, _t_datalayerproperties>
 														(const CBTreeArray<_t_data, _t_datalayerproperties> &rBT, bool bAssign = true);
@@ -322,6 +326,15 @@ public:
 
 	template<class _t_iterator>
 	iterator					insert					(const_iterator sCIterPos, _t_iterator sItFirst, _t_iterator sItLast);
+
+	iterator					emplace					(const_iterator sCIterPos, value_type &&rData);
+	iterator					emplace_back			(value_type &&rData);
+
+	template<class ..._t_va_args>
+	iterator					emplace					(const_iterator sCIterPos, _t_va_args && ... rrArgs);
+	
+	template<class ..._t_va_args>
+	iterator					emplace_back			(_t_va_args && ... rrArgs);
 
 	iterator					erase					(const_iterator sCIterPos);
 	iterator					erase					(const_iterator sCIterFirst, const_iterator sCIterLast);
@@ -374,7 +387,7 @@ protected:
 	template<class _t_iterator>
 	iterator					insert_via_iterator_tag (const_iterator sCIterPos, _t_iterator sItFirst, _t_iterator sItLast, ::std::random_access_iterator_tag);
 
-	void						insert_via_reference	(const_iterator &rCIterPos, const value_type& rData, bool bReEvaluate = true);
+	void						insert_via_reference	(const_iterator &rCIterPos, const value_type& rData, bool bCopyNotMove, bool bReEvaluate = true);
 
 	void						erase_via_reference		(const_iterator &rCIterPos, bool bReEvaluate = true);
 
@@ -385,6 +398,9 @@ protected:
 	}
 
 	void						_swap					(CBTreeArray &rArray);
+
+	bool						compare_value_type		(const value_type & rLhs, const value_type & rRhs, ::std::true_type) const;
+	bool						compare_value_type		(const value_type & rLhs, const value_type & rRhs, ::std::false_type) const;
 
 	CBTreeArrayAccessWrapper<value_type, size_type>		*m_pClAccessWrapper;
 

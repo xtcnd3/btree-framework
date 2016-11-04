@@ -2,7 +2,7 @@
 **
 ** file:	btreearray.cpp
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -19,13 +19,11 @@ template<class _t_data, class _t_datalayerproperties>
 CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray
 	(
 		_t_datalayerproperties &rDataLayerProperties, 
-		const bayerTreeCacheDescription_t *psCacheDescription, 
 		typename _t_datalayerproperties::sub_node_iter_type nNodeSize
 	)
 	:	CBTreeBaseDefaults <CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>
 	(
 		rDataLayerProperties, 
-		psCacheDescription, 
 		nNodeSize
 	)
 	,	CBTreeArrayIf <_t_data, typename _t_datalayerproperties::size_type> ()
@@ -36,11 +34,11 @@ CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray
 
 	m_pClAccessWrapper = new CBTreeArrayAccessWrapper<value_type, typename _t_datalayerproperties::size_type> (rBtrArray);
 
-	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type): insufficient memory!");
+	BTREE_ASSERT (m_pClAccessWrapper != NULL, "CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (_t_datalayerproperties &, sub_node_iter_type): insufficient memory!");
 
 	m_psReturnData = new value_type ();
 
-	BTREE_ASSERT (m_psReturnData != NULL, "CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (_t_datalayerproperties &, bayerTreeCacheDescription_t *, sub_node_iter_type): insufficient memory!");
+	BTREE_ASSERT (m_psReturnData != NULL, "CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (_t_datalayerproperties &, sub_node_iter_type): insufficient memory!");
 }
 						
 template<class _t_data, class _t_datalayerproperties>
@@ -270,7 +268,7 @@ typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
 {
 	this->create_root ();
 
-	this->insert_via_reference (sCIterPos, rData, false);
+	this->insert_via_reference (sCIterPos, rData, false, false);
 
 	iterator		sRetval (this, false);
 
@@ -297,7 +295,7 @@ typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
 
 	for (i = 0; i < nLen; i++)
 	{
-		this->insert_via_reference (sCIterPos, rData);
+		this->insert_via_reference (sCIterPos, rData, false, true);
 	}
 
 	return (sRetval);
@@ -401,7 +399,7 @@ typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
 				{
 					j--;
 
-					this->insert_via_reference (sCIterTarget, pBlock[j]);
+					this->insert_via_reference (sCIterTarget, pBlock[j], false);
 				}
 
 				sCIterTarget += nChunkSize;
@@ -419,7 +417,7 @@ typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
 				{
 					j--;
 
-					this->insert_via_reference (sCIterTarget, pBlock[j]);
+					this->insert_via_reference (sCIterTarget, pBlock[j], false);
 				}
 
 				nLenPriorToInsert += nChunkSize;
@@ -436,7 +434,7 @@ typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
 
 				for (j = 0; j < nChunkSize; j++)
 				{
-					this->insert_via_reference (sCIterTarget, pBlock[j]);
+					this->insert_via_reference (sCIterTarget, pBlock[j], false);
 				}
 			}
 
@@ -450,7 +448,7 @@ typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
 
 				for (j = 0; j < nChunkSize; j++)
 				{
-					this->insert_via_reference (sCIterTarget, pBlock[j]);
+					this->insert_via_reference (sCIterTarget, pBlock[j], false);
 				}
 
 				nLenPriorToInsert += nChunkSize;
@@ -473,6 +471,97 @@ typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
 
 		return (this->insert_via_iterator_tag (sCIterPos, sItFirst, sItLast, sIterCategory));
 	}
+}
+
+template<class _t_data, class _t_datalayerproperties>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::emplace
+	(
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterPos, 
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::value_type &&rData
+	)
+{
+	return (this->template emplace<value_type &&> (sCIterPos, ::std::forward<value_type> (rData)));
+}
+
+template<class _t_data, class _t_datalayerproperties>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::emplace_back
+	(
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::value_type &&rData
+	)
+{
+	return (this->template emplace_back<value_type &&> (::std::forward<value_type> (rData)));
+}
+
+template<class _t_data, class _t_datalayerproperties>
+template<class ..._t_va_args>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::emplace
+	(
+		typename CBTreeArray<_t_data, _t_datalayerproperties>::const_iterator sCIterPos, 
+		_t_va_args && ... rrArgs
+	)
+{
+	iterator_state_t			sIterState;
+	iterator_state_t			*psIterState;
+	position_t					sPos;
+	bool						bFallBack = true;
+	sub_node_iter_type			nSubPos;
+	
+	this->create_root ();
+
+	if (sCIterPos.is_evaluated ())
+	{
+		psIterState = (iterator_state_t *) sCIterPos.get_iterator_state ();
+
+		if (this->is_leaf (psIterState->nNode))
+		{
+			sPos.nIndex = size_type (psIterState->nSubPos);
+
+			nSubPos = this->find_next_sub_pos (psIterState->nNode, sPos);
+
+			size_type		nDiff = size_type (nSubPos - psIterState->nSubPos);
+
+			::std::advance (sCIterPos, nDiff);
+
+			bFallBack = this->insert_via_iterator (sCIterPos, sIterState.nNode, sIterState.nSubPos);
+		}
+	}
+
+	if (bFallBack)
+	{
+		sPos.nIndex = sCIterPos.get_pos ();
+
+		size_type	nRetval = this->add_to_node (sPos, this->m_nRootNode, 0, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos);
+
+		BTREE_ASSERT (nRetval == 1, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace_hint (const_iterator, _t_va_args && ...): Failed to create new entry!");
+	}
+	else
+	{
+		sIterState.nAssociatedPos = psIterState->nAssociatedPos;
+	}
+
+	value_type	*psData = this->get_data (sIterState.nNode, sIterState.nSubPos);
+
+	new (psData) value_type (::std::forward<_t_va_args> (rrArgs) ...);
+
+	iterator		sRetval (this, sIterState.nAssociatedPos, &sIterState, this->get_time_stamp (), false);
+
+	return (sRetval);
+}
+
+template<class _t_data, class _t_datalayerproperties>
+template<class ..._t_va_args>
+typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
+	CBTreeArray<_t_data, _t_datalayerproperties>::emplace_back
+	(
+		_t_va_args && ... rrArgs
+	)
+{
+	const_iterator		sCIterEnd = this->cend ();
+
+	return (this->emplace (sCIterEnd, ::std::forward<_t_va_args> (rrArgs) ...));
 }
 
 template<class _t_data, class _t_datalayerproperties>
@@ -705,7 +794,9 @@ bool CBTreeArray<_t_data, _t_datalayerproperties>::operator==
 
 	for (sCIterLhs = sCIterBegin; sCIterLhs < sCIterEnd; sCIterLhs++, sCIterRhs++)
 	{
-		if ((value_type) *sCIterLhs != (value_type) *sCIterRhs)
+		typename has_compare_operator_equal<value_type>::type		sSelectCompareOperatorPresent;
+
+		if (!this->compare_value_type ((value_type) *sCIterLhs, (value_type) *sCIterRhs, sSelectCompareOperatorPresent))
 		{
 			return (false);
 		}
@@ -1326,75 +1417,25 @@ typename CBTreeArray<_t_data, _t_datalayerproperties>::iterator
 }
 
 template<class _t_data, class _t_datalayerproperties>
-void CBTreeArray<_t_data, _t_datalayerproperties>::insert_via_reference (const_iterator &rCIterPos, const _t_data& rData, bool bReEvaluate)
+void CBTreeArray<_t_data, _t_datalayerproperties>::insert_via_reference (const_iterator &rCIterPos, const _t_data& rData, bool bCopyNotMove, bool bReEvaluate)
 {
-	bool				bFallBack = true;
-	iterator_state_t	*psIterState = (iterator_state_t *) rCIterPos.get_iterator_state ();
+	node_iter_type					nNode;
+	sub_node_iter_type				nSubPos;
 
-	// if the iterator is associated with this btree ...
-	if (this == rCIterPos.get_container ())
-	{
-		// ... and the iterator is ready for use ...
-		if (rCIterPos.is_evaluated ())
-		{
-			// ... and if btree is not empty ...
-			if (!this->empty ())
-			{
-				// ... and if the node to be modified is a leaf node ...
-				if (this->is_leaf (psIterState->nNode))
-				{
-					// ... and if the node to be modified has enough space to take another entry ...
-					if (this->get_data_count (psIterState->nNode) < this->get_node_max_data_size ())
-					{
-						// ... then an additional entry can be added fast
-						node_iter_type			nNode;
-						sub_node_iter_type		nSubPos;
-
-						bFallBack = false;
-
-#if defined (_DEBUG)
-
-						BTREE_ASSERT (psIterState->nSubPos <= this->get_data_count (psIterState->nNode), "CBTreeArray<>::insert_via_reference (const_iterator &, const value_type&): iterator not up-to-date!");
-
-#endif
-
-						// insert entry into leaf node
-						nSubPos = this->insert_data_into_node (psIterState->nNode, psIterState->nSubPos, rData, (node_iter_type) ~0x0, -1);
-
-						// rebuild node integrity of all parent nodes by back-tracing to the root node
-						nNode = psIterState->nNode;
-
-						while (nNode != this->m_nRootNode)
-						{
-							nNode = this->get_parent (nNode);
-
-							this->rebuild_node (nNode, 1);
-						}
-
-						// update time stamp
-						this->update_time_stamp ();
-
-						// overwrite iterator time stamp directly, without having the iterator to evaluate again
-						rCIterPos.set_time_stamp (this);
-					}
-				}
-			}
-		}
-	}
-
+	bool				bFallBack = this->insert_via_iterator (rCIterPos, nNode, nSubPos);
+	
 	// if fast insert was not possible ...
 	if (bFallBack)
 	{
 		// ... then perform actual insert
 		position_t						sPos;
-		node_iter_type					nNode;
-		sub_node_iter_type				nSubPos;
+		iterator_state_t				*psIterState = (iterator_state_t *) rCIterPos.get_iterator_state ();
 	
 		this->create_root ();
 
 		sPos.nIndex = rCIterPos.get_pos ();
 
-		this->add_to_node (sPos, rData, this->m_nRootNode, 0, nNode, nSubPos);
+		this->add_to_node (sPos, this->m_nRootNode, 0, nNode, nSubPos);
 
 		// iterator reference is used for more than one access ...
 		if (bReEvaluate)
@@ -1405,6 +1446,17 @@ void CBTreeArray<_t_data, _t_datalayerproperties>::insert_via_reference (const_i
 
 			rCIterPos.set_time_stamp (this);
 		}
+	}
+
+	value_type	*psData = this->get_data (nNode, nSubPos);
+
+	if (bCopyNotMove)
+	{
+		new (psData) value_type (rData);
+	}
+	else
+	{
+		*psData = ::std::move (rData);
 	}
 }
 
@@ -1490,6 +1542,28 @@ void CBTreeArray<_t_data, _t_datalayerproperties>::_swap (CBTreeArray<_t_data, _
 	CBTreeBaseDefaults_t	&rArrayBase = dynamic_cast <CBTreeBaseDefaults_t &> (rArray);
 
 	CBTreeBaseDefaults_t::_swap (rArrayBase);
+}
+
+template<class _t_data, class _t_datalayerproperties>
+bool CBTreeArray<_t_data, _t_datalayerproperties>::compare_value_type (const value_type & rLhs, const value_type & rRhs, ::std::true_type) const
+{
+	return (rLhs == rRhs);
+}
+
+template<class _t_data, class _t_datalayerproperties>
+bool CBTreeArray<_t_data, _t_datalayerproperties>::compare_value_type (const value_type & rLhs, const value_type & rRhs, ::std::false_type) const
+{
+#if defined (_MSC_VER)
+
+	throw new ::std::bad_function_call ("CBTreeArray<_t_data, _t_datalayerproperties>::compare_value_type (const value_type &, const value_type &, ::std::false_type) const: ERROR: value_type is not out fitted with a compare operator!");
+
+#else
+
+	throw new ::std::bad_function_call ();
+
+#endif
+
+	return (false);
 }
 
 /**********************************************************************************************/

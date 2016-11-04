@@ -2,7 +2,7 @@
 **
 ** file:	btreeif.h
 ** author:	Andreas Steffens
-** license:	GPL v2
+** license:	LGPL v3
 **
 ** description:
 **
@@ -42,11 +42,6 @@
 
 #include "super_classes/btreeaux.h"
 #include "iterators/btreeiter.h"
-
-typedef struct
-{
-	uint32_t	nMinNumberOfBytesPerSuperBlock;
-} bayerTreeCacheDescription_t;
 
 template<class _t_data, class _t_sizetype = uint64_t>
 class CBTreeIf
