@@ -133,12 +133,10 @@ In order to see all build rules, please see section "2.1.1. How to build the tes
 <br>
 ## Version
 
-The current version of the project is: 0.05 (alpha)
+The current version of the project is: 0.06 (alpha)
 
 Please don't be discouraged by the fact that the version contains the word "alpha". What this means is that the feature set is incomplete, but what has been implemented is stable and thoroughly tested. See below to find out what is missing:
 
-- emplace ()
-- emplace&#95;hint ()
 - initializer&#95;list<> support
 - move constructors and move assignment operators
 - equal&#95;range ()
