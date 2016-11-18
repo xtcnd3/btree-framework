@@ -69,14 +69,8 @@ public:
 							~CBTreeBlockIO<_t_datalayerproperties>
 														();
 
-	// properties
-	node_iter_type			get_maxNodes				();
-	
-	offset_type				get_dataAlignment			();
-	offset_type				get_alignedOffset			(offset_type nOffset);
-
 	// resource management
-	void					set_root_node				(node_iter_type nRootNode);
+	virtual void			set_root_node				(node_iter_type nRootNode);
 
 protected:
 

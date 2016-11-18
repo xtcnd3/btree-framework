@@ -80,8 +80,8 @@ public:
 	// construction
 						CBTreeIO<_t_datalayerproperties>
 													(
-														uint32_t nNumDataPools, 
-														CBTreeIOperBlockPoolDesc_t *psDataPools
+														const uint32_t nNumDataPools, 
+														const CBTreeIOperBlockPoolDesc_t *psDataPools
 													);
 
 						~CBTreeIO<_t_datalayerproperties>

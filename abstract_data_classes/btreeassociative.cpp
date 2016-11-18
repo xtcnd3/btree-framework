@@ -187,6 +187,21 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	return (sRetval);
 }
 
+/*
+
+insert - insert data
+
+sCIterHint	- indicates the location where the new entry is going to be inserted
+rData		- data set to be added
+
+This method inserts one entry, using the input iterator as a hint as to where the new data entry
+is going to be put.
+
+If the method was successful, then the return value is an iterator reflecting the position of
+the newly added entry, otherwise the method asserts and throws an ::std::run_time_error expection.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
@@ -263,6 +278,30 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	return (sRetval);
 }
 
+/*
+
+insert - insert data
+
+sItFirst	- specifies reference to first entry to be transfered
+sItLast		- specifies reference to one entry past the final entry to be transfered
+
+This method will insert one or more data items to the target container, according to
+the input iterators. In case sItFirst equals sItLast, the call is ineffective neither
+the stored data nor the state of the target container is being altered.
+The method iterates element by element from sItFirst onwards until sItLast has been
+found. In case sItLast is not being found and the container associated with sItFirst
+goes beyond its last element, then an ::std::out_of_range exception is thrown.
+
+If the method was not successful for any other reason, then ::std::run_time_error
+expection is thrown.
+
+Note: The method is capable to self-reference, which means if the input iterators are
+associated with the target container, then the method copies the content specified by the
+range to a temporary container and then inserts the data from that temporary container
+into the target container.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
 	(
@@ -272,6 +311,30 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
 {
 	this->template insert <iterator> (sItFirst, sItLast);
 }
+
+/*
+
+insert - insert data
+
+sItFirst	- specifies reference to first entry to be transfered
+sItLast		- specifies reference to one entry past the final entry to be transfered
+
+This method will insert one or more data items to the target container, according to
+the input iterators. In case sItFirst equals sItLast, the call is ineffective neither
+the stored data nor the state of the target container is being altered.
+The method iterates element by element from sItFirst onwards until sItLast has been
+found. In case sItLast is not being found and the container associated with sItFirst
+goes beyond its last element, then an ::std::out_of_range exception is thrown.
+
+If the method was not successful for any other reason, then ::std::run_time_error
+expection is thrown.
+
+Note: The method is capable to self-reference, which means if the input iterators are
+associated with the target container, then the method copies the content specified by the
+range to a temporary container and then inserts the data from that temporary container
+into the target container.
+
+*/
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
@@ -283,6 +346,30 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
 	this->template insert <const_iterator> (sItFirst, sItLast);
 }
 
+/*
+
+insert - insert data
+
+sItFirst	- specifies reference to first entry to be transfered
+sItLast		- specifies reference to one entry past the final entry to be transfered
+
+This method will insert one or more data items to the target container, according to
+the input iterators. In case sItFirst equals sItLast, the call is ineffective neither
+the stored data nor the state of the target container is being altered.
+The method iterates element by element from sItFirst onwards until sItLast has been
+found. In case sItLast is not being found and the container associated with sItFirst
+goes beyond its last element, then an ::std::out_of_range exception is thrown.
+
+If the method was not successful for any other reason, then ::std::run_time_error
+expection is thrown.
+
+Note: The method is capable to self-reference, which means if the input iterators are
+associated with the target container, then the method copies the content specified by the
+range to a temporary container and then inserts the data from that temporary container
+into the target container.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
 	(
@@ -293,6 +380,30 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
 	this->template insert <reverse_iterator> (sItFirst, sItLast);
 }
 
+/*
+
+insert - insert data
+
+sItFirst	- specifies reference to first entry to be transfered
+sItLast		- specifies reference to one entry past the final entry to be transfered
+
+This method will insert one or more data items to the target container, according to
+the input iterators. In case sItFirst equals sItLast, the call is ineffective neither
+the stored data nor the state of the target container is being altered.
+The method iterates element by element from sItFirst onwards until sItLast has been
+found. In case sItLast is not being found and the container associated with sItFirst
+goes beyond its last element, then an ::std::out_of_range exception is thrown.
+
+If the method was not successful for any other reason, then ::std::run_time_error
+expection is thrown.
+
+Note: The method is capable to self-reference, which means if the input iterators are
+associated with the target container, then the method copies the content specified by the
+range to a temporary container and then inserts the data from that temporary container
+into the target container.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
 	(
@@ -302,6 +413,30 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert
 {
 	this->template insert <const_reverse_iterator> (sItFirst, sItLast);
 }
+
+/*
+
+insert - insert data
+
+sItFirst	- specifies reference to first entry to be transfered
+sItLast		- specifies reference to one entry past the final entry to be transfered
+
+This method will insert one or more data items to the target container, according to
+the input iterators. In case sItFirst equals sItLast, the call is ineffective neither
+the stored data nor the state of the target container is being altered.
+The method iterates element by element from sItFirst onwards until sItLast has been
+found. In case sItLast is not being found and the container associated with sItFirst
+goes beyond its last element, then an ::std::out_of_range exception is thrown.
+
+If the method was not successful for any other reason, then ::std::run_time_error
+expection is thrown.
+
+Note: The method is capable to self-reference, which means if the input iterators are
+associated with the target container, then the method copies the content specified by the
+range to a temporary container and then inserts the data from that temporary container
+into the target container.
+
+*/
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 template<class _t_iterator>
@@ -431,6 +566,23 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::insert (_t_iter
 	}
 }
 
+/*
+
+emplace - insert data by constructing it in place
+
+rData		- specifies the data to be insered as a move constructor argument
+
+The method constructs a new entry in place based on the move constructor
+argument, which increases the container size by one.
+
+If the method is successful, then an iterator referring to the newly inserted
+data entry is returned. Otherwise, an ::std::run_time_error exception is thrown.
+
+Note: If value_type doesn't provide a move constructor, then the copy constructor
+is invoked.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace
@@ -441,6 +593,27 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	// method provides the actual code for the virtual emplace (value_type &&) of CBTreeAssociativeIf
 	return (this->template emplace<value_type &&> (::std::forward<value_type> (rData)));
 }
+
+/*
+
+emplace_hint - insert data by constructing it in place
+
+sCIterHint	- indicates the location where the new data is going to be inserted
+rData		- specifies the data to be insered as a move constructor argument
+
+The method constructs a new entry in place based on the move constructor
+argument, which increases the container size by one, while trying to use sCIterHint
+as an indicator where that insertion has to take place, for an accelerated operation.
+If the position displayed by sCIterHint is insufficient to be used, then the
+method ignores sCIterHint and falls back to its emplace () equivalent.
+
+If the method is successful, then an iterator referring to the newly inserted
+data entry is returned. Otherwise, an ::std::run_time_error exception is thrown.
+
+Note: If value_type doesn't provide a move constructor, then the copy constructor
+is invoked.
+
+*/
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
@@ -453,6 +626,20 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	// method provides the actual code for the virtual emplace_hint (const_iterator, value_type &&) of CBTreeAssociativeIf
 	return (this->template emplace_hint<value_type &&> (sCIterHint, ::std::forward<value_type> (rData)));
 }
+
+/*
+
+emplace - insert data by constructing it in place
+
+rData		- specifies the constructor arguments for a new data entry
+
+The method constructs a new entry in place based on the constructor
+arguments, which increases the container size by one.
+
+If the method is successful, then an iterator referring to the newly inserted
+data entry is returned. Otherwise, an ::std::run_time_error exception is thrown.
+
+*/
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 template<class ..._t_va_args>
@@ -494,6 +681,24 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 
 	return (sRetval);
 }
+
+/*
+
+emplace_hint - insert data by constructing it in place
+
+sCIterHint	- indicates the location where the new data is going to be inserted
+rData		- specifies the constructor arguments for a new data entry
+
+The method constructs a new entry in place based on the constructor
+arguments, which increases the container size by one, while trying to use sCIterHint
+as an indicator where that insertion has to take place, for an accelerated operation.
+If the position displayed by sCIterHint is insufficient to be used, then the
+method ignores sCIterHint and falls back to its emplace () equivalent.
+
+If the method is successful, then an iterator referring to the newly inserted
+data entry is returned. Otherwise, an ::std::run_time_error exception is thrown.
+
+*/
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 template<class ..._t_va_args>
@@ -551,6 +756,8 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	if (bFallBack)
 	{
 		// ... then use the regular allocation
+		sIterState.nAssociatedPos = 0;
+
 		size_type	nRetval = this->add_to_node (sPos, this->m_nRootNode, 0, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos);
 
 		BTREE_ASSERT (nRetval == 1, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::emplace_hint (const_iterator, _t_va_args && ...): Failed to create new entry!");
@@ -568,6 +775,21 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 
 	return (sRetval);
 }
+
+/*
+
+erase - removes one entry from the container
+
+sCIterPos		- specifies iterator referring to an entry to be removed
+
+This method removes the data entry assoctiated with the location sCIterPos
+is referring to from the container. This means, the container size is reduced
+by one.
+
+If successful the method returns an iterator associated with the location
+of the removed entry. Otherwise, an ::std::run_time_error exception is thrown.
+
+*/
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
@@ -622,6 +844,24 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 	return (nRetval);
 }
 
+/*
+
+erase - removes a range of entries from the container
+
+sCIterFirst		- specifies iterator referring to the initial entry to be removed
+sCIterLast		- specifies iterator referring one past to the final entry to be removed
+
+This method removes all data entries between the location referred to by sCIterFirst and 
+before sCIterLast. If sCIterFirst and sCIterLast refer to the same location, then the call
+is ineffective and neither is an entry removed nor the state of the container changed.
+In case sCIterLast refers to a location before sCIterFirst, then any data past sCIterFirst
+is removed and an ::std::run_time_error exception is thrown.
+
+If successful the method returns an iterator associated with the initial location
+of the removed range. Otherwise, an ::std::run_time_error exception is thrown.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::erase
@@ -643,6 +883,24 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 
 	return (iterator (this, sCIterFirst.get_pos (), false));
 }
+
+/*
+
+find - finds any entry containing a specified key
+
+rKey		- specifies key value of any element to be found
+
+This method finds an entry which has a key value equivalent to the input key
+value 'rKey', so any exists. If there is more than one entry containing
+equivalent keys, then any of those is returned. If an entry with a matching
+key value is not present, then an iterator equivalent to this->end () is
+returned.
+
+If successful the method returns an iterator associated with any entry
+containing a key value same as the input key value. Otherwise, an iterator
+past the last entry (value equivalent to this->end ()) is returned.
+
+*/
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
@@ -666,6 +924,24 @@ CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find
 	}
 }
 
+/*
+
+find - finds any entry containing a specified key
+
+rKey		- specifies key value of any element to be found
+
+This method finds an entry which has a key value equivalent to the input key
+value 'rKey', so any exists. If there is more than one entry containing
+equivalent keys, then any of those is returned. If an entry with a matching
+key value is not present, then a const_iterator equivalent to this->cend () is
+returned.
+
+If successful the method returns an const_iterator associated with any entry
+containing a key value same as the input key value. Otherwise, a const_iterator
+past the last entry (value equivalent to this->cend ()) is returned.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator
 	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find
@@ -688,6 +964,25 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_itera
 	}
 }
 
+/*
+
+lower_bound - finds initial entry containing a specified key
+
+rKey		- specifies key value of initial element to be found
+
+This method finds the first entry which has a key value equivalent to the input key
+value 'rKey', so any exists. If an entry with a matching key value is not 
+present, then an iterator referring to an entry containing a key value
+deemed to be the next greater key value is returned.
+
+If successful the method returns an iterator associated with the initial entry
+containing a key value same as the input key value. Otherwise, a iterator pointing
+to an entry containing a key value what is deemed to be the next greater key value is
+returned. If such an entry doesn't exist, then an iterator past the last entry
+(value equivalent to this->end ()) is returned.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::lower_bound
@@ -702,6 +997,25 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	return (iterator (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false));
 }
 
+/*
+
+lower_bound - finds initial entry containing a specified key
+
+rKey		- specifies key value of initial element to be found
+
+This method finds the first entry which has a key value equivalent to the input key
+value 'rKey', so any exists. If an entry with a matching key value is not 
+present, then a const_iterator referring to an entry containing a key value
+deemed to be the next greater key value is returned.
+
+If successful the method returns a const_iterator associated with the initial entry
+containing a key value same as the input key value. Otherwise, a const_iterator pointing
+to an entry containing a key value what is deemed to be the next greater key value is
+returned. If such an entry doesn't exist, then a const_iterator past the last entry
+(value equivalent to this->cend ()) is returned.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator
 	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::lower_bound
@@ -715,6 +1029,25 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_itera
 	
 	return (const_iterator (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false));
 }
+
+/*
+
+upper_bound - finds initial entry containing the next greater key
+
+rKey		- specifies the next lesser key value of initial element to be found
+
+This method finds the first entry which has a key value equivalent to the next greater
+input key value 'rKey', so any exists. If an entry with a matching key value is not 
+present, then an iterator referring to an entry containing a key value
+deemed to be the nearest greater key value is returned.
+
+If successful the method returns an iterator associated with the initial entry
+containing the next greater key value than the input key value. Otherwise, an
+iterator pointing to an entry containing a key value what is deemed to be the
+nearest greater key value is returned. If such an entry doesn't exist, then an
+iterator past the last entry (value equivalent to this->end ()) is returned.
+
+*/
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
@@ -738,6 +1071,25 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::iterator
 	}
 }
 
+/*
+
+upper_bound - finds initial entry containing the next greater key
+
+rKey		- specifies the next lesser key value of initial element to be found
+
+This method finds the first entry which has a key value equivalent to the next greater
+input key value 'rKey', so any exists. If an entry with a matching key value is not 
+present, then a const_iterator referring to an entry containing a key value
+deemed to be the nearest greater key value is returned.
+
+If successful the method returns a const_iterator associated with the initial entry
+containing the next greater key value than the input key value. Otherwise, a
+const_iterator pointing to an entry containing a key value what is deemed to be the
+nearest greater key value is returned. If such an entry doesn't exist, then a
+const_iterator past the last entry (value equivalent to this->end ()) is returned.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_iterator
 	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::upper_bound
@@ -758,6 +1110,26 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::const_itera
 		// otherwise generate iterator referring to next key
 		return (const_iterator (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false));
 	}
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::equal_range_type
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::equal_range
+	(
+		const key_type &rKey
+	)
+{
+	return (this->template _equal_range <iterator> (rKey));
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::equal_range_const_type
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::equal_range
+	(
+		const key_type &rKey
+	) const
+{
+	return (this->template _equal_range <const_iterator> (rKey));
 }
 
 /*
@@ -927,7 +1299,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::get_prev_key (c
 	}
 
 	// if key is present ...
-	if (this->find_oneKey (rKey, nNode, nSub))
+	if (this->find_oneKey (this->m_nRootNode, rKey, nNode, nSub))
 	{
 		// ... then look for initial data entry associated with that key value
 		this->find_firstKey (nNode, nSub, nPrevNode, nPrevSub);
@@ -976,7 +1348,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 	}
 
 	// if not a single entry can be found using the same key as pkey is pointing at ...
-	if (!find_oneKey (rKey, nNode, nSubPos))
+	if (!find_oneKey (this->m_nRootNode, rKey, nNode, nSubPos))
 	{
 		// ... then return
 		return (nRetval);
@@ -1018,6 +1390,19 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 	return (nRetval);
 }
 
+/*
+
+key_compare - get key compare object
+
+This method returns an object with an overloaded call operator, which accepts two key values
+as an input. Said operator returns true if the left hand key value is deemed lesser than the
+right hand key value, otherwise false.
+
+Note: Unlike other STL implementations, the returned object is only valid for as long as
+the container instance employed to create it has not been destroyed.
+
+*/
+
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::key_compare CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::key_comp () const
 {
@@ -1027,6 +1412,19 @@ typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::key_compare
 
 	return (sRetval);
 }
+
+/*
+
+value_compare - get value compare object
+
+This method returns an object with an overloaded call operator, which accepts two entries of type
+value_type as an input. Said operator returns true if the left hand value is deemed lesser than the
+right hand value, otherwise false.
+
+Note: Unlike other STL implementations, the returned object is only valid for as long as
+the container instance employed to create it has not been destroyed.
+
+*/
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::value_compare CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::value_comp () const
@@ -1308,7 +1706,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 	}
 
 	// if any entry using that key exists ...
-	if (find_oneKey (rKey, nNode, sub))
+	if (find_oneKey (this->m_nRootNode, rKey, nNode, sub))
 	{
 		// ... then find first entry sharing the same key and find its linear position within the tree
 		find_firstKey (nNode, sub, fstNode, fstSub);
@@ -2123,7 +2521,7 @@ The value returned is the sub-position, which has the nearest greater key compar
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 typename _t_datalayerproperties::sub_node_iter_type CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find_next_sub_pos (const typename _t_datalayerproperties::node_iter_type nNode, typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t &sPos) const
 {
-	node_t					*psNodeDesc;
+	node_t						*psNodeDesc;
 	sub_node_iter_type			ui32;
 	sub_node_iter_type			nMinPos, nMaxPos;
 
@@ -2171,6 +2569,7 @@ find_oneKey - find one key
 To track down into the tree to find any location, which has the same key as pKey is
 pointing at, this method is to be used.
 
+nStartNode	- specifies the node to start the tracking from
 pkey		- specifies the pointer to the key in question
 nNode		- returns the node in which an equal key has been found
 nSub		- returns the sub-position within the node in which an equal key has been found
@@ -2180,11 +2579,11 @@ If it was possible to find any matching key, then true is returned, otherwise fa
 */
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
-bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find_oneKey (const _t_key &rKey, typename _t_datalayerproperties::node_iter_type &nNode, typename _t_datalayerproperties::sub_node_iter_type &nSub, typename _t_datalayerproperties::size_type *pnPos) const
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find_oneKey (const node_iter_type nStartNode, const _t_key &rKey, typename _t_datalayerproperties::node_iter_type &nNode, typename _t_datalayerproperties::sub_node_iter_type &nSub, typename _t_datalayerproperties::size_type *pnPos) const
 {
 	uint32_t	bFound;
 
-	nNode = this->m_nRootNode;
+	nNode = nStartNode;
 
 	if (pnPos != NULL)
 	{
@@ -2258,6 +2657,154 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find_oneKey (co
 	}
 
 	return (true);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::find_nextKey (const key_type &rKey, const node_iter_type nFromNode, const sub_node_iter_type nFromSub, node_iter_type &rnNode, sub_node_iter_type &rnSub, size_type *pnPos) const
+{
+	if (pnPos != NULL)
+	{
+		if (*pnPos >= this->size ())
+		{
+			return (false);
+		}
+	}
+
+	key_type		*psKey;
+	bool			bBounce;
+
+	this->move_next (nFromNode, nFromSub, rnNode, rnSub, bBounce);
+
+	if (bBounce)
+	{
+		if (pnPos != NULL)
+		{
+			*pnPos = this->size ();
+		}
+
+		return (false);
+	}
+
+	if (pnPos != NULL)
+	{
+		(*pnPos)++;
+	}
+
+	node_iter_type		nThisNode;
+	sub_node_iter_type	nThisSub;
+
+	while (1)
+	{
+		
+		nThisNode = rnNode;
+		nThisSub = rnSub;
+
+		sub_node_iter_type	nMinPos = nThisSub;
+		sub_node_iter_type	nMaxPos = this->get_data_count (nThisNode);
+
+		psKey = this->extract_key (*this->m_ppShortLiveKey, nThisNode, nMaxPos - 1);
+
+		if (this->comp (rKey, *psKey) == 0)
+		{
+			this->move_next (nThisNode, nMaxPos - 1, rnNode, rnSub, bBounce);
+
+			if (bBounce)
+			{
+				if (pnPos != NULL)
+				{
+					*pnPos = this->size ();
+				}
+
+				return (false);
+			}
+			else
+			{
+				if (pnPos != NULL)
+				{
+					if (this->is_leaf (nThisNode))
+					{
+						*pnPos += nMaxPos - nMinPos;
+					}
+					else
+					{
+						if (rnSub > 0)
+						{
+							size_type	*pnSerVector = this->get_serVector (rnNode);
+
+							*pnPos += pnSerVector[nMaxPos - 1] - pnSerVector[nMinPos];
+						}
+
+						(*pnPos)++;
+					}
+				}
+
+				continue;
+			}
+		}
+
+		while (nMinPos != nMaxPos)
+		{
+			sub_node_iter_type	nMidPos = (nMinPos + nMaxPos) / 2;
+
+			psKey = this->extract_key (*this->m_ppShortLiveKey, nThisNode, nMidPos);
+
+			if (this->comp (rKey, *psKey) < 0)
+			{
+				nMaxPos = nMidPos;
+			}
+			else
+			{
+				nMinPos = nMidPos + 1;
+			}
+		}
+
+		if (this->is_leaf (nThisNode))
+		{
+			rnNode = nThisNode;
+			rnSub = nMinPos;
+
+			if (pnPos != NULL)
+			{
+				*pnPos += (nMinPos - nThisSub);
+			}
+
+			return (true);
+		}
+		else
+		{
+			this->move_prev (nThisNode, nMinPos, rnNode, rnSub, bBounce);
+
+#if defined (_DEBUG)
+
+			BTREE_ASSERT (!bBounce, "CBTreeAssociative<>::find_nextKey (): ERROR: move_prev ought not to return with bounce flagged on an inner node!");
+
+#endif
+
+			if ((pnPos != NULL) && (nThisSub != nMinPos))
+			{
+				size_type	*pnSerVector = this->get_serVector (nThisNode);
+
+				*pnPos += pnSerVector[nMinPos] - pnSerVector[nThisSub];
+			}
+
+			psKey = this->extract_key (*this->m_ppShortLiveKey, rnNode, rnSub);
+
+			if (this->comp (rKey, *psKey) == 0)
+			{
+				rnNode = nThisNode;
+				rnSub = nMinPos;
+
+				return (true);
+			}
+
+			if (pnPos != NULL)
+			{
+				*pnPos -= rnSub + 1;
+			}
+
+			rnSub = 0;
+		}
+	}
 }
 
 /*
@@ -2419,7 +2966,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::erase_via_refer
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_find (const _t_key &rKey, typename _t_datalayerproperties::node_iter_type &rnNode, typename _t_datalayerproperties::sub_node_iter_type &rnSub, typename _t_datalayerproperties::size_type &rnPos) const
 {
-	return (this->find_oneKey (rKey, rnNode, rnSub, &rnPos));
+	return (this->find_oneKey (this->m_nRootNode, rKey, rnNode, rnSub, &rnPos));
 }
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
@@ -2428,7 +2975,7 @@ void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_lower_bound (c
 	node_iter_type			nRsltNode;
 	sub_node_iter_type		nRsltSub;
 
-	if (this->find_oneKey (rKey, rnNode, rnSub, &rnPos))
+	if (this->find_oneKey (this->m_nRootNode, rKey, rnNode, rnSub, &rnPos))
 	{
 		rnPos -= this->find_firstKey (rnNode, rnSub, nRsltNode, nRsltSub);
 
@@ -2455,6 +3002,53 @@ bool CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_upper_bound (c
 	}
 
 	return (bBounce);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+template<class _t_iterator>
+typename ::std::pair<_t_iterator, _t_iterator>
+	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::_equal_range
+	(
+		const key_type &rKey
+	) const
+{
+	typedef typename ::std::pair<_t_iterator, _t_iterator>		local_equal_range_type;
+	node_iter_type			nRsltNode;
+	sub_node_iter_type		nRsltSub;
+	iterator_state_t		sIterState;
+	size_type				nPos;
+
+	sIterState.nAssociatedPos = size_type (0);
+
+	if (this->find_oneKey (this->m_nRootNode, rKey, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos))
+	{
+		nPos = sIterState.nAssociatedPos;
+
+		sIterState.nAssociatedPos -= this->find_firstKey (sIterState.nNode, sIterState.nSubPos, nRsltNode, nRsltSub);
+
+		fast_swap (sIterState.nNode, nRsltNode);
+		fast_swap (sIterState.nSubPos, nRsltSub);
+
+		_t_iterator		sIterLower (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false);
+
+		sIterState.nAssociatedPos = nPos;
+
+		this->find_nextKey (rKey, nRsltNode, nRsltSub, sIterState.nNode, sIterState.nSubPos, &sIterState.nAssociatedPos);
+
+		_t_iterator		sIterUpper (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false);
+
+		local_equal_range_type	sRetval (sIterLower, sIterUpper);
+
+		return (sRetval);
+	}
+	else
+	{
+		_t_iterator		sIter (this, sIterState.nAssociatedPos, (void *) &sIterState, this->get_time_stamp (), false);
+
+		local_equal_range_type	sRetval (sIter, sIter);
+
+		return (sRetval);
+	}
 }
 
 /*

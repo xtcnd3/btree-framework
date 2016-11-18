@@ -29,7 +29,7 @@ class CBTreeConstIterator : public ::std::iterator < ::std::random_access_iterat
 {
 public:
 
-	typedef CBTreeConstIterator									CBTreeBaseConstIterator_t;
+	typedef CBTreeConstIterator									CBTreeConstIterator_t;
 
 	typedef _ti_container										container_t;
 
@@ -43,6 +43,7 @@ public:
 								CBTreeConstIterator<_ti_container> (const _ti_container *pContainer, const size_type nPos, const bool bRegister = true);
 								CBTreeConstIterator<_ti_container> (const _ti_container *pContainer, const size_type nPos, const void *pExternState, const btree_time_stamp_t sTimeStamp, const bool bRegister = true);
 								CBTreeConstIterator<_ti_container> (const CBTreeConstIterator &rIter, const bool bRegister = true);
+								CBTreeConstIterator<_ti_container> (CBTreeConstIterator && rIter);
 								CBTreeConstIterator<_ti_container> (const CBTreeIterator<_ti_container> &rIter, const bool bRegister = true);
 
 								~CBTreeConstIterator<_ti_container> ();
@@ -53,6 +54,8 @@ public:
 	
 	CBTreeConstIterator &		operator= (const CBTreeConstIterator &rIter);
 	CBTreeConstIterator &		operator= (const CBTreeIterator<_ti_container> &rIter);
+
+	CBTreeConstIterator &		operator= (CBTreeConstIterator && rIter);
 
 	bool						operator== (const CBTreeConstIterator &rIter) const;
 	bool						operator!= (const CBTreeConstIterator &rIter) const;
@@ -65,19 +68,15 @@ public:
 	CBTreeConstIterator&		operator-- ();
 	CBTreeConstIterator			operator-- (int);
 	
-//	CBTreeConstIterator&		operator+= (const int nOperand);
 	CBTreeConstIterator&		operator+= (const size_type nOperand);
 	CBTreeConstIterator&		operator+= (const CBTreeConstIterator &rIter);
 
-//	CBTreeConstIterator&		operator-= (const int nOperand);
 	CBTreeConstIterator&		operator-= (const size_type nOperand);
 	CBTreeConstIterator&		operator-= (const CBTreeConstIterator &rIter);
 	
-//	const CBTreeConstIterator	operator+ (const int nOperand) const;
 	const CBTreeConstIterator	operator+ (const size_type nOperand) const;
 	const CBTreeConstIterator	operator+ (const CBTreeConstIterator &rIter) const;
 
-//	const CBTreeConstIterator	operator- (const int nOperand) const;
 	const CBTreeConstIterator	operator- (const size_type nOperand) const;
 	const size_type				operator- (const CBTreeConstIterator &rIter) const;
 
@@ -146,9 +145,10 @@ protected:
 	_ti_container				*m_pContainer;
 	size_type					m_nPos;
 	void						*m_pExternState;
+	btree_iter_last_access_t	m_sTimeStamp;
+
 	value_type					m_sData;
 	value_type					m_sSubScriptResult;
-	btree_iter_last_access_t	m_sTimeStamp;
 
 public:
 
@@ -206,18 +206,36 @@ public:
 									CBTreeIterator<_ti_container> (const _ti_container *pContainer, const size_type nPos, const bool bRegister = true);
 									CBTreeIterator<_ti_container> (const _ti_container *pContainer, const size_type nPos, const void *pExternState, const btree_time_stamp_t sTimeStamp, const bool bRegister = true);
 									CBTreeIterator<_ti_container> (const CBTreeIterator &rIter, const bool bRegister = true);
+									CBTreeIterator<_ti_container> (CBTreeIterator && rIter);
 						explicit	CBTreeIterator<_ti_container> (const CBTreeReverseIterator<CBTreeIterator<_ti_container> > &rRIter, const bool bRegister = true);
 						
-									CBTreeIterator<_ti_container> (const CBTreeConstIterator<_ti_container> &rIter, const bool bRegister = true);
-
 									~CBTreeIterator<_ti_container> ();
 
 	const value_type &				operator* () const;
 
 	CBTreeIteratorSubScriptWrapper<_ti_container>
 									operator* ();
+
+	CBTreeIterator&					operator++ ();
+	CBTreeIterator					operator++ (int);
+	CBTreeIterator&					operator-- ();
+	CBTreeIterator					operator-- (int);
 	
+	CBTreeIterator&					operator+= (const size_type nOperand);
+	CBTreeIterator&					operator+= (const CBTreeIterator &rIter);
+
+	CBTreeIterator&					operator-= (const size_type nOperand);
+	CBTreeIterator&					operator-= (const CBTreeIterator &rIter);
+	
+	const CBTreeIterator			operator+ (const size_type nOperand) const;
+	const CBTreeIterator			operator+ (const CBTreeIterator &rIter) const;
+
+	const CBTreeIterator			operator- (const size_type nOperand) const;
+	const size_type					operator- (const CBTreeIterator &rIter) const;
+
 	CBTreeIterator&					operator= (const CBTreeIterator &rIter);
+
+	CBTreeIterator&					operator= (CBTreeIterator && rIter);
 
 	CBTreeIteratorSubScriptWrapper<_ti_container>
 									operator[] (const int nPos);
@@ -325,14 +343,19 @@ public:
 											CBTreeConstReverseIterator<_t_iterator>	();
 								explicit	CBTreeConstReverseIterator<_t_iterator>	(const _t_iterator &rIter);
 											CBTreeConstReverseIterator<_t_iterator>	(const CBTreeConstReverseIterator<_t_iterator> &rIter);
+											CBTreeConstReverseIterator<_t_iterator>	(CBTreeConstReverseIterator<_t_iterator> && rIter);
 								explicit	CBTreeConstReverseIterator<_t_iterator> (const CBTreeReverseIterator<CBTreeIterator<container_t> > &rIter);
 
 											~CBTreeConstReverseIterator<_t_iterator>	();
 
 	void									swap (CBTreeConstReverseIterator &rRight);
 												
-	CBTreeConstReverseIterator&				operator= (const ::std::reverse_iterator<_t_iterator> &rIter);
+	CBTreeConstReverseIterator&				operator= (const ::std::reverse_iterator<typename _t_iterator::container_t::const_iterator> &rIter);
+	CBTreeConstReverseIterator&				operator= (const CBTreeConstReverseIterator<_t_iterator> &rIter);
+
 	CBTreeConstReverseIterator&				operator= (const CBTreeReverseIterator<CBTreeIterator <container_t> > &rIter);
+
+	CBTreeConstReverseIterator&				operator= (CBTreeConstReverseIterator<_t_iterator> && rIter);
 
 	bool									operator== (const CBTreeConstReverseIterator &rIter) const;
 	bool									operator!= (const CBTreeConstReverseIterator &rIter) const;
@@ -364,6 +387,7 @@ public:
 											CBTreeReverseIterator<_t_iterator>	();
 								explicit	CBTreeReverseIterator<_t_iterator>	(const _t_iterator &rIter);
 											CBTreeReverseIterator<_t_iterator>	(const CBTreeReverseIterator<_t_iterator> &rIter);
+											CBTreeReverseIterator<_t_iterator>	(CBTreeReverseIterator<_t_iterator> && rIter);
 
 											~CBTreeReverseIterator<_t_iterator>	();
 
@@ -373,7 +397,10 @@ public:
 											operator*	();
 											
 	CBTreeReverseIterator&					operator=	(const ::std::reverse_iterator<_t_iterator> &rIter);
+	CBTreeReverseIterator&					operator=	(const CBTreeReverseIterator &rIter);
 	CBTreeReverseIterator&					operator=	(const value_type &rData);
+
+	CBTreeReverseIterator&					operator=	(CBTreeReverseIterator && rIter);
 
 											operator const CBTreeConstReverseIterator<CBTreeConstIterator <container_t> > &	();
 

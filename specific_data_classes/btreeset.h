@@ -59,6 +59,9 @@ public:
 	typedef typename CBTreeAssociativeBase_t::reverse_iterator			reverse_iterator;
 	typedef typename CBTreeAssociativeBase_t::const_reverse_iterator	const_reverse_iterator;
 
+	typedef typename ::std::pair<iterator, iterator>					equal_range_type;
+	typedef typename ::std::pair<const_iterator, const_iterator>		equal_range_const_type;
+	
 	typedef	typename CBTreeAssociativeBase_t::iterator_state_t			iterator_state_t;
 	typedef	typename CBTreeAssociativeBase_t::position_t				position_t;
 
@@ -82,11 +85,20 @@ public:
 
 	iterator				insert					(const_iterator sCIterHint, const value_type &rData);
 
+	iterator				emplace					(value_type && rData);
+	iterator				emplace_hint			(const_iterator sCIterHint, value_type &&rData);
+
+	template<class ..._t_va_args>
+	iterator				emplace					(_t_va_args && ... rrArgs);
+	
+	template<class ..._t_va_args>
+	iterator				emplace_hint			(const_iterator sCIterHint, _t_va_args && ... rrArgs);
+
+	equal_range_type		equal_range				(const key_type &rKey);
+	equal_range_const_type	equal_range				(const key_type &rKey) const;
+
 	void					swap					(CBTreeAssociativeIf_t &rContainerIf);
 	void					swap					(CBTreeSet_t &rContainer);
-
-//	key_compare				key_comp				() const;
-//	value_compare			value_comp				() const;
 	
 protected:
 

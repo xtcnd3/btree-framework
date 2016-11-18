@@ -230,23 +230,26 @@ class CBTreeAssociativeIf
 {
 public:
 
-	typedef _t_data												value_type;
-	typedef _t_key												key_type;
-	typedef _t_sizetype											size_type;
+	typedef _t_data													value_type;
+	typedef _t_key													key_type;
+	typedef _t_sizetype												size_type;
 	
-	typedef value_type&											reference;
-	typedef const value_type&									const_reference;
-	typedef value_type*											pointer;
-	typedef const value_type*									const_pointer;
-	typedef	typename ::std::make_signed<size_type>::type		difference_type;
+	typedef value_type&												reference;
+	typedef const value_type&										const_reference;
+	typedef value_type*												pointer;
+	typedef const value_type*										const_pointer;
+	typedef	typename ::std::make_signed<size_type>::type			difference_type;
 
-	typedef CBTreeIf<value_type, size_type>						CBTreeIf_t;
+	typedef CBTreeIf<value_type, size_type>							CBTreeIf_t;
 
-	typedef typename CBTreeIf_t::iterator						iterator;
-	typedef typename CBTreeIf_t::const_iterator					const_iterator;
-	typedef typename CBTreeIf_t::reverse_iterator				reverse_iterator;
-	typedef typename CBTreeIf_t::const_reverse_iterator			const_reverse_iterator;
+	typedef typename CBTreeIf_t::iterator							iterator;
+	typedef typename CBTreeIf_t::const_iterator						const_iterator;
+	typedef typename CBTreeIf_t::reverse_iterator					reverse_iterator;
+	typedef typename CBTreeIf_t::const_reverse_iterator				const_reverse_iterator;
 
+	typedef typename ::std::pair<iterator, iterator>				equal_range_type;
+	typedef typename ::std::pair<const_iterator, const_iterator>	equal_range_const_type;
+	
 	template<class _ti_keytype>
 	struct key_compare_s
 	{
@@ -315,6 +318,9 @@ public:
 
 	virtual iterator		upper_bound					(const key_type &rKey) = 0;
 	virtual const_iterator	upper_bound					(const key_type &rKey) const = 0;
+
+	virtual equal_range_type	equal_range				(const key_type &rKey) = 0;
+	virtual equal_range_const_type	equal_range			(const key_type &rKey) const = 0;
 	
 	virtual void			get_next_key				(const key_type &rKey, key_type &rNextKey, bool &bBounce) const = 0;
 	virtual void			get_prev_key				(const key_type &rKey, key_type &rPrevKey, bool &bBounce) const = 0;
@@ -391,6 +397,9 @@ public:
 	typedef	typename CBTreeBaseDefaults_t::reverse_iterator			reverse_iterator;
 	typedef	typename CBTreeBaseDefaults_t::const_reverse_iterator	const_reverse_iterator;
 
+	typedef typename ::std::pair<iterator, iterator>				equal_range_type;
+	typedef typename ::std::pair<const_iterator, const_iterator>	equal_range_const_type;
+	
 	typedef	typename CBTreeBaseDefaults_t::iterator_state_t			iterator_state_t;
 
 	typedef	typename CBTreeAssociativeIf_t::key_compare				key_compare;
@@ -440,6 +449,9 @@ public:
 
 	iterator			upper_bound					(const key_type &rKey);
 	const_iterator		upper_bound					(const key_type &rKey) const;
+
+	equal_range_type	equal_range					(const key_type &rKey);
+	equal_range_const_type	equal_range				(const key_type &rKey) const;
 
 	void				get_next_key				(const key_type &rKey, key_type &rNextKey, bool &bBounce) const;
 	void				get_prev_key				(const key_type &rKey, key_type &rPrevKey, bool &bBounce) const;
@@ -499,8 +511,9 @@ protected:
 	virtual sub_node_iter_type	get_firstSubPos		(const node_iter_type nNode, const key_type &rKey, bool bReverse = false) const;
 	virtual sub_node_iter_type	find_next_sub_pos	(const node_iter_type nNode, position_t &sPos) const;
 
-	virtual bool		find_oneKey					(const key_type &rKey, node_iter_type &nNode, sub_node_iter_type &nSub, size_type *pnPos = NULL) const;
+	virtual bool		find_oneKey					(const node_iter_type nStartNode, const key_type &rKey, node_iter_type &nNode, sub_node_iter_type &nSub, size_type *pnPos = NULL) const;
 	virtual size_type	find_firstKey				(const node_iter_type nFromNode, const sub_node_iter_type nFromSub, node_iter_type &nNode, sub_node_iter_type &nSub) const;
+	virtual bool		find_nextKey				(const key_type &rKey, const node_iter_type nFromNode, const sub_node_iter_type nFromSub, node_iter_type &rnNode, sub_node_iter_type &rnSub, size_type *pnPos = NULL) const;
 
 	void				erase_via_reference			(const_iterator &rCIterPos, bool bReEvaluate = true);
 
@@ -508,6 +521,10 @@ protected:
 	
 	inline void			_lower_bound				(const key_type &rKey, node_iter_type &rnNode, sub_node_iter_type &rnSub, size_type &rnPos) const;
 	inline bool			_upper_bound				(const key_type &rKey, node_iter_type &rnNode, sub_node_iter_type &rnSub, size_type &rnPos) const;
+
+	template<class _t_iterator>
+	inline typename ::std::pair<_t_iterator, _t_iterator>
+						_equal_range				(const key_type &rKey) const;
 
 	// variable size buffer service
 	void				vbufferAllocate				(key_type **pp);

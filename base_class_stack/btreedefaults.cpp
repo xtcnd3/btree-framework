@@ -107,30 +107,6 @@ CBTreeDefaults<_t_data, _t_sizetype>::~CBTreeDefaults ()
 		delete m_psCIterRegister;
 	}
 
-//	if (m_psRIterRegister != NULL)
-//	{
-//		auto	sCIter = m_psRIterRegister->cbegin ();
-//
-//		for (; sCIter != m_psRIterRegister->cend (); sCIter++)
-//		{
-//			(*sCIter)->detach ();
-//		}
-//
-//		delete m_psRIterRegister;
-//	}
-//
-//	if (m_psCRIterRegister != NULL)
-//	{
-//		auto	sCIter = m_psCRIterRegister->cbegin ();
-//
-//		for (; sCIter != m_psCRIterRegister->cend (); sCIter++)
-//		{
-//			(*sCIter)->detach ();
-//		}
-//
-//		delete m_psCRIterRegister;
-//	}
-
 #endif
 }
 
@@ -300,8 +276,6 @@ void CBTreeDefaults<_t_data, _t_sizetype>::register_iterator (iterator *pIter)
 	if (m_psIterRegister->count (pIter) == 0)
 	{
 		m_psIterRegister->insert (pIter);
-
-//		printf ("%08lx --> %08lx\n", this, pIter);
 	}
 
 #endif
@@ -312,21 +286,10 @@ void CBTreeDefaults<_t_data, _t_sizetype>::register_iterator (const_iterator *pC
 {
 #if defined (BTREE_ITERATOR_REGISTRATION)
 
-//	static uint32_t		nCnt = 0;
-
 	if (m_psCIterRegister->count (pCIter) == 0)
 	{
 		m_psCIterRegister->insert (pCIter);
-
-//		printf ("%5u: %08lx --> %08lx\n", nCnt, this, pCIter);
 	}
-	else
-	{
-//		printf ("%5u: %08lx     %08lx\n", nCnt, this, pCIter);
-	}
-
-//	nCnt++;
-
 #endif
 }
 
@@ -362,16 +325,7 @@ void CBTreeDefaults<_t_data, _t_sizetype>::unregister_iterator (iterator *pIter)
 #if defined (BTREE_ITERATOR_REGISTRATION)
 
 	auto	nSize = m_psIterRegister->erase (pIter);
-/*
-	if (nSize == 0)
-	{
-		printf ("%08lx  x  %08lx\n", this, pIter);
-	}
-	else
-	{
-		printf ("%08lx <-- %08lx\n", this, pIter);
-	}
-*/
+
 #endif
 }
 
@@ -380,21 +334,8 @@ void CBTreeDefaults<_t_data, _t_sizetype>::unregister_iterator (const_iterator *
 {
 #if defined (BTREE_ITERATOR_REGISTRATION)
 
-//	static uint32_t		nCnt = 0;
-
 	auto	nSize = m_psCIterRegister->erase (pCIter);
-/*
-	if (nSize == 0)
-	{
-		printf ("%5u: %08lx  x  %08lx\n", nCnt, this, pCIter);
-	}
-	else
-	{
-		printf ("%5u: %08lx <-- %08lx\n", nCnt, this, pCIter);
-	}
 
-	nCnt++;
-*/
 #endif
 }
 

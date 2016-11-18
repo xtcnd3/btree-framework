@@ -76,9 +76,6 @@ public:
 	void					swap					(CBTreeAssociativeIf_t &rContainerIf);
 	void					swap					(CBTreeMultiSet_t &rContainer);
 	
-//	key_compare				key_comp				() const;
-//	value_compare			value_comp				() const;
-
 protected:
 
 	void					_swap					(CBTreeMultiSet_t &rContainer);

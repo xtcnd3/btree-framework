@@ -78,7 +78,6 @@ CBTreeConstIterator<_ti_container>::CBTreeConstIterator
 	}
 }
 
-
 template<class _ti_container>
 CBTreeConstIterator<_ti_container>::CBTreeConstIterator (const CBTreeConstIterator &rIter, const bool bRegister)
 	:	::std::iterator< ::std::random_access_iterator_tag, typename _ti_container::value_type, typename _ti_container::difference_type, typename _ti_container::pointer, typename _ti_container::reference> ()
@@ -100,6 +99,18 @@ CBTreeConstIterator<_ti_container>::CBTreeConstIterator (const CBTreeConstIterat
 			this->register_iterator (this->m_pContainer);
 		}
 	}
+}
+
+template<class _ti_container>
+CBTreeConstIterator<_ti_container>::CBTreeConstIterator (CBTreeConstIterator && rIter)
+	:	::std::iterator< ::std::random_access_iterator_tag, typename _ti_container::value_type, typename _ti_container::difference_type, typename _ti_container::pointer, typename _ti_container::reference> ()
+	,	m_pContainer (NULL)
+	,	m_pExternState (NULL)
+{
+	fast_swap (this->m_pContainer, rIter.m_pContainer);
+	fast_swap (this->m_nPos, rIter.m_nPos);
+	fast_swap (this->m_pExternState, rIter.m_pExternState);
+	fast_swap (this->m_sTimeStamp, rIter.m_sTimeStamp);
 }
 
 template<class _ti_container>
@@ -184,6 +195,14 @@ CBTreeConstIterator<_ti_container>& CBTreeConstIterator<_ti_container>::operator
 	CBTreeConstIterator<_ti_container>		sCIter (rIter);
 
 	*this = sCIter;
+
+	return (*this);
+}
+
+template<class _ti_container>
+CBTreeConstIterator<_ti_container>& CBTreeConstIterator<_ti_container>::operator= (CBTreeConstIterator && rIter)
+{
+	this->swap (rIter);
 
 	return (*this);
 }
@@ -283,29 +302,11 @@ CBTreeConstIterator<_ti_container> CBTreeConstIterator<_ti_container>::operator-
 	
 	return (sTemp);
 }
-/*
-template<class _ti_container>
-CBTreeConstIterator<_ti_container>& CBTreeConstIterator<_ti_container>::operator+= (const int nOperand)
-{
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator+= (int): Cannot increment if iterator is not associated with a container!");
 
-	if (nOperand > 0)
-	{
-		return (this->operator+= ((size_type) nOperand));
-	}
-	else
-	{
-		return (this->operator-= ((size_type) (0 - nOperand)));
-	}
-
-	return (*this);
-}
-*/
 template<class _ti_container>
 CBTreeConstIterator<_ti_container>& CBTreeConstIterator<_ti_container>::operator+= (const typename CBTreeConstIterator<_ti_container>::size_type nOperand)
 {
 	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator+= (size_type): Cannot increment if target iterator is not associated with a container!");
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator+= (size_type): Cannot increment if external iterator is not associated with a container!");
 
 	this->increment_by (nOperand);
 
@@ -316,35 +317,16 @@ template<class _ti_container>
 CBTreeConstIterator<_ti_container>& CBTreeConstIterator<_ti_container>::operator+= (const CBTreeConstIterator<_ti_container> &rIter)
 {
 	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator+= (const CBTreeConstIterator &): Cannot increment if target iterator is not associated with a container!");
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator+= (const CBTreeConstIterator &): Cannot increment if external iterator is not associated with a container!");
 
 	this->increment_by (rIter.m_nPos);
 
 	return (*this);
 }
-/*
-template<class _ti_container>
-CBTreeConstIterator<_ti_container>& CBTreeConstIterator<_ti_container>::operator-= (const int nOperand)
-{
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator-= (int): Cannot decrement if iterator is not associated with a container!");
 
-	if (nOperand > 0)
-	{
-		return (this->operator-= ((size_type) nOperand));
-	}
-	else
-	{
-		return (this->operator+= ((size_type) (0 - nOperand)));
-	}
-
-	return (*this);
-}
-*/
 template<class _ti_container>
 CBTreeConstIterator<_ti_container>& CBTreeConstIterator<_ti_container>::operator-= (const typename CBTreeConstIterator<_ti_container>::size_type nOperand)
 {
 	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator-= (size_type): Cannot decrement if target iterator is not associated with a container!");
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator-= (size_type): Cannot decrement if external iterator is not associated with a container!");
 
 	this->decrement_by (nOperand);
 
@@ -355,32 +337,19 @@ template<class _ti_container>
 CBTreeConstIterator<_ti_container>& CBTreeConstIterator<_ti_container>::operator-= (const CBTreeConstIterator<_ti_container> &rIter)
 {
 	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator-= (const CBTreeConstIterator &): Cannot decrement if target iterator is not associated with a container!");
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator-= (const CBTreeConstIterator &): Cannot decrement if external iterator is not associated with a container!");
+	BTREE_ASSERT (rIter.m_pContainer != NULL, "CBTreeConstIterator::operator-= (const CBTreeConstIterator &): Cannot decrement if external iterator is not associated with a container!");
 
 	this->decrement_by (rIter.m_nPos);
 
 	return (*this);
 }
-/*
-template<class _ti_container>
-const CBTreeConstIterator<_ti_container> CBTreeConstIterator<_ti_container>::operator+ (const int nOperand) const
-{
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator+ (int): Cannot increment if iterator is not associated with a container!");
 
-	CBTreeBaseConstIterator_t		nResult = *this;
-
-	nResult += nOperand;
-
-	return (nResult);
-}
-*/
 template<class _ti_container>
 const CBTreeConstIterator<_ti_container> CBTreeConstIterator<_ti_container>::operator+ (const typename CBTreeConstIterator<_ti_container>::size_type nOperand) const
 {
 	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator+ (size_type): Cannot increment if target iterator is not associated with a container!");
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator+ (size_type): Cannot increment if external iterator is not associated with a container!");
 
-	CBTreeBaseConstIterator_t		nResult = *this;
+	CBTreeConstIterator_t		nResult = *this;
 
 	nResult += nOperand;
 
@@ -393,32 +362,19 @@ const CBTreeConstIterator<_ti_container> CBTreeConstIterator<_ti_container>::ope
 	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator+ (const CBTreeConstIterator &): Cannot increment if target iterator is not associated with a container!");
 	BTREE_ASSERT (rIter.m_pContainer != NULL, "CBTreeConstIterator::operator+ (const CBTreeConstIterator &): Cannot increment if external iterator is not associated with a container!");
 
-	CBTreeBaseConstIterator_t		nResult = *this;
+	CBTreeConstIterator_t		nResult = *this;
 
 	nResult += rIter;
 	
 	return (nResult);
 }
-/*
-template<class _ti_container>
-const CBTreeConstIterator<_ti_container> CBTreeConstIterator<_ti_container>::operator- (const int nOperand) const
-{
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator- (int): Cannot decrement if iterator is not associated with a container!");
 
-	CBTreeBaseConstIterator_t		nResult = *this;
-
-	nResult -= nOperand;
-
-	return (nResult);
-}
-*/
 template<class _ti_container>
 const CBTreeConstIterator<_ti_container> CBTreeConstIterator<_ti_container>::operator- (const typename CBTreeConstIterator<_ti_container>::size_type nOperand) const
 {
 	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator- (size_type): Cannot decrement if target iterator is not associated with a container!");
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::operator- (size_type): Cannot decrement if external iterator is not associated with a container!");
 
-	CBTreeBaseConstIterator_t		nResult = *this;
+	CBTreeConstIterator_t		nResult = *this;
 
 	nResult -= nOperand;
 
@@ -428,8 +384,8 @@ const CBTreeConstIterator<_ti_container> CBTreeConstIterator<_ti_container>::ope
 template<class _ti_container>
 const typename CBTreeConstIterator<_ti_container>::size_type CBTreeConstIterator<_ti_container>::operator- (const CBTreeConstIterator<_ti_container> &rIter) const
 {
-	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::(size_type)operator- (const CBTreeConstIterator &): Cannot decrement if target iterator is not associated with a container!");
-	BTREE_ASSERT (rIter.m_pContainer != NULL, "CBTreeConstIterator::(size_type)operator- (const CBTreeConstIterator &): Cannot decrement if external iterator is not associated with a container!");
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeConstIterator::(size_type)operator- (const CBTreeConstIterator &): Cannot subtract if target iterator is not associated with a container!");
+	BTREE_ASSERT (rIter.m_pContainer != NULL, "CBTreeConstIterator::(size_type)operator- (const CBTreeConstIterator &): Cannot subtract if external iterator is not associated with a container!");
 	
 	size_type		nResult;
 	
@@ -727,18 +683,9 @@ void CBTreeConstIterator<_ti_container>::assign (const CBTreeConstIterator<_ti_c
 
 #endif
 
-//			if (rIter.m_pExternState != NULL)
-			{
-				memcpy (m_pExternState, rIter.m_pExternState, rIter.m_pContainer->get_iter_state_size ());
+			memcpy (m_pExternState, rIter.m_pExternState, rIter.m_pContainer->get_iter_state_size ());
 
-				m_sTimeStamp = rIter.m_sTimeStamp;
-			}
-//			else
-//			{
-//				rIter.m_pContainer->reset_iter_state (m_pExternState);
-//
-//				invalidate_time_stamp ();
-//			}
+			m_sTimeStamp = rIter.m_sTimeStamp;
 		}
 
 		if (m_pContainer != rIter.m_pContainer)
@@ -772,6 +719,8 @@ void CBTreeConstIterator<_ti_container>::unregister_iterator (_ti_container *pCo
 	}
 }
 
+/********************************************************************************************/
+
 template<class _ti_container>
 typename ::CBTreeConstIterator<_ti_container> operator+
 (
@@ -799,6 +748,8 @@ typename ::CBTreeConstIterator<_ti_container> operator+
 
 	return (nResult);
 }
+
+/********************************************************************************************/
 
 template<class _ti_container>
 CBTreeIterator<_ti_container>::CBTreeIterator ()
@@ -831,8 +782,8 @@ CBTreeIterator<_ti_container>::CBTreeIterator (const CBTreeReverseIterator<CBTre
 }
 
 template<class _ti_container>
-CBTreeIterator<_ti_container>::CBTreeIterator (const CBTreeConstIterator<_ti_container> &rIter, const bool bRegister)
-	:	CBTreeConstIterator<_ti_container> (rIter, bRegister)
+CBTreeIterator<_ti_container>::CBTreeIterator (CBTreeIterator<_ti_container> && rIter)
+	:	CBTreeConstIterator<_ti_container> (rIter)
 {
 }
 
@@ -856,9 +807,154 @@ CBTreeIteratorSubScriptWrapper<_ti_container> CBTreeIterator<_ti_container>::ope
 }
 
 template<class _ti_container>
+CBTreeIterator<_ti_container>& CBTreeIterator<_ti_container>::operator++ ()
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::++operator: Cannot increment if iterator is not associated with a container!");
+
+	this->increment_by (1);
+	
+	return (*this);
+}
+
+template<class _ti_container>
+CBTreeIterator<_ti_container> CBTreeIterator<_ti_container>::operator++ (int)
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::operator++: Cannot increment if iterator is not associated with a container!");
+
+	CBTreeIterator		sTemp (*this);
+
+	this->increment_by (1);
+	
+	return (sTemp);
+}
+
+template<class _ti_container>
+CBTreeIterator<_ti_container>& CBTreeIterator<_ti_container>::operator-- ()
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::--operator: Cannot decrement if iterator is not associated with a container!");
+
+	this->decrement_by (1);
+	
+	return (*this);
+}
+
+template<class _ti_container>
+CBTreeIterator<_ti_container> CBTreeIterator<_ti_container>::operator-- (int)
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::operator--: Cannot decrement if iterator is not associated with a container!");
+
+	CBTreeIterator		sTemp (*this);
+
+	this->decrement_by (1);
+	
+	return (sTemp);
+}
+	
+template<class _ti_container>
+CBTreeIterator<_ti_container>& CBTreeIterator<_ti_container>::operator+= (const size_type nOperand)
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::operator+= (size_type): Cannot increment if target iterator is not associated with a container!");
+
+	this->increment_by (nOperand);
+
+	return (*this);
+}
+
+template<class _ti_container>
+CBTreeIterator<_ti_container>& CBTreeIterator<_ti_container>::operator+= (const CBTreeIterator &rIter)
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::operator+= (size_type): Cannot increment if target iterator is not associated with a container!");
+	BTREE_ASSERT (rIter.m_pContainer != NULL, "CBTreeIterator::operator+= (size_type): Cannot increment if external iterator is not associated with a container!");
+
+	this->increment_by (rIter.m_nPos);
+
+	return (*this);
+}
+
+template<class _ti_container>
+CBTreeIterator<_ti_container>& CBTreeIterator<_ti_container>::operator-= (const size_type nOperand)
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::operator-= (size_type): Cannot decrement if target iterator is not associated with a container!");
+
+	this->decrement_by (nOperand);
+
+	return (*this);
+}
+
+template<class _ti_container>
+CBTreeIterator<_ti_container>& CBTreeIterator<_ti_container>::operator-= (const CBTreeIterator &rIter)
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::operator-= (size_type): Cannot decrement if target iterator is not associated with a container!");
+	BTREE_ASSERT (rIter.m_pContainer != NULL, "CBTreeIterator::operator-= (size_type): Cannot decrement if external iterator is not associated with a container!");
+
+	this->decrement_by (rIter.m_nPos);
+
+	return (*this);
+}
+
+template<class _ti_container>
+const CBTreeIterator<_ti_container> CBTreeIterator<_ti_container>::operator+ (const size_type nOperand) const
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::operator+ (size_type): Cannot increment if target iterator is not associated with a container!");
+
+	CBTreeIterator_t		nResult = *this;
+
+	nResult += nOperand;
+
+	return (nResult);
+}
+
+template<class _ti_container>
+const CBTreeIterator<_ti_container> CBTreeIterator<_ti_container>::operator+ (const CBTreeIterator &rIter) const
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::operator+ (const CBTreeIterator &): Cannot increment if target iterator is not associated with a container!");
+	BTREE_ASSERT (rIter.m_pContainer != NULL, "CBTreeIterator::operator+ (const CBTreeIterator &): Cannot increment if external iterator is not associated with a container!");
+
+	CBTreeIterator_t		nResult = *this;
+
+	nResult += rIter;
+	
+	return (nResult);
+}
+
+template<class _ti_container>
+const CBTreeIterator<_ti_container> CBTreeIterator<_ti_container>::operator- (const size_type nOperand) const
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::operator- (size_type): Cannot decrement if target iterator is not associated with a container!");
+
+	CBTreeIterator_t		nResult = *this;
+
+	nResult -= nOperand;
+
+	return (nResult);
+}
+
+template<class _ti_container>
+const typename CBTreeIterator<_ti_container>::size_type CBTreeIterator<_ti_container>::operator- (const CBTreeIterator<_ti_container> &rIter) const
+{
+	BTREE_ASSERT (this->m_pContainer != NULL, "CBTreeIterator::(size_type)operator- (const CBTreeIterator &): Cannot subtract if target iterator is not associated with a container!");
+	BTREE_ASSERT (rIter.m_pContainer != NULL, "CBTreeIterator::(size_type)operator- (const CBTreeIterator &): Cannot subtract if external iterator is not associated with a container!");
+	
+	size_type		nResult;
+	
+	nResult = this->m_nPos - rIter.m_nPos;
+	
+	return (nResult);
+}
+
+
+template<class _ti_container>
 CBTreeIterator<_ti_container>& CBTreeIterator<_ti_container>::operator= (const CBTreeIterator<_ti_container> &rIter)
 {
 	this->assign (rIter);
+
+	return (*this);
+}
+
+template<class _ti_container>
+CBTreeIterator<_ti_container>& CBTreeIterator<_ti_container>::operator= (CBTreeIterator<_ti_container> && rIter)
+{
+	this->swap (rIter);
 
 	return (*this);
 }
@@ -888,6 +984,8 @@ void CBTreeIterator<_ti_container>::set (const value_type &rData)
 	this->m_pContainer->set_iter_data (this->m_pExternState, rData);
 }
 
+/********************************************************************************************/
+
 template<class _ti_container>
 typename ::CBTreeIterator<_ti_container> operator+
 (
@@ -915,6 +1013,8 @@ typename ::CBTreeIterator<_ti_container> operator+
 
 	return (nResult);
 }
+
+/********************************************************************************************/
 
 template<class _ti_container>
 CBTreeIteratorSubScriptWrapper<_ti_container>::CBTreeIteratorSubScriptWrapper
@@ -950,6 +1050,8 @@ CBTreeIteratorSubScriptWrapper<_ti_container>::operator const typename CBTreeIte
 	return (m_sData);
 }
 
+/********************************************************************************************/
+
 template<class _t_iterator>
 CBTreeConstReverseIterator<_t_iterator>::CBTreeConstReverseIterator ()
 	:	::std::reverse_iterator<_t_iterator> ()
@@ -964,6 +1066,12 @@ CBTreeConstReverseIterator<_t_iterator>::CBTreeConstReverseIterator (const _t_it
 
 template<class _t_iterator>
 CBTreeConstReverseIterator<_t_iterator>::CBTreeConstReverseIterator (const CBTreeConstReverseIterator<_t_iterator> &rIter)
+	:	::std::reverse_iterator<_t_iterator> (rIter)
+{
+}
+
+template<class _t_iterator>
+CBTreeConstReverseIterator<_t_iterator>::CBTreeConstReverseIterator (CBTreeConstReverseIterator<_t_iterator> && rIter)
 	:	::std::reverse_iterator<_t_iterator> (rIter)
 {
 }
@@ -998,11 +1106,22 @@ void CBTreeConstReverseIterator<_t_iterator>::swap (CBTreeConstReverseIterator &
 }
 
 template<class _t_iterator>
-CBTreeConstReverseIterator<_t_iterator>& CBTreeConstReverseIterator<_t_iterator>::operator= (const ::std::reverse_iterator<_t_iterator> &rIter)
+CBTreeConstReverseIterator<_t_iterator>& CBTreeConstReverseIterator<_t_iterator>::operator= (const ::std::reverse_iterator<typename _t_iterator::container_t::const_iterator> &rIter)
 {
 	CBTreeConstReverseIterator<_t_iterator>		sIter (rIter.base ());
 
 	*this = sIter;
+
+	return (*this);
+}
+
+template<class _t_iterator>
+CBTreeConstReverseIterator<_t_iterator>& CBTreeConstReverseIterator<_t_iterator>::operator= (const CBTreeConstReverseIterator<_t_iterator> &rIter)
+{
+	::std::reverse_iterator<_t_iterator>		&rLhs = dynamic_cast <::std::reverse_iterator<_t_iterator> &> (*this);
+	const ::std::reverse_iterator<_t_iterator>	&rRhs = dynamic_cast <const ::std::reverse_iterator<_t_iterator> &> (rIter);
+
+	rLhs = rRhs;
 
 	return (*this);
 }
@@ -1016,6 +1135,17 @@ CBTreeConstReverseIterator<_t_iterator>& CBTreeConstReverseIterator<_t_iterator>
 	CBTreeConstReverseIterator<_t_iterator>		sIter (rIter.base ());
 
 	*this = sIter;
+
+	return (*this);
+}
+
+template<class _t_iterator>
+CBTreeConstReverseIterator<_t_iterator>& CBTreeConstReverseIterator<_t_iterator>::operator=
+	(
+		CBTreeConstReverseIterator<_t_iterator> && rIter
+	)
+{
+	this->swap (rIter);
 
 	return (*this);
 }
@@ -1089,6 +1219,8 @@ typename CBTreeConstReverseIterator<_t_iterator>::value_type& CBTreeConstReverse
 	return (m_sSubScriptResult);
 }	
 
+/********************************************************************************************/
+
 template<class _t_iterator>
 CBTreeReverseIterator<_t_iterator>::CBTreeReverseIterator ()
 	:	CBTreeConstReverseIterator<_t_iterator> ()
@@ -1103,6 +1235,12 @@ CBTreeReverseIterator<_t_iterator>::CBTreeReverseIterator (const _t_iterator &rI
 
 template<class _t_iterator>
 CBTreeReverseIterator<_t_iterator>::CBTreeReverseIterator (const CBTreeReverseIterator<_t_iterator> &rIter)
+	:	CBTreeConstReverseIterator<_t_iterator> (rIter)
+{
+}
+
+template<class _t_iterator>
+CBTreeReverseIterator<_t_iterator>::CBTreeReverseIterator (CBTreeReverseIterator<_t_iterator> && rIter)
 	:	CBTreeConstReverseIterator<_t_iterator> (rIter)
 {
 }
@@ -1143,6 +1281,17 @@ CBTreeReverseIterator<_t_iterator>& CBTreeReverseIterator<_t_iterator>::operator
 }
 
 template<class _t_iterator>
+CBTreeReverseIterator<_t_iterator>& CBTreeReverseIterator<_t_iterator>::operator= (const CBTreeReverseIterator<_t_iterator> &rIter)
+{
+	::std::reverse_iterator<_t_iterator>		&rLhs = dynamic_cast <::std::reverse_iterator<_t_iterator> &> (*this);
+	const ::std::reverse_iterator<_t_iterator>	&rRhs = dynamic_cast <const ::std::reverse_iterator<_t_iterator> &> (rIter);
+
+	rLhs = rRhs;
+
+	return (*this);
+}
+
+template<class _t_iterator>
 CBTreeReverseIterator<_t_iterator>& CBTreeReverseIterator<_t_iterator>::operator= (const value_type &rData)
 {
 	_t_iterator				sIter (this->base ());
@@ -1150,6 +1299,14 @@ CBTreeReverseIterator<_t_iterator>& CBTreeReverseIterator<_t_iterator>::operator
 	sIter++;
 
 	sIter = rData;
+
+	return (*this);
+}
+
+template<class _t_iterator>
+CBTreeReverseIterator<_t_iterator>& CBTreeReverseIterator<_t_iterator>::operator= (CBTreeReverseIterator && rIter)
+{
+	this->swap (rIter);
 
 	return (*this);
 }

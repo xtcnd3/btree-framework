@@ -335,7 +335,6 @@ void CBTreeFileIO<_t_datalayerproperties>::insert_dataIntoPool (uint32_t nPool, 
 	_t_dl_data		*psNodeData = this->template get_pooledData<_t_dl_data> (nPool, nNode);
 
 	memmove ((void *) &(psNodeData[nOffset + nDataLen]), (void *) &(psNodeData[nOffset]), sizeof (*psNodeData) * (nNodeLen - nOffset));
-//	memcpy ((void *) &(psNodeData[nOffset]), (void *) pData, sizeof (*psNodeData) * nDataLen);
 }
 
 template<class _t_datalayerproperties>

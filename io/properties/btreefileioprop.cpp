@@ -59,7 +59,7 @@ _t_addresstype CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, 
 template<class _t_sizetype, class _t_nodeiter, class _t_subnodeiter, class _t_addresstype, class _t_offsettype>
 _t_addresstype CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>::get_blocksize () const
 {
-	return (m_nAddrSpaceSoftLimit);
+	return (m_nBlockSize);
 }
 
 #endif

@@ -19,8 +19,8 @@
 template<class _t_datalayerproperties>
 CBTreeIO<_t_datalayerproperties>::CBTreeIO
 (
-	uint32_t nNumDataPools, 
-	CBTreeIOperBlockPoolDesc_t *psDataPools
+	const uint32_t nNumDataPools, 
+	const CBTreeIOperBlockPoolDesc_t *psDataPools
 )
 	:	m_psDataPools (NULL)
 	,	m_nNumDataPools (nNumDataPools)

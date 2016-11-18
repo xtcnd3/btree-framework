@@ -63,29 +63,6 @@ CBTreeBlockIO<_t_datalayerproperties>::~CBTreeBlockIO ()
 }
 
 template<class _t_datalayerproperties>
-typename _t_datalayerproperties::node_iter_type CBTreeBlockIO<_t_datalayerproperties>::get_maxNodes ()
-{
-	return (this->m_nMaxNodes);
-}
-
-template<class _t_datalayerproperties>
-typename _t_datalayerproperties::offset_type CBTreeBlockIO<_t_datalayerproperties>::get_dataAlignment ()
-{
-	// The keyword 'long' has been purposely choosen, since it will make the compiler to return 4 bytes on 32 bit builds and 8 bytes on 64 bit builds, as oppose to uint32_t and uint64_t.
-	return ((offset_type) (sizeof (long)));
-}
-
-template<class _t_datalayerproperties>
-typename _t_datalayerproperties::offset_type CBTreeBlockIO<_t_datalayerproperties>::get_alignedOffset (typename _t_datalayerproperties::offset_type nOffset)
-{
-	nOffset += get_dataAlignment () - 1;
-	nOffset /= get_dataAlignment ();
-	nOffset *= get_dataAlignment ();
-
-	return (nOffset);
-}
-
-template<class _t_datalayerproperties>
 void CBTreeBlockIO<_t_datalayerproperties>::set_root_node (typename _t_datalayerproperties::node_iter_type nRootNode)
 {
 	uint32_t		nCurrentRootContainingDesc;

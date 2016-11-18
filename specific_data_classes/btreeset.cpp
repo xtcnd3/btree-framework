@@ -48,87 +48,69 @@ template<class _t_keytype, class _t_datalayerproperties>
 template<class _t_iterator>
 void CBTreeSet<_t_keytype, _t_datalayerproperties>::insert (_t_iterator sItFirst, _t_iterator sItLast)
 {
-	_t_iterator		sIt;
-	bool			bSelfReverse;
-	bool			bSelfReference = CBTreeSet_t::test_self_reference_of_iterator_to_this (sItFirst, sItLast, bSelfReverse, NULL, NULL);
-
-	if (!bSelfReference)
-	{
-		for (sIt = sItFirst; sIt != sItLast; sIt++)
-		{
-			CBTreeSet_t::insert ((value_type) (*sIt));
-		}
-	}
+	CBTreeAssociativeBase_t::template _insert_unique <_t_iterator> (sItFirst, sItLast);
 }
 
 template<class _t_keytype, class _t_datalayerproperties>
 typename CBTreeSet<_t_keytype, _t_datalayerproperties>::iterator
-	CBTreeSet<_t_keytype, _t_datalayerproperties>::insert (const typename CBTreeSet<_t_keytype, _t_datalayerproperties>::value_type &rData)
+	CBTreeSet<_t_keytype, _t_datalayerproperties>::insert (const typename CBTreeSet_t::value_type &rData)
 {
-	iterator			sIter;
-
-	size_type			nPresent = CBTreeAssociativeBase_t::count (rData);
-
-	if (nPresent == 0)
-	{
-		sIter = CBTreeAssociative_t::insert (rData);
-	}
-	else
-	{
-		sIter = this->cend ();
-	}
-
-	return (sIter);
+	return (CBTreeAssociativeBase_t::_insert_unique (rData));
 }
 
 template<class _t_keytype, class _t_datalayerproperties>
 typename CBTreeSet<_t_keytype, _t_datalayerproperties>::iterator
 	CBTreeSet<_t_keytype, _t_datalayerproperties>::insert (typename CBTreeSet_t::const_iterator sCIterHint, const typename CBTreeSet_t::value_type &rData)
 {
-	bool				bFallBack = true;
-	node_iter_type		nNode;
-	sub_node_iter_type	nSubPos;
-
-	if (sCIterHint.is_evaluated ())
-	{
-		iterator_state_t	*psIterState = (iterator_state_t *) sCIterHint.get_iterator_state ();
-
-		if (this->is_leaf (psIterState->nNode))
-		{
-			position_t			sPos;
-
-			sPos.nInstance = ~0;
-			sPos.pKey = this->extract_key (this->m_pAddToNodeKey, rData);
-
-			nSubPos = this->find_next_sub_pos (psIterState->nNode, sPos);
-
-			if ((nSubPos != 0) && (nSubPos != this->get_data_count (psIterState->nNode)))
-			{
-				size_type		nDiff = size_type (nSubPos - psIterState->nSubPos);
-
-				::std::advance (sCIterHint, nDiff);
-
-				bFallBack = this->insert_via_iterator (sCIterHint, nNode, nSubPos);
-			}
-		}
-	}
-
-	if (bFallBack)
-	{
-		return (this->insert (rData));
-	}
-	else
-	{
-		value_type	*psData = this->get_data (nNode, nSubPos);
-
-		*psData = ::std::move (rData);
-
-		return (iterator (sCIterHint));
-	}
+	return (CBTreeAssociativeBase_t::_insert_unique (sCIterHint, rData));
 }
 
 template<class _t_keytype, class _t_datalayerproperties>
-void CBTreeSet<_t_keytype, _t_datalayerproperties>::swap (typename CBTreeSet<_t_keytype, _t_datalayerproperties>::CBTreeAssociativeIf_t &rContainerIf)
+typename CBTreeSet<_t_keytype, _t_datalayerproperties>::iterator
+	CBTreeSet<_t_keytype, _t_datalayerproperties>::emplace (typename CBTreeSet_t::value_type && rrData)
+{
+	return (CBTreeAssociativeBase_t::_emplace_unique (::std::forward<value_type> (rrData)));
+}
+
+template<class _t_keytype, class _t_datalayerproperties>
+typename CBTreeSet<_t_keytype, _t_datalayerproperties>::iterator
+	CBTreeSet<_t_keytype, _t_datalayerproperties>::emplace_hint (const_iterator sCIterHint, typename CBTreeSet_t::value_type && rrData)
+{
+	return (CBTreeAssociativeBase_t::_emplace_hint_unique (sCIterHint, ::std::forward<value_type> (rrData)));
+}
+
+template<class _t_keytype, class _t_datalayerproperties>
+template<class ..._t_va_args>
+typename CBTreeSet<_t_keytype, _t_datalayerproperties>::iterator
+	CBTreeSet<_t_keytype, _t_datalayerproperties>::emplace (_t_va_args && ... rrArgs)
+{
+	return (CBTreeAssociativeBase_t::_emplace_unique (::std::forward<_t_va_args> (rrArgs) ...));
+}
+
+template<class _t_keytype, class _t_datalayerproperties>
+template<class ..._t_va_args>
+typename CBTreeSet<_t_keytype, _t_datalayerproperties>::iterator
+	CBTreeSet<_t_keytype, _t_datalayerproperties>::emplace_hint (const_iterator sCIterHint, _t_va_args && ... rrArgs)
+{
+	return (CBTreeAssociativeBase_t::_emplace_hint_unique (sCIterHint, ::std::forward<_t_va_args> (rrArgs) ...));
+}
+
+template<class _t_keytype, class _t_datalayerproperties>
+typename CBTreeSet<_t_keytype, _t_datalayerproperties>::equal_range_type
+	CBTreeSet<_t_keytype, _t_datalayerproperties>::equal_range (const key_type &rKey)
+{
+	return (CBTreeAssociativeBase_t::template _equal_range_unique <iterator> (rKey));
+}
+
+template<class _t_keytype, class _t_datalayerproperties>
+typename CBTreeSet<_t_keytype, _t_datalayerproperties>::equal_range_const_type
+	CBTreeSet<_t_keytype, _t_datalayerproperties>::equal_range (const key_type &rKey) const
+{
+	return (CBTreeAssociativeBase_t::template _equal_range_unique <const_iterator> (rKey));
+}
+
+template<class _t_keytype, class _t_datalayerproperties>
+void CBTreeSet<_t_keytype, _t_datalayerproperties>::swap (typename CBTreeSet_t::CBTreeAssociativeIf_t &rContainerIf)
 {
 	CBTreeSet_t		&rContainer = dynamic_cast<CBTreeSet_t &> (rContainerIf);
 
@@ -136,7 +118,7 @@ void CBTreeSet<_t_keytype, _t_datalayerproperties>::swap (typename CBTreeSet<_t_
 }
 
 template<class _t_keytype, class _t_datalayerproperties>
-void CBTreeSet<_t_keytype, _t_datalayerproperties>::swap (typename CBTreeSet<_t_keytype, _t_datalayerproperties>::CBTreeSet_t &rContainer)
+void CBTreeSet<_t_keytype, _t_datalayerproperties>::swap (CBTreeSet_t &rContainer)
 {
 	if (this != &rContainer)
 	{
@@ -145,7 +127,7 @@ void CBTreeSet<_t_keytype, _t_datalayerproperties>::swap (typename CBTreeSet<_t_
 }
 
 template<class _t_keytype, class _t_datalayerproperties>
-void CBTreeSet<_t_keytype, _t_datalayerproperties>::_swap (typename CBTreeSet<_t_keytype, _t_datalayerproperties>::CBTreeSet_t &rContainer)
+void CBTreeSet<_t_keytype, _t_datalayerproperties>::_swap (CBTreeSet_t &rContainer)
 {
 	CBTreeAssociativeBase_t		&rSTLbaseContainerContainer = dynamic_cast <CBTreeAssociativeBase_t &> (rContainer);
 	
