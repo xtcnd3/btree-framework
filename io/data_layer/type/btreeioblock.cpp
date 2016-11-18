@@ -154,7 +154,7 @@ typename CBTreeBlockIO<_t_datalayerproperties>::offset_type CBTreeBlockIO<_t_dat
 	offset_type		nBase = this->get_poolOffset ();
 	uint32_t		ui32;
 
-	nBase = get_alignedOffset (nBase);
+	nBase = this->get_alignedOffset (nBase);
 
 	for (ui32 = 0; ui32 < this->m_nNumDataPools; ui32++)
 	{
@@ -162,7 +162,7 @@ typename CBTreeBlockIO<_t_datalayerproperties>::offset_type CBTreeBlockIO<_t_dat
 
 		nBase += this->get_pool_total_size (ui32);
 
-		nBase = get_alignedOffset (nBase);
+		nBase = this->get_alignedOffset (nBase);
 	}
 
 	return (nBase);

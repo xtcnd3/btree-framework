@@ -11,8 +11,8 @@ Note: Please understand that this is not a stand-alone project and needs to be b
 ## Documentation
 
 The documentation of this project comes in two flavours:
-- [Open Document Text file (.ODT)](https://github.com/andreas-steffens/btree-framework-testbench/blob/master/doc/btree%20programmer%20guide.odt?raw=true)
-- [Portable Document Format file (.PDF)](https://github.com/andreas-steffens/btree-framework-testbench/blob/master/doc/btree%20programmer%20guide.pdf?raw=true)
+- [Documentation as Open Document Text file (.ODT)](https://github.com/andreas-steffens/btree-framework-testbench/blob/master/doc/btree%20programmer%20guide.odt?raw=true)
+- [Documentation as Portable Document Format file (.PDF)](https://github.com/andreas-steffens/btree-framework-testbench/blob/master/doc/btree%20programmer%20guide.pdf?raw=true)
 
 The documentation is pretty large and might be a bit overwhelming. To address that problem, please find the section "1. Where to start" of the [README](https://github.com/andreas-steffens/btree-framework/blob/master/README) file. This section tells what sections need to be initially read in order to understand how this framework is working and supposed to be used.
 <br>
