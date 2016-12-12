@@ -21,6 +21,8 @@ class CBTreeRAMIO : public CBTreeLinearIO<_t_datalayerproperties>
 {
 public:
 
+	typedef CBTreeRAMIO												CBTreeRAMIO_t;
+
 	typedef typename _t_datalayerproperties::size_type				size_type;
 	typedef typename _t_datalayerproperties::node_iter_type			node_iter_type;
 	typedef typename _t_datalayerproperties::sub_node_iter_type		sub_node_iter_type;
@@ -30,10 +32,10 @@ public:
 	// construction
 						CBTreeRAMIO<_t_datalayerproperties>
 													(
-														_t_datalayerproperties &rDataLayerProperties, 
-														sub_node_iter_type nNodeSize,
-														uint32_t nNumDataPools, 
-														CBTreeIOperBlockPoolDesc_t *psDataPools
+														const _t_datalayerproperties &rDataLayerProperties, 
+														const sub_node_iter_type nNodeSize,
+														const uint32_t nNumDataPools, 
+														const CBTreeIOperBlockPoolDesc_t *psDataPools
 													);
 
 						~CBTreeRAMIO<_t_datalayerproperties>
@@ -44,26 +46,26 @@ public:
 
 	// data access primitives
 	template<class _t_dl_data>
-	inline _t_dl_data *	get_pooledData				(uint32_t nPool, node_iter_type nNode);
+	inline _t_dl_data *	get_pooledData				(const uint32_t nPool, const node_iter_type nNode) const;
 
 	template<class _t_dl_data>
-	inline _t_dl_data *	get_pooledData				(uint32_t nPool, node_iter_type nNode, sub_node_iter_type nEntry);
+	inline _t_dl_data *	get_pooledData				(const uint32_t nPool, const node_iter_type nNode, const sub_node_iter_type nEntry) const;
 
 	// mid level data access
 	template<class _t_dl_data>
-	void				insert_dataIntoPool			(uint32_t nPool, node_iter_type nNode, sub_node_iter_type nNodeLen, sub_node_iter_type nOffset, sub_node_iter_type nDataLen);
+	void				insert_dataIntoPool			(const uint32_t nPool, const node_iter_type nNode, const sub_node_iter_type nNodeLen, const sub_node_iter_type nOffset, const sub_node_iter_type nDataLen);
 
 	// maintanence
-	void				set_size					(node_iter_type nMaxNodes);
+	void				set_size					(const node_iter_type nMaxNodes);
 	void				unload						();
 
 	// cache management
-	void				unload_from_cache			(node_iter_type nNode);
+	void				unload_from_cache			(const node_iter_type nNode);
 
 	// cache information
-	bool				is_dataCached				(uint32_t nPool, node_iter_type nNode);
+	bool				is_dataCached				(const uint32_t nPool, const node_iter_type nNode) const;
 
-	void				showdump					(std::ofstream &ofs, node_iter_type nTreeSize, char *pAlloc);
+	void				showdump					(std::ofstream &ofs, const node_iter_type nTreeSize) const;
 
 protected:
 

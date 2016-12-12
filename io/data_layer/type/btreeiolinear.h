@@ -55,8 +55,9 @@ public:
 	// construction
 							CBTreeLinearIO<_t_datalayerproperties>
 												(
-													uint32_t nNumDataPools, 
-													CBTreeIOperBlockPoolDesc_t *psDataPools
+													const sub_node_iter_type nNodeSize, 
+													const uint32_t nNumDataPools, 
+													const CBTreeIOperBlockPoolDesc_t *psDataPools
 												);
 
 							~CBTreeLinearIO<_t_datalayerproperties>
@@ -65,7 +66,7 @@ public:
 protected:
 
 	// address generation
-	inline const uint8_t	*get_node_base			(uint32_t nPool, node_iter_type nNode);
+	inline const uint8_t	*get_node_base			(const uint32_t nPool, const node_iter_type nNode) const;
 	
 	uint8_t											**m_ppsPools;
 };

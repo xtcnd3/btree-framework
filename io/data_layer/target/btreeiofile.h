@@ -46,6 +46,8 @@ class CBTreeFileIO : public CBTreeBlockIO<_t_datalayerproperties>
 {
 public:
 	
+	typedef	CBTreeFileIO											CBTreeFileIO_t;
+
 	typedef typename _t_datalayerproperties::size_type				size_type;
 	typedef typename _t_datalayerproperties::node_iter_type			node_iter_type;
 	typedef typename _t_datalayerproperties::sub_node_iter_type		sub_node_iter_type;
@@ -55,10 +57,10 @@ public:
 	// construction
 						CBTreeFileIO<_t_datalayerproperties>
 												(
-													_t_datalayerproperties &rDataLayerProperties, 
-													sub_node_iter_type nNodeSize,
-													uint32_t nNumDataPools, 
-													CBTreeIOperBlockPoolDesc_t *psDataPools
+													const _t_datalayerproperties &rDataLayerProperties, 
+													const sub_node_iter_type nNodeSize,
+													const uint32_t nNumDataPools, 
+													const CBTreeIOperBlockPoolDesc_t *psDataPools
 												);
 
 						~CBTreeFileIO<_t_datalayerproperties>
@@ -69,40 +71,40 @@ public:
 
 	// data access primitives
 	template<class _t_dl_data>
-	inline _t_dl_data *	get_pooledData				(uint32_t nPool, node_iter_type nNode);
+	inline _t_dl_data *	get_pooledData				(const uint32_t nPool, const node_iter_type nNode) const;
 
 	template<class _t_dl_data>
-	inline _t_dl_data *	get_pooledData				(uint32_t nPool, node_iter_type nNode, sub_node_iter_type nEntry);
+	inline _t_dl_data *	get_pooledData				(const uint32_t nPool, const node_iter_type nNode, const sub_node_iter_type nEntry) const;
 
 	// mid level data access
 	template<class _t_dl_data>
-	void				insert_dataIntoPool			(uint32_t nPool, node_iter_type nNode, sub_node_iter_type nNodeLen, sub_node_iter_type nOffset, sub_node_iter_type nDataLen);
+	void				insert_dataIntoPool			(const uint32_t nPool, const node_iter_type nNode, const sub_node_iter_type nNodeLen, const sub_node_iter_type nOffset, const sub_node_iter_type nDataLen);
 
 	// resources
-	void				set_size					(node_iter_type nMaxNodes);
+	void				set_size					(const node_iter_type nMaxNodes);
 	void				unload						();
 
 	// cache management
-	void				unload_from_cache			(node_iter_type nNode);
+	void				unload_from_cache			(const node_iter_type nNode);
 
 	// cache information
-	bool				is_dataCached				(uint32_t nPool, node_iter_type nNode);
+	bool				is_dataCached				(const uint32_t nPool, const node_iter_type nNode) const;
 
 	// resource management
 	void				terminate_access			();
 
-	void				showdump					(std::ofstream &ofs, node_iter_type nTreeSize, char *pAlloc);
+	void				showdump					(std::ofstream &ofs, const node_iter_type nTreeSize) const;
 
 protected:
 
 	void				init_mapping				();
 	void				exit_mapping				();
 
-	void				map_descriptor				(uint32_t nDescriptor);
-	void				sync_descriptor				(uint32_t nDescriptor);
-	void				unmap_descriptor			(uint32_t nDescriptor);
+	void				map_descriptor				(const uint32_t nDescriptor);
+	void				sync_descriptor				(const uint32_t nDescriptor);
+	void				unmap_descriptor			(const uint32_t nDescriptor);
 
-	void				unmap_all_descriptors		(bool bExceptRoot);
+	void				unmap_all_descriptors		(const bool bExceptRoot);
 
 	::std::string									m_strTempFile;
 

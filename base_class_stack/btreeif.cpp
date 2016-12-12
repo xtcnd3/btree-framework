@@ -29,6 +29,12 @@ CBTreeIf<_t_data, _t_sizetype>::CBTreeIf (const CBTreeIf<_t_data, _t_sizetype> &
 }
 
 template<class _t_data, class _t_sizetype>
+CBTreeIf<_t_data, _t_sizetype>::CBTreeIf (CBTreeIf<_t_data, _t_sizetype> &&rRhsContainer)
+	: CBTreeSuper (dynamic_cast <CBTreeSuper &&> (rRhsContainer))
+{
+}
+
+template<class _t_data, class _t_sizetype>
 CBTreeIf<_t_data, _t_sizetype>::~CBTreeIf ()
 {
 }

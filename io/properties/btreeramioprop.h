@@ -42,7 +42,7 @@ public:
 												();
 
 					CBTreeIOpropertiesRAM<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
-												(CBTreeIOpropertiesRAM &rBT);
+												(const CBTreeIOpropertiesRAM &rProperties);
 
 					~CBTreeIOpropertiesRAM<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
 												();

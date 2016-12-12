@@ -64,16 +64,17 @@ public:
 
 	// construction
 							CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
+													(const _t_datalayerproperties &rDataLayerProperties, const sub_node_iter_type nNodeSize);
 
 							CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>
-													(const CBTreeAssociativeBase_t &rBT, bool bAssign = true);
+													(const CBTreeAssociativeBase_t &rContainer, const bool bAssign = true);
+
+							CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>
+													(CBTreeAssociativeBase_t &&rRhsContainer);
 
 	// destruction
 	virtual					~CBTreeAssociativeBase<_t_data, _t_key, _t_datalayerproperties>
 													();
-
-	CBTreeAssociativeBase_t &		operator=				(const CBTreeAssociativeBase_t &rBT);
 
 	size_type				max_size				() const;
 
@@ -82,6 +83,10 @@ public:
 
 	iterator				upper_bound				(const key_type &rKey);
 	const_iterator			upper_bound				(const key_type &rKey) const;
+
+	CBTreeAssociativeBase &	operator=				(const CBTreeAssociativeBase &rContainer);
+	CBTreeAssociativeBase &	operator=				(CBTreeAssociativeBase &&rRhsContainer);
+
 
 protected:
 

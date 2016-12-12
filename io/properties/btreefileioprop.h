@@ -45,12 +45,12 @@ public:
 					CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
 															(
 																const char *pszPathName, 
-																address_type nAddrSpaceSoftLimit = BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT, 
-																address_type nBlockSize = 4096
+																const address_type nAddrSpaceSoftLimit = BAYERTREE_FILE_IO_PROPERTIES_ADDR_SPACE_SOFT_LIMIT, 
+																const address_type nBlockSize = 4096
 															);
 
 					CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
-															(CBTreeIOpropertiesFile &rBT);
+															(const CBTreeIOpropertiesFile &rProperties);
 
 					~CBTreeIOpropertiesFile<_t_sizetype, _t_nodeiter, _t_subnodeiter, _t_addresstype, _t_offsettype>
 															();

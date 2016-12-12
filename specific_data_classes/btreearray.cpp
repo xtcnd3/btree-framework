@@ -18,8 +18,8 @@
 template<class _t_data, class _t_datalayerproperties>
 CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray
 	(
-		_t_datalayerproperties &rDataLayerProperties, 
-		typename _t_datalayerproperties::sub_node_iter_type nNodeSize
+		const _t_datalayerproperties &rDataLayerProperties, 
+		const typename _t_datalayerproperties::sub_node_iter_type nNodeSize
 	)
 	:	CBTreeBaseDefaults <CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>
 	(
@@ -42,10 +42,10 @@ CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray
 }
 						
 template<class _t_data, class _t_datalayerproperties>
-CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (const CBTreeArray<_t_data, _t_datalayerproperties> &rBT, bool bAssign)
+CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (const CBTreeArray<_t_data, _t_datalayerproperties> &rContainer, const bool bAssign)
 	:	CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>
 	(
-		dynamic_cast <const CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties> &> (rBT)
+		dynamic_cast <const CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties> &> (rContainer)
 	)
 	,	CBTreeArrayIf <_t_data, typename _t_datalayerproperties::size_type> ()
 	,	m_pClAccessWrapper (NULL)
@@ -63,22 +63,22 @@ CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray (const CBTreeArray<_t_
 	
 	if (bAssign)
 	{
-		_assign (rBT);
+		_assign (rContainer);
 	}
 }
 
 template<class _t_data, class _t_datalayerproperties>
 CBTreeArray<_t_data, _t_datalayerproperties>::CBTreeArray
-	(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhBT)
+	(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhsContainer)
 	:	CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties>
 	(
-		dynamic_cast <CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties> &&> (rRhBT)
+		dynamic_cast <CBTreeBaseDefaults<CBTreeArrayPos<typename _t_datalayerproperties::size_type>, _t_data, _t_datalayerproperties> &&> (rRhsContainer)
 	)
 	,	CBTreeArrayIf <_t_data, typename _t_datalayerproperties::size_type> ()
 	,	m_pClAccessWrapper (NULL)
 	,	m_psReturnData (NULL)
 {
-	CBTreeArray_t::swap (&rRhBT);
+	_local_swap (rRhsContainer);
 }
 
 template<class _t_data, class _t_datalayerproperties>
@@ -172,7 +172,7 @@ void CBTreeArray<_t_data, _t_datalayerproperties>::assign (_t_iterator sItFirst,
 }
 
 template<class _t_data, class _t_datalayerproperties>
-void CBTreeArray<_t_data, _t_datalayerproperties>::assign (typename _t_datalayerproperties::size_type nNewSize, const _t_data& rVal)
+void CBTreeArray<_t_data, _t_datalayerproperties>::assign (const typename _t_datalayerproperties::size_type nNewSize, const _t_data& rVal)
 {
 	// remove all data in this list
 	CBTreeArray_t::clear ();
@@ -685,7 +685,7 @@ typename _t_datalayerproperties::size_type CBTreeArray<_t_data, _t_datalayerprop
 
 operator= - assignment operator overload
 
-rBT		- is a reference to a b-tree that will have its content be assigned to this instance
+rContainer		- is a reference to a b-tree that will have its content be assigned to this instance
 
 The result is a reference to this instance.
 
@@ -693,16 +693,16 @@ The result is a reference to this instance.
 
 template<class _t_data, class _t_datalayerproperties>
 CBTreeArray<_t_data, _t_datalayerproperties> &CBTreeArray<_t_data, _t_datalayerproperties>::operator=
-	(const CBTreeArray<_t_data, _t_datalayerproperties> &rBT)
+	(const CBTreeArray<_t_data, _t_datalayerproperties> &rContainer)
 {
-	// if this is not the same instance as the referenced b-tree (rBT) ...
-	if (this != &rBT)
+	// if this is not the same instance as the referenced b-tree (rContainer) ...
+	if (this != &rContainer)
 	{
 		// ... then destroy this data layer
 		CBTreeArray_t::clear ();
 
-		// and copy all data from rBT to this instance
-		CBTreeArray_t::_assign (rBT);
+		// and copy all data from rContainer to this instance
+		CBTreeArray_t::_assign (rContainer);
 	}
 
 	return (*this);
@@ -710,17 +710,14 @@ CBTreeArray<_t_data, _t_datalayerproperties> &CBTreeArray<_t_data, _t_datalayerp
 
 template<class _t_data, class _t_datalayerproperties>
 CBTreeArray<_t_data, _t_datalayerproperties> &CBTreeArray<_t_data, _t_datalayerproperties>::operator=
-	(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhBT)
+	(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhsContainer)
 {
-	// if this is not the same instance as the referenced b-tree (rBT) ...
-	if (this != &&rRhBT)
-	{
-		// ... then destroy this data layer
-		this->clear ();
+	CBTreeBaseDefaults_t		&rBaseDefaultsThis = dynamic_cast<CBTreeBaseDefaults_t &> (*this);
+	CBTreeBaseDefaults_t		&rBaseDefaultsContainer = dynamic_cast<CBTreeBaseDefaults_t &> (rRhsContainer);
 
-		// and swap all data from reference of right-hand container with this instance
-		swap (&rRhBT);
-	}
+	rBaseDefaultsThis = ::std::move (rBaseDefaultsContainer);
+	
+	_local_swap (rRhsContainer);
 
 	return (*this);
 }
@@ -1114,7 +1111,7 @@ return_value = (*this)[sPos (this, nNode, nSub) - 1];
 */
 
 template<class _t_data, class _t_datalayerproperties>
-CBTreeArrayPos<typename _t_datalayerproperties::size_type> CBTreeArray<_t_data, _t_datalayerproperties>::generate_prev_position (const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSub, CBTreeArrayPos<typename _t_datalayerproperties::size_type> sPos)
+CBTreeArrayPos<typename _t_datalayerproperties::size_type> CBTreeArray<_t_data, _t_datalayerproperties>::generate_prev_position (const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSub, CBTreeArrayPos<typename _t_datalayerproperties::size_type> sPos) const
 {
 #if defined (_DEBUG)
 	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeArray<_t_data, _t_datalayerproperties>::generate_prev_position: This method cannot be used on leaf nodes!");
@@ -1146,7 +1143,7 @@ return_value = (*this)[sPos (this, nNode, nSub) + 1];
 */
 
 template<class _t_data, class _t_datalayerproperties>
-CBTreeArrayPos<typename _t_datalayerproperties::size_type> CBTreeArray<_t_data, _t_datalayerproperties>::generate_next_position (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, CBTreeArrayPos<typename _t_datalayerproperties::size_type> sPos)
+CBTreeArrayPos<typename _t_datalayerproperties::size_type> CBTreeArray<_t_data, _t_datalayerproperties>::generate_next_position (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, CBTreeArrayPos<typename _t_datalayerproperties::size_type> sPos) const
 {
 #if defined (_DEBUG)
 	BTREE_ASSERT (!this->is_leaf (nNode), "CBTreeArray<_t_data, _t_datalayerproperties>::generate_next_position: This method cannot be used on leaf nodes!");
@@ -1542,6 +1539,15 @@ void CBTreeArray<_t_data, _t_datalayerproperties>::_swap (CBTreeArray<_t_data, _
 	CBTreeBaseDefaults_t	&rArrayBase = dynamic_cast <CBTreeBaseDefaults_t &> (rArray);
 
 	CBTreeBaseDefaults_t::_swap (rArrayBase);
+
+	_local_swap (rArray);
+}
+
+template<class _t_data, class _t_datalayerproperties>
+void CBTreeArray<_t_data, _t_datalayerproperties>::_local_swap (CBTreeArray<_t_data, _t_datalayerproperties> &rArray)
+{
+	fast_swap (this->m_pClAccessWrapper, rArray.m_pClAccessWrapper);
+	fast_swap (this->m_psReturnData, rArray.m_psReturnData);
 }
 
 template<class _t_data, class _t_datalayerproperties>

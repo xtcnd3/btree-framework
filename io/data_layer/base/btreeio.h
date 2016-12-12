@@ -80,6 +80,7 @@ public:
 	// construction
 						CBTreeIO<_t_datalayerproperties>
 													(
+														const sub_node_iter_type nNodeSize, 
 														const uint32_t nNumDataPools, 
 														const CBTreeIOperBlockPoolDesc_t *psDataPools
 													);
@@ -88,42 +89,44 @@ public:
 													();
 
 	// properties
-	node_iter_type		get_maxNodes				();
+	node_iter_type		get_maxNodes				() const;
 	
-	offset_type			get_dataAlignment			();
-	offset_type			get_alignedOffset			(offset_type nOffset);
+	offset_type			get_dataAlignment			() const;
+	offset_type			get_alignedOffset			(const offset_type nOffset) const;
 
 	// monitoring
 	void				get_performance_counters	(uint64_t (&rHitCtrs)[PERFCTR_TERMINATOR], uint64_t (&rMissCtrs)[PERFCTR_TERMINATOR]);
 
 	// cache information
-	uint32_t			get_pool_entry_size			(uint32_t nPool);
+	uint32_t			get_pool_entry_size			(const uint32_t nPool) const;
 
 	// resources
-	virtual void		set_size					(node_iter_type nMaxNodes) = 0;
+	virtual void		set_size					(const node_iter_type nMaxNodes) = 0;
 	virtual void		unload						() = 0;
 
 	// resource management
-	virtual void		set_root_node				(node_iter_type nRootNode);
+	virtual void		set_root_node				(const node_iter_type nRootNode);
 	virtual void		terminate_access			();
 
 	// cache management
-	virtual void		unload_from_cache			(node_iter_type nNode) = 0;
+	virtual void		unload_from_cache			(const node_iter_type nNode) = 0;
 
 	// cache settings
-	void				set_cacheFreeze				(bool bEnabled);
+	void				set_cacheFreeze				(const bool bEnabled);
 
 	// cache information
-	virtual bool		is_dataCached				(uint32_t nPool, node_iter_type nNode) = 0;
+	virtual bool		is_dataCached				(const uint32_t nPool, const node_iter_type nNode) const = 0;
 
-	virtual void		showdump					(std::ofstream &ofs, node_iter_type nTreeSize, char *pAlloc) = 0;
+	virtual void		showdump					(std::ofstream &ofs, const node_iter_type nTreeSize) const = 0;
 
 protected:
 
-	uint32_t			get_pool_total_size			(uint32_t nPool);
+	uint32_t			get_pool_total_size			(const uint32_t nPool) const;
 
 	uint32_t										m_nNumDataPools;
 	CBTreeIOperBlockPoolDesc_t						*m_psDataPools;
+
+	sub_node_iter_type								m_nNodeSize;				// node size parameter a.k.a. t
 
 	node_iter_type									m_nMaxNodes;
 

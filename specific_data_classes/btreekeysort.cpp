@@ -19,8 +19,8 @@
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::CBTreeKeySort
 	(
-		_t_datalayerproperties &rDataLayerProperties, 
-		typename _t_datalayerproperties::sub_node_iter_type nNodeSize
+		const _t_datalayerproperties &rDataLayerProperties, 
+		const typename _t_datalayerproperties::sub_node_iter_type nNodeSize
 	)
 	:	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
 	(
@@ -31,10 +31,19 @@ CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::CBTreeKeySort
 }
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
-CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::CBTreeKeySort (CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rBT, bool bAssign)
+CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::CBTreeKeySort (const CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rContainer, const bool bAssign)
 	:	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
 	(
-		dynamic_cast <CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &> (rBT), bAssign
+		dynamic_cast <const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &> (rContainer), bAssign
+	)
+{
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::CBTreeKeySort (CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &&rRhsContainer)
+	:	CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
+	(
+		dynamic_cast <CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &&> (rRhsContainer)
 	)
 {
 }
@@ -87,7 +96,7 @@ void CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::clear ()
 
 operator= - assignment operator overload
 
-rBT		- is a reference to a b-tree that will have its content be assigned to this instance
+rContainer		- is a reference to a b-tree that will have its content be assigned to this instance
 
 The result is a reference to this instance.
 
@@ -95,17 +104,27 @@ The result is a reference to this instance.
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::operator=
-	(const CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rBT)
+	(const CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rContainer)
 {
-	// if this is not the same instance as the referenced b-tree (rBT) ...
-	if (this != &rBT)
+	// if this is not the same instance as the referenced b-tree (rContainer) ...
+	if (this != &rContainer)
 	{
 		// ... then destroy this data layer
-		this->clear ();
-
-		// and copy all data from rBT to this instance
-		this->assign (rBT);
+		// and copy all data from rContainer to this instance
+		this->_assign (rContainer);
 	}
+
+	return (*this);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>::operator=
+	(CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &&rRhsContainer)
+{
+	CBTreeAssociative_t		&rAssociativeThis = dynamic_cast<CBTreeAssociative_t &> (*this);
+	CBTreeAssociative_t		&rAssociativeContainer = dynamic_cast<CBTreeAssociative_t &> (rRhsContainer);
+
+	rAssociativeThis = ::std::move (rAssociativeContainer);
 
 	return (*this);
 }

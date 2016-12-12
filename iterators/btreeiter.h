@@ -88,15 +88,15 @@ public:
 	value_type&					operator[] (const int nPos);
 	value_type&					operator[] (const size_type nPos);
 
-	_ti_container				*get_container	();
-	bool						is_btree_valid	();
+	_ti_container				*get_container	() const;
+	bool						is_btree_valid	() const;
 
-	bool						is_evaluated	();
+	bool						is_evaluated	() const;
 
 	void						sync			();
 
-	size_type					get_pos			();
-	void						*get_iterator_state ();
+	size_type					get_pos			() const;
+	void						*get_iterator_state () const;
 
 	void						set_time_stamp	(_ti_container *pContainer);
 	
@@ -121,15 +121,13 @@ protected:
 	void						increment_by	(const size_type nOperand);
 	void						decrement_by	(const size_type nOperand);
 	
-	bool						out_of_range	();
+	bool						out_of_range	() const;
 	
 	void						evaluate		();
 	
 	void						evaluate_by_seek ();
 	
-	size_type					get_pos			() const;
-
-	bool						is_time_stamp_up_to_date	();
+	bool						is_time_stamp_up_to_date	() const;
 
 	void						invalidate_time_stamp	();
 

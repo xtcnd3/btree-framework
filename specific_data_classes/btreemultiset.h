@@ -64,10 +64,13 @@ public:
 
 	// construction
 							CBTreeMultiSet<_t_keytype, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
+													(const _t_datalayerproperties &rDataLayerProperties, const sub_node_iter_type nNodeSize);
 
 							CBTreeMultiSet<_t_keytype, _t_datalayerproperties>
-													(const CBTreeMultiSet_t &rBT, bool bAssign = true);
+													(const CBTreeMultiSet_t &rContainer, const bool bAssign = true);
+
+							CBTreeMultiSet<_t_keytype, _t_datalayerproperties>
+													(CBTreeMultiSet_t &&rRhsContainer);
 
 	// destruction
 	virtual					~CBTreeMultiSet<_t_keytype, _t_datalayerproperties>
@@ -76,6 +79,9 @@ public:
 	void					swap					(CBTreeAssociativeIf_t &rContainerIf);
 	void					swap					(CBTreeMultiSet_t &rContainer);
 	
+	CBTreeMultiSet &		operator=				(const CBTreeMultiSet &rContainer);
+	CBTreeMultiSet &		operator=				(CBTreeMultiSet &&rRhsContainer);
+
 protected:
 
 	void					_swap					(CBTreeMultiSet_t &rContainer);

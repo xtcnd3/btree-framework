@@ -21,10 +21,10 @@
 template<class _t_datalayerproperties>
 CBTreeFileIO<_t_datalayerproperties>::CBTreeFileIO
 (
-	_t_datalayerproperties &rDataLayerProperties, 
-	typename _t_datalayerproperties::sub_node_iter_type nNodeSize, 
-	uint32_t nNumDataPools, 
-	CBTreeIOperBlockPoolDesc_t *psDataPools
+	const _t_datalayerproperties &rDataLayerProperties, 
+	const typename _t_datalayerproperties::sub_node_iter_type nNodeSize, 
+	const uint32_t nNumDataPools, 
+	const CBTreeIOperBlockPoolDesc_t *psDataPools
 )
 	:	CBTreeBlockIO<_t_datalayerproperties> (nNodeSize, nNumDataPools, psDataPools)
 
@@ -272,14 +272,15 @@ nNode[in]	- specifies linear node address of data pool
 
 template<class _t_datalayerproperties>
 template<class _t_dl_data>
-_t_dl_data* CBTreeFileIO<_t_datalayerproperties>::get_pooledData (uint32_t nPool, typename _t_datalayerproperties::node_iter_type nNode)
+_t_dl_data* CBTreeFileIO<_t_datalayerproperties>::get_pooledData (const uint32_t nPool, const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 	uint32_t		nDescriptor = this->convert_node_to_descriptor (nNode);
 	address_type	nOffset;
+	CBTreeFileIO_t	*pThis = (CBTreeFileIO_t *) this;
 
 	if (this->m_psDescriptorVector[nDescriptor].pBlockData == NULL)
 	{
-		this->map_descriptor (nDescriptor);
+		pThis->map_descriptor (nDescriptor);
 	}
 
 	this->increment_access_counter (nDescriptor);
@@ -302,7 +303,7 @@ nEntry[in]	- specifies entry to be returned
 
 template<class _t_datalayerproperties>
 template<class _t_dl_data>
-_t_dl_data* CBTreeFileIO<_t_datalayerproperties>::get_pooledData (uint32_t nPool, typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nEntry)
+_t_dl_data* CBTreeFileIO<_t_datalayerproperties>::get_pooledData (const uint32_t nPool, const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nEntry) const
 {
 	uint8_t			*pClData = this->template get_pooledData<uint8_t> (nPool, nNode);
 	_t_dl_data		*psData = (_t_dl_data *) &(pClData[nEntry * this->get_pool_entry_size (nPool)]);
@@ -324,7 +325,7 @@ pData	- pointer to new data
 
 template<class _t_datalayerproperties>
 template<class _t_dl_data>
-void CBTreeFileIO<_t_datalayerproperties>::insert_dataIntoPool (uint32_t nPool, typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nNodeLen, typename _t_datalayerproperties::sub_node_iter_type nOffset, typename _t_datalayerproperties::sub_node_iter_type nDataLen)
+void CBTreeFileIO<_t_datalayerproperties>::insert_dataIntoPool (const uint32_t nPool, const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nNodeLen, const typename _t_datalayerproperties::sub_node_iter_type nOffset, const typename _t_datalayerproperties::sub_node_iter_type nDataLen)
 {
 #if defined (_DEBUG)
 
@@ -338,7 +339,7 @@ void CBTreeFileIO<_t_datalayerproperties>::insert_dataIntoPool (uint32_t nPool, 
 }
 
 template<class _t_datalayerproperties>
-void CBTreeFileIO<_t_datalayerproperties>::set_size (typename _t_datalayerproperties::node_iter_type nMaxNodes)
+void CBTreeFileIO<_t_datalayerproperties>::set_size (const typename _t_datalayerproperties::node_iter_type nMaxNodes)
 {
 	if (nMaxNodes == this->m_nMaxNodes)
 	{
@@ -446,7 +447,7 @@ void CBTreeFileIO<_t_datalayerproperties>::unload ()
 }
 
 template<class _t_datalayerproperties>
-void CBTreeFileIO<_t_datalayerproperties>::unload_from_cache (typename _t_datalayerproperties::node_iter_type nNode)
+void CBTreeFileIO<_t_datalayerproperties>::unload_from_cache (const typename _t_datalayerproperties::node_iter_type nNode)
 {
 	if (nNode < this->m_nMaxNodes)
 	{
@@ -460,7 +461,7 @@ void CBTreeFileIO<_t_datalayerproperties>::unload_from_cache (typename _t_datala
 }
 
 template<class _t_datalayerproperties>
-bool CBTreeFileIO<_t_datalayerproperties>::is_dataCached (uint32_t nPool, typename _t_datalayerproperties::node_iter_type nNode)
+bool CBTreeFileIO<_t_datalayerproperties>::is_dataCached (const uint32_t nPool, const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 	nPool;
 
@@ -573,12 +574,14 @@ void CBTreeFileIO<_t_datalayerproperties>::terminate_access ()
 }
 
 template<class _t_datalayerproperties>
-void CBTreeFileIO<_t_datalayerproperties>::showdump	(std::ofstream &ofs, typename _t_datalayerproperties::node_iter_type nTreeSize, char *pAlloc)
+void CBTreeFileIO<_t_datalayerproperties>::showdump	(std::ofstream &ofs, const typename _t_datalayerproperties::node_iter_type nTreeSize) const
 {
+	::std::string	strType;
 	node_iter_type	ui64;
 	uint32_t		ui32, uj32;
+	CBTreeFileIO_t	*pThis = (CBTreeFileIO_t *) this;
 
-	this->set_cacheFreeze (true);
+	pThis->set_cacheFreeze (true);
 	{
 		ofs << "<H1>data dump</H1>" << ::std::endl;
 		ofs << "<br>" << ::std::endl;
@@ -637,6 +640,35 @@ void CBTreeFileIO<_t_datalayerproperties>::showdump	(std::ofstream &ofs, typenam
 		
 		ofs << "</table>" << ::std::endl;
 
+		ofs << "<br>types in use<br><br>" << ::std::endl;
+		ofs << "data layer: file<br>" << ::std::endl;
+
+		size_type			nDummySizeType = 0;
+		node_iter_type		nDummyNodeIterType = 0;
+		sub_node_iter_type	nDummySubNodeIterType = 0;
+		address_type		nDummyAddressType = 0;
+		offset_type			nDummyOffsetType = 0;
+
+		get_typename (nDummySizeType, strType);
+
+		ofs << "size type: " << strType << "<br>" << ::std::endl;
+		
+		get_typename (nDummyNodeIterType, strType);
+
+		ofs << "node iterator type: " << strType << "<br>" << ::std::endl;
+		
+		get_typename (nDummySubNodeIterType, strType);
+
+		ofs << "sub-node iterator type: " << strType << "<br>" << ::std::endl;
+		
+		get_typename (nDummyAddressType, strType);
+
+		ofs << "address type: " << strType << "<br>" << ::std::endl;
+		
+		get_typename (nDummyOffsetType, strType);
+
+		ofs << "offset type: " << strType << "<br><br>" << ::std::endl;
+		
 		ofs << "<table>" << ::std::endl;
 
 		for (ui64 = 0; ui64 < nTreeSize; )
@@ -793,7 +825,7 @@ void CBTreeFileIO<_t_datalayerproperties>::showdump	(std::ofstream &ofs, typenam
 
 		ofs << "</table>" << ::std::endl;
 	}
-	this->set_cacheFreeze (false);
+	pThis->set_cacheFreeze (false);
 }
 
 template<class _t_datalayerproperties>
@@ -839,7 +871,7 @@ void CBTreeFileIO<_t_datalayerproperties>::exit_mapping ()
 }
 
 template<class _t_datalayerproperties>
-void CBTreeFileIO<_t_datalayerproperties>::map_descriptor (uint32_t nDescriptor)
+void CBTreeFileIO<_t_datalayerproperties>::map_descriptor (const uint32_t nDescriptor)
 {
 	uint64_t	nFileOffset;
 
@@ -957,7 +989,7 @@ void CBTreeFileIO<_t_datalayerproperties>::map_descriptor (uint32_t nDescriptor)
 }
 
 template<class _t_datalayerproperties>
-void CBTreeFileIO<_t_datalayerproperties>::sync_descriptor (uint32_t nDescriptor)
+void CBTreeFileIO<_t_datalayerproperties>::sync_descriptor (const uint32_t nDescriptor)
 {
 #if defined (_DEBUG)
 
@@ -984,7 +1016,7 @@ void CBTreeFileIO<_t_datalayerproperties>::sync_descriptor (uint32_t nDescriptor
 }
 
 template<class _t_datalayerproperties>
-void CBTreeFileIO<_t_datalayerproperties>::unmap_descriptor (uint32_t nDescriptor)
+void CBTreeFileIO<_t_datalayerproperties>::unmap_descriptor (const uint32_t nDescriptor)
 {
 #if defined (_DEBUG)
 
@@ -1022,7 +1054,7 @@ void CBTreeFileIO<_t_datalayerproperties>::unmap_descriptor (uint32_t nDescripto
 }
 
 template<class _t_datalayerproperties>
-void CBTreeFileIO<_t_datalayerproperties>::unmap_all_descriptors (bool bExceptRoot)
+void CBTreeFileIO<_t_datalayerproperties>::unmap_all_descriptors (const bool bExceptRoot)
 {
 	uint32_t	u;
 	uint32_t	nDescRoot;

@@ -29,12 +29,11 @@
 template<class _t_datalayerproperties>
 CBTreeBlockIO<_t_datalayerproperties>::CBTreeBlockIO
 (
-	sub_node_iter_type nNodeSize, 
-	uint32_t nNumDataPools, 
-	CBTreeIOperBlockPoolDesc_t *psDataPools
+	const sub_node_iter_type nNodeSize, 
+	const uint32_t nNumDataPools, 
+	const CBTreeIOperBlockPoolDesc_t *psDataPools
 )
-	:	CBTreeIO<_t_datalayerproperties> (nNumDataPools, psDataPools)
-	,	m_nNodeSize (nNodeSize)
+	:	CBTreeIO<_t_datalayerproperties> (nNodeSize, nNumDataPools, psDataPools)
 	,	m_pnPerNodePoolOffset (NULL)
 	,	m_psDescriptorVector (NULL)
 	,	m_nDescriptorVectorSize (0)
@@ -63,7 +62,7 @@ CBTreeBlockIO<_t_datalayerproperties>::~CBTreeBlockIO ()
 }
 
 template<class _t_datalayerproperties>
-void CBTreeBlockIO<_t_datalayerproperties>::set_root_node (typename _t_datalayerproperties::node_iter_type nRootNode)
+void CBTreeBlockIO<_t_datalayerproperties>::set_root_node (const typename _t_datalayerproperties::node_iter_type nRootNode)
 {
 	uint32_t		nCurrentRootContainingDesc;
 	uint32_t		nNewRootContainingDesc = convert_node_to_descriptor (nRootNode);
@@ -90,7 +89,7 @@ void CBTreeBlockIO<_t_datalayerproperties>::set_root_node (typename _t_datalayer
 }
 
 template<class _t_datalayerproperties>
-typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_datalayerproperties>::get_blockAddr (typename _t_datalayerproperties::node_iter_type nNode)
+typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_datalayerproperties>::get_blockAddr (const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 	address_type		nRetval;
 
@@ -100,13 +99,13 @@ typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_da
 }
 
 template<class _t_datalayerproperties>
-typename CBTreeBlockIO<_t_datalayerproperties>::offset_type CBTreeBlockIO<_t_datalayerproperties>::get_poolOffset ()
+typename CBTreeBlockIO<_t_datalayerproperties>::offset_type CBTreeBlockIO<_t_datalayerproperties>::get_poolOffset () const
 {
 	return ((offset_type) 0);
 }
 
 template<class _t_datalayerproperties>
-typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_datalayerproperties>::get_node_offset (typename _t_datalayerproperties::node_iter_type nNode)
+typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_datalayerproperties>::get_node_offset (const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 	address_type		nRetval;
 
@@ -116,7 +115,7 @@ typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_da
 }
 
 template<class _t_datalayerproperties>
-typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_datalayerproperties>::get_nodeAddr (typename _t_datalayerproperties::node_iter_type nNode)
+typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_datalayerproperties>::get_nodeAddr (const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 	address_type		nRetval;
 
@@ -127,7 +126,7 @@ typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_da
 }
 
 template<class _t_datalayerproperties>
-typename CBTreeBlockIO<_t_datalayerproperties>::offset_type CBTreeBlockIO<_t_datalayerproperties>::get_per_node_pool_offset (uint32_t nPool)
+typename CBTreeBlockIO<_t_datalayerproperties>::offset_type CBTreeBlockIO<_t_datalayerproperties>::get_per_node_pool_offset (const uint32_t nPool) const
 {
 #if defined (_DEBUG)
 
@@ -139,7 +138,7 @@ typename CBTreeBlockIO<_t_datalayerproperties>::offset_type CBTreeBlockIO<_t_dat
 }
 
 template<class _t_datalayerproperties>
-typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_datalayerproperties>::get_pool_address (uint32_t nPool, typename _t_datalayerproperties::node_iter_type nNode)
+typename CBTreeBlockIO<_t_datalayerproperties>::address_type CBTreeBlockIO<_t_datalayerproperties>::get_pool_address (const uint32_t nPool, const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 	address_type		nAddr = get_nodeAddr (nNode);
 
@@ -169,7 +168,7 @@ typename CBTreeBlockIO<_t_datalayerproperties>::offset_type CBTreeBlockIO<_t_dat
 }
 
 template<class _t_datalayerproperties>
-void CBTreeBlockIO<_t_datalayerproperties>::realloc_descriptor_vector (typename _t_datalayerproperties::node_iter_type nMaxNodes)
+void CBTreeBlockIO<_t_datalayerproperties>::realloc_descriptor_vector (const typename _t_datalayerproperties::node_iter_type nMaxNodes)
 {
 	uint32_t	nOldDescriptorVectorSize = m_nDescriptorVectorSize;
 	uint32_t	nNewDescriptorVectorSize;
@@ -207,7 +206,7 @@ void CBTreeBlockIO<_t_datalayerproperties>::realloc_descriptor_vector (typename 
 }
 
 template<class _t_datalayerproperties>
-uint32_t CBTreeBlockIO<_t_datalayerproperties>::convert_node_to_descriptor (typename _t_datalayerproperties::node_iter_type nNode, bool bRoundUp)
+uint32_t CBTreeBlockIO<_t_datalayerproperties>::convert_node_to_descriptor (const typename _t_datalayerproperties::node_iter_type nNode, const bool bRoundUp) const
 {
 #if defined (_DEBUG)
 
@@ -218,17 +217,19 @@ uint32_t CBTreeBlockIO<_t_datalayerproperties>::convert_node_to_descriptor (type
 
 #endif
 
+	node_iter_type		nIntermediateRslt = nNode;
+
 	uint32_t			nRslt;
 
-	nNode >>= this->m_nNodesPerBlockVectorSize;
+	nIntermediateRslt >>= this->m_nNodesPerBlockVectorSize;
 
 #if defined (_DEBUG)
 
-	BTREE_ASSERT ((nNode & uRevNodeMask) == 0x0, "CBTreeBlockIO<_t_datalayerproperties>::convert_node_to_descriptor: node value exceeds maximum descriptor vector size!");
+	BTREE_ASSERT ((nIntermediateRslt & uRevNodeMask) == 0x0, "CBTreeBlockIO<_t_datalayerproperties>::convert_node_to_descriptor: node value exceeds maximum descriptor vector size!");
 
 #endif
 
-	nRslt = (uint32_t) nNode;
+	nRslt = (uint32_t) nIntermediateRslt;
 
 	if (bRoundUp)
 	{
@@ -245,7 +246,7 @@ uint32_t CBTreeBlockIO<_t_datalayerproperties>::convert_node_to_descriptor (type
 }
 
 template<class _t_datalayerproperties>
-void CBTreeBlockIO<_t_datalayerproperties>::setup (typename CBTreeBlockIO<_t_datalayerproperties>::address_type nBlockSize)
+void CBTreeBlockIO<_t_datalayerproperties>::setup (const typename CBTreeBlockIO<_t_datalayerproperties>::address_type nBlockSize)
 {
 	uint32_t	nMultiple = 1;
 	uint32_t	ui32;
@@ -279,7 +280,7 @@ void CBTreeBlockIO<_t_datalayerproperties>::setup (typename CBTreeBlockIO<_t_dat
 }
 
 template<class _t_datalayerproperties>
-void CBTreeBlockIO<_t_datalayerproperties>::increment_access_counter (uint32_t nDescriptor)
+void CBTreeBlockIO<_t_datalayerproperties>::increment_access_counter (const uint32_t nDescriptor) const
 {
 	this->m_psDescriptorVector[nDescriptor].nAccessCtr++;
 

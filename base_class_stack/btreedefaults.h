@@ -44,8 +44,11 @@ public:
 									CBTreeDefaults<_t_data, _t_sizetype>
 															();
 
+	explicit						CBTreeDefaults<_t_data, _t_sizetype>
+															(const CBTreeDefaults<_t_data, _t_sizetype> &rContainer);
+
 									CBTreeDefaults<_t_data, _t_sizetype>
-															(const CBTreeDefaults<_t_data, _t_sizetype> &rBT);
+															(CBTreeDefaults<_t_data, _t_sizetype> &&rRhsContainer);
 
 	// destruction
 	virtual							~CBTreeDefaults<_t_data, _t_sizetype> ();
@@ -69,7 +72,7 @@ public:
 	const_reverse_iterator			rbegin					() const;
 	const_reverse_iterator			rend					() const;
 
-	CBTreeDefaults &				operator=				(const CBTreeDefaults &rBT);
+	CBTreeDefaults &				operator=				(CBTreeDefaults &&rRhsContainer);
 
 protected:
  
@@ -83,7 +86,9 @@ protected:
 //	void							unregister_iterator		(reverse_iterator *pRIter);
 //	void							unregister_iterator		(const_reverse_iterator *pCRIter);
 
-	void							_swap					(CBTreeDefaults &rBT);
+	void							_swap					(CBTreeDefaults &rContainer);
+
+	void							_local_swap				(CBTreeDefaults &rContainer);
 
 #if defined (USE_PERFORMANCE_COUNTERS)
 

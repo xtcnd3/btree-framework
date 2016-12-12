@@ -459,19 +459,19 @@ typename CBTreeConstIterator<_ti_container>::value_type& CBTreeConstIterator<_ti
 }
 
 template<class _ti_container>
-_ti_container* CBTreeConstIterator<_ti_container>::get_container ()
+_ti_container* CBTreeConstIterator<_ti_container>::get_container () const
 {
 	return (this->m_pContainer);
 }
 
 template<class _ti_container>
-bool CBTreeConstIterator<_ti_container>::is_btree_valid ()
+bool CBTreeConstIterator<_ti_container>::is_btree_valid () const
 {
 	return (this->m_pContainer != NULL);
 }
 
 template<class _ti_container>
-bool CBTreeConstIterator<_ti_container>::is_evaluated ()
+bool CBTreeConstIterator<_ti_container>::is_evaluated () const
 {
 	if (this->is_time_stamp_up_to_date ())
 	{
@@ -499,13 +499,13 @@ void CBTreeConstIterator<_ti_container>::sync ()
 }
 
 template<class _ti_container>
-typename CBTreeConstIterator<_ti_container>::size_type CBTreeConstIterator<_ti_container>::get_pos ()
+typename CBTreeConstIterator<_ti_container>::size_type CBTreeConstIterator<_ti_container>::get_pos () const
 {
 	return (this->m_nPos);
 }
 
 template<class _ti_container>
-void *CBTreeConstIterator<_ti_container>::get_iterator_state ()
+void *CBTreeConstIterator<_ti_container>::get_iterator_state () const
 {
 	BTREE_ASSERT (this->m_pExternState != NULL, "CBTreeConstIterator<_ti_container>::get_iterator_state (): An external state that has not been initialized ought not to be returned!");
 
@@ -534,7 +534,7 @@ void CBTreeConstIterator<_ti_container>::decrement_by (typename CBTreeConstItera
 }
 
 template<class _ti_container>
-bool CBTreeConstIterator<_ti_container>::out_of_range ()
+bool CBTreeConstIterator<_ti_container>::out_of_range () const
 {
 	return (m_nPos >= m_pContainer->size ());
 }
@@ -561,13 +561,7 @@ void CBTreeConstIterator<_ti_container>::evaluate_by_seek ()
 }
 
 template<class _ti_container>
-typename CBTreeConstIterator<_ti_container>::size_type CBTreeConstIterator<_ti_container>::get_pos () const
-{
-	return (this->m_nPos);
-}
-
-template<class _ti_container>
-bool CBTreeConstIterator<_ti_container>::is_time_stamp_up_to_date ()
+bool CBTreeConstIterator<_ti_container>::is_time_stamp_up_to_date () const
 {
 	if (this->m_sTimeStamp.pContainer == NULL)
 	{

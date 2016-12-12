@@ -71,10 +71,13 @@ public:
 
 	// construction
 							CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
+													(const _t_datalayerproperties &rDataLayerProperties, const sub_node_iter_type nNodeSize);
 
 							CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>
-													(const CBTreeMap_t &rBT, bool bAssign = true);
+													(const CBTreeMap_t &rContainer, const bool bAssign = true);
+
+							CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>
+													(CBTreeMap_t &&rRhsContainer);
 
 	// destruction
 	virtual					~CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>
@@ -101,6 +104,9 @@ public:
 	void					swap					(CBTreeAssociativeIf_t &rContainerIf);
 	void					swap					(CBTreeMap_t &rContainer);
 	
+	CBTreeMap &				operator=				(const CBTreeMap &rContainer);
+	CBTreeMap &				operator=				(CBTreeMap &&rRhsContainer);
+
 protected:
 
 	key_type				*extract_key			(key_type *pKey, const value_type &rData) const;
@@ -110,7 +116,7 @@ protected:
 	template<class _t_iterator>
 	bool					test_self_reference_of_iterator_to_this (_t_iterator &sItFirst, _t_iterator &sItLast, bool &bSelfReverse, const_iterator **ppsItFirst, const_iterator **ppsItLast)
 	{
-		return (btree_associative_container_iterator_self_reference_arbiter<value_type, key_type, data_layer_properties_type, _t_iterator>::test_self_reference_of_iterator_to_this (this, sItFirst, sItLast, bSelfReverse, ppsItFirst, ppsItLast));
+		return (btree_associative_container_iterator_self_reference_arbiter<value_type, data_layer_properties_type, _t_iterator>::test_self_reference_of_iterator_to_this (this, sItFirst, sItLast, bSelfReverse, ppsItFirst, ppsItLast));
 	}
 
 public:

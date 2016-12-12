@@ -17,7 +17,7 @@
 #include "btreebaseif.h"
 
 template<class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter>
-CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::CBTreeBaseIf (_t_subnodeiter nNodeSize)
+CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::CBTreeBaseIf (const _t_subnodeiter nNodeSize)
 	:	CBTreeDefaults<_t_data, _t_sizetype> ()
 {
 }
@@ -26,13 +26,19 @@ CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::CBTree
 
 Copy Constructor
 
-rBT		-	reference to CBTreeBaseDefaults instance to be copied
+rContainer		-	reference to CBTreeBaseDefaults instance to be copied
 
 */
 
 template<class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter>
-CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::CBTreeBaseIf (const CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &rBT)
-	:	CBTreeDefaults<_t_data, _t_sizetype> (dynamic_cast <const CBTreeDefaults<_t_data, _t_sizetype> &> (rBT))
+CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::CBTreeBaseIf (const CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &rContainer)
+	:	CBTreeDefaults<_t_data, _t_sizetype> (dynamic_cast <const CBTreeDefaults<_t_data, _t_sizetype> &> (rContainer))
+{
+}
+
+template<class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter>
+CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::CBTreeBaseIf (CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &&rRhsContainer)
+	:	CBTreeDefaults<_t_data, _t_sizetype> (dynamic_cast <CBTreeDefaults<_t_data, _t_sizetype> &&> (rRhsContainer))
 {
 }
 
@@ -45,22 +51,6 @@ Destructor
 template<class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter>
 CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::~CBTreeBaseIf ()
 {
-}
-
-template<class _ti_pos, class _t_data, class _t_sizetype, class _t_nodeiter, class _t_subnodeiter>
-CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>::operator=
-	(const CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &rBT)
-{
-	// if this is not the same instance as the referenced b-tree (rBT) ...
-	if (this != &rBT)
-	{
-		CBTreeDefaults_t			&rBaseIterThis = dynamic_cast<CBTreeDefaults_t &> (*this);
-		const CBTreeDefaults_t	&rBaseIterBT = dynamic_cast<const CBTreeDefaults_t &> (rBT);
-		
-		rBaseIterThis = rBaseIterBT;
-	}
-
-	return (*this);
 }
 
 #endif // BTREEBASEIF_CPP

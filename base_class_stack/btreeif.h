@@ -68,6 +68,7 @@ public:
 									CBTreeIf				();
 
 	explicit						CBTreeIf				(const CBTreeIf<_t_data, _t_sizetype> &rContainer);
+									CBTreeIf				(CBTreeIf<_t_data, _t_sizetype> &&rRhsContainer);
 
 	virtual							~CBTreeIf				();
 
@@ -101,7 +102,7 @@ public:
 
 	virtual void					test					() const = 0;
 
-	virtual void					set_atomic_testing		(bool bEnable) = 0;
+	virtual void					set_atomic_testing		(const bool bEnable) = 0;
 
 #endif
 
@@ -116,9 +117,9 @@ protected:
 
 	virtual uint32_t				get_iter_state_size		() const = 0;
 	virtual void					reset_iter_state		(void *pState) const = 0;
-	virtual void					evaluate_iter			(void *pState, size_type nOffsetPos) const = 0;
-	virtual void					evaluate_iter_by_seek	(void *pState, size_type nNewPos) const = 0;
-	virtual bool					is_iter_pos_evaluated	(void *pState, size_type nPos) const = 0; // part of is_evaluated ()
+	virtual void					evaluate_iter			(void *pState, const size_type nOffsetPos) const = 0;
+	virtual void					evaluate_iter_by_seek	(void *pState, const size_type nNewPos) const = 0;
+	virtual bool					is_iter_pos_evaluated	(void *pState, const size_type nPos) const = 0; // part of is_evaluated ()
 
 	virtual value_type				*get_iter_data			(void *pState) const = 0;
 	virtual void					set_iter_data			(void *pState, const value_type &rData) = 0;

@@ -21,29 +21,25 @@
 
 #include "iterators/btreeiter.h"
 
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-class CBTreeAssociative;
-
 template<class _t_sizetype, class _t_key>
 class CBTreeKeySortPos;
 
 /***********************************************************************/
 
-template<class _t_data, class _t_key, class _t_datalayerproperties, class _t_iterator>
+template<class _t_data, class _t_datalayerproperties, class _t_iterator>
 struct btree_associative_container_iterator_self_reference_arbiter
 {
 	static bool	test_self_reference_of_iterator_to_this
 	(
-		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>	*pClKeySort, 
-		_t_iterator &sItFirst, 
-		_t_iterator &sItLast, 
-		bool &bSelfReverse, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator	**ppsItFirst, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator	**ppsItLast
-		
+		const CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>								*pContainer, 
+		const _t_iterator																				&sItFirst, 
+		const _t_iterator																				&sItLast, 
+		bool																							&bSelfReverse, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItLast
 	)
 	{
-		pClKeySort;
+		pContainer;
 		sItFirst;
 		sItLast;
 
@@ -63,88 +59,14 @@ struct btree_associative_container_iterator_self_reference_arbiter
 	}
 };
 
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_key, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator >
+template<class _t_data, class _t_datalayerproperties>
+struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator >
 {
 	static bool	test_self_reference_of_iterator_to_this
 	(
-		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>									*pClKeySort, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator			&sItFirst, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator			&sItLast, 
-		bool																						&bSelfReverse, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		**ppsItFirst, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		**ppsItLast
-	)
-	{
-		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
-		
-		bool	bSelfReference = (pClKeySort == sItFirst.get_container ()) || (pClKeySort == sItLast.get_container ());
-
-		bSelfReverse = false;
-
-		if ((ppsItFirst != NULL) && bSelfReference)
-		{
-			(*ppsItFirst) = new citer_t (sItFirst);
-
-			BTREE_ASSERT (((citer_t *) (*ppsItFirst)) != NULL, "btree_associative_container_iterator_self_reference_arbiter<..., const_iterator>::test_self_reference_of_iterator_to_this (): insufficient memory! (ppsItFirst)");
-		}
-
-		if ((ppsItLast != NULL) && bSelfReference)
-		{
-			(*ppsItLast) = new citer_t (sItLast);
-
-			BTREE_ASSERT (((citer_t *) (*ppsItLast)) != NULL, "btree_associative_container_iterator_self_reference_arbiter<..., const_iterator>::test_self_reference_of_iterator_to_this (): insufficient memory! (ppsItLast)");
-		}
-
-		return (bSelfReference);
-	}
-};
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_key, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator >
-{
-	static bool	test_self_reference_of_iterator_to_this
-	(
-		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>									*pClKeySort, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		&sItFirst, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		&sItLast, 
-		bool																						&bSelfReverse, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		**ppsItFirst, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		**ppsItLast
-	)
-	{
-		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
-		
-		bool	bSelfReference = (pClKeySort == sItFirst.get_container ()) || (pClKeySort == sItLast.get_container ());
-
-		bSelfReverse = false;
-
-		if ((ppsItFirst != NULL) && bSelfReference)
-		{
-			(*ppsItFirst) = new citer_t (sItFirst);
-
-			BTREE_ASSERT (((citer_t *) (*ppsItFirst)) != NULL, "btree_associative_container_iterator_self_reference_arbiter<..., const_iterator>::test_self_reference_of_iterator_to_this (): insufficient memory! (ppsItFirst)");
-		}
-
-		if ((ppsItLast != NULL) && bSelfReference)
-		{
-			(*ppsItLast) = new citer_t (sItLast);
-
-			BTREE_ASSERT (((citer_t *) (*ppsItLast)) != NULL, "btree_associative_container_iterator_self_reference_arbiter<..., const_iterator>::test_self_reference_of_iterator_to_this (): insufficient memory! (ppsItLast)");
-		}
-
-		return (bSelfReference);
-	}
-};
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_key, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator >
-{
-	static bool	test_self_reference_of_iterator_to_this
-	(
-		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>										*pClKeySort, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator		&sItFirst, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator		&sItLast, 
+		const CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>								*pContainer, 
+		const typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator			&sItFirst, 
+		const typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::iterator			&sItLast, 
 		bool																							&bSelfReverse, 
 		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItFirst, 
 		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItLast
@@ -152,7 +74,102 @@ struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_k
 	{
 		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
 		
-		bool	bSelfReference = (pClKeySort == sItFirst.base ().get_container ()) || (pClKeySort == sItLast.base ().get_container ());
+#if defined (_DEBUG)
+
+		BTREE_ASSERT (sItFirst.get_container () == sItLast.get_container (), "test_self_reference_of_iterator_to_this<iterator> (): ERROR: iterators displaying the range are not associated with the same container!");
+		BTREE_ASSERT (sItFirst <= sItLast, "test_self_reference_of_iterator_to_this<iterator> (): ERROR: first iterator is greater than the second iterator!");
+
+#endif
+
+		bool	bSelfReference = (pContainer == sItFirst.get_container ()) || (pContainer == sItLast.get_container ());
+
+		bSelfReverse = false;
+
+		if ((ppsItFirst != NULL) && bSelfReference)
+		{
+			(*ppsItFirst) = new citer_t (sItFirst);
+
+			BTREE_ASSERT (((citer_t *) (*ppsItFirst)) != NULL, "test_self_reference_of_iterator_to_this<iterator> (): ERROR: insufficient memory! (ppsItFirst)");
+		}
+
+		if ((ppsItLast != NULL) && bSelfReference)
+		{
+			(*ppsItLast) = new citer_t (sItLast);
+
+			BTREE_ASSERT (((citer_t *) (*ppsItLast)) != NULL, "test_self_reference_of_iterator_to_this<iterator> (): ERROR: insufficient memory! (ppsItLast)");
+		}
+
+		return (bSelfReference);
+	}
+};
+
+template<class _t_data, class _t_datalayerproperties>
+struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator >
+{
+	static bool	test_self_reference_of_iterator_to_this
+	(
+		const CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>								*pContainer, 
+		const typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator	&sItFirst, 
+		const typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator	&sItLast, 
+		bool																							&bSelfReverse, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItLast
+	)
+	{
+		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
+		
+#if defined (_DEBUG)
+
+		BTREE_ASSERT (sItFirst.get_container () == sItLast.get_container (), "test_self_reference_of_iterator_to_this<const_iterator> (): ERROR: iterators displaying the range are not associated with the same container!");
+		BTREE_ASSERT (sItFirst <= sItLast, "test_self_reference_of_iterator_to_this<const_iterator> (): ERROR: first iterator is greater than the second iterator!");
+
+#endif
+
+		bool	bSelfReference = (pContainer == sItFirst.get_container ()) || (pContainer == sItLast.get_container ());
+
+		bSelfReverse = false;
+
+		if ((ppsItFirst != NULL) && bSelfReference)
+		{
+			(*ppsItFirst) = new citer_t (sItFirst);
+
+			BTREE_ASSERT (((citer_t *) (*ppsItFirst)) != NULL, "test_self_reference_of_iterator_to_this<const_iterator> (): ERROR: insufficient memory! (ppsItFirst)");
+		}
+
+		if ((ppsItLast != NULL) && bSelfReference)
+		{
+			(*ppsItLast) = new citer_t (sItLast);
+
+			BTREE_ASSERT (((citer_t *) (*ppsItLast)) != NULL, "test_self_reference_of_iterator_to_this<const_iterator> (): ERROR: insufficient memory! (ppsItLast)");
+		}
+
+		return (bSelfReference);
+	}
+};
+
+template<class _t_data, class _t_datalayerproperties>
+struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator >
+{
+	static bool	test_self_reference_of_iterator_to_this
+	(
+		const CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>								*pContainer, 
+		const typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator	&sItFirst, 
+		const typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::reverse_iterator	&sItLast, 
+		bool																							&bSelfReverse, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator			**ppsItLast
+	)
+	{
+		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
+		
+#if defined (_DEBUG)
+
+		BTREE_ASSERT (sItFirst.base ().get_container () == sItLast.base ().get_container (), "test_self_reference_of_iterator_to_this<reverse_iterator> (): ERROR: iterators displaying the range are not associated with the same container!");
+		BTREE_ASSERT (sItFirst <= sItLast, "test_self_reference_of_iterator_to_this<const_iterator> (): ERROR: first iterator is greater than the second iterator!");
+
+#endif
+
+		bool	bSelfReference = (pContainer == sItFirst.base ().get_container ()) || (pContainer == sItLast.base ().get_container ());
 				
 		bSelfReverse = true;
 
@@ -160,7 +177,7 @@ struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_k
 		{
 			(*ppsItFirst) = new citer_t (sItLast.base ());
 
-			BTREE_ASSERT (((citer_t *) (*ppsItFirst)) != NULL, "btree_associative_container_iterator_self_reference_arbiter<..., const_reverse_iterator>::test_self_reference_of_iterator_to_this (): insufficient memory! (ppsItFirst)");
+			BTREE_ASSERT (((citer_t *) (*ppsItFirst)) != NULL, "test_self_reference_of_iterator_to_this<reverse_iterator> (): ERROR: insufficient memory! (ppsItFirst)");
 
 			((citer_t) (**ppsItFirst))--;
 		}
@@ -169,7 +186,7 @@ struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_k
 		{
 			(*ppsItLast) = new citer_t (sItFirst.base ());
 
-			BTREE_ASSERT (((citer_t *) (*ppsItLast)) != NULL, "btree_associative_container_iterator_self_reference_arbiter<..., const_reverse_iterator>::test_self_reference_of_iterator_to_this (): insufficient memory! (ppsItLast)");
+			BTREE_ASSERT (((citer_t *) (*ppsItLast)) != NULL, "test_self_reference_of_iterator_to_this<reverse_iterator> (): ERROR: insufficient memory! (ppsItLast)");
 
 			((citer_t) (**ppsItLast))--;
 		}
@@ -178,22 +195,29 @@ struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_k
 	}
 };
 
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_key, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator >
+template<class _t_data, class _t_datalayerproperties>
+struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_datalayerproperties, typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator >
 {
 	static bool	test_self_reference_of_iterator_to_this
 	(
-		CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>											*pClKeySort, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator		&sItFirst, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator		&sItLast, 
-		bool																								&bSelfReverse, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator				**ppsItFirst, 
-		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator				**ppsItLast
+		const CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>										*pContainer, 
+		const typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator	&sItFirst, 
+		const typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_reverse_iterator	&sItLast, 
+		bool																									&bSelfReverse, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator					**ppsItFirst, 
+		typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator					**ppsItLast
 	)
 	{
 		typedef typename CBTreeIf<_t_data, typename _t_datalayerproperties::size_type>::const_iterator		citer_t;
 		
-		bool	bSelfReference = (pClKeySort == sItFirst.base ().get_container ()) || (pClKeySort == sItLast.base ().get_container ());
+#if defined (_DEBUG)
+
+		BTREE_ASSERT (sItFirst.base ().get_container () == sItLast.base ().get_container (), "test_self_reference_of_iterator_to_this<const_reverse_iterator> (): ERROR: iterators displaying the range are not associated with the same container!");
+		BTREE_ASSERT (sItFirst <= sItLast, "test_self_reference_of_iterator_to_this<const_reverse_iterator> (): ERROR: first iterator is greater than the second iterator!");
+
+#endif
+
+		bool	bSelfReference = (pContainer == sItFirst.base ().get_container ()) || (pContainer == sItLast.base ().get_container ());
 				
 		bSelfReverse = true;
 
@@ -201,7 +225,7 @@ struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_k
 		{
 			(*ppsItFirst) = new citer_t (sItLast.base ());
 
-			BTREE_ASSERT (((citer_t *) (*ppsItFirst)) != NULL, "btree_associative_container_iterator_self_reference_arbiter<..., const_reverse_iterator>::test_self_reference_of_iterator_to_this (): insufficient memory! (ppsItFirst)");
+			BTREE_ASSERT (((citer_t *) (*ppsItFirst)) != NULL, "test_self_reference_of_iterator_to_this<const_reverse_iterator> (): ERROR: insufficient memory! (ppsItFirst)");
 
 			((citer_t) (**ppsItFirst))--;
 		}
@@ -210,7 +234,7 @@ struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_k
 		{
 			(*ppsItLast) = new citer_t (sItFirst.base ());
 
-			BTREE_ASSERT (((citer_t *) (*ppsItLast)) != NULL, "btree_associative_container_iterator_self_reference_arbiter<..., const_reverse_iterator>::test_self_reference_of_iterator_to_this (): insufficient memory! (ppsItLast)");
+			BTREE_ASSERT (((citer_t *) (*ppsItLast)) != NULL, "test_self_reference_of_iterator_to_this<const_reverse_iterator> (): ERROR: insufficient memory! (ppsItLast)");
 
 			((citer_t) (**ppsItLast))--;
 		}
@@ -220,9 +244,6 @@ struct btree_associative_container_iterator_self_reference_arbiter<_t_data, _t_k
 };
 
 /***********************************************************************/
-
-template<class _t_data, class _t_key, class _t_datalayerproperties>
-class CBTreeAssociative;
 
 template<class _t_data, class _t_key = _t_data, class _t_sizetype = uint64_t>
 class CBTreeAssociativeIf
@@ -407,10 +428,13 @@ public:
 
 	// construction
 						CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
+													(const _t_datalayerproperties &rDataLayerProperties, const sub_node_iter_type nNodeSize);
 
 						CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
-													(const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rBT, bool bAssign = true);
+													(const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rContainer, const bool bAssign = true);
+
+						CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
+													(CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &&rRhsContainer);
 
 	// destruction
 	virtual				~CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>
@@ -463,7 +487,8 @@ public:
 	
 	size_type			serialize					(const size_type nStart, const size_type nLen, value_type *pData) const;
 
-	CBTreeAssociative &	operator=					(const CBTreeAssociative &rBT);
+	CBTreeAssociative &	operator=					(const CBTreeAssociative &rContainer);
+	CBTreeAssociative &	operator=					(CBTreeAssociative &&rRhsContainer);
 
 	bool				operator==					(const CBTreeAssociativeIf_t &rRhs) const;
 	bool				operator!=					(const CBTreeAssociativeIf_t &rRhs) const;
@@ -474,7 +499,6 @@ protected:
 
 	bool				get_at						(const size_type nPos, value_type &rData) const;
 	
-//	bool				get							(const key_type &rKey, size_type nInstance, value_type *pObj) const;
 	size_type			get_init_pos_of_key			(const key_type &rKey) const;
 	
 	// node operations
@@ -482,8 +506,8 @@ protected:
 
 	void				rebuild_node				(const node_iter_type nNode, const int32_t triMod = 0, sub_node_iter_type nSubStart = 0);
 
-	virtual position_t	generate_prev_position		(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos);
-	virtual position_t	generate_next_position		(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos);
+	virtual position_t	generate_prev_position		(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos) const;
+	virtual position_t	generate_next_position		(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos) const;
 
 	// testing
 	virtual int			comp						(const key_type &rKey0, const key_type &rKey1) const;
@@ -539,9 +563,11 @@ protected:
 	void				_swap						(CBTreeAssociative &rContainer);
 
 	template<class _t_iterator>
-	bool				test_self_reference_of_iterator_to_this (_t_iterator &sItFirst, _t_iterator &sItLast, bool &bSelfReverse, const_iterator **ppsItFirst, const_iterator **ppsItLast)
+	bool				test_self_reference_of_iterator_to_this (const _t_iterator &sItFirst, const _t_iterator &sItLast, bool &bSelfReverse, const_iterator **ppsItFirst, const_iterator **ppsItLast)
 	{
-		return (btree_associative_container_iterator_self_reference_arbiter<value_type, key_type, data_layer_properties_type, _t_iterator>::test_self_reference_of_iterator_to_this (this, sItFirst, sItLast, bSelfReverse, ppsItFirst, ppsItLast));
+		CBTreeIf_t		*pThisIf = dynamic_cast <CBTreeIf_t *> (this);
+
+		return (btree_associative_container_iterator_self_reference_arbiter<value_type, data_layer_properties_type, _t_iterator>::test_self_reference_of_iterator_to_this (pThisIf, sItFirst, sItLast, bSelfReverse, ppsItFirst, ppsItLast));
 	}
 
 	// protected variables

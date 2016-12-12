@@ -19,7 +19,7 @@
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap
-	(_t_datalayerproperties &rDataLayerProperties, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
+	(const _t_datalayerproperties &rDataLayerProperties, const typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
 	:	CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties>
 		(
 			rDataLayerProperties, 
@@ -30,11 +30,21 @@ CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
 CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap
-	(const CBTreeMap_t &rBT, bool bAssign)
+	(const CBTreeMap_t &rContainer, const bool bAssign)
 	:	CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties>
 	(
-		dynamic_cast<const CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties> &> (rBT), 
+		dynamic_cast<const CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties> &> (rContainer), 
 		bAssign
+	)
+{
+}
+
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::CBTreeMap
+	(CBTreeMap_t &&rRhsContainer)
+	:	CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties>
+	(
+		dynamic_cast<CBTreeAssociativeBase<typename CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::value_type, _t_keytype, _t_datalayerproperties> &&> (rRhsContainer)
 	)
 {
 }
@@ -124,6 +134,34 @@ void CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::swap (CBTreeMap_
 	{
 		this->_swap (rContainer);
 	}
+}
+
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties> &CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::operator=
+	(const CBTreeMap_t &rContainer)
+{
+	// if this is not the same instance as the referenced b-tree (rContainer) ...
+	if (this != &rContainer)
+	{
+		CBTreeAssociativeBase_t			&rAssociativeBaseThis = dynamic_cast<CBTreeAssociativeBase_t &> (*this);
+		const CBTreeAssociativeBase_t	&rAssociativeBaseContainer = dynamic_cast<const CBTreeAssociativeBase_t &> (rContainer);
+		
+		rAssociativeBaseThis = rAssociativeBaseContainer;
+	}
+
+	return (*this);
+}
+
+template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>
+CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties> &CBTreeMap<_t_keytype, _t_maptype, _t_datalayerproperties>::operator=
+	(CBTreeMap_t &&rRhsContainer)
+{
+	CBTreeAssociativeBase_t		&rAssociativeBaseThis = dynamic_cast<CBTreeAssociativeBase_t &> (*this);
+	CBTreeAssociativeBase_t		&rAssociativeBaseContainer = dynamic_cast<CBTreeAssociativeBase_t &> (rRhsContainer);
+		
+	rAssociativeBaseThis = ::std::move (rAssociativeBaseContainer);
+
+	return (*this);
 }
 
 template<class _t_keytype, class _t_maptype, class _t_datalayerproperties>

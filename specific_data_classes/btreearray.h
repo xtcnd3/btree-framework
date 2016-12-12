@@ -216,7 +216,7 @@ public:
 						{
 						};
 
-	virtual void		assign						(size_type nNewSize, const value_type& rVal) = 0;
+	virtual void		assign						(const size_type nNewSize, const value_type& rVal) = 0;
 
 	virtual	void		push_back					(const value_type &rData) = 0;
 	virtual	void		pop_back					() = 0;
@@ -301,13 +301,13 @@ public:
 
 	// construction
 								CBTreeArray<_t_data, _t_datalayerproperties>
-														(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
+														(const _t_datalayerproperties &rDataLayerProperties, const sub_node_iter_type nNodeSize);
 
 								CBTreeArray<_t_data, _t_datalayerproperties>
-														(const CBTreeArray<_t_data, _t_datalayerproperties> &rBT, bool bAssign = true);
+														(const CBTreeArray<_t_data, _t_datalayerproperties> &rContainer, const bool bAssign = true);
 
 								CBTreeArray<_t_data, _t_datalayerproperties>
-														(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhBT);
+														(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhsContainer);
 
 	// destruction
 	virtual						~CBTreeArray<_t_data, _t_datalayerproperties>
@@ -315,7 +315,7 @@ public:
 
 	template<class _t_iterator>
 	void						assign					(_t_iterator sItFirst, _t_iterator sItLast);
-	void						assign					(size_type nNewSize, const value_type& rVal);
+	void						assign					(const size_type nNewSize, const value_type& rVal);
 
 	void						push_back				(const value_type &rData);
 
@@ -347,10 +347,10 @@ public:
 	size_type					serialize				(const size_type nStart, const size_type nLen, value_type *pData) const;
 
 	CBTreeArray<_t_data, _t_datalayerproperties> &
-								operator=				(const CBTreeArray<_t_data, _t_datalayerproperties> &rBT);
+								operator=				(const CBTreeArray<_t_data, _t_datalayerproperties> &rContainer);
 
 	CBTreeArray<_t_data, _t_datalayerproperties> &
-								operator=				(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhBT);
+								operator=				(CBTreeArray<_t_data, _t_datalayerproperties> &&rRhsContainer);
 
 	CBTreeArrayAccessWrapper<value_type, size_type>
 								operator[]				(const size_type nPos);
@@ -372,8 +372,8 @@ protected:
 
 	void						rebuild_node			(const node_iter_type nNode, const int32_t triMod = 0, sub_node_iter_type nSubStart = 0);
 
-	virtual position_t			generate_prev_position	(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos);
-	virtual position_t			generate_next_position	(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos);
+	virtual position_t			generate_prev_position	(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos) const;
+	virtual position_t			generate_next_position	(const node_iter_type nNode, const sub_node_iter_type nSub, position_t sPos) const;
 
 	// manuvering
 	virtual sub_node_iter_type		find_next_sub_pos	(const node_iter_type nNode, position_t &sPos) const;
@@ -398,6 +398,8 @@ protected:
 	}
 
 	void						_swap					(CBTreeArray &rArray);
+
+	void						_local_swap				(CBTreeArray &rArray);
 
 	bool						compare_value_type		(const value_type & rLhs, const value_type & rRhs, ::std::true_type) const;
 	bool						compare_value_type		(const value_type & rLhs, const value_type & rRhs, ::std::false_type) const;

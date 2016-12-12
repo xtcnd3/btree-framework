@@ -19,8 +19,8 @@
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative
 	(
-		_t_datalayerproperties &rDataLayerProperties, 
-		typename _t_datalayerproperties::sub_node_iter_type nNodeSize
+		const _t_datalayerproperties &rDataLayerProperties, 
+		const typename _t_datalayerproperties::sub_node_iter_type nNodeSize
 	)
 	:	CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties>
 	(
@@ -66,25 +66,31 @@ CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative
 }
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
-CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rBT, bool bAssign)
+CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rContainer, const bool bAssign)
 	:	CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties>
 	(
-		dynamic_cast <const CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties> &> (rBT)
+		dynamic_cast <const CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties> &> (rContainer)
 	)
+#if defined (_DEBUG)
+	,	m_pbShortLiveKeyInUse (NULL)
+#endif
+	,	m_pRemoveKey (NULL)
+	,	m_pTempRemoveKey (NULL)
+	,	m_pInstancesNewKey (NULL)
+	,	m_pTempFindFirstKeyNewKey (NULL)
+	,	m_pAddToNodeKey (NULL)
+	,	m_pGetNewKey (NULL)
+	,	m_ppShortLiveKey (NULL)
+	,	m_ppTempFindFirstKeyKey (NULL)
 {
 #if defined (_DEBUG)
+
 	m_pbShortLiveKeyInUse = new bool (false);
 
 	BTREE_ASSERT (m_pbShortLiveKeyInUse != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (CBTreeAssociative<> &): insufficient memory!");
+
 #endif
 
-	m_pRemoveKey = NULL;
-	m_pTempRemoveKey = NULL;
-	m_pInstancesNewKey = NULL;
-	m_pTempFindFirstKeyNewKey = NULL;
-	m_pAddToNodeKey = NULL;
-	m_pGetNewKey = NULL;
-	
 	m_ppShortLiveKey = new _t_key *;
 
 	BTREE_ASSERT (m_ppShortLiveKey != NULL, "CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (CBTreeAssociative<> &) (m_ppShortLiveKey): insufficient memory!");
@@ -110,8 +116,42 @@ CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (c
 
 	if (bAssign)
 	{
-		this->_assign (rBT);
+		this->_assign (rContainer);
 	}
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::CBTreeAssociative (CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &&rRhsContainer)
+	:	CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties>
+	(
+		dynamic_cast <CBTreeBaseDefaults<typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t, _t_data, _t_datalayerproperties> &&> (rRhsContainer)
+	)
+#if defined (_DEBUG)
+	,	m_pbShortLiveKeyInUse (NULL)
+#endif
+	,	m_pRemoveKey (NULL)
+	,	m_pTempRemoveKey (NULL)
+	,	m_pInstancesNewKey (NULL)
+	,	m_pTempFindFirstKeyNewKey (NULL)
+	,	m_pAddToNodeKey (NULL)
+	,	m_pGetNewKey (NULL)
+	,	m_ppShortLiveKey (NULL)
+	,	m_ppTempFindFirstKeyKey (NULL)
+{
+#if defined (_DEBUG)
+
+	fast_swap (this->m_pbShortLiveKeyInUse, rRhsContainer.m_pbShortLiveKeyInUse);
+
+#endif
+
+	fast_swap (this->m_pRemoveKey, rRhsContainer.m_pRemoveKey);
+	fast_swap (this->m_pTempRemoveKey, rRhsContainer.m_pTempRemoveKey);
+	fast_swap (this->m_pInstancesNewKey, rRhsContainer.m_pInstancesNewKey);
+	fast_swap (this->m_pTempFindFirstKeyNewKey, rRhsContainer.m_pTempFindFirstKeyNewKey);
+	fast_swap (this->m_pAddToNodeKey, rRhsContainer.m_pAddToNodeKey);
+	fast_swap (this->m_pGetNewKey, rRhsContainer.m_pGetNewKey);
+	fast_swap (this->m_ppShortLiveKey, rRhsContainer.m_ppShortLiveKey);
+	fast_swap (this->m_ppTempFindFirstKeyKey, rRhsContainer.m_ppTempFindFirstKeyKey);
 }
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
@@ -126,11 +166,23 @@ CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::~CBTreeAssociative (
 	vbufferDeallocate (&m_pAddToNodeKey);
 	vbufferDeallocate (&m_pGetNewKey);
 
-	delete m_ppShortLiveKey;
-	delete m_ppTempFindFirstKeyKey;
+	if (m_ppShortLiveKey != NULL)
+	{
+		delete m_ppShortLiveKey;
+	}
+
+	if (m_ppTempFindFirstKeyKey != NULL)
+	{
+		delete m_ppTempFindFirstKeyKey;
+	}
 
 #if defined (_DEBUG)
-	delete m_pbShortLiveKeyInUse;
+
+	if (m_pbShortLiveKeyInUse != NULL)
+	{
+		delete m_pbShortLiveKeyInUse;
+	}
+
 #endif
 }
 
@@ -1494,7 +1546,7 @@ typename _t_datalayerproperties::size_type CBTreeAssociative<_t_data, _t_key, _t
 
 operator= - assignment operator overload
 
-rBT		- is a reference to a b-tree that will have its content be assigned to this instance
+rContainer		- is a reference to a b-tree that will have its content be assigned to this instance
 
 The result is a reference to this instance.
 
@@ -1502,16 +1554,28 @@ The result is a reference to this instance.
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::operator=
-	(const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rBT)
+	(const CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &rContainer)
 {
-	// if this is not the same instance as the referenced b-tree (rBT) ...
-	if (this != &rBT)
+	// if this is not the same instance as the referenced b-tree (rContainer) ...
+	if (this != &rContainer)
 	{
 		CBTreeBaseDefaults_t		&rBaseThis = dynamic_cast<CBTreeBaseDefaults_t &> (*this);
-		const CBTreeBaseDefaults_t	&rBaseBT = dynamic_cast<const CBTreeBaseDefaults_t &> (rBT);
+		const CBTreeBaseDefaults_t	&rBaseContainer = dynamic_cast<const CBTreeBaseDefaults_t &> (rContainer);
 		
-		rBaseThis = rBaseBT;
+		rBaseThis = rBaseContainer;
 	}
+
+	return (*this);
+}
+
+template<class _t_data, class _t_key, class _t_datalayerproperties>
+CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::operator=
+	(CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties> &&rRhsContainer)
+{
+	CBTreeBaseDefaults_t		&rBaseThis = dynamic_cast<CBTreeBaseDefaults_t &> (*this);
+	CBTreeBaseDefaults_t		&rBaseContainer = dynamic_cast<CBTreeBaseDefaults_t &> (rRhsContainer);
+		
+	rBaseThis = ::std::move (rBaseContainer);
 
 	return (*this);
 }
@@ -2088,7 +2152,7 @@ return_value = (*this)[sPos (this, nNode, nSub) - 1];
 */
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_prev_position (const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSub, typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t sPos)
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_prev_position (const typename _t_datalayerproperties::node_iter_type nNode, const typename _t_datalayerproperties::sub_node_iter_type nSub, typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t sPos) const
 {
 	node_iter_type		nPrevNode;
 	sub_node_iter_type	nPrevSubPos;
@@ -2136,7 +2200,7 @@ return_value = (*this)[sPos (this, nNode, nSub) + 1];
 */
 
 template<class _t_data, class _t_key, class _t_datalayerproperties>
-typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_next_position (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t sPos)
+typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::generate_next_position (typename _t_datalayerproperties::node_iter_type nNode, typename _t_datalayerproperties::sub_node_iter_type nSub, typename CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::position_t sPos) const
 {
 	node_iter_type		nNextNode;
 	sub_node_iter_type	nNextSubPos;
@@ -3092,12 +3156,15 @@ Note:	The intention is to be able to allocate and de-allocate temporary key buff
 template<class _t_data, class _t_key, class _t_datalayerproperties>
 void CBTreeAssociative<_t_data, _t_key, _t_datalayerproperties>::vbufferDeallocate (_t_key **pp)
 {
-	if (*pp != NULL)
+	if (pp != NULL)
 	{
-		delete *pp;
-	}
+		if (*pp != NULL)
+		{
+			delete *pp;
+		}
 
-	*pp = NULL;
+		*pp = NULL;
+	}
 }
 
 /*

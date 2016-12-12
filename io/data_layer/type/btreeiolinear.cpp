@@ -19,10 +19,11 @@
 template<class _t_datalayerproperties>
 CBTreeLinearIO<_t_datalayerproperties>::CBTreeLinearIO
 (
-	uint32_t nNumDataPools, 
-	CBTreeIOperBlockPoolDesc_t *psDataPools
+	const sub_node_iter_type nNodeSize, 
+	const uint32_t nNumDataPools, 
+	const CBTreeIOperBlockPoolDesc_t *psDataPools
 )
-	:	CBTreeIO<_t_datalayerproperties> (nNumDataPools, psDataPools)
+	:	CBTreeIO<_t_datalayerproperties> (nNodeSize, nNumDataPools, psDataPools)
 	,	m_ppsPools (NULL)
 {
 	m_ppsPools = new uint8_t * [this->m_nNumDataPools];
@@ -57,7 +58,7 @@ CBTreeLinearIO<_t_datalayerproperties>::~CBTreeLinearIO ()
 }
 
 template<class _t_datalayerproperties>
-const uint8_t* CBTreeLinearIO<_t_datalayerproperties>::get_node_base (uint32_t nPool, typename _t_datalayerproperties::node_iter_type nNode)
+const uint8_t* CBTreeLinearIO<_t_datalayerproperties>::get_node_base (const uint32_t nPool, const typename _t_datalayerproperties::node_iter_type nNode) const
 {
 #if defined (_DEBUG)
 

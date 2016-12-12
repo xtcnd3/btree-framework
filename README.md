@@ -133,12 +133,11 @@ In order to see all build rules, please see section "2.1.1. How to build the tes
 <br>
 ## Version
 
-The current version of the project is: 0.07 (alpha)
+The current version of the project is: 0.08 (alpha)
 
 Please don't be discouraged by the fact that the version contains the word "alpha". What this means is that the feature set is incomplete, but what has been implemented is stable and thoroughly tested. See below to find out what is missing:
 
 - initializer&#95;list<> support
-- move constructors and move assignment operators for all container types
  
 <br>
 <br>

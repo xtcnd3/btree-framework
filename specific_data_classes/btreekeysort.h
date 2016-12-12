@@ -62,10 +62,13 @@ public:
 
 	// construction
 						CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
+													(const _t_datalayerproperties &rDataLayerProperties, const sub_node_iter_type nNodeSize);
 
 						CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>
-													(CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rBT, bool bAssign = true);
+													(const CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &rContainer, const bool bAssign = true);
+
+						CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>
+													(CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties> &&rRhsContainer);
 
 	// destruction
 	virtual				~CBTreeKeySort<_t_data, _t_key, _t_datalayerproperties>
@@ -76,7 +79,8 @@ public:
 	
 	void				clear						();
 
-	CBTreeKeySort_t &	operator=					(const CBTreeKeySort_t &rBT);
+	CBTreeKeySort_t &	operator=					(const CBTreeKeySort_t &rContainer);
+	CBTreeKeySort_t &	operator=					(CBTreeKeySort_t &&rRhsContainer);
 
 protected:
 

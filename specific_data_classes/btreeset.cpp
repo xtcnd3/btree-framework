@@ -19,7 +19,7 @@
 
 template<class _t_keytype, class _t_datalayerproperties>
 CBTreeSet<_t_keytype, _t_datalayerproperties>::CBTreeSet
-	(_t_datalayerproperties &rDataLayerProperties, typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
+	(const _t_datalayerproperties &rDataLayerProperties, const typename _t_datalayerproperties::sub_node_iter_type nNodeSize)
 	:	CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties>
 		(
 			rDataLayerProperties, 
@@ -30,11 +30,21 @@ CBTreeSet<_t_keytype, _t_datalayerproperties>::CBTreeSet
 
 template<class _t_keytype, class _t_datalayerproperties>
 CBTreeSet<_t_keytype, _t_datalayerproperties>::CBTreeSet
-	(const CBTreeSet_t &rBT, bool bAssign)
+	(const CBTreeSet_t &rContainer, const bool bAssign)
 	:	CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties>
 	(
-		dynamic_cast<const CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties> &> (rBT), 
+		dynamic_cast<const CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties> &> (rContainer), 
 		bAssign
+	)
+{
+}
+
+template<class _t_keytype, class _t_datalayerproperties>
+CBTreeSet<_t_keytype, _t_datalayerproperties>::CBTreeSet
+	(CBTreeSet_t &&rRhsContainer)
+	:	CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties>
+	(
+		dynamic_cast<CBTreeAssociativeBase<_t_keytype, _t_keytype, _t_datalayerproperties> &&> (rRhsContainer)
 	)
 {
 }
@@ -124,6 +134,34 @@ void CBTreeSet<_t_keytype, _t_datalayerproperties>::swap (CBTreeSet_t &rContaine
 	{
 		this->_swap (rContainer);
 	}
+}
+
+template<class _t_keytype, class _t_datalayerproperties>
+CBTreeSet<_t_keytype, _t_datalayerproperties> &CBTreeSet<_t_keytype, _t_datalayerproperties>::operator=
+	(const CBTreeSet<_t_keytype, _t_datalayerproperties> &rContainer)
+{
+	// if this is not the same instance as the referenced b-tree (rContainer) ...
+	if (this != &rContainer)
+	{
+		CBTreeAssociativeBase_t			&rAssociativeBaseThis = dynamic_cast<CBTreeAssociativeBase_t &> (*this);
+		const CBTreeAssociativeBase_t	&rAssociativeBaseContainer = dynamic_cast<const CBTreeAssociativeBase_t &> (rContainer);
+		
+		rAssociativeBaseThis = rAssociativeBaseContainer;
+	}
+
+	return (*this);
+}
+
+template<class _t_keytype, class _t_datalayerproperties>
+CBTreeSet<_t_keytype, _t_datalayerproperties> &CBTreeSet<_t_keytype, _t_datalayerproperties>::operator=
+	(CBTreeSet<_t_keytype, _t_datalayerproperties> &&rRhsContainer)
+{
+	CBTreeAssociativeBase_t		&rAssociativeBaseThis = dynamic_cast<CBTreeAssociativeBase_t &> (*this);
+	CBTreeAssociativeBase_t		&rAssociativeBaseContainer = dynamic_cast<CBTreeAssociativeBase_t &> (rRhsContainer);
+		
+	rAssociativeBaseThis = ::std::move (rAssociativeBaseContainer);
+
+	return (*this);
 }
 
 template<class _t_keytype, class _t_datalayerproperties>

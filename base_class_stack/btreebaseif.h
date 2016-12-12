@@ -42,15 +42,16 @@ public:
 
 	// construction
 							CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>
-													(_t_subnodeiter nNodeSize);
+													(const _t_subnodeiter nNodeSize);
+
+	explicit				CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>
+													(const CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &rContainer);
 
 							CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter>
-													(const CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &rBT);
+													(CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> &&rRhsContainer);
 
 	// destruction
 	virtual					~CBTreeBaseIf<_ti_pos, _t_data, _t_sizetype, _t_nodeiter, _t_subnodeiter> ();
-
-	CBTreeBaseIf &			operator=				(const CBTreeBaseIf &rBT);
 
 protected:
  
@@ -58,18 +59,18 @@ protected:
 
 	virtual void			rebuild_node			(const _t_nodeiter nNode, const int32_t triMod = 0, _t_subnodeiter nSubStart = 0) = 0;
 
-	virtual _ti_pos			generate_prev_position	(const _t_nodeiter nNode, const _t_subnodeiter nSub, _ti_pos sPos) = 0;
-	virtual _ti_pos			generate_next_position	(const _t_nodeiter nNode, const _t_subnodeiter nSub, _ti_pos sPos) = 0;
+	virtual _ti_pos			generate_prev_position	(const _t_nodeiter nNode, const _t_subnodeiter nSub, _ti_pos sPos) const = 0;
+	virtual _ti_pos			generate_next_position	(const _t_nodeiter nNode, const _t_subnodeiter nSub, _ti_pos sPos) const = 0;
 
 	virtual _t_subnodeiter	find_next_sub_pos		(const _t_nodeiter nNode, _ti_pos &sPos) const = 0;
 
-	virtual void			convert_pos_to_container_pos	(_t_nodeiter nNode, _t_sizetype nPos, _t_nodeiter &rRsltNode, _t_subnodeiter &rRsltSubPos) const = 0;
+	virtual void			convert_pos_to_container_pos	(const _t_nodeiter nNode, const _t_sizetype nPos, _t_nodeiter &rRsltNode, _t_subnodeiter &rRsltSubPos) const = 0;
 
 	// manuvering
-	virtual _t_subnodeiter	find_sub_node_offset	(_t_nodeiter nNode, _t_nodeiter nSubNode) const = 0;
+	virtual _t_subnodeiter	find_sub_node_offset	(const _t_nodeiter nNode, const _t_nodeiter nSubNode) const = 0;
 
-	virtual void			move_prev				(_t_nodeiter nNode, _t_subnodeiter nSub, _t_nodeiter &nPrevNode, _t_subnodeiter &nPrevSubPos, bool &bBounce) const = 0;
-	virtual void			move_next				(_t_nodeiter nNode, _t_subnodeiter nSub, _t_nodeiter &nNextNode, _t_subnodeiter &nNextSubPos, bool &bBounce) const = 0;
+	virtual void			move_prev				(const _t_nodeiter nNode, const _t_subnodeiter nSub, _t_nodeiter &nPrevNode, _t_subnodeiter &nPrevSubPos, bool &bBounce) const = 0;
+	virtual void			move_next				(const _t_nodeiter nNode, const _t_subnodeiter nSub, _t_nodeiter &nNextNode, _t_subnodeiter &nNextSubPos, bool &bBounce) const = 0;
 
 	// node property access methods
 	virtual _t_subnodeiter	get_data_count			(const _t_nodeiter nNode) const = 0;

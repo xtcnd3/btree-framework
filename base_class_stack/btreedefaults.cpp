@@ -44,12 +44,12 @@ CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults ()
 
 Copy Constructor
 
-rBT		-	reference to CBTreeDefaults instance to be copied
+rContainer		-	reference to CBTreeDefaults instance to be copied
 
 */
 
 template<class _t_data, class _t_sizetype>
-CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults (const CBTreeDefaults<_t_data, _t_sizetype> &rBT)
+CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults (const CBTreeDefaults<_t_data, _t_sizetype> &rContainer)
 	:	CBTreeIf<_t_data, _t_sizetype> ()
 {
 #if defined (BTREE_ITERATOR_REGISTRATION)
@@ -70,6 +70,21 @@ CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults (const CBTreeDefaults<_t_da
 	m_nHitCtr = 0;
 	m_nMissCtr = 0;
 #endif
+}
+
+template<class _t_data, class _t_sizetype>
+CBTreeDefaults<_t_data, _t_sizetype>::CBTreeDefaults (CBTreeDefaults<_t_data, _t_sizetype> &&rRhsContainer)
+	:	CBTreeIf<_t_data, _t_sizetype> (dynamic_cast<CBTreeIf<_t_data, _t_sizetype> &&> (rRhsContainer))
+#if defined (BTREE_ITERATOR_REGISTRATION)
+	,	m_psIterRegister (NULL)
+	,	m_psCIterRegister (NULL)
+#endif
+#if defined (USE_PERFORMANCE_COUNTERS)
+	,	m_nHitCtr (0)
+	,	m_nMissCtr (0)
+#endif
+{
+	_local_swap (rRhsContainer);
 }
 
 /*
@@ -254,16 +269,14 @@ typename CBTreeDefaults<_t_data, _t_sizetype>::const_reverse_iterator CBTreeDefa
 
 template<class _t_data, class _t_sizetype>
 CBTreeDefaults<_t_data, _t_sizetype> &CBTreeDefaults<_t_data, _t_sizetype>::operator=
-	(const CBTreeDefaults<_t_data, _t_sizetype> &rBT)
+	(CBTreeDefaults<_t_data, _t_sizetype> &&rRhsContainer)
 {
-	// if this is not the same instance as the referenced b-tree (rBT) ...
-	if (this != &rBT)
-	{
-		CBTreeIf_t			&rIterTraitsThis = dynamic_cast<CBTreeIf_t &> (*this);
-		const CBTreeIf_t	&rIterTraitsBT = dynamic_cast<const CBTreeIf_t &> (rBT);
-		
-		rIterTraitsThis = rIterTraitsBT;
-	}
+	CBTreeSuper		&rSuperThis = dynamic_cast<CBTreeSuper &> (*this);
+	CBTreeSuper		&rSuperContainer = dynamic_cast<CBTreeSuper &> (rRhsContainer);
+	
+	rSuperThis = ::std::move (rSuperContainer);
+
+	_local_swap (rRhsContainer);
 
 	return (*this);
 }
@@ -362,19 +375,38 @@ void CBTreeDefaults<_t_data, _t_sizetype>::unregister_iterator (const_iterator *
 template<class _t_data, class _t_sizetype>
 void CBTreeDefaults<_t_data, _t_sizetype>::_swap
 	(
-		CBTreeDefaults<_t_data, _t_sizetype> &rBT
+		CBTreeDefaults<_t_data, _t_sizetype> &rContainer
 	)
 {
-#if defined (USE_PERFORMANCE_COUNTERS)
+	CBTreeSuper	&rSuper = dynamic_cast <CBTreeSuper &> (rContainer);
 
-	fast_swap (this->m_nHitCtr, rBT.m_nHitCtr);
-	fast_swap (this->m_nMissCtr, rBT.m_nMissCtr);
+	CBTreeSuper::_swap (rSuper);
+
+	_local_swap (rContainer);
+}
+
+template<class _t_data, class _t_sizetype>
+void CBTreeDefaults<_t_data, _t_sizetype>::_local_swap
+	(
+		CBTreeDefaults<_t_data, _t_sizetype> &rContainer
+	)
+{
+#if defined (BTREE_ITERATOR_REGISTRATION)
+
+	// unregister and re-register any iterator
+
+	// fast_swap ought not to be used here
+	fast_swap (this->m_psIterRegister, rContainer.m_psIterRegister);
+	fast_swap (this->m_psCIterRegister, rContainer.m_psCIterRegister);
 
 #endif
 
-	CBTreeSuper	&rSuper = dynamic_cast <CBTreeSuper &> (rBT);
+#if defined (USE_PERFORMANCE_COUNTERS)
 
-	CBTreeSuper::_swap (rSuper);
+	fast_swap (this->m_nHitCtr, rContainer.m_nHitCtr);
+	fast_swap (this->m_nMissCtr, rContainer.m_nMissCtr);
+
+#endif
 }
 
 #endif // BTREEDEFAULTS_CPP

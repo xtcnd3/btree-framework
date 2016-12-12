@@ -65,10 +65,13 @@ public:
 
 	// construction
 							CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
+													(const _t_datalayerproperties &rDataLayerProperties, const sub_node_iter_type nNodeSize);
 
 							CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>
-													(const CBTreeMultiMap_t &rBT, bool bAssign = true);
+													(const CBTreeMultiMap_t &rContainer, const bool bAssign = true);
+
+							CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>
+													(CBTreeMultiMap_t &&rContainer);
 
 	// destruction
 	virtual					~CBTreeMultiMap<_t_keytype, _t_maptype, _t_datalayerproperties>
@@ -77,6 +80,9 @@ public:
 	void					swap					(CBTreeAssociativeIf_t &rContainer);
 	void					swap					(CBTreeMultiMap_t &rContainer);
 	
+	CBTreeMultiMap &		operator=				(const CBTreeMultiMap &rContainer);
+	CBTreeMultiMap &		operator=				(CBTreeMultiMap &&rRhsContainer);
+
 protected:
 
 	key_type				*extract_key			(key_type *pKey, const value_type &rData) const;

@@ -61,41 +61,40 @@ public:
 	// construction
 							CBTreeBlockIO<_t_datalayerproperties>
 														(
-															sub_node_iter_type nNodeSize,
-															uint32_t nNumDataPools, 
-															CBTreeIOperBlockPoolDesc_t *psDataPools
+															const sub_node_iter_type nNodeSize, 
+															const uint32_t nNumDataPools, 
+															const CBTreeIOperBlockPoolDesc_t *psDataPools
 														);
 
 							~CBTreeBlockIO<_t_datalayerproperties>
 														();
 
 	// resource management
-	virtual void			set_root_node				(node_iter_type nRootNode);
+	virtual void			set_root_node				(const node_iter_type nRootNode);
 
 protected:
 
 	// address generation
-	inline address_type		get_blockAddr				(node_iter_type nNode);
-	virtual offset_type		get_poolOffset				();
-	inline address_type		get_node_offset				(node_iter_type nNode);
-	inline address_type		get_nodeAddr				(node_iter_type nNode);
+	inline address_type		get_blockAddr				(const node_iter_type nNode) const;
+	virtual offset_type		get_poolOffset				() const;
+	inline address_type		get_node_offset				(const node_iter_type nNode) const;
+	inline address_type		get_nodeAddr				(const node_iter_type nNode) const;
 	
-	inline offset_type		get_per_node_pool_offset	(uint32_t nPool);
-	inline address_type		get_pool_address			(uint32_t nPool, node_iter_type nNode);
+	inline offset_type		get_per_node_pool_offset	(const uint32_t nPool) const;
+	inline address_type		get_pool_address			(const uint32_t nPool, const node_iter_type nNode) const;
 
 	offset_type				generate_pool_offsets		();
 
-	void					realloc_descriptor_vector	(node_iter_type nMaxNodes);
+	void					realloc_descriptor_vector	(const node_iter_type nMaxNodes);
 
-	uint32_t				convert_node_to_descriptor	(node_iter_type nNode, bool bRoundUp = false);
+	uint32_t				convert_node_to_descriptor	(const node_iter_type nNode, const bool bRoundUp = false) const;
 
 	// initialisation
-	void					setup						(address_type nBlockSize);
+	void					setup						(const address_type nBlockSize);
 
-	void					increment_access_counter	(uint32_t nDescriptor);
+	void					increment_access_counter	(const uint32_t nDescriptor) const;
 
 	address_type										m_nBlockSize;				// optimal block size
-	sub_node_iter_type									m_nNodeSize;				// node size parameter a.k.a. t
 	uint32_t											m_nNodesPerBlock;			// number of nodes that fit into one block
 	uint32_t											m_nNodesPerBlockVectorSize;	// number of nodes that fit into one block (vector size)
 

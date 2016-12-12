@@ -15,6 +15,10 @@
 
 #include <stdint.h>
 
+#if defined(__GNUC__) || defined(__GNUG__)
+ #include <cxxabi.h>
+#endif
+
 #include <stdexcept>
 
 #include <chrono>
@@ -82,6 +86,32 @@ namespace operator_test_scope
 	{
 		typedef typename ::std::is_same<typename ::std::is_same<decltype (*(_t_data *)(0) == *(_t_cdata *)(0)), doesnt_exist>::type, ::std::false_type>::type		type;
 	};
+}
+
+template<class _t>
+void get_typename (_t &rType, ::std::string &rString)
+{
+#if defined(__GNUC__) || defined(__GNUG__)
+
+	int		nStatus;
+	char	*pszTypeid = abi::__cxa_demangle (typeid (_t).name (), 0, 0, &nStatus);
+
+	if (pszTypeid != NULL)
+	{
+		rString = pszTypeid;
+		
+		free ((void *) pszTypeid);
+	}
+	else
+	{
+		rString = typeid (_t).name ();
+	}
+	
+#else
+
+	rString = typeid (_t).name ();
+	
+#endif
 }
 
 #endif // BTREECOMMON_H

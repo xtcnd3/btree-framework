@@ -26,9 +26,15 @@ class CBTreeSuper
 public:
 
 								CBTreeSuper					();
+	explicit					CBTreeSuper					(const CBTreeSuper &rContainer);
+								CBTreeSuper					(CBTreeSuper &&rRhsContainer);
+
 								~CBTreeSuper				();
 
 	btree_time_stamp_t			get_time_stamp				() const;
+
+	CBTreeSuper &				operator=					(const CBTreeSuper &rContainer);
+	CBTreeSuper &				operator=					(CBTreeSuper &&rRhsContainer);
 
 protected:
 
@@ -36,7 +42,9 @@ protected:
 
 	uint32_t					create_dataPool				(CBTreeIOperBlockPoolDesc_t *pPoolDesc);
 
-	void						_swap						(CBTreeSuper &rBT);
+	void						_swap						(CBTreeSuper &rContainer);
+
+	void						_local_swap					(CBTreeSuper &rContainer);
 
 	uint32_t					m_nNumPools;
 	CBTreeIOperBlockPoolDesc_t	*m_pPoolDesc;

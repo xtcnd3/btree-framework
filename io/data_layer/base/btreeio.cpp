@@ -19,12 +19,14 @@
 template<class _t_datalayerproperties>
 CBTreeIO<_t_datalayerproperties>::CBTreeIO
 (
+	const sub_node_iter_type nNodeSize, 
 	const uint32_t nNumDataPools, 
 	const CBTreeIOperBlockPoolDesc_t *psDataPools
 )
 	:	m_psDataPools (NULL)
 	,	m_nNumDataPools (nNumDataPools)
 	,	m_bCacheFreeze (false)
+	,	m_nNodeSize (nNodeSize)
 	,	m_nMaxNodes (0)
 {
 	uint32_t			ui32;
@@ -60,26 +62,28 @@ CBTreeIO<_t_datalayerproperties>::~CBTreeIO ()
 }
 
 template<class _t_datalayerproperties>
-typename _t_datalayerproperties::node_iter_type CBTreeIO<_t_datalayerproperties>::get_maxNodes ()
+typename _t_datalayerproperties::node_iter_type CBTreeIO<_t_datalayerproperties>::get_maxNodes () const
 {
 	return (m_nMaxNodes);
 }
 
 template<class _t_datalayerproperties>
-typename CBTreeIO<_t_datalayerproperties>::offset_type CBTreeIO<_t_datalayerproperties>::get_dataAlignment ()
+typename CBTreeIO<_t_datalayerproperties>::offset_type CBTreeIO<_t_datalayerproperties>::get_dataAlignment () const
 {
 	// The keyword 'long' has been purposely choosen, since it will make the compiler to return 4 bytes on 32 bit builds and 8 bytes on 64 bit builds, as oppose to uint32_t and uint64_t.
 	return ((offset_type) (sizeof (long)));
 }
 
 template<class _t_datalayerproperties>
-typename CBTreeIO<_t_datalayerproperties>::offset_type CBTreeIO<_t_datalayerproperties>::get_alignedOffset (typename CBTreeIO<_t_datalayerproperties>::offset_type nOffset)
+typename CBTreeIO<_t_datalayerproperties>::offset_type CBTreeIO<_t_datalayerproperties>::get_alignedOffset (const typename _t_datalayerproperties::offset_type nOffset) const
 {
-	nOffset += get_dataAlignment () - 1;
-	nOffset /= get_dataAlignment ();
-	nOffset *= get_dataAlignment ();
+	offset_type		nRetval = nOffset;
 
-	return (nOffset);
+	nRetval += get_dataAlignment () - 1;
+	nRetval /= get_dataAlignment ();
+	nRetval *= get_dataAlignment ();
+
+	return (nRetval);
 }
 
 template<class _t_datalayerproperties>
@@ -112,7 +116,7 @@ void CBTreeIO<_t_datalayerproperties>::get_performance_counters (uint64_t (&rHit
 }
 
 template<class _t_datalayerproperties>
-uint32_t CBTreeIO<_t_datalayerproperties>::get_pool_entry_size (uint32_t nPool)
+uint32_t CBTreeIO<_t_datalayerproperties>::get_pool_entry_size (const uint32_t nPool) const
 {
 #if defined (_DEBUG)
 	BTREEDATA_ASSERT (nPool < m_nNumDataPools, "CBTreeIO::get_pool_entry_size: nPool exceeds available block pools!");
@@ -122,7 +126,7 @@ uint32_t CBTreeIO<_t_datalayerproperties>::get_pool_entry_size (uint32_t nPool)
 }
 
 template<class _t_datalayerproperties>
-void CBTreeIO<_t_datalayerproperties>::set_root_node (typename _t_datalayerproperties::node_iter_type nRootNode)
+void CBTreeIO<_t_datalayerproperties>::set_root_node (const typename _t_datalayerproperties::node_iter_type nRootNode)
 {
 	nRootNode;
 }
@@ -134,13 +138,13 @@ void CBTreeIO<_t_datalayerproperties>::terminate_access ()
 }
 
 template<class _t_datalayerproperties>
-void CBTreeIO<_t_datalayerproperties>::set_cacheFreeze (bool bEnabled)
+void CBTreeIO<_t_datalayerproperties>::set_cacheFreeze (const bool bEnabled)
 {
 	m_bCacheFreeze = bEnabled;
 }
 
 template<class _t_datalayerproperties>
-uint32_t CBTreeIO<_t_datalayerproperties>::get_pool_total_size (uint32_t nPool)
+uint32_t CBTreeIO<_t_datalayerproperties>::get_pool_total_size (const uint32_t nPool) const
 {
 #if defined (_DEBUG)
 	BTREEDATA_ASSERT (nPool < m_nNumDataPools, "CBTreeIO::get_pool_total_size: nPool exceeds available block pools!");

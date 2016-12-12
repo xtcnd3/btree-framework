@@ -95,12 +95,15 @@ public:
 
 	// construction
 						CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>
-													(_t_datalayerproperties &rDataLayerProperties, sub_node_iter_type nNodeSize);
+													(const _t_datalayerproperties &rDataLayerProperties, const sub_node_iter_type nNodeSize);
+
+	explicit			CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>
+													(const CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &rContainer);
 
 						CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>
-													(const CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &rBT);
+													(CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties> &&rRhsContainer);
 
-	// destruction
+						// destruction
 	virtual				~CBTreeBaseDefaults<_ti_pos, _t_data, _t_datalayerproperties>
 													();
 
@@ -123,11 +126,11 @@ public:
 
 	void				test						() const;
 
-	void				set_atomic_testing			(bool bEnable);
+	virtual void		set_atomic_testing			(const bool bEnable);
 
 #endif
 
-	CBTreeBaseDefaults &	operator=				(const CBTreeBaseDefaults &rBT);
+	CBTreeBaseDefaults &	operator=				(CBTreeBaseDefaults &&rRhsContainer);
 
 protected:
  
@@ -135,13 +138,13 @@ protected:
 	void				create_root					();
 
 	// complex primitives
-	node_iter_type		create_node					(node_iter_type nParent);
-	size_type			add_to_node					(_ti_pos sPos, node_iter_type nNode, uint32_t nDepth, node_iter_type &rnRsltNode, sub_node_iter_type &rnRsltSub, size_type *pnPos = NULL);
-	node_iter_type		split_node					(node_iter_type nNode);
-	size_type			remove_from_node			(_ti_pos sPos, node_iter_type nNode, uint32_t nDepth);
-	node_iter_type		merge_node					(node_iter_type nNode, sub_node_iter_type nSub);
-	void				rotate						(node_iter_type nNode, sub_node_iter_type nSub, sub_node_iter_type &newSub, bool bLeftToRight);
-	void				replace_with_adjacent_entry	(node_iter_type nNode, sub_node_iter_type nSub, bool bFromLeft);
+	node_iter_type		create_node					(const node_iter_type nNextParent);
+	size_type			add_to_node					(_ti_pos sPos, const node_iter_type nNode, const uint32_t nDepth, node_iter_type &rnRsltNode, sub_node_iter_type &rnRsltSub, size_type *pnPos = NULL);
+	node_iter_type		split_node					(const node_iter_type nNode);
+	size_type			remove_from_node			(_ti_pos sPos, const node_iter_type nNode, const uint32_t nDepth);
+	node_iter_type		merge_node					(const node_iter_type nNode, const sub_node_iter_type nSub);
+	void				rotate						(const node_iter_type nNode, const sub_node_iter_type nSub, sub_node_iter_type &newSub, const bool bLeftToRight);
+	void				replace_with_adjacent_entry	(const node_iter_type nNode, const sub_node_iter_type nSub, const bool bFromLeft);
 
 	size_type			serialize					(const _ti_pos nFrom, const size_type nLen, value_type *pData, const bool bReadOpr = true) const;
 
@@ -150,25 +153,25 @@ protected:
 	// primitives
 	void				insert_data_into_node		(node_iter_type &rnNode, sub_node_iter_type &rnSubPos, node_iter_type nSubNode = (node_iter_type) ~0x0, int triMod = -1);
 
-	void				remove_data_from_leaf		(node_iter_type nNode, sub_node_iter_type nSub);
-	void				remove_data_from_node		(node_iter_type nNode, sub_node_iter_type nSub, sub_node_iter_type nSubNode);
+	void				remove_data_from_leaf		(const node_iter_type nNode, const sub_node_iter_type nSub);
+	void				remove_data_from_node		(const node_iter_type nNode, const sub_node_iter_type nSub, const sub_node_iter_type nSubNode);
 
-	void				replace_data				(node_iter_type nNode, sub_node_iter_type nSub, const value_type &rData);
+	void				replace_data				(const node_iter_type nNode, const sub_node_iter_type nSub, const value_type &rData);
 
 	// manuvering
-	sub_node_iter_type	find_sub_node_offset		(node_iter_type nNode, node_iter_type nSubNode) const;
+	sub_node_iter_type	find_sub_node_offset		(const node_iter_type nNode, const node_iter_type nSubNode) const;
 	
-	void				move_prev					(node_iter_type nNode, sub_node_iter_type nSub, node_iter_type &nPrevNode, sub_node_iter_type &nPrevSubPos, bool &bBounce) const;
-	void				move_next					(node_iter_type nNode, sub_node_iter_type nSub, node_iter_type &nNextNode, sub_node_iter_type &nNextSubPos, bool &bBounce) const;
+	void				move_prev					(const node_iter_type nNode, const sub_node_iter_type nSub, node_iter_type &nPrevNode, sub_node_iter_type &nPrevSubPos, bool &bBounce) const;
+	void				move_next					(const node_iter_type nNode, const sub_node_iter_type nSub, node_iter_type &nNextNode, sub_node_iter_type &nNextSubPos, bool &bBounce) const;
 
 	// position coversion
-	void				convert_pos_to_container_pos	(node_iter_type nNode, size_type nPos, node_iter_type &rRsltNode, sub_node_iter_type &rRsltSubPos) const;
+	void				convert_pos_to_container_pos	(const node_iter_type nNode, const size_type nPos, node_iter_type &rRsltNode, sub_node_iter_type &rRsltSubPos) const;
 
 	// maintanence (allocation)
-	void				set_reservation				(node_iter_type nNode);
-	bool				get_reservation				(node_iter_type nNode) const;
-	void				unset_reservation			(node_iter_type nNode);
-	void				reset_reservation			(node_iter_type nNode);
+	void				set_reservation				(const node_iter_type nNode);
+	bool				get_reservation				(const node_iter_type nNode) const;
+	void				unset_reservation			(const node_iter_type nNode);
+	void				reset_reservation			(const node_iter_type nNode);
 
 	// node property access methods
 	sub_node_iter_type	get_data_count				(const node_iter_type nNode) const;
@@ -209,7 +212,7 @@ protected:
 
 	// rebuild FIFO
 	void				rebuild_FIFO_put			(node_iter_type nNode);
-	node_iter_type		rebuild_FIFO_peek			();
+	node_iter_type		rebuild_FIFO_peek			() const;
 	node_iter_type		rebuild_FIFO_get			();
 	uint32_t			rebuild_FIFO_fillstate		();
 
@@ -218,14 +221,14 @@ protected:
 	void				detache_traced_node			();
 
 	// heuristic
-	float				get_average_access_depth	();
+	float				get_average_access_depth	() const;
 
 	// iterator interface
 	uint32_t			get_iter_state_size			() const;
 	void				reset_iter_state			(void *pState) const;
-	void				evaluate_iter				(void *pState, size_type nOffsetPos) const;
-	void				evaluate_iter_by_seek		(void *pState, size_type nNewPos) const;
-	bool				is_iter_pos_evaluated		(void *pState, size_type nPos) const;
+	void				evaluate_iter				(void *pState, const size_type nOffsetPos) const;
+	void				evaluate_iter_by_seek		(void *pState, const size_type nNewPos) const;
+	bool				is_iter_pos_evaluated		(void *pState, const size_type nPos) const;
 
 	value_type			*get_iter_data				(void *pState) const;
 	void				set_iter_data				(void *pState, const value_type &rData);
@@ -233,10 +236,12 @@ protected:
 	bool				is_simple_evaluation_possible (void *pState, size_type nPos) const;
 
 	// debug aid
-	bool				show_tree					(std::ofstream &ofs, node_iter_type nNode, node_iter_type nParent, char *pAlloc) const;
+	bool				show_tree					(std::ofstream &ofs, const node_iter_type nNode, const node_iter_type nParent, char *pAlloc) const;
 	void				shownodelist				(std::ofstream &ofs, char *pAlloc) const;
 
-	void				_swap						(CBTreeBaseDefaults &rBT);
+	void				_swap						(CBTreeBaseDefaults &rContainer);
+
+	void				_local_swap					(CBTreeBaseDefaults &rContainer);
 
 	// properties
 	node_iter_type									m_nRootNode;
